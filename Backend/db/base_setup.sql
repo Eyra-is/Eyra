@@ -42,7 +42,8 @@ create table session (
     comments text,
     foreign key (speakerId) references speaker(id),
     foreign key (instructorId) references instructor(id),
-    foreign key (deviceId) references device(id)
+    foreign key (deviceId) references device(id),
+    unique (speakerId, instructorId, deviceId, location, start, end)
 );
 create table recording (
     id int not null auto_increment primary key,
