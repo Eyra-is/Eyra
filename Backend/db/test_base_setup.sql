@@ -4,7 +4,11 @@ start transaction;
 insert into token (inputToken)
 values
     ('Snjalli brúni refurinn stökk yfir lata hundinn'),
-    ('To be or not to be, that is the question?');
+    ('To be or not to be, that is the question?'),
+    ('Jaja'),
+    ('Mhm'),
+    ('Akkúrat'),
+    ('Þannig er það');
 insert into device (hardware, os, software)
 values
     ('hp mini TURBO edition', 'debian 5.41', 'chrome browser 37'),
@@ -35,4 +39,5 @@ values
     /*(1, 2, 15, 50000, 'b/a/f.wav'); --this should throw an error, since there is no session(id)
                                       --that is 15 (only 3 session entries, starts count at 1) */
 
-rollback;
+-- rollback;
+commit;
