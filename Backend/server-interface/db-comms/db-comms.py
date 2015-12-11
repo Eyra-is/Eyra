@@ -23,7 +23,7 @@ app.config['MYSQL_DB']   = 'recordings_master'
 
 mysql = MySQL(app)
 
-@app.route('/submit/session', methods=['GET','POST'])
+@app.route('/submit/session', methods=['POST'])
 def submit_session():
     MAX_RECORDINGS = 50 # maximum recordings per session 
     response = '' # debug
