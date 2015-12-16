@@ -9,7 +9,7 @@
 
 # ***************************************************************************************** #
 
-from flask import Flask, request, make_response
+from flask import Flask, request
 from db_handler import DbHandler
 from flask.ext.cors import CORS
 
@@ -42,9 +42,7 @@ def submit_session():
         response += 'Stream: ' + str(request.stream) + '\n'
 
         if 'json' in request.form:
-            jsonData = request.form['json']
-        if 'json' in request.files:
-            jsonData = request.files['json']    
+            jsonData = request.form['json']  
 
         for i in range(MAX_RECORDINGS):
             key = 'rec'+str(i)

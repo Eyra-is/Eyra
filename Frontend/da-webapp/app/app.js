@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('daApp', [])
+angular.module('daApp', ['LocalForageModule'])
   .config( [
+      // make sure Angular doesn't prepend "unsafe:" to the blob: url
       '$compileProvider',
       function( $compileProvider )
       {   
@@ -14,7 +15,7 @@ angular.module('daApp', [])
       delete $httpProvider.defaults.headers.common['X-Requested-With'];
     }
   ]*/)
-  .controller('RecordingController', function($scope, $http) {
+  .controller('RecordingController', function($scope, $http, $localForage) {
     var recording = this;
 
     $scope.msg = '';
@@ -82,19 +83,6 @@ angular.module('daApp', [])
       $scope.outputLink = url;
       $scope.outputDesc = 'Wav file';
 
-      // and send it to remote server
-      $http({
-        method: 'GET',
-        url: 'http://127.0.0.1:5000/submit/session'
-      })
-      .success(function (data) {
-        console.log(data);
-      })
-      .error(function (data, status) {
-        console.log(data);
-        console.log(status);
-      });
-
       var jsonData = '{'+                                                                  
                      '  "type":"session",'+ 
                      '  "data":'+
@@ -112,6 +100,35 @@ angular.module('daApp', [])
                      '      }'+
                      '   }'+
                      '}';
+
+      console.log('testing localForage.....');
+
+      console.log('get');
+      console.log($localForage.getItem('test'));
+      console.log($localForage.getItem('rec0'));
+      console.log($localForage.getItem('json'));
+
+
+      /*$localForage.setItem('test','heyo');
+      $localForage.setItem('rec0', blob);
+      $localForage.setItem('json', jsonData);*/
+
+      // and send it to remote server
+      // test CORS is working
+      $http({
+        method: 'GET',
+        url: 'http://127.0.0.1:5000/submit/session'
+      })
+      .success(function (data) {
+        console.log(data);
+      })
+      .error(function (data, status) {
+        console.log(data);
+        console.log(status);
+      });
+
+      // send our recording/s, and metadata as json
+      
 
       console.log(blob);
 

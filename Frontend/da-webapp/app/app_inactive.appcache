@@ -1,0 +1,6 @@
+CACHE MANIFEST
+# 2015-12-16 10:37
+app.js
+bower_components/angular/angular.js
+bower_components/angular-localforage/dist/angular-localforage.js
+bower_components/localforage/dist/localforage.js
