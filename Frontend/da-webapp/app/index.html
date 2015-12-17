@@ -7,19 +7,40 @@
     <title>Minimal app</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--<link rel="stylesheet" href="app.css">-->
+    <link rel="stylesheet" href="app.css">
 </head>
 <body>
-    <div ng-controller="RecordingController as recording">
-        <button type="button" ng-disabled="recordBtnState" ng-click="recording.record()">Record</button>
-        <button type="button" ng-disabled="stopBtnState" ng-click="recording.stop()">Stop</button>
+    <div ng-controller="RecordingController as recordCtrl">
+        <button type="button" ng-disabled="{{recordBtnState}}" ng-click="recordCtrl.record()">
+            Record
+        </button>
+        <button type="button" ng-disabled="{{stopBtnState}}" ng-click="recordCtrl.stop()">
+            Stop
+        </button>
+        <button type="button" ng-disabled="{{saveBtnState}}" ng-click="recordCtrl.save()">
+            Save &amp; Send
+        </button>
+
+        <ul>
+            <li ng-repeat="rec in recordings">
+                <audio ng-src="{{rec.url | trustUrl}}" controls></audio>
+                <a ng-href="{{rec.url}}">{{rec.name}}</a>
+            </li>
+        </ul>
 
         <div>{{msg}}</div>
-        <a ng-href="{{outputLink}}">{{outputDesc}}</a>
-    </div>
+        <div>{{msg2}}</div>
 
-    <h2>Recordings</h2>
-    <ul id="recordingslist"></ul>
+        </br></br>
+
+        <div class="dataEntry">
+            <label><input type="text" ng-model="speakerId" placeholder="1"> speakerId</label>
+            <label><input type="text" ng-model="instructorId" placeholder="1"> instructorId</label>
+            <label><input type="text" ng-model="deviceId" placeholder="1"> deviceId</label>
+            <label><input type="text" ng-model="curLocation" placeholder="rvk iceland"> location</label>
+            <label><input type="text" ng-model="comments" placeholder="birds chirping in background"> comments</label>
+        </div>
+    </div>
 
     <!-- In production use:
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>

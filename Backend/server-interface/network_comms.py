@@ -58,13 +58,16 @@ def submit_session():
 
         try:
             response += dbHandler.processSessionData(jsonData, recordings)
+        # these error excepts are ONLY for debug right now
         except TypeError as e:
             response += 'error: ' + str(e) + '\n'
             response += str(jsonData)
         except KeyError as e:
             response += 'error: ' + str(e) + '\n'
             response += str(jsonData)
-
+        except ValueError as e:
+            response += 'error: ' + str(e) + '\n'
+            response += str(jsonData)
 
     return response
 

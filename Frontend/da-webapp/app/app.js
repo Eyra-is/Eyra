@@ -2,15 +2,35 @@
 
 var app = angular.module('daApp', ['LocalForageModule']);
 
+app.config( [
+      // make sure Angular doesn't prepend "unsafe:" to the blob: url
+      '$compileProvider',
+      function( $compileProvider )
+      {   
+          $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+      }
+]);
+
+app.filter("trustUrl", ['$sce', function ($sce) {
+  return function (recordingUrl) {
+    return $sce.trustAsResourceUrl(recordingUrl);
+  };
+}]);
+
 app.controller('RecordingController', function($scope, $http, $localForage) {
   var recordCtrl = this;
 
-  $scope.msg = '';
-  $scope.outputDesc = '';
-  $scope.outputLink = '';
+  $scope.msg = ''; // single debug/information msg
+  $scope.msg2 = '';
+  $scope.recordings = []; // recordings so far
 
-  var recordBtnDisabled = false;
-  var stopBtnDisabled = true;
+  // these button things don't work yet
+  $scope.recordBtnDisabled = false;
+  $scope.stopBtnDisabled = true;
+  $scope.saveBtnDisabled = true;
+
+  var start_time = new Date().toISOString();
+  var end_time;
 
   var audio_context;
   var recorder;
@@ -29,8 +49,9 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
   recordCtrl.record = function() {
     recorder && recorder.record();
 
-    recordBtnDisabled = true;
-    stopBtnDisabled = false;
+    $scope.recordBtnDisabled = true;
+    $scope.stopBtnDisabled = false;
+    $scope.saveBtnDisabled = true;
     $scope.msg = 'Recording now...';
     console.log('Recording...');
   };
@@ -39,31 +60,85 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     $scope.msg = 'Handing off the file now...';
 
     recorder && recorder.stop();
-    stopBtnDisabled = true;
-    recordBtnDisabled = false;
+    $scope.stopBtnDisabled = true;
+    $scope.recordBtnDisabled = false;
     console.log('Stopped recording.');
     
-    // create WAV download link using audio data blob
-    sendWav();
+    // create WAV download link using audio data blob and display on website
+    displayWav();
     
     recorder.clear();
   };
 
-  function sendWav() {
+  recordCtrl.save = function() {
+    $scope.msg = 'Saving and sending recs...';
+
+    $scope.saveBtnDisabled = true;
+    
+    end_time = new Date().toISOString();
+    var jsonData = '{'+                                                                  
+                     '  "type":"session",'+ 
+                     '  "data":'+
+                     '   {'+
+                     '      "speakerId"      : '+ ($scope.speakerId || 1) +','+
+                     '      "instructorId"   : '+ ($scope.instructorId || 1) +','+
+                     '      "deviceId"       : '+ ($scope.deviceId || 1) +','+
+                     '      "location"       : "'+ ($scope.curLocation || 'unknown') +'",'+
+                     '      "start"          : "'+ start_time +'",'+
+                     '      "end"            : "'+ end_time +'",'+
+                     '      "comments"       : "'+ ($scope.comments || 'no comments') +'",'+
+                     '      "recordingsInfo" :'+
+                     '      {'+
+                     '          "blob"                    : { "tokenId" : 5 }'+                        
+                     '      }'+
+                     '   }'+
+                     '}';
+
+    // and send it to remote server
+    // test CORS is working
+    $http({
+      method: 'GET',
+      url: 'http://127.0.0.1:5000/submit/session'
+    })
+    .success(function (data) {
+      console.log(data);
+    })
+    .error(function (data, status) {
+      console.log(data);
+      console.log(status);
+    });
+
+    // send our recording/s, and metadata as json
+    var rec = $scope.recordings[$scope.recordings.length-1];
+    console.log(rec.blob);
+
+    var fd = new FormData();
+    fd.append('json', jsonData);
+    fd.append('rec0', rec.blob);
+    $http.post('http://127.0.0.1:5000/submit/session', fd, {
+      transformRequest: angular.identity,
+      headers: {'Content-Type': undefined}
+    })
+    .success(function (data) {
+      console.log(data);
+    })
+    .error(function (data, status) {
+      console.log(data);
+      console.log(status);
+    });
+  };
+
+  function displayWav() {
     recorder && recorder.exportWAV(function(blob) {
       var url = URL.createObjectURL(blob);
-      var li = document.createElement('li');
-      var au = document.createElement('audio');
-      var hf = document.createElement('a');
-      
-      au.controls = true;
-      au.src = url;
-      hf.href = url;
-      hf.download = new Date().toISOString() + '.wav';
-      hf.innerHTML = hf.download;
-      li.appendChild(au);
-      li.appendChild(hf);
-      recordingslist.appendChild(li);
+
+      // display recordings on website
+      $scope.recordings.push({"blob":blob,
+                              "url":url,
+                              "name":(new Date().toISOString() + '.wav')});
+      $scope.saveBtnDisabled = false;
+
+      $scope.$apply(); // update our bindings
     });
   }
 
