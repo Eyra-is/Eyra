@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html lang="en" ng-app="daApp"><!--manifest="app.appcache"-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Minimal app</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div ng-controller="RecordingController as recordCtrl">
+        <button type="button" ng-disabled="recordBtnDisabled" ng-click="recordCtrl.record()">
+            Record
+        </button>
+        <button type="button" ng-disabled="stopBtnDisabled" ng-click="recordCtrl.stop()">
+            Stop
+        </button>
+        <button type="button" ng-disabled="saveBtnDisabled" ng-click="recordCtrl.save()">
+            Save &amp; Send
+        </button>
+
+        <ul>
+            <li ng-repeat="rec in recordings">
+                <audio ng-src="{{rec.url | trustUrl}}" controls></audio>
+                <a ng-href="{{rec.url}}">{{rec.title}}</a>
+            </li>
+        </ul>
+
+        <div>{{msg}}</div>
+        <div>{{msg2}}</div>
+
+        </br></br>
+
+        <h3>Session info</h3>
+        <div class="dataEntry">
+            <label><input type="text" ng-model="speakerId" placeholder="1"> speakerId</label>
+            <label><input type="text" ng-model="instructorId" placeholder="1"> instructorId</label>
+            <label><input type="text" ng-model="deviceId" placeholder="1"> deviceId</label>
+            <label><input type="text" ng-model="curLocation" placeholder="rvk iceland"> location</label>
+            <label><input type="text" ng-model="comments" placeholder="birds chirping in background"> comments</label>
+        </div>
+    </div>
+
+    <!-- In production use:
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+    -->
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/localforage/dist/localforage.js"></script>
+    <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
+
+    <script src="recorderjs/dist/recorder.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
