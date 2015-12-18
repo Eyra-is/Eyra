@@ -24,7 +24,7 @@
         <ul>
             <li ng-repeat="rec in recordings">
                 <audio ng-src="{{rec.url | trustUrl}}" controls></audio>
-                <a ng-href="{{rec.url}}">{{rec.name}}</a>
+                <a ng-href="{{rec.url}}">{{rec.title}}</a>
             </li>
         </ul>
 
