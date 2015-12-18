@@ -3,6 +3,7 @@
 //                                         TODO                                             //
 
 // sanitize user input for speakerId, etc.
+// add try catch, for example with JSON.stringify
 
 // ***************************************************************************************** //
 
@@ -10,8 +11,8 @@
 
 var app = angular.module('daApp', ['LocalForageModule']);
 
+// make sure Angular doesn't prepend "unsafe:" to the blob: url
 app.config( [
-      // make sure Angular doesn't prepend "unsafe:" to the blob: url
       '$compileProvider',
       function( $compileProvider )
       {   
@@ -66,7 +67,7 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
   };
 
   recordCtrl.stop = function() {
-    $scope.msg = 'Handing off the file now...';
+    $scope.msg = 'Processing wav...';
 
     recorder && recorder.stop();
     $scope.stopBtnDisabled = true;
@@ -75,7 +76,7 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     console.log('Stopped recording.');
     
     // create WAV download link using audio data blob and display on website
-    displayWav();
+    createWav();
     
     recorder.clear();
   };
@@ -87,23 +88,20 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     
     // these scope variables connected to user input obviously have to be sanitized.
     end_time = new Date().toISOString();
-    var jsonData = '{'+                                                                  
-                     '  "type":"session",'+ 
-                     '  "data":'+
-                     '   {'+
-                     '      "speakerId"      : '+ ($scope.speakerId || 1) +','+
-                     '      "instructorId"   : '+ ($scope.instructorId || 1) +','+
-                     '      "deviceId"       : '+ ($scope.deviceId || 1) +','+
-                     '      "location"       : "'+ ($scope.curLocation || 'unknown') +'",'+
-                     '      "start"          : "'+ start_time +'",'+
-                     '      "end"            : "'+ end_time +'",'+
-                     '      "comments"       : "'+ ($scope.comments || 'no comments') +'",'+
-                     '      "recordingsInfo" :'+
-                     '      {'+
-                     '          "blob"                    : { "tokenId" : 5 }'+                        
-                     '      }'+
-                     '   }'+
-                     '}';
+    var jsonData =  {                                                                  
+                      "type":'session', 
+                      "data":
+                      {
+                         "speakerId"      : ($scope.speakerId || 1),
+                         "instructorId"   : ($scope.instructorId || 1),
+                         "deviceId"       : ($scope.deviceId || 1),
+                         "location"       : ($scope.curLocation || 'unknown'),
+                         "start"          : start_time,
+                         "end"            : end_time,
+                         "comments"       : ($scope.comments || 'no comments'),
+                         "recordingsInfo" : {}
+                      }
+                    };
     // update start time for next session
     start_time = new Date().toISOString();
 
@@ -122,13 +120,18 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     });
 
     // send our recording/s, and metadata as json
-    var rec = $scope.recordings[$scope.recordings.length-1];
-    console.log(rec.blob);
-
     var fd = new FormData();
-    fd.append('json', jsonData);
-    fd.append('rec0', rec.blob);
+    for (var i = 0; i < $scope.recordings.length; i++)
+    {
+      var rec = $scope.recordings[i];
+      fd.append('rec'+i, rec.blob, rec.title);
+      // all recordings get same tokenId for now
+      jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : 5 };
+    }
+    fd.append('json', JSON.stringify(jsonData));
+
     $http.post('http://127.0.0.1:5000/submit/session', fd, {
+      // this is so angular sets the correct headers/info itself
       transformRequest: angular.identity,
       headers: {'Content-Type': undefined}
     })
@@ -141,14 +144,14 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     });
   };
 
-  function displayWav() {
+  function createWav() {
     recorder && recorder.exportWAV(function(blob) {
       var url = URL.createObjectURL(blob);
 
       // display recordings on website
       $scope.recordings.push({"blob":blob,
                               "url":url,
-                              "name":(new Date().toISOString() + '.wav')});
+                              "title":(new Date().toISOString() + '.wav')});
       $scope.saveBtnDisabled = false;
 
       $scope.$apply(); // update our bindings
