@@ -7,6 +7,8 @@
 # Think about if we shouldn't just allow unlimited recordings processed, they are uploaded anyway
 # Add code to calculate duration of wav files if needed from flask import Flask, request
 
+# Make CORS more secure, e.g. not origins='*' but from a specific domain only.
+
 # ***************************************************************************************** #
 
 from flask import Flask, request

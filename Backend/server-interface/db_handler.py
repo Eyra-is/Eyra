@@ -46,7 +46,7 @@ class DbHandler:
             os.mkdir(RECORDINGS_ROOT)
         for rec in recordings:
             # save recordings to recordings/sessionId/filename
-            sessionPath = os.path.join(RECORDINGS_ROOT, str(sessionId))
+            sessionPath = os.path.join(RECORDINGS_ROOT, 'session_'+str(sessionId))
             if not os.path.exists(sessionPath):
                 os.mkdir(sessionPath)
             wavePath = os.path.join(sessionPath, rec.filename)
