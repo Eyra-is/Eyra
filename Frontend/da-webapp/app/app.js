@@ -9,6 +9,9 @@
 
 'use strict';
 
+var putOnline = false;
+var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
+
 var app = angular.module('daApp', ['LocalForageModule']);
 
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
@@ -109,7 +112,7 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     // test CORS is working
     $http({
       method: 'GET',
-      url: 'http://127.0.0.1:5000/submit/session'
+      url: 'http://'+BACKENDURL+'/submit/session'
     })
     .success(function (data) {
       console.log(data);
@@ -130,7 +133,7 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     }
     fd.append('json', JSON.stringify(jsonData));
 
-    $http.post('http://127.0.0.1:5000/submit/session', fd, {
+    $http.post('http://'+BACKENDURL+'/submit/session', fd, {
       // this is so angular sets the correct headers/info itself
       transformRequest: angular.identity,
       headers: {'Content-Type': undefined}
