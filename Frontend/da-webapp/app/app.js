@@ -1,3 +1,11 @@
+// **************************************************************************************** //
+
+//                                         TODO                                             //
+
+// sanitize user input for speakerId, etc.
+
+// ***************************************************************************************** //
+
 'use strict';
 
 var app = angular.module('daApp', ['LocalForageModule']);
@@ -11,6 +19,7 @@ app.config( [
       }
 ]);
 
+// fix some angular issue with <audio ng-src="{{var}}"></audio>
 app.filter("trustUrl", ['$sce', function ($sce) {
   return function (recordingUrl) {
     return $sce.trustAsResourceUrl(recordingUrl);
@@ -75,6 +84,7 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
 
     $scope.saveBtnDisabled = true;
     
+    // these scope variables connected to user input obviously have to be sanitized.
     end_time = new Date().toISOString();
     var jsonData = '{'+                                                                  
                      '  "type":"session",'+ 
@@ -93,6 +103,8 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
                      '      }'+
                      '   }'+
                      '}';
+    // update start time for next session
+    start_time = new Date().toISOString();
 
     // and send it to remote server
     // test CORS is working
