@@ -11,13 +11,13 @@
 </head>
 <body>
     <div ng-controller="RecordingController as recordCtrl">
-        <button type="button" ng-disabled="{{recordBtnState}}" ng-click="recordCtrl.record()">
+        <button type="button" ng-disabled="recordBtnDisabled" ng-click="recordCtrl.record()">
             Record
         </button>
-        <button type="button" ng-disabled="{{stopBtnState}}" ng-click="recordCtrl.stop()">
+        <button type="button" ng-disabled="stopBtnDisabled" ng-click="recordCtrl.stop()">
             Stop
         </button>
-        <button type="button" ng-disabled="{{saveBtnState}}" ng-click="recordCtrl.save()">
+        <button type="button" ng-disabled="saveBtnDisabled" ng-click="recordCtrl.save()">
             Save &amp; Send
         </button>
 

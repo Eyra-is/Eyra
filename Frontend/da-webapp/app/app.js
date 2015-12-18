@@ -57,11 +57,11 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
   // controller functions
   recordCtrl.record = function() {
     recorder && recorder.record();
+    $scope.msg = 'Recording now...';
 
     $scope.recordBtnDisabled = true;
     $scope.stopBtnDisabled = false;
     $scope.saveBtnDisabled = true;
-    $scope.msg = 'Recording now...';
     console.log('Recording...');
   };
 
@@ -71,6 +71,7 @@ app.controller('RecordingController', function($scope, $http, $localForage) {
     recorder && recorder.stop();
     $scope.stopBtnDisabled = true;
     $scope.recordBtnDisabled = false;
+    $scope.saveBtnDisabled = false;
     console.log('Stopped recording.');
     
     // create WAV download link using audio data blob and display on website
