@@ -38,7 +38,7 @@ angular.module('daApp')
         console.log(value);
 
         var minFreeIdx = value || 0;
-        $localForage.pull('tokens/' + minFreeIdx).then(function(value){
+        $localForage.getItem('tokens/' + minFreeIdx).then(function(value){
           if (value) {
             next.resolve(value);
           } else {
@@ -47,7 +47,12 @@ angular.module('daApp')
 
           // update our minFreeIdx
           if (minFreeIdx > 0) minFreeIdx--;
-          $localForage.setItem('minFreeTokenIdx', minFreeIdx);
+          $localForage.setItem('minFreeTokenIdx', minFreeIdx).then(function(value){
+            // don't delete token until we have updated the index, then if
+            // user exits browser after get but before update of index,
+            // at least it will still show the last token.
+            $localForage.removeItem('tokens/' + (minFreeIdx+1));
+          });
         });
       });
       return next.promise;
