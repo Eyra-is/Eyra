@@ -3,17 +3,17 @@
 'use strict';
 
 angular.module('daApp')
-.controller('RecordingController', ['$scope', 
-                                    '$http', 
-                                    '$localForage', 
-                                    'tokenService', 
-                                    function($scope, $http, $localForage, tokenService) {
+.controller('RecordingController', ['$http',
+                                    '$localForage',
+                                    '$scope',
+                                    'tokenService',
+                                    function($http, $localForage, $scope, tokenService) {
   var recordCtrl = this;
 
-  tokenService.getTokens(10);
+  //tokenService.getTokens(10);
+  var currentToken = {'id':0, 'token':'No token yet.'};
 
   $scope.msg = ''; // single debug/information msg
-  $scope.msg2 = '';
   $scope.recordings = []; // recordings so far
 
   // these button things don't work yet
@@ -41,12 +41,17 @@ angular.module('daApp')
   recordCtrl.record = function() {
     recorder && recorder.record();
     $scope.msg = 'Recording now...';
-    $scope.displayToken = tokenService.nextToken();
+    console.log('Recording...');
+
+    // 
+    tokenService.nextToken().then(function(data){
+      $scope.displayToken = data['token'];
+      currentToken = data;
+    });
 
     $scope.recordBtnDisabled = true;
     $scope.stopBtnDisabled = false;
     $scope.saveBtnDisabled = true;
-    console.log('Recording...');
   };
 
   recordCtrl.stop = function() {

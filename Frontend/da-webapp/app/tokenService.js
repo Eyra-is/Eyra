@@ -1,15 +1,14 @@
-// handler to query and process tokens from server
+// service to query and process tokens from server
 
 'use strict';
 
 angular.module('daApp')
-  .factory('tokenService', ['$http', function ($http) {
+  .factory('tokenService', ['$http', '$localForage', '$q', function ($http, $localForage, $q) {
     var tokenHandler = {};
+    var TOKENURL = '/submit/gettokens';
+
     tokenHandler.getTokens = getTokens;
     tokenHandler.nextToken = nextToken;
-
-    var TOKENURL = '/submit/gettokens';
-    var tokens = [];    
 
     return tokenHandler;
 
@@ -26,7 +25,7 @@ angular.module('daApp')
         console.log(data);
 
         // some validation of 'data' perhaps here
-        tokens = data; // later just save to local storage here
+        saveTokens(data); // save to local forage
       })
       .error(function (data, status) {
         console.log(data);
@@ -35,7 +34,40 @@ angular.module('daApp')
     }
 
     function nextToken() {
-      var next = tokens.pop();
-      return next ? next['token'] : 'No more tokens.';
+      var next = $q.defer();
+      $localForage.getItem('minFreeTokenIdx').then(function(value) {
+        console.log(value);
+
+        var minFreeIdx = value || 0;
+        $localForage.pull('tokens/' + minFreeIdx).then(function(value){
+          if (value) {
+            next.resolve(value);
+          } else {
+            next.reject({'id':0, 'token':'No more tokens.'});
+          }
+
+          // update our minFreeIdx
+          if (minFreeIdx > 0) minFreeIdx--;
+          $localForage.setItem('minFreeTokenIdx', minFreeIdx);
+        });
+      });
+      return next.promise;
+    }
+
+    // save tokens locally. tokens should be on format depicted in getTokens in client-server API
+    function saveTokens(tokens) {
+      $localForage.getItem('minFreeTokenIdx').then(function(value) {
+        console.log('save val: ' + value);
+        var minFreeIdx = value || 0;
+        var oldMinFreeIdx = minFreeIdx;
+
+        for (var i = 0; i < tokens.length; i++) {
+          $localForage.setItem('tokens/' + minFreeIdx, tokens[i]);
+          minFreeIdx++;
+        }
+
+        // update our minFreeIdx to reflect newly input tokens
+        $localForage.setItem('minFreeTokenIdx', oldMinFreeIdx + tokens.length);
+      });
     }
   }]);
