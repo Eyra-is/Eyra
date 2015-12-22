@@ -22,7 +22,6 @@ angular.module('daApp')
       })
       .success(function (data) {
         // seems like data is automatically parsed as JSON for us
-        console.log(data);
 
         // some validation of 'data' perhaps here
         saveTokens(data); // save to local forage
@@ -57,7 +56,6 @@ angular.module('daApp')
     // save tokens locally. tokens should be on format depicted in getTokens in client-server API
     function saveTokens(tokens) {
       $localForage.getItem('minFreeTokenIdx').then(function(value) {
-        console.log('save val: ' + value);
         var minFreeIdx = value || 0;
         var oldMinFreeIdx = minFreeIdx;
 

@@ -10,7 +10,6 @@ angular.module('daApp')
                                     function($http, $localForage, $scope, tokenService) {
   var recordCtrl = this;
 
-  //tokenService.getTokens(10);
   var currentToken = {'id':0, 'token':'No token yet.'};
 
   $scope.msg = ''; // single debug/information msg
@@ -38,6 +37,10 @@ angular.module('daApp')
   }
 
   // controller functions
+  recordCtrl.getTokens = function() {
+    tokenService.getTokens(25);
+  };
+
   recordCtrl.record = function() {
     recorder && recorder.record();
     $scope.msg = 'Recording now...';
