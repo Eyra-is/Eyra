@@ -3,8 +3,14 @@
 'use strict';
 
 angular.module('daApp')
-.controller('RecordingController', ['$scope', '$http', '$localForage', function($scope, $http, $localForage) {
+.controller('RecordingController', ['$scope', 
+                                    '$http', 
+                                    '$localForage', 
+                                    'tokenService', 
+                                    function($scope, $http, $localForage, tokenService) {
   var recordCtrl = this;
+
+  tokenService.getTokens(10);
 
   $scope.msg = ''; // single debug/information msg
   $scope.msg2 = '';
@@ -35,6 +41,7 @@ angular.module('daApp')
   recordCtrl.record = function() {
     recorder && recorder.record();
     $scope.msg = 'Recording now...';
+    $scope.displayToken = tokenService.nextToken();
 
     $scope.recordBtnDisabled = true;
     $scope.stopBtnDisabled = false;

@@ -33,4 +33,4 @@ Each tokenId must match it's corresponding recording filename including extensio
 
 Client queries server for X number of tokens. Server returns tokens.
 
-json format: { id1 : token1, id2 : token2, ... }
+json format: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]

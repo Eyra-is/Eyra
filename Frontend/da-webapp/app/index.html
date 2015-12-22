@@ -36,13 +36,7 @@
 
         </br></br>
 
-        <div ng-controller="TokenController as tokCtrl">
-            <ul>
-                <li ng-repeat="token in tokens">
-                    <p>{{token}}</p>
-                </li>
-            </ul>
-        </div>
+        <p>{{displayToken}}</p>
 
         </br></br>
 
@@ -67,7 +61,7 @@
     <script src="recorderjs/dist/recorder.js"></script>
 
     <script src="app.js"></script>
+    <script src="tokenService.js"></script>
     <script src="RecordingController.js"></script>
-    <script src="TokenController.js"></script>
 </body>
 </html>

@@ -24,9 +24,10 @@ angular.module('daApp', ['LocalForageModule'])
 ])
 
 // fix some angular issue with <audio ng-src="{{var}}"></audio>
+// http://stackoverflow.com/questions/20049261/sce-trustasresourceurl-globally
 .filter("trustUrl", ['$sce', function ($sce) {
-  return function (recordingUrl) {
-    return $sce.trustAsResourceUrl(recordingUrl);
+  return function (url) {
+    return $sce.trustAsResourceUrl(url);
   };
 }]);
 
