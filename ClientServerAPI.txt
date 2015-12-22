@@ -4,7 +4,7 @@ API from Client to Server
 1. submitSession
 ----------------
 
-submit data signifying one session (session being a single sitting by one speaker) including metadata + recordings
+Submit data signifying one session (session being a single sitting by one speaker) including metadata + recordings
 
 json format:   {    
                     "type":"session",
@@ -27,3 +27,10 @@ json format:   {
                 }
 
 Each tokenId must match it's corresponding recording filename including extension.
+
+2. getTokens
+------------
+
+Client queries server for X number of tokens. Server returns tokens.
+
+json format: { id1 : token1, id2 : token2, ... }
