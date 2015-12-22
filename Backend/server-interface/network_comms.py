@@ -22,7 +22,7 @@ dbHandler = DbHandler(app)
 cors = CORS(app,    resources=r'/submit/*', 
                     allow_headers='Content-Type', 
                     origins='*', 
-                    methods='GET, POST, OPTIONS' )
+                    methods='GET, POST, OPTIONS')
 
 @app.route('/submit/session', methods=['GET', 'POST'])
 def submit_session():
@@ -70,6 +70,15 @@ def submit_session():
         except ValueError as e:
             response += 'error: ' + str(e) + '\n'
             response += str(jsonData)
+
+    return response
+
+@app.route('/submit/gettokens/<int:numTokens>', methods=['GET'])
+def submit_gettokens(numTokens):
+    response = ''
+
+    if request.method == 'GET':
+        response += str(dbHandler.getTokens(numTokens))
 
     return response
 
