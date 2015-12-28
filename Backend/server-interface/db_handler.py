@@ -65,3 +65,19 @@ class DbHandler:
         self.mysql.connection.commit()
 
         return 'Successful process of session data.\n'
+
+    # gets numTokens tokens from the database and returns them in a nice json format.
+    # look at format in the client-server API
+    # or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
+    def getTokens(self, numTokens):
+        cur = self.mysql.connection.cursor()
+        cur.execute('SELECT id, inputToken FROM token LIMIT %s',
+                    (numTokens,)) # have to pass in a tuple, with only one parameter
+        tokens = cur.fetchall()
+
+        jsonTokens = []
+        # parse our tuple object from the cursor.execute into our desired json object
+        for pair in tokens:
+            jsonTokens.append({"id":pair[0], "token":pair[1]})
+
+        return json.dumps(jsonTokens)
