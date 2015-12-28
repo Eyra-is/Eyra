@@ -3,7 +3,12 @@
 'use strict';
 
 angular.module('daApp')
-  .factory('tokenService', ['$http', '$localForage', '$q', function ($http, $localForage, $q) {
+  .factory('tokenService', ['$http', 
+                            '$localForage', 
+                            '$q', 
+                            tokenService]);
+
+function tokenService($http, $localForage, $q) {
     var tokenHandler = {};
     var TOKENURL = '/submit/gettokens';
 
@@ -35,7 +40,7 @@ angular.module('daApp')
     function nextToken() {
       var next = $q.defer();
       $localForage.getItem('minFreeTokenIdx').then(function(value) {
-        console.log(value);
+        console.log('local db index: ' + value);
 
         var minFreeIdx = value || 0;
         $localForage.getItem('tokens/' + minFreeIdx).then(function(value){
@@ -73,4 +78,4 @@ angular.module('daApp')
         $localForage.setItem('minFreeTokenIdx', oldMinFreeIdx + tokens.length);
       });
     }
-  }]);
+  }

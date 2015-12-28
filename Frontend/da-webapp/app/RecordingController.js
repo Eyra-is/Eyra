@@ -7,7 +7,9 @@ angular.module('daApp')
                                     '$localForage',
                                     '$scope',
                                     'tokenService',
-                                    function($http, $localForage, $scope, tokenService) {
+                                    RecordingController]);
+
+function RecordingController($http, $localForage, $scope, tokenService) {
   var recordCtrl = this;
 
   var currentToken = {'id':0, 'token':'No token yet.'};
@@ -167,5 +169,5 @@ angular.module('daApp')
   navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
     console.log('No live audio input: ' + e);
   });
-}]);
+}
 
