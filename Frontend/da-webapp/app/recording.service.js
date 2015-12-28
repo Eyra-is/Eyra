@@ -17,7 +17,10 @@ function recordingService($http, $localForage, tokenService) {
   recHandler.save = save;
   recHandler.stop = stop;
 
-  recHandler.recordings = []; // recordings so far
+  // for some reason, putting this in an array, makes angular updates this correctly
+  recHandler.currentRecording = [{ "blob":null,
+                                  "url":null,
+                                  "title":'no_data.wav'}];
 
   // local variable definitions for service
   var start_time;
@@ -32,6 +35,7 @@ function recordingService($http, $localForage, tokenService) {
 
   function init(updateBindings) {
     recHandler.updateBindings = updateBindings;
+
     start_time = new Date().toISOString();
 
     // kick it off
@@ -92,15 +96,12 @@ function recordingService($http, $localForage, tokenService) {
       console.log(status);
     });
 
-    // send our recording/s, and metadata as json
+    // send our recording, and metadata as json
     var fd = new FormData();
-    for (var i = 0; i < recHandler.recordings.length; i++)
-    {
-      var rec = recHandler.recordings[i];
-      fd.append('rec'+i, rec.blob, rec.title);
-      // all recordings get same tokenId for now
-      jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : 5 };
-    }
+    var rec = recHandler.currentRecording[0];
+    fd.append('rec'+i, rec.blob, rec.title);
+    // all recordings get same tokenId for now
+    jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : 5 };
     fd.append('json', JSON.stringify(jsonData));
 
     $http.post('http://'+BACKENDURL+'/submit/session', fd, {
@@ -133,10 +134,10 @@ function recordingService($http, $localForage, tokenService) {
     recorder && recorder.exportWAV(function(blob) {
       var url = URL.createObjectURL(blob);
 
-      // display recordings on website
-      recHandler.recordings.push({  "blob":blob,
-                                    "url":url,
-                                    "title":(new Date().toISOString() + '.wav')});
+      // display recording on website
+      recHandler.currentRecording[0] = {  "blob":blob,
+                                          "url":url,
+                                          "title":(new Date().toISOString() + '.wav')};
 
       // angular didn't update bindings on that recordings push, so we do it manually
       // through this callback function from the controller

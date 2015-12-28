@@ -18,7 +18,7 @@ function MainController($scope, recordingService, tokenService) {
   recCtrl.stop = stop;
 
   recCtrl.msg = ''; // single debug/information msg
-  recCtrl.recordings = recService.recordings; // recordings so far
+  recCtrl.curRec = recService.currentRecording;
 
   recCtrl.recordBtnDisabled = false;
   recCtrl.saveBtnDisabled = true;
