@@ -13,42 +13,42 @@
     <!--<script src="http://jsconsole.com/remote.js?51B729F1-B396-4E9A-9F1E-4B1B1F30F619"></script>-->
 </head>
 <body>
-    <div ng-controller="RecordingController as recCtrl">
-        <button type="button" ng-disabled="recordBtnDisabled" ng-click="recCtrl.record()">
+    <div ng-controller="MainController as main">
+        <button type="button" ng-disabled="main.recordBtnDisabled" ng-click="main.record()">
             Record
         </button>
-        <button type="button" ng-disabled="stopBtnDisabled" ng-click="recCtrl.stop()">
+        <button type="button" ng-disabled="main.stopBtnDisabled" ng-click="main.stop()">
             Stop
         </button>
-        <button type="button" ng-disabled="saveBtnDisabled" ng-click="recCtrl.save()">
+        <button type="button" ng-disabled="main.saveBtnDisabled" ng-click="main.save()">
             Save &amp; Send
         </button>
-        <button type="button" ng-click="recCtrl.getTokens()">
+        <button type="button" ng-click="main.getTokens()">
             Get tokens
         </button>
 
         <ul>
-            <li ng-repeat="rec in recordings">
+            <li ng-repeat="rec in main.recordings">
                 <audio ng-src="{{rec.url | trustUrl}}" controls></audio>
                 <a ng-href="{{rec.url}}">{{rec.title}}</a>
             </li>
         </ul>
 
-        <div>{{msg}}</div>
+        <div>{{main.msg}}</div>
 
         </br></br>
 
-        <p>{{displayToken}}</p>
+        <p>{{main.displayToken}}</p>
 
         </br></br>
 
         <h3>Session info</h3>
         <div class="dataEntry">
-            <label><input type="text" ng-model="speakerId" placeholder="1"> speakerId</label>
-            <label><input type="text" ng-model="instructorId" placeholder="1"> instructorId</label>
-            <label><input type="text" ng-model="deviceId" placeholder="1"> deviceId</label>
-            <label><input type="text" ng-model="curLocation" placeholder="rvk iceland"> location</label>
-            <label><input type="text" ng-model="comments" placeholder="birds chirping in background"> comments</label>
+            <label><input type="text" ng-model="main.speakerId" placeholder="1"> speakerId</label>
+            <label><input type="text" ng-model="main.instructorId" placeholder="1"> instructorId</label>
+            <label><input type="text" ng-model="main.deviceId" placeholder="1"> deviceId</label>
+            <label><input type="text" ng-model="main.curLocation" placeholder="rvk iceland"> location</label>
+            <label><input type="text" ng-model="main.comments" placeholder="birds chirping in background"> comments</label>
         </div>
     </div>
 
@@ -63,7 +63,8 @@
     <script src="recorderjs/dist/recorder.js"></script>
 
     <script src="app.js"></script>
-    <script src="tokenService.js"></script>
-    <script src="RecordingController.js"></script>
+    <script src="recording.service.js"></script>
+    <script src="token.service.js"></script>
+    <script src="main.controller.js"></script>
 </body>
 </html>
