@@ -18,9 +18,11 @@ function recordingService($http, $localForage, tokenService) {
   recHandler.stop = stop;
 
   // for some reason, putting this in an array, makes angular updates this correctly
-  recHandler.currentRecording = [{ "blob":null,
-                                  "url":null,
-                                  "title":'no_data.wav'}];
+  recHandler.currentRecording = [{  "blob":new Blob(),
+                                    "url":'',
+                                    "title":'no_data.wav'}];
+  // keep the previous title so we don't send same recording twice
+  recHandler.prevRecTitle = recHandler.currentRecording[0].title;
 
   // local variable definitions for service
   var start_time;
@@ -33,8 +35,9 @@ function recordingService($http, $localForage, tokenService) {
 
   //////////
 
-  function init(updateBindings) {
-    recHandler.updateBindings = updateBindings;
+  function init(updateBindingsCallback, recordingCompleteCallback) {
+    recHandler.updateBindingsCallback = updateBindingsCallback;
+    recHandler.recordingCompleteCallback = recordingCompleteCallback;
 
     start_time = new Date().toISOString();
 
@@ -96,26 +99,29 @@ function recordingService($http, $localForage, tokenService) {
       console.log(status);
     });
 
-    // send our recording, and metadata as json
-    var fd = new FormData();
+    // send our recording, and metadata as json, so long as it is valid
     var rec = recHandler.currentRecording[0];
-    fd.append('rec'+i, rec.blob, rec.title);
-    // all recordings get same tokenId for now
-    jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : 5 };
-    fd.append('json', JSON.stringify(jsonData));
+    if (rec.title !== recHandler.prevRecTitle)
+    {
+      var fd = new FormData();
+      fd.append('rec0', rec.blob, rec.title);
+      // all recordings get same tokenId for now
+      jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : 5 };
+      fd.append('json', JSON.stringify(jsonData));
 
-    $http.post('http://'+BACKENDURL+'/submit/session', fd, {
-      // this is so angular sets the correct headers/info itself
-      transformRequest: angular.identity,
-      headers: {'Content-Type': undefined}
-    })
-    .success(function (data) {
-      console.log(data);
-    })
-    .error(function (data, status) {
-      console.log(data);
-      console.log(status);
-    });
+      $http.post('http://'+BACKENDURL+'/submit/session', fd, {
+        // this is so angular sets the correct headers/info itself
+        transformRequest: angular.identity,
+        headers: {'Content-Type': undefined}
+      })
+      .success(function (data) {
+        console.log(data);
+      })
+      .error(function (data, status) {
+        console.log(data);
+        console.log(status);
+      });
+    }
   }
 
   function stop() {
@@ -134,6 +140,7 @@ function recordingService($http, $localForage, tokenService) {
     recorder && recorder.exportWAV(function(blob) {
       var url = URL.createObjectURL(blob);
 
+      recHandler.prevRecTitle = recHandler.currentRecording[0].title;
       // display recording on website
       recHandler.currentRecording[0] = {  "blob":blob,
                                           "url":url,
@@ -141,7 +148,9 @@ function recordingService($http, $localForage, tokenService) {
 
       // angular didn't update bindings on that recordings push, so we do it manually
       // through this callback function from the controller
-      recHandler.updateBindings();
+      recHandler.updateBindingsCallback();
+      // notify main controller of completed recording
+      recHandler.recordingCompleteCallback();
     });
   }
 
