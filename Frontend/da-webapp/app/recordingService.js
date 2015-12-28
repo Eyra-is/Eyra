@@ -3,10 +3,11 @@
 'use strict';
 
 angular.module('daApp')
-  .factory('recordingService', ['$http', 
-                                '$localForage',
-                                'tokenService', 
-                                recordingService]);
+  .factory('recordingService', recordingService);
+
+recordingService.$inject = ['$http', 
+                            '$localForage',
+                            'tokenService'];
 
 function recordingService($http, $localForage, tokenService) {
   var recHandler = {};

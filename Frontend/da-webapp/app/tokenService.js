@@ -3,10 +3,11 @@
 'use strict';
 
 angular.module('daApp')
-  .factory('tokenService', ['$http', 
-                            '$localForage', 
-                            '$q', 
-                            tokenService]);
+  .factory('tokenService', tokenService);
+
+tokenService.$inject = ['$http', 
+                        '$localForage', 
+                        '$q'];
 
 function tokenService($http, $localForage, $q) {
   var tokenHandler = {};

@@ -3,10 +3,11 @@
 'use strict';
 
 angular.module('daApp')
-.controller('MainController', [ '$scope',
-                                'recordingService',
-                                'tokenService',
-                                MainController]);
+.controller('MainController', MainController);
+
+MainController.$inject = ['$scope',
+                          'recordingService',
+                          'tokenService'];
 
 function MainController($scope, recordingService, tokenService) {
   var recCtrl = this; // record control
@@ -26,6 +27,7 @@ function MainController($scope, recordingService, tokenService) {
   recCtrl.getTokens = getTokens;
 
   var currentToken = {'id':0, 'token':'No token yet.'};
+
 
   activate();
 
