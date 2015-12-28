@@ -27,12 +27,15 @@ function MainController($scope, recordingService, tokenService) {
 
   var currentToken = {'id':0, 'token':'No token yet.'};
 
-  // kick it off
-
-  // provide updateBindings function so recordingService can call that function when it needs to update bindings
-  recService.init(updateBindings);
+  activate();
 
   //////////
+
+  function activate() {
+    // provide updateBindings function so recordingService can 
+    // call that function when it needs to update bindings
+    recService.init(updateBindings);    
+  }
 
   function record() {
     recCtrl.msg = 'Recording now...';
