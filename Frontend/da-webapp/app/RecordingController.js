@@ -10,17 +10,17 @@ angular.module('daApp')
                                     RecordingController]);
 
 function RecordingController($http, $localForage, $scope, tokenService) {
-  var recordCtrl = this;
+  var rc = this; // record control
 
   var currentToken = {'id':0, 'token':'No token yet.'};
 
-  $scope.msg = ''; // single debug/information msg
-  $scope.recordings = []; // recordings so far
+  rc.msg = ''; // single debug/information msg
+  rc.recordings = []; // recordings so far
 
   // these button things don't work yet
-  $scope.recordBtnDisabled = false;
-  $scope.stopBtnDisabled = true;
-  $scope.saveBtnDisabled = true;
+  rc.recordBtnDisabled = false;
+  rc.stopBtnDisabled = true;
+  rc.saveBtnDisabled = true;
 
   var start_time = new Date().toISOString();
   var end_time;
@@ -39,33 +39,33 @@ function RecordingController($http, $localForage, $scope, tokenService) {
   }
 
   // controller functions
-  recordCtrl.getTokens = function() {
+  rc.getTokens = function() {
     tokenService.getTokens(25);
   };
 
-  recordCtrl.record = function() {
+  rc.record = function() {
     recorder && recorder.record();
-    $scope.msg = 'Recording now...';
+    rc.msg = 'Recording now...';
     console.log('Recording...');
 
     // 
     tokenService.nextToken().then(function(data){
-      $scope.displayToken = data['token'];
+      rc.displayToken = data['token'];
       currentToken = data;
     });
 
-    $scope.recordBtnDisabled = true;
-    $scope.stopBtnDisabled = false;
-    $scope.saveBtnDisabled = true;
+    rc.recordBtnDisabled = true;
+    rc.stopBtnDisabled = false;
+    rc.saveBtnDisabled = true;
   };
 
-  recordCtrl.stop = function() {
-    $scope.msg = 'Processing wav...';
+  rc.stop = function() {
+    rc.msg = 'Processing wav...';
 
     recorder && recorder.stop();
-    $scope.stopBtnDisabled = true;
-    $scope.recordBtnDisabled = false;
-    $scope.saveBtnDisabled = false;
+    rc.stopBtnDisabled = true;
+    rc.recordBtnDisabled = false;
+    rc.saveBtnDisabled = false;
     console.log('Stopped recording.');
     
     // create WAV download link using audio data blob and display on website
@@ -74,10 +74,10 @@ function RecordingController($http, $localForage, $scope, tokenService) {
     recorder.clear();
   };
 
-  recordCtrl.save = function() {
-    $scope.msg = 'Saving and sending recs...';
+  rc.save = function() {
+    rc.msg = 'Saving and sending recs...';
 
-    $scope.saveBtnDisabled = true;
+    rc.saveBtnDisabled = true;
     
     // these scope variables connected to user input obviously have to be sanitized.
     end_time = new Date().toISOString();
@@ -85,13 +85,13 @@ function RecordingController($http, $localForage, $scope, tokenService) {
                       "type":'session', 
                       "data":
                       {
-                         "speakerId"      : ($scope.speakerId || 1),
-                         "instructorId"   : ($scope.instructorId || 1),
-                         "deviceId"       : ($scope.deviceId || 1),
-                         "location"       : ($scope.curLocation || 'unknown'),
+                         "speakerId"      : (rc.speakerId || 1),
+                         "instructorId"   : (rc.instructorId || 1),
+                         "deviceId"       : (rc.deviceId || 1),
+                         "location"       : (rc.curLocation || 'unknown'),
                          "start"          : start_time,
                          "end"            : end_time,
-                         "comments"       : ($scope.comments || 'no comments'),
+                         "comments"       : (rc.comments || 'no comments'),
                          "recordingsInfo" : {}
                       }
                     };
@@ -114,9 +114,9 @@ function RecordingController($http, $localForage, $scope, tokenService) {
 
     // send our recording/s, and metadata as json
     var fd = new FormData();
-    for (var i = 0; i < $scope.recordings.length; i++)
+    for (var i = 0; i < rc.recordings.length; i++)
     {
-      var rec = $scope.recordings[i];
+      var rec = rc.recordings[i];
       fd.append('rec'+i, rec.blob, rec.title);
       // all recordings get same tokenId for now
       jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : 5 };
@@ -142,10 +142,10 @@ function RecordingController($http, $localForage, $scope, tokenService) {
       var url = URL.createObjectURL(blob);
 
       // display recordings on website
-      $scope.recordings.push({"blob":blob,
-                              "url":url,
-                              "title":(new Date().toISOString() + '.wav')});
-      $scope.saveBtnDisabled = false;
+      rc.recordings.push({"blob":blob,
+                          "url":url,
+                          "title":(new Date().toISOString() + '.wav')});
+      rc.saveBtnDisabled = false;
 
       $scope.$apply(); // update our bindings
     });
