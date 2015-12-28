@@ -70,7 +70,8 @@ function MainController($scope, recordingService, tokenService) {
                     recCtrl.isntructorId,
                     recCtrl.deviceId,
                     recCtrl.curLocation,
-                    recCtrl.comments);
+                    recCtrl.comments,
+                    currentToken['id']);
   }
 
   function stop() {

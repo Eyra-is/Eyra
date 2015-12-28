@@ -67,7 +67,7 @@ function recordingService($http, $localForage, tokenService) {
   }
 
   // attempt to send recording with session info (speakerId, etc.) to server
-  function send(speakerId, instructorId, deviceId, curLocation, comments) {    
+  function send(speakerId, instructorId, deviceId, curLocation, comments, tokenId) {    
     end_time = new Date().toISOString();
     var jsonData =  {                                                                  
                       "type":'session', 
@@ -107,7 +107,7 @@ function recordingService($http, $localForage, tokenService) {
       var fd = new FormData();
       fd.append('rec0', rec.blob, rec.title);
       // all recordings get same tokenId for now
-      jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : 5 };
+      jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : tokenId };
       fd.append('json', JSON.stringify(jsonData));
 
       $http.post('http://'+BACKENDURL+'/submit/session', fd, {
