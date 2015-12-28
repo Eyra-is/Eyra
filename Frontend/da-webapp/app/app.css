@@ -1,3 +1,7 @@
+#playback {
+    margin: 1%;
+    max-width: 100%;
+}
 
 .dataEntry label {
     float: left;

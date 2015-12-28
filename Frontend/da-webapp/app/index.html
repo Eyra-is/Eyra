@@ -20,19 +20,14 @@
         <button type="button" ng-disabled="main.stopBtnDisabled" ng-click="main.stop()">
             Stop
         </button>
-        <button type="button" ng-disabled="main.saveBtnDisabled" ng-click="main.save()">
-            Save &amp; Send
-        </button>
         <button type="button" ng-click="main.getTokens()">
             Get tokens
         </button>
 
-        <ul>
-            <li ng-repeat="rec in main.recordings">
-                <audio ng-src="{{rec.url | trustUrl}}" controls></audio>
-                <a ng-href="{{rec.url}}">{{rec.title}}</a>
-            </li>
-        </ul>
+        <div id="playback">
+            <audio ng-src="{{main.curRec[0].url | trustUrl}}" controls></audio>
+            <a ng-href="main.curRec[0].url">{{main.curRec[0].title}}</a>
+        </div>
 
         <div>{{main.msg}}</div>
 

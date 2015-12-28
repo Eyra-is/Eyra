@@ -14,14 +14,12 @@ function MainController($scope, recordingService, tokenService) {
   var recService = recordingService;
 
   recCtrl.record = record;
-  recCtrl.save = save;
   recCtrl.stop = stop;
 
   recCtrl.msg = ''; // single debug/information msg
-  recCtrl.recordings = recService.recordings; // recordings so far
+  recCtrl.curRec = recService.currentRecording;
 
   recCtrl.recordBtnDisabled = false;
-  recCtrl.saveBtnDisabled = true;
   recCtrl.stopBtnDisabled = true;
 
   recCtrl.getTokens = getTokens;
@@ -36,7 +34,11 @@ function MainController($scope, recordingService, tokenService) {
   function activate() {
     // provide updateBindings function so recordingService can 
     // call that function when it needs to update bindings
-    recService.init(updateBindings);    
+    recService.init(updateBindingsCallback, recordingCompleteCallback);    
+  }
+
+  function getTokens() {
+    tokenService.getTokens(25);
   }
 
   function record() {
@@ -44,7 +46,6 @@ function MainController($scope, recordingService, tokenService) {
 
     recCtrl.recordBtnDisabled = true;
     recCtrl.stopBtnDisabled = false;
-    recCtrl.saveBtnDisabled = true;
 
     recService.record();
 
@@ -55,16 +56,22 @@ function MainController($scope, recordingService, tokenService) {
     });
   }
 
-  function save() {
-    recCtrl.msg = 'Saving and sending recs...';
-    recCtrl.saveBtnDisabled = true;
+  // function passed to our recording service, notified when a recording has been finished
+  function recordingCompleteCallback() {
+    send(); // attempt to send current recording
+    // TODO if unsuccessful, save it locally
+  }
+
+  function send() {
+    recCtrl.msg = 'Sending recs...';
 
     // these scope variables connected to user input obviously have to be sanitized.
-    recService.save(recCtrl.speakerId,
+    recService.send(recCtrl.speakerId,
                     recCtrl.isntructorId,
                     recCtrl.deviceId,
                     recCtrl.curLocation,
-                    recCtrl.comments);
+                    recCtrl.comments,
+                    currentToken['id']);
   }
 
   function stop() {
@@ -72,17 +79,12 @@ function MainController($scope, recordingService, tokenService) {
 
     recCtrl.stopBtnDisabled = true;
     recCtrl.recordBtnDisabled = false;
-    recCtrl.saveBtnDisabled = false;
     
     recService.stop();
   }
 
-  function updateBindings() {
+  function updateBindingsCallback() {
     $scope.$apply();
   }
-
-  function getTokens() {
-    tokenService.getTokens(25);
-  };
 }
 
