@@ -3,12 +3,12 @@
 'use strict';
 
 angular.module('daApp')
-.controller('RecordingController', ['$scope',
-                                    'recordingService',
-                                    'tokenService',
-                                    RecordingController]);
+.controller('MainController', [ '$scope',
+                                'recordingService',
+                                'tokenService',
+                                MainController]);
 
-function RecordingController($scope, recordingService, tokenService) {
+function MainController($scope, recordingService, tokenService) {
   var recCtrl = this; // record control
   var recService = recordingService;
 
@@ -22,7 +22,6 @@ function RecordingController($scope, recordingService, tokenService) {
   recCtrl.recordBtnDisabled = false;
   recCtrl.saveBtnDisabled = true;
   recCtrl.stopBtnDisabled = true;
-
 
   recCtrl.getTokens = getTokens;
 
@@ -38,6 +37,10 @@ function RecordingController($scope, recordingService, tokenService) {
   function record() {
     recCtrl.msg = 'Recording now...';
 
+    recCtrl.recordBtnDisabled = true;
+    recCtrl.stopBtnDisabled = false;
+    recCtrl.saveBtnDisabled = true;
+
     recService.record();
 
     // show token on record/newToken button hit
@@ -45,10 +48,6 @@ function RecordingController($scope, recordingService, tokenService) {
       recCtrl.displayToken = data['token'];
       currentToken = data;
     });
-
-    recCtrl.recordBtnDisabled = true;
-    recCtrl.stopBtnDisabled = false;
-    recCtrl.saveBtnDisabled = true;
   }
 
   function save() {
