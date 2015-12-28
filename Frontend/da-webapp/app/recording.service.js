@@ -14,7 +14,7 @@ function recordingService($http, $localForage, tokenService) {
 
   recHandler.init = init;
   recHandler.record = record;
-  recHandler.save = save;
+  recHandler.send = send;
   recHandler.stop = stop;
 
   // for some reason, putting this in an array, makes angular updates this correctly
@@ -66,7 +66,8 @@ function recordingService($http, $localForage, tokenService) {
     recorder && recorder.record();
   }
 
-  function save(speakerId, instructorId, deviceId, curLocation, comments) {    
+  // attempt to send recording with session info (speakerId, etc.) to server
+  function send(speakerId, instructorId, deviceId, curLocation, comments) {    
     end_time = new Date().toISOString();
     var jsonData =  {                                                                  
                       "type":'session', 

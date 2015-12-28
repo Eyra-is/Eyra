@@ -58,14 +58,15 @@ function MainController($scope, recordingService, tokenService) {
 
   // function passed to our recording service, notified when a recording has been finished
   function recordingCompleteCallback() {
-    save(); // attempt to send current recording, if unsuccessful, save it locally
+    send(); // attempt to send current recording
+    // TODO if unsuccessful, save it locally
   }
 
-  function save() {
-    recCtrl.msg = 'Saving and sending recs...';
+  function send() {
+    recCtrl.msg = 'Sending recs...';
 
     // these scope variables connected to user input obviously have to be sanitized.
-    recService.save(recCtrl.speakerId,
+    recService.send(recCtrl.speakerId,
                     recCtrl.isntructorId,
                     recCtrl.deviceId,
                     recCtrl.curLocation,
