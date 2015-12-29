@@ -24,7 +24,8 @@ function MainController($scope, recordingService, tokenService) {
 
   recCtrl.getTokens = getTokens;
 
-  var currentToken = {'id':0, 'token':'No token yet.'};
+  var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
+  recCtrl.displayToken = currentToken['token'];
 
 
   activate();
@@ -38,6 +39,8 @@ function MainController($scope, recordingService, tokenService) {
   }
 
   function getTokens() {
+    recCtrl.msg = 'Getting tokens...';
+
     tokenService.getTokens(25);
   }
 

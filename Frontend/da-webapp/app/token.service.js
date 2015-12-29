@@ -41,18 +41,18 @@ function tokenService($http, $localForage, $q) {
   function nextToken() {
     var next = $q.defer();
     $localForage.getItem('minFreeTokenIdx').then(function(value) {
-      console.log('local db index: ' + value);
+      console.log('Local db index: ' + value);
 
-      var minFreeIdx = value || 0;
+      var minFreeIdx = value === -1 ? 0 : (value || 0);
       $localForage.getItem('tokens/' + minFreeIdx).then(function(value){
         if (value) {
           next.resolve(value);
         } else {
-          next.reject({'id':0, 'token':'No more tokens.'});
+          next.resolve({'id':0, 'token':'No more tokens. Hit \'Get tokens\' for more.'});
         }
 
         // update our minFreeIdx
-        if (minFreeIdx > 0) minFreeIdx--;
+        if (minFreeIdx > -1) minFreeIdx--;
         $localForage.setItem('minFreeTokenIdx', minFreeIdx).then(function(value){
           // don't delete token until we have updated the index, then if
           // user exits browser after get but before update of index,
@@ -67,8 +67,8 @@ function tokenService($http, $localForage, $q) {
   // save tokens locally. tokens should be on format depicted in getTokens in client-server API
   function saveTokens(tokens) {
     $localForage.getItem('minFreeTokenIdx').then(function(value) {
-      var minFreeIdx = value || 0;
-      var oldMinFreeIdx = minFreeIdx;
+      var minFreeIdx = value === -1 ? 0 : (value || 0);
+      var oldMinFreeIdx = (value || 0);
 
       for (var i = 0; i < tokens.length; i++) {
         $localForage.setItem('tokens/' + minFreeIdx, tokens[i]);

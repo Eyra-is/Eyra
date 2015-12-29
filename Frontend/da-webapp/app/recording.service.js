@@ -17,12 +17,12 @@ function recordingService($http, $localForage, tokenService) {
   recHandler.send = send;
   recHandler.stop = stop;
 
+
+  var invalidTitle = 'no_data.wav';
   // for some reason, putting this in an array, makes angular updates this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),
                                     "url":'',
-                                    "title":'no_data.wav'}];
-  // keep the previous title so we don't send same recording twice
-  recHandler.prevRecTitle = recHandler.currentRecording[0].title;
+                                    "title":invalidTitle}];
 
   // local variable definitions for service
   var start_time;
@@ -102,7 +102,7 @@ function recordingService($http, $localForage, tokenService) {
 
     // send our recording, and metadata as json, so long as it is valid
     var rec = recHandler.currentRecording[0];
-    if (rec.title !== recHandler.prevRecTitle)
+    if (rec.title !== invalidTitle && tokenId !== 0)
     {
       var fd = new FormData();
       fd.append('rec0', rec.blob, rec.title);
