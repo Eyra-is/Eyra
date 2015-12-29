@@ -6,10 +6,9 @@ angular.module('daApp')
   .factory('recordingService', recordingService);
 
 recordingService.$inject = ['$http', 
-                            '$localForage',
-                            'tokenService'];
+                            '$localForage'];
 
-function recordingService($http, $localForage, tokenService) {
+function recordingService($http, $localForage) {
   var recHandler = {};
 
   recHandler.init = init;
