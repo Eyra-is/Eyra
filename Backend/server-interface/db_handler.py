@@ -1,6 +1,7 @@
 from flask.ext.mysqldb import MySQL
 import json
 import os # for mkdir
+import random
 
 class DbHandler:
     def __init__(self, app):
@@ -66,13 +67,20 @@ class DbHandler:
 
         return 'Successful process of session data.\n'
 
-    # gets numTokens tokens from the database and returns them in a nice json format.
+    # gets numTokens tokens randomly selected from the database and returns them in a nice json format.
     # look at format in the client-server API
     # or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
     def getTokens(self, numTokens):
         cur = self.mysql.connection.cursor()
-        cur.execute('SELECT id, inputToken FROM token LIMIT %s',
-                    (numTokens,)) # have to pass in a tuple, with only one parameter
+
+        # select numTokens random rows from the database
+        cur.execute('SELECT COUNT(*) FROM token');
+        numRows = cur.fetchone()[0]
+        # needs testing here to make sure 1 is lowest id, and numRows is highest id
+        randIds = [random.randint(1,int(numRows)) for i in range(int(numTokens))]
+        randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
+        cur.execute('SELECT id, inputToken FROM token WHERE id IN %s',
+                    (randIds,)) # have to pass in a tuple, with only one parameter
         tokens = cur.fetchall()
 
         jsonTokens = []

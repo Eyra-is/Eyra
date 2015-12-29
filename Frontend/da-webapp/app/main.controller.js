@@ -13,6 +13,8 @@ function MainController($scope, recordingService, tokenService) {
   var recCtrl = this; // record control
   var recService = recordingService;
 
+  recCtrl.clearLocalDb = clearLocalDb;
+  recCtrl.getTokens = getTokens;
   recCtrl.record = record;
   recCtrl.stop = stop;
 
@@ -21,8 +23,6 @@ function MainController($scope, recordingService, tokenService) {
 
   recCtrl.recordBtnDisabled = false;
   recCtrl.stopBtnDisabled = true;
-
-  recCtrl.getTokens = getTokens;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
   recCtrl.displayToken = currentToken['token'];
@@ -36,6 +36,15 @@ function MainController($scope, recordingService, tokenService) {
     // provide updateBindings function so recordingService can 
     // call that function when it needs to update bindings
     recService.init(updateBindingsCallback, recordingCompleteCallback);    
+  }
+
+  // dev function, clear the entire local forage database
+  function clearLocalDb() {
+    if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.'))
+    {
+      recCtrl.msg = 'Clearing entire local db...';
+      tokenService.clearLocalDb();      
+    }
   }
 
   function getTokens() {
