@@ -5,11 +5,9 @@
 angular.module('daApp')
   .factory('recordingService', recordingService);
 
-recordingService.$inject = ['$http', 
-                            '$localForage',
-                            'deliveryService'];
+recordingService.$inject = ['deliveryService'];
 
-function recordingService($http, $localForage, deliveryService) {
+function recordingService(deliveryService) {
   var recHandler = {};
   var delService = deliveryService;
 
@@ -90,19 +88,25 @@ function recordingService($http, $localForage, deliveryService) {
     // and send it to remote server
     // test CORS is working
     delService.testServerGet()
-    .then(function (response) {
-      console.log(response);
-    }, function (response) {
-      console.log(response);
-    });
+    .then(
+      function success(response) {
+        console.log(response);
+      }, 
+      function error(response) {
+        console.log(response);
+      }
+    );
 
     // plump out the recording!
     delService.submitRecordings(jsonData, recHandler.currentRecording, invalidTitle)
-    .then(function (response) {
-      console.log(response);
-    }, function (response) {
-      console.log(response);
-    });
+    .then(
+      function success(response) {
+        console.log(response);
+      }, 
+      function error(response) {
+        console.log(response);
+      }
+    );
   }
 
   function stop() {

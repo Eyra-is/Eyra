@@ -5,13 +5,13 @@
 angular.module('daApp')
   .factory('tokenService', tokenService);
 
-tokenService.$inject = ['$http', 
-                        '$localForage', 
-                        '$q'];
+tokenService.$inject = ['$localForage', 
+                        '$q',
+                        'deliveryService'];
 
-function tokenService($http, $localForage, $q) {
+function tokenService($localForage, $q, deliveryService) {
   var tokenHandler = {};
-  var TOKENURL = '/submit/gettokens';
+  var delService = deliveryService;
 
   tokenHandler.clearLocalDb = clearLocalDb;
   tokenHandler.getTokens = getTokens;
@@ -29,20 +29,18 @@ function tokenService($http, $localForage, $q) {
 
   function getTokens(numTokens) {
     // query server for tokens
-    $http({
-      method: 'GET',
-      url: '//'+BACKENDURL+TOKENURL+'/'+numTokens
-    })
-    .success(function (data) {
-      // seems like data is automatically parsed as JSON for us
+    delService.getTokens(numTokens)
+    .then(
+      function success(response) {
+        // seems like response is automatically parsed as JSON for us
 
-      // some validation of 'data' perhaps here
-      saveTokens(data); // save to local forage
-    })
-    .error(function (data, status) {
-      console.log(data);
-      console.log(status);
-    });
+        // some validation of 'data' perhaps here
+        saveTokens(response.data); // save to local forage
+      }, 
+      function error(response) {
+        console.log(response);
+      }
+    );
   }
 
   function nextToken() {
