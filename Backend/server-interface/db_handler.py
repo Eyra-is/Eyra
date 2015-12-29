@@ -24,21 +24,36 @@ class DbHandler:
         output += str(jsonDecoded)
         if jsonDecoded['type'] == 'session':
             jsonDecoded = jsonDecoded['data']
+        else:
+            return 'Wrong type of data.'
 
-        # insert json data into our database
-        #
-        # start with the session table
         cur = self.mysql.connection.cursor()
-        cur.execute('INSERT INTO session (speakerId, instructorId, deviceId, location, start, end, comments) \
-                     VALUES (%s, %s, %s, %s, %s, %s, %s)', 
-                    (jsonDecoded['speakerId'], jsonDecoded['instructorId'], jsonDecoded['deviceId'],
-                     jsonDecoded['location'], jsonDecoded['start'], jsonDecoded['end'], jsonDecoded['comments']))
-        # get the newly auto generated session.id 
+
+        # firstly, check if this session already exists, if so, update end time, otherwise add session
         cur.execute('SELECT id FROM session WHERE \
-                     speakerId=%s AND instructorId=%s AND deviceId=%s AND location=%s AND start=%s AND end=%s',
+                     speakerId=%s AND instructorId=%s AND deviceId=%s AND location=%s AND start=%s',
                     (jsonDecoded['speakerId'], jsonDecoded['instructorId'], jsonDecoded['deviceId'],
-                     jsonDecoded['location'], jsonDecoded['start'], jsonDecoded['end']))
-        sessionId = cur.fetchone()[0] # not sure why fetchone returns a tuple
+                     jsonDecoded['location'], jsonDecoded['start']))
+        sessionId = cur.fetchone()
+        if (sessionId is None):
+            # create new session entry in database
+            cur.execute('INSERT INTO session (speakerId, instructorId, deviceId, location, start, end, comments) \
+                         VALUES (%s, %s, %s, %s, %s, %s, %s)', 
+                        (jsonDecoded['speakerId'], jsonDecoded['instructorId'], jsonDecoded['deviceId'],
+                         jsonDecoded['location'], jsonDecoded['start'], jsonDecoded['end'], jsonDecoded['comments']))
+            # get the newly auto generated session.id 
+            cur.execute('SELECT id FROM session WHERE \
+                         speakerId=%s AND instructorId=%s AND deviceId=%s AND location=%s AND start=%s AND end=%s',
+                        (jsonDecoded['speakerId'], jsonDecoded['instructorId'], jsonDecoded['deviceId'],
+                         jsonDecoded['location'], jsonDecoded['start'], jsonDecoded['end']))
+            sessionId = cur.fetchone()[0] # fetchone returns a tuple
+        else:
+            # session already exists, simply update end-time
+            sessionId = sessionId[0] # fetchone() returns tuple
+            cur.execute('UPDATE session \
+                         SET end=%s \
+                         WHERE id=%s', 
+                        (jsonDecoded['end'], sessionId))
 
         # now populate recordings table
         #
