@@ -75,15 +75,15 @@ function tokenService($http, $localForage, $q) {
   function saveTokens(tokens) {
     $localForage.getItem('minFreeTokenIdx').then(function(value) {
       var minFreeIdx = value === -1 ? 0 : (value || 0);
-      var oldMinFreeIdx = (value || 0);
+      var oldMinFreeIdx = minFreeIdx;
 
       for (var i = 0; i < tokens.length; i++) {
         $localForage.setItem('tokens/' + minFreeIdx, tokens[i]);
         minFreeIdx++;
       }
 
-      // update our minFreeIdx to reflect newly input tokens
-      $localForage.setItem('minFreeTokenIdx', oldMinFreeIdx + tokens.length);
+      // update our minFreeIdx to reflect newly input tokens, 0 counts as 1, so only add length-1
+      $localForage.setItem('minFreeTokenIdx', oldMinFreeIdx + (tokens.length - 1));
     });
   }
 }
