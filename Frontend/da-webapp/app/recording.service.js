@@ -11,6 +11,7 @@ recordingService.$inject = ['$http',
 
 function recordingService($http, $localForage, deliveryService) {
   var recHandler = {};
+  var delService = deliveryService;
 
   recHandler.init = init;
   recHandler.record = record;
@@ -73,54 +74,35 @@ function recordingService($http, $localForage, deliveryService) {
                       "type":'session', 
                       "data":
                       {
-                         "speakerId"      : (speakerId || 1),
-                         "instructorId"   : (instructorId || 1),
-                         "deviceId"       : (deviceId || 1),
-                         "location"       : (curLocation || 'unknown'),
-                         "start"          : start_time,
-                         "end"            : end_time,
-                         "comments"       : (comments || 'no comments'),
-                         "recordingsInfo" : {}
+                        "speakerId"      : (speakerId || 1),
+                        "instructorId"   : (instructorId || 1),
+                        "deviceId"       : (deviceId || 1),
+                        "location"       : (curLocation || 'unknown'),
+                        "start"          : start_time,
+                        "end"            : end_time,
+                        "comments"       : (comments || 'no comments'),
+                        "recordingsInfo" : {}
                       }
                     };
+    jsonData["data"]["recordingsInfo"]
+                [recHandler.currentRecording[0].title] = { "tokenId" : tokenId };
 
     // and send it to remote server
     // test CORS is working
-    $http({
-      method: 'GET',
-      url: '//'+BACKENDURL+'/submit/session'
-    })
-    .success(function (data) {
-      console.log(data);
-    })
-    .error(function (data, status) {
-      console.log(data);
-      console.log(status);
+    delService.testServerGet()
+    .then(function (response) {
+      console.log(response);
+    }, function (response) {
+      console.log(response);
     });
 
-    // send our recording, and metadata as json, so long as it is valid
-    var rec = recHandler.currentRecording[0];
-    if (rec.title !== invalidTitle && tokenId !== 0)
-    {
-      var fd = new FormData();
-      fd.append('rec0', rec.blob, rec.title);
-      // all recordings get same tokenId for now
-      jsonData["data"]["recordingsInfo"][rec.title] = { "tokenId" : tokenId };
-      fd.append('json', JSON.stringify(jsonData));
-
-      $http.post('http://'+BACKENDURL+'/submit/session', fd, {
-        // this is so angular sets the correct headers/info itself
-        transformRequest: angular.identity,
-        headers: {'Content-Type': undefined}
-      })
-      .success(function (data) {
-        console.log(data);
-      })
-      .error(function (data, status) {
-        console.log(data);
-        console.log(status);
-      });
-    }
+    // plump out the recording!
+    delService.submitRecordings(jsonData, recHandler.currentRecording, invalidTitle)
+    .then(function (response) {
+      console.log(response);
+    }, function (response) {
+      console.log(response);
+    });
   }
 
   function stop() {
