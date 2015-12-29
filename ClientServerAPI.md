@@ -1,10 +1,10 @@
 # API from Client to Server
 
 
-1. submitSession
+1. submitRecordings
 ----------------
 
-*Submit data signifying one session (session being a single sitting by one speaker) including metadata + recordings*
+*Submit recordings, 1 or more, including metadata.*
 
 Current implementation:
 * json format:
@@ -29,7 +29,8 @@ Current implementation:
             }
         }
 ```
-Each tokenId must match it's corresponding recording filename including extension.
+  * Each tokenId must match it's corresponding recording filename including extension.
+  * Server looks at sessions with the same info (minus end time of course), and if it is the same, it simply adds the recording to that session, and updates the end time of that session.
 * url:
 ```
         /submit/session

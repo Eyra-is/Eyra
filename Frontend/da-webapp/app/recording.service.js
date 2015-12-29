@@ -83,8 +83,6 @@ function recordingService($http, $localForage, deliveryService) {
                          "recordingsInfo" : {}
                       }
                     };
-    // update start time for next session
-    start_time = new Date().toISOString();
 
     // and send it to remote server
     // test CORS is working
