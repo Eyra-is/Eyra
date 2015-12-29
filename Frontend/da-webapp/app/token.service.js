@@ -13,12 +13,19 @@ function tokenService($http, $localForage, $q) {
   var tokenHandler = {};
   var TOKENURL = '/submit/gettokens';
 
+  tokenHandler.clearLocalDb = clearLocalDb;
   tokenHandler.getTokens = getTokens;
   tokenHandler.nextToken = nextToken;
 
   return tokenHandler;
 
   //////////
+
+  // dev function, clear the entire local forage database
+  function clearLocalDb() {
+    console.log('Deleting entire local database...');
+    $localForage.clear();
+  }
 
   function getTokens(numTokens) {
     // query server for tokens
