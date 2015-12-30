@@ -1,4 +1,4 @@
-// record and submit recordings/data to server
+// main controller for application
 
 'use strict';
 
@@ -6,12 +6,14 @@ angular.module('daApp')
 .controller('MainController', MainController);
 
 MainController.$inject = ['$scope',
+                          'deliveryService',
                           'recordingService',
                           'tokenService'];
 
-function MainController($scope, recordingService, tokenService) {
+function MainController($scope, deliveryService, recordingService, tokenService) {
   var recCtrl = this; // record control
   var recService = recordingService;
+  var delService = deliveryService;
 
   recCtrl.clearLocalDb = clearLocalDb;
   recCtrl.getTokens = getTokens;
@@ -27,6 +29,9 @@ function MainController($scope, recordingService, tokenService) {
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
   recCtrl.displayToken = currentToken['token'];
 
+  var invalidTitle = recService.invalidTitle; // sentinel value for title of recording
+  var start_time = new Date().toISOString(); // session start time
+  var end_time;
 
   activate();
 
@@ -57,9 +62,10 @@ function MainController($scope, recordingService, tokenService) {
     recCtrl.msg = 'Recording now...';
 
     recCtrl.recordBtnDisabled = true;
-    recCtrl.stopBtnDisabled = false;
 
     recService.record();
+    
+    recCtrl.stopBtnDisabled = false;
 
     // show token on record/newToken button hit
     tokenService.nextToken().then(function(data){
@@ -69,28 +75,63 @@ function MainController($scope, recordingService, tokenService) {
   }
 
   // function passed to our recording service, notified when a recording has been finished
-  function recordingCompleteCallback() {
-    send(); // attempt to send current recording
+  function recordingCompleteCallback() {   
+    end_time = new Date().toISOString();
+    // these scope variables connected to user input obviously have to be sanitized.
+    var jsonData =  {                                                                  
+                      "type":'session', 
+                      "data":
+                      {
+                        "speakerId"      : (recCtrl.speakerId || 1),
+                        "instructorId"   : (recCtrl.instructorId || 1),
+                        "deviceId"       : (recCtrl.deviceId || 1),
+                        "location"       : (recCtrl.curLocation || 'unknown'),
+                        "start"          : start_time,
+                        "end"            : end_time,
+                        "comments"       : (recCtrl.comments || 'no comments'),
+                        "recordingsInfo" : {}
+                      }
+                    };
+    jsonData["data"]["recordingsInfo"]
+                [recCtrl.curRec[0].title] = { "tokenId" : currentToken['id'] };
+
+    send(jsonData); // attempt to send current recording
     // TODO if unsuccessful, save it locally
+
+    recCtrl.recordBtnDisabled = false;
   }
 
-  function send() {
+  function send(jsonData) {
     recCtrl.msg = 'Sending recs...';
 
-    // these scope variables connected to user input obviously have to be sanitized.
-    recService.send(recCtrl.speakerId,
-                    recCtrl.isntructorId,
-                    recCtrl.deviceId,
-                    recCtrl.curLocation,
-                    recCtrl.comments,
-                    currentToken['id']);
+    // and send it to remote server
+    // test CORS is working
+    delService.testServerGet()
+    .then(
+      function success(response) {
+        console.log(response);
+      }, 
+      function error(response) {
+        console.log(response);
+      }
+    );
+
+    // plump out the recording!
+    delService.submitRecordings(jsonData, recCtrl.curRec, invalidTitle)
+    .then(
+      function success(response) {
+        console.log(response);
+      }, 
+      function error(response) {
+        console.log(response);
+      }
+    );
   }
 
   function stop() {
     recCtrl.msg = 'Processing wav...';
 
     recCtrl.stopBtnDisabled = true;
-    recCtrl.recordBtnDisabled = false;
     
     recService.stop();
   }

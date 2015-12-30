@@ -4,6 +4,8 @@
 
 // sanitize user input for speakerId, etc.
 // add try catch, for example with JSON.stringify
+// CONSIDER moving logic in recordingsCallback() and send() to a service or something, 
+//   and out of main controller 
 
 // ***************************************************************************************** //
 
