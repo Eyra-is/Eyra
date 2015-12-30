@@ -78,7 +78,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   function recordingCompleteCallback() {   
     end_time = new Date().toISOString();
     // these scope variables connected to user input obviously have to be sanitized.
-    var jsonData =  {                                                                  
+    var sessionData =  {                                                                  
                       "type":'session', 
                       "data":
                       {
@@ -92,16 +92,16 @@ function MainController($scope, deliveryService, localDbService, recordingServic
                         "recordingsInfo" : {}
                       }
                     };
-    jsonData['data']['recordingsInfo']
+    sessionData['data']['recordingsInfo']
                 [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
 
-    send(jsonData); // attempt to send current recording
+    send(sessionData); // attempt to send current recording
     // if unsuccessful, save it locally, see send()->delService.submit()
 
     recCtrl.recordBtnDisabled = false;
   }
 
-  function send(jsonData) {
+  function send(sessionData) {
     recCtrl.msg = 'Sending recs...';
 
     // and send it to remote server
@@ -117,7 +117,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
     );
 
     // plump out the recording!
-    delService.submitRecordings(jsonData, recCtrl.curRec, invalidTitle)
+    delService.submitRecordings(sessionData, recCtrl.curRec, invalidTitle)
     .then(
       function success(response) {
         console.log(response);
@@ -127,11 +127,11 @@ function MainController($scope, deliveryService, localDbService, recordingServic
 
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
         var rec = recCtrl.curRec[0];
-        var tokenId = jsonData['data']['recordingsInfo'][rec.title]['tokenId'];
+        var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
         if (rec.title !== invalidTitle && tokenId !== 0) {
           recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
           // only need blob and title from recording
-          localDbService.saveRecording(jsonData, {'blob' : rec.blob, 'title' : rec.title });
+          localDbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
         }
       }
     );

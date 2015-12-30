@@ -25,7 +25,7 @@ function localDbService($localForage) {
   //////////
 
   // adds new session to local db, and updates sessionIdxs
-  function addNewSession(jsonData, recording, sessionIdxs) {
+  function addNewSession(sessionData, recording, sessionIdxs) {
     var idx = 0;
     if (sessionIdxs.length > 0) {
       // we have some sessions already, set our idx as last idx + 1
@@ -33,7 +33,7 @@ function localDbService($localForage) {
       idx = parseInt(tokens[tokens.length - 1]) + 1;
     }
     // now add our session
-    var session = { 'metadata' : jsonData, 'recordings' : [recording] };
+    var session = { 'metadata' : sessionData, 'recordings' : [recording] };
     $localForage.setItem(sessionsPath + idx, session).then(function(value){
       // and update sessionIdxs
       sessionIdxs.push(sessionsPath + idx);
@@ -41,9 +41,9 @@ function localDbService($localForage) {
     });
   }
 
-  function isSameSession(jsonData, prevJsonData) {
-    var data = jsonData['data'];
-    var prevData = prevJsonData['data'];
+  function isSameSession(sessionData, prevSessionData) {
+    var data = sessionData['data'];
+    var prevData = prevSessionData['data'];
     return  data['speakerId'] === prevData['speakerId'] && 
             data['instructorId'] === prevData['instructorId'] &&
             data['deviceId'] === prevData['deviceId'] &&
@@ -51,8 +51,8 @@ function localDbService($localForage) {
             data['start'] === prevData['start'];
   }
 
-  // jsonData is on format in Client-Server API
-  function saveRecording(jsonData, recording) {
+  // sessionData is on format in Client-Server API
+  function saveRecording(sessionData, recording) {
     console.log('Saving rec locally.');
     // first check if this recording is part of a previous session, only need to
     // look at the newest session.
@@ -77,21 +77,21 @@ function localDbService($localForage) {
             return;
           }
           // compare previous session with this session
-          var prevJsonData = value['metadata'];
-          if (isSameSession(jsonData, prevJsonData)) {
+          var prevSessionData = value['metadata'];
+          if (isSameSession(sessionData, prevSessionData)) {
             // we have seen this session before, simply replace that session metadata (updated end-time) 
             // and add the recording
-            value['metadata'] = jsonData;
+            value['metadata'] = sessionData;
             value['recordings'].push(recording);
             $localForage.setItem(sessionIdxs[prevSessionIdx], value);
           } else {
             // haven't seen this session before, need to add a session
-            addNewSession(jsonData, recording, sessionIdxs);
+            addNewSession(sessionData, recording, sessionIdxs);
           }
         });
       } else {
         // no previous session, in fact, no session at all stored
-        addNewSession(jsonData, recording, sessionIdxs);
+        addNewSession(sessionData, recording, sessionIdxs);
       }
     });
   }
