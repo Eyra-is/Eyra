@@ -2,7 +2,13 @@
 
 // stores indices of session objects in 'localDb/sessionIdxs'
 // for example localDb/sessionIdxs = ['localDb/sessions/0', etc.]
-// then 'localDb/sessions/0 = { metadata, recordings }'
+// then sessionObject: 
+//          'localDb/sessions/0 = { 'metadata' : sessionData, 
+//                                  'recordings' : [{'blobPath' : blobPath, 'title' : wavTitle.wav },...] }'
+// where blobPath is the localForage index of the stored blob (it seems like you can only store 
+// blobs as single blobs and not as part of an object when you store them through localForage)
+//   see issue: https://github.com/mozilla/localForage/issues/380
+// blobPath = 'localDb/sessions/0/blobs/0' where blob id is same as recording index in array recordings
 
 'use strict';
 
@@ -16,6 +22,7 @@ function localDbService($localForage) {
   var lfPrefix = 'localDb/'; // local forage prefix, stuff stored at 'localDb/stuff'
   var sessionIdxsPath = lfPrefix + 'sessionIdxs';
   var sessionsPath = lfPrefix + 'sessions/';
+  var blobsPrefix = 'blobs/';
 
   dbHandler.saveRecording = saveRecording;
 
@@ -24,21 +31,76 @@ function localDbService($localForage) {
 
   //////////
 
+  // adds recording to local database, and returns
+  // ready to store sessionObject, containing sessionData updated with recording info
+  // and blob reference.
+  // where: prev/sessionData is as in Client Server API (prevSessionData is falsy if no previous session data)
+  //        sessionIdx is the numerical index of the session to add recording to 
+  //          e.g. if session is at 'localDb/sessions/5', sessionIdx = 5
+  //        recordings is the recordings array associated with the session
+  //        recording is the recording itself, with attribute blob and title.
+  function addRecording(prevSessionData, sessionData, sessionIdx, recordings, recording) {
+    // firstly, add this recording data to sessionData['data']['recordingsInfo']
+    var newSessionData;
+    if (prevSessionData) {
+      // we have some previous session data
+      prevSessionData['data']['recordingsInfo'][recording.title] =
+        sessionData['data']['recordingsInfo'][recording.title];
+
+      newSessionData = prevSessionData;
+    } else {
+      newSessionData = sessionData;
+    }
+
+    // secondly add blobPath & title to our sessionObject['recordings'] array
+    var blobIdx = 0;
+    if (!recordings || recordings.length === 0) {
+      recordings = [];
+      blobIdx = 0;
+    } else {
+      // we have some recordings already, set our idx as last idx + 1
+      blobIdx = getIdxFromPath(recordings[recordings.length - 1].blobPath) + 1;
+    }
+    var blobPath = sessionsPath + sessionIdx + '/' + blobsPrefix + blobIdx;
+    recordings.push({ 'blobPath' : blobPath, 'title' : recording.title });
+
+    // finally save blob object to our blobPath
+    console.log('blob before: ');
+    console.log(recording.blob);
+    $localForage.setItem(blobPath, recording.blob).then(function(value){
+      console.log('blob after: ');
+      console.log(value);
+    });
+
+    return { 'metadata' : newSessionData, 'recordings' : recordings };
+  }
+
   // adds new session to local db, and updates sessionIdxs
   function addNewSession(sessionData, recording, sessionIdxs) {
     var idx = 0;
     if (sessionIdxs.length > 0) {
       // we have some sessions already, set our idx as last idx + 1
-      var tokens = sessionIdxs[sessionIdxs.length - 1].split('/');
-      idx = parseInt(tokens[tokens.length - 1]) + 1;
+      idx = getIdxFromPath(sessionIdxs[sessionIdxs.length - 1]) + 1;
     }
     // now add our session
-    var session = { 'metadata' : sessionData, 'recordings' : [recording] };
-    $localForage.setItem(sessionsPath + idx, session).then(function(value){
+    var sessionObject = addRecording(null, sessionData, idx, [], recording);
+    console.log('before session: ');
+    console.log(sessionObject);
+    $localForage.setItem(sessionsPath + idx, sessionObject).then(function(value){
+      console.log('saved session: ');
+      console.log(value);
       // and update sessionIdxs
       sessionIdxs.push(sessionsPath + idx);
       $localForage.setItem(sessionIdxsPath, sessionIdxs);
     });
+  }
+
+  // e.g if path === 'localDb/sessions/blob/5'
+  // this will return 5
+  function getIdxFromPath(path) {
+    var tokens = path.split('/');
+    var idx = parseInt(tokens[tokens.length - 1]);
+    return idx;
   }
 
   function isSameSession(sessionData, prevSessionData) {
@@ -58,7 +120,7 @@ function localDbService($localForage) {
     // look at the newest session.
     $localForage.getItem(sessionIdxsPath).then(function(value){
       var sessionIdxs;
-      if (value === null) {
+      if (!value) {
         sessionIdxs = [];
       } else {
         sessionIdxs = value;
@@ -68,7 +130,7 @@ function localDbService($localForage) {
         // we have a previous session
         var prevSessionIdx = sessionIdxs.length - 1;
         $localForage.getItem(sessionIdxs[prevSessionIdx]).then(function(value){
-          if (value === null) {
+          if (!value) {
             // error, must have not deleted session idx from sessionIdxs, for now,
             // ignore this error, and just give up on saving this recording
             // delete the index though
@@ -81,9 +143,13 @@ function localDbService($localForage) {
           if (isSameSession(sessionData, prevSessionData)) {
             // we have seen this session before, simply replace that session metadata (updated end-time) 
             // and add the recording
-            value['metadata'] = sessionData;
-            value['recordings'].push(recording);
-            $localForage.setItem(sessionIdxs[prevSessionIdx], value);
+            var sessionIdx = getIdxFromPath(sessionIdxs[prevSessionIdx]);
+            var sessionObject = addRecording(prevSessionData, sessionData, sessionIdx, value['recordings'], recording);
+            console.log(sessionObject);
+            $localForage.setItem(sessionIdxs[prevSessionIdx], sessionObject).then(function(value){
+              alert('recording saved!');
+              console.log(value);
+            });
           } else {
             // haven't seen this session before, need to add a session
             addNewSession(sessionData, recording, sessionIdxs);
