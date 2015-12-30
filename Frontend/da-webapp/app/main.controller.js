@@ -46,8 +46,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
 
   // dev function, clear the entire local forage database
   function clearLocalDb() {
-    if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.'))
-    {
+    if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
       recCtrl.msg = 'Clearing entire local db...';
       tokenService.clearLocalDb();      
     }
@@ -93,8 +92,8 @@ function MainController($scope, deliveryService, localDbService, recordingServic
                         "recordingsInfo" : {}
                       }
                     };
-    jsonData["data"]["recordingsInfo"]
-                [recCtrl.curRec[0].title] = { "tokenId" : currentToken['id'] };
+    jsonData['data']['recordingsInfo']
+                [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
 
     send(jsonData); // attempt to send current recording
     // if unsuccessful, save it locally, see send()->delService.submit()
@@ -127,9 +126,12 @@ function MainController($scope, deliveryService, localDbService, recordingServic
         console.log(response);
 
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
-        if (recCtrl.curRec[0].title !== invalidTitle && currentToken['id'] !== 0) {
+        var rec = recCtrl.curRec[0];
+        var tokenId = jsonData['data']['recordingsInfo'][rec.title]['tokenId'];
+        if (rec.title !== invalidTitle && tokenId !== 0) {
           recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
-          localDbService.saveRecording(jsonData, recCtrl.curRec[0]);
+          // only need blob and title from recording
+          localDbService.saveRecording(jsonData, {'blob' : rec.blob, 'title' : rec.title });
         }
       }
     );
