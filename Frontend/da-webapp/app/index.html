@@ -29,7 +29,7 @@
 
         <div id="playback">
             <audio ng-src="{{main.curRec[0].url | trustUrl}}" controls></audio>
-            <a ng-href="main.curRec[0].url">{{main.curRec[0].title}}</a>
+            <a ng-href="{{main.curRec[0].url}}">{{main.curRec[0].title}}</a>
         </div>
 
         <div>{{main.msg}}</div>
