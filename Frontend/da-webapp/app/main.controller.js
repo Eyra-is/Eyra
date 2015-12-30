@@ -7,10 +7,11 @@ angular.module('daApp')
 
 MainController.$inject = ['$scope',
                           'deliveryService',
+                          'localDbService',
                           'recordingService',
                           'tokenService'];
 
-function MainController($scope, deliveryService, recordingService, tokenService) {
+function MainController($scope, deliveryService, localDbService, recordingService, tokenService) {
   var recCtrl = this; // record control
   var recService = recordingService;
   var delService = deliveryService;
@@ -64,7 +65,7 @@ function MainController($scope, deliveryService, recordingService, tokenService)
     recCtrl.recordBtnDisabled = true;
 
     recService.record();
-    
+
     recCtrl.stopBtnDisabled = false;
 
     // show token on record/newToken button hit
@@ -96,7 +97,7 @@ function MainController($scope, deliveryService, recordingService, tokenService)
                 [recCtrl.curRec[0].title] = { "tokenId" : currentToken['id'] };
 
     send(jsonData); // attempt to send current recording
-    // TODO if unsuccessful, save it locally
+    // if unsuccessful, save it locally, see send()->delService.submit()
 
     recCtrl.recordBtnDisabled = false;
   }
@@ -124,6 +125,12 @@ function MainController($scope, deliveryService, recordingService, tokenService)
       }, 
       function error(response) {
         console.log(response);
+
+        // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
+        if (recCtrl.curRec[0].title !== invalidTitle && currentToken['id'] !== 0) {
+          recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
+          localDbService.saveRecording(jsonData, recCtrl.curRec[0]);
+        }
       }
     );
   }

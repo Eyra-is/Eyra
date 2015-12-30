@@ -1,4 +1,4 @@
-// service to handle recording
+// service to handle recording, basically a wrapper around recorderjs
 
 'use strict';
 
