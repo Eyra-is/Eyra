@@ -28,6 +28,8 @@ function deliveryService($http, $q) {
   }
 
   // invalid title is just a sentinel value for a 'no_data' wav recording.
+  // sessionData is on the json format depicted in client-server API.
+  // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
   function submitRecordings(sessionData, recordings, invalidTitle) {
     var fd = new FormData();
     fd.append('json', JSON.stringify(sessionData));

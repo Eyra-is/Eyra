@@ -6,6 +6,7 @@
 // add try catch, for example with JSON.stringify
 // CONSIDER moving logic in recordingsCallback() and send() to a service or something, 
 //   and out of main controller 
+// Think about if we want to have a limit on how many sessions are sent in "sync"
 
 // ***************************************************************************************** //
 

@@ -140,6 +140,30 @@ function MainController($scope, deliveryService, localDbService, recordingServic
     );
   }
 
+  // send session from localdb to server
+  // recursive function, calls itself as long as there are sessions in localdb
+  function sendSession() {
+    dbService.countAvailableSessions().then(function(availSessions){
+      if (availSessions > 0) {
+        console.log('Sending session as part of sync...');
+        dbService.pullSession().then(function(session){
+          delService.submitRecordings(session.metadata, session.recordings, invalidTitle)
+          .then(
+            function success(response) {
+              console.log(response);
+
+              // recursively call this function
+              sendSession();
+            },
+            function error(response) {
+              console.log(response);
+            }
+          );
+        });
+      }
+    });
+  }
+
   function stop() {
     recCtrl.msg = 'Processing wav...';
 
@@ -148,17 +172,10 @@ function MainController($scope, deliveryService, localDbService, recordingServic
     recService.stop();
   }
 
-  // sends all available session data from local db to server
+  // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-    dbService.countAvailableSessions().then(function(availSession){
-      if (availSession) {
-        dbService.pullSession().then(function(session){
-          console.log('session ctrl: ');
-          console.log(session);
-        });
-      }
-    });
+    sendSession(); // recursive
   }
 
   function test() {
