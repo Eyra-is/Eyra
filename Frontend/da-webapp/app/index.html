@@ -26,6 +26,9 @@
         <button type="button" ng-click="main.clearLocalDb()">
             Clear local db (dev)
         </button>
+        <button type="button" ng-click="main.test()">
+            Test (dev)
+        </button>
 
         <div id="playback">
             <audio ng-src="{{main.curRec[0].url | trustUrl}}" controls></audio>

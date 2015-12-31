@@ -20,6 +20,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   recCtrl.getTokens = getTokens;
   recCtrl.record = record;
   recCtrl.stop = stop;
+  recCtrl.test = test;
 
   recCtrl.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
@@ -143,6 +144,15 @@ function MainController($scope, deliveryService, localDbService, recordingServic
     recCtrl.stopBtnDisabled = true;
     
     recService.stop();
+  }
+
+  function test() {
+    localDbService.isAvailableSessionData().then(function(value){
+      if (value)
+        console.log('Aw yeah');
+      else
+        console.log('Nope');
+    });
   }
 
   function updateBindingsCallback() {

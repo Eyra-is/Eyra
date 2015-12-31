@@ -15,9 +15,9 @@
 angular.module('daApp')
   .factory('localDbService', localDbService);
 
-localDbService.$inject = ['$localForage'];
+localDbService.$inject = ['$localForage', '$q'];
 
-function localDbService($localForage) {
+function localDbService($localForage, $q) {
   var dbHandler = {};
   var lfPrefix = 'localDb/'; // local forage prefix, stuff stored at 'localDb/stuff'
   var sessionIdxsPath = lfPrefix + 'sessionIdxs';
@@ -25,7 +25,7 @@ function localDbService($localForage) {
   var blobsPrefix = 'blobs/';
 
   dbHandler.saveRecording = saveRecording;
-
+  dbHandler.isAvailableSessionData = isAvailableSessionData;
 
   return dbHandler;
 
@@ -92,6 +92,19 @@ function localDbService($localForage) {
     var tokens = path.split('/');
     var idx = parseInt(tokens[tokens.length - 1]);
     return idx;
+  }
+
+  // returns promise, true if there is any session data stored (i.e. sessionIdxs is non-empty)
+  function isAvailableSessionData() {
+    var isAvail = $q.defer();
+    $localForage.getItem(sessionIdxsPath).then(function(value){
+      if (value && value.length > 0) {
+        isAvail.resolve(true);
+      } else {
+        isAvail.resolve(false);
+      }
+    });
+    return isAvail.promise;
   }
 
   function isSameSession(sessionData, prevSessionData) {
