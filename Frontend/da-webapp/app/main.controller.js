@@ -15,11 +15,13 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   var recCtrl = this; // record control
   var recService = recordingService;
   var delService = deliveryService;
+  var dbService = localDbService;
 
   recCtrl.clearLocalDb = clearLocalDb;
   recCtrl.getTokens = getTokens;
   recCtrl.record = record;
   recCtrl.stop = stop;
+  recCtrl.sync = sync;
   recCtrl.test = test;
 
   recCtrl.msg = ''; // single debug/information msg
@@ -132,7 +134,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
         if (rec.title !== invalidTitle && tokenId !== 0) {
           recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
           // only need blob and title from recording
-          localDbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
+          dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
         }
       }
     );
@@ -146,8 +148,21 @@ function MainController($scope, deliveryService, localDbService, recordingServic
     recService.stop();
   }
 
+  // sends all available session data from local db to server
+  // assumes internet connection
+  function sync() {
+    dbService.isAvailableSession().then(function(availSession){
+      if (availSession) {
+        dbService.pullSession().then(function(session){
+          console.log('session ctrl: ');
+          console.log(session);
+        });
+      }
+    });
+  }
+
   function test() {
-    localDbService.isAvailableSessionData().then(function(value){
+    dbService.isAvailableSession().then(function(value){
       if (value)
         console.log('Aw yeah');
       else

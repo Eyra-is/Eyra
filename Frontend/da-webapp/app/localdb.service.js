@@ -25,7 +25,8 @@ function localDbService($localForage, $q) {
   var blobsPrefix = 'blobs/';
 
   dbHandler.saveRecording = saveRecording;
-  dbHandler.isAvailableSessionData = isAvailableSessionData;
+  dbHandler.isAvailableSession = isAvailableSession;
+  dbHandler.pullSession = pullSession;
 
   return dbHandler;
 
@@ -95,7 +96,7 @@ function localDbService($localForage, $q) {
   }
 
   // returns promise, true if there is any session data stored (i.e. sessionIdxs is non-empty)
-  function isAvailableSessionData() {
+  function isAvailableSession() {
     var isAvail = $q.defer();
     $localForage.getItem(sessionIdxsPath).then(function(value){
       if (value && value.length > 0) {
@@ -117,6 +118,40 @@ function localDbService($localForage, $q) {
             data['start'] === prevData['start'];
   }
 
+  // gets a single session data / recordings pair from local db and deletes it afterwards
+  // returns { 'metadata' : sessionData, 'recordings' : [ {'blob':blob, 'title':title}, ...]}
+  // There should be some session data before calling this function, that's what 'isAvailableSessionData()' is for.
+  function pullSession() {
+    console.log('Getting session data...');
+    var pulledSession = $q.defer();
+    $localForage.getItem(sessionIdxsPath).then(function(sessionIdxs){
+      // pull newest session (delete it afterwards)
+      $localForage.pull(sessionIdxs[sessionIdxs.length - 1]).then(function(session){
+        // update our sessionIdxs in db
+        $localForage.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1));
+        // now we just have to replace recordings[i].blobPath:blobPath with blob:blob
+        var recordings = session.recordings;
+        var blobPromises = []; // an array of blob promises
+        // get all blobs for this session from our local db
+        for (var i = 0; i < recordings.length; i++) {
+          blobPromises.push($localForage.getItem(recordings[i].blobPath));
+        }
+        // q.all waits on all blobs to resolve, or one to reject
+        $q.all(blobPromises).then(function(blobs){
+          for (var i = 0; i < blobs.length; i++) {
+            $localForage.removeItem(recordings[i].blobPath); // delete blob from local db
+            delete recordings[i].blobPath;
+            recordings[i].blob = blobs[i];
+          }
+          // finally we have our updated session to return!
+          pulledSession.resolve(session);
+        });
+      });
+    });
+
+    return pulledSession.promise;
+  }
+
   // sessionData is on format in Client-Server API
   function saveRecording(sessionData, recording) {
     console.log('Saving rec locally.');
@@ -133,22 +168,21 @@ function localDbService($localForage, $q) {
       if (sessionIdxs.length > 0) {
         // we have a previous session
         var prevSessionIdx = sessionIdxs.length - 1;
-        $localForage.getItem(sessionIdxs[prevSessionIdx]).then(function(value){
-          if (!value) {
+        $localForage.getItem(sessionIdxs[prevSessionIdx]).then(function(session){
+          if (!session) {
             // error, must have not deleted session idx from sessionIdxs, for now,
             // ignore this error, and just give up on saving this recording
             // delete the index though
-            sessionIdxs.pop();
-            $localForage.setItem(sessionIdxsPath, sessionIdxs);
+            $localForage.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1));
             return;
           }
           // compare previous session with this session
-          var prevSessionData = value['metadata'];
+          var prevSessionData = session['metadata'];
           if (isSameSession(sessionData, prevSessionData)) {
             // we have seen this session before, simply replace that session metadata (updated end-time) 
             // and add the recording
             var sessionIdx = getIdxFromPath(sessionIdxs[prevSessionIdx]);
-            var sessionObject = addRecording(prevSessionData, sessionData, sessionIdx, value['recordings'], recording);
+            var sessionObject = addRecording(prevSessionData, sessionData, sessionIdx, session['recordings'], recording);
             $localForage.setItem(sessionIdxs[prevSessionIdx], sessionObject);
           } else {
             // haven't seen this session before, need to add a session
