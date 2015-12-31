@@ -151,7 +151,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   // sends all available session data from local db to server
   // assumes internet connection
   function sync() {
-    dbService.isAvailableSession().then(function(availSession){
+    dbService.countAvailableSessions().then(function(availSession){
       if (availSession) {
         dbService.pullSession().then(function(session){
           console.log('session ctrl: ');
@@ -162,9 +162,9 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   }
 
   function test() {
-    dbService.isAvailableSession().then(function(value){
-      if (value)
-        console.log('Aw yeah');
+    dbService.countAvailableSessions().then(function(value){
+      if (value > 0)
+        console.log('Aw yeah, '+value);
       else
         console.log('Nope');
     });

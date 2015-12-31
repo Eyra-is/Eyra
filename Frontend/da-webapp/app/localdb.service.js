@@ -25,7 +25,7 @@ function localDbService($localForage, $q) {
   var blobsPrefix = 'blobs/';
 
   dbHandler.saveRecording = saveRecording;
-  dbHandler.isAvailableSession = isAvailableSession;
+  dbHandler.countAvailableSessions = countAvailableSessions;
   dbHandler.pullSession = pullSession;
 
   return dbHandler;
@@ -95,14 +95,14 @@ function localDbService($localForage, $q) {
     return idx;
   }
 
-  // returns promise, true if there is any session data stored (i.e. sessionIdxs is non-empty)
-  function isAvailableSession() {
+  // returns promise, number of sessions in local db, 0 if no session data
+  function countAvailableSessions() {
     var isAvail = $q.defer();
     $localForage.getItem(sessionIdxsPath).then(function(value){
       if (value && value.length > 0) {
-        isAvail.resolve(true);
+        isAvail.resolve(value.length);
       } else {
-        isAvail.resolve(false);
+        isAvail.resolve(0);
       }
     });
     return isAvail.promise;
@@ -120,7 +120,7 @@ function localDbService($localForage, $q) {
 
   // gets a single session data / recordings pair from local db and deletes it afterwards
   // returns { 'metadata' : sessionData, 'recordings' : [ {'blob':blob, 'title':title}, ...]}
-  // There should be some session data before calling this function, that's what 'isAvailableSessionData()' is for.
+  // There should be some session data before calling this function, that's what 'countAvailableSessionsData()' is for.
   function pullSession() {
     console.log('Getting session data...');
     var pulledSession = $q.defer();
