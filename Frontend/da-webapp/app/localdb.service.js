@@ -65,12 +65,7 @@ function localDbService($localForage) {
     recordings.push({ 'blobPath' : blobPath, 'title' : recording.title });
 
     // finally save blob object to our blobPath
-    console.log('blob before: ');
-    console.log(recording.blob);
-    $localForage.setItem(blobPath, recording.blob).then(function(value){
-      console.log('blob after: ');
-      console.log(value);
-    });
+    $localForage.setItem(blobPath, recording.blob);
 
     return { 'metadata' : newSessionData, 'recordings' : recordings };
   }
@@ -84,11 +79,7 @@ function localDbService($localForage) {
     }
     // now add our session
     var sessionObject = addRecording(null, sessionData, idx, [], recording);
-    console.log('before session: ');
-    console.log(sessionObject);
     $localForage.setItem(sessionsPath + idx, sessionObject).then(function(value){
-      console.log('saved session: ');
-      console.log(value);
       // and update sessionIdxs
       sessionIdxs.push(sessionsPath + idx);
       $localForage.setItem(sessionIdxsPath, sessionIdxs);
@@ -145,11 +136,7 @@ function localDbService($localForage) {
             // and add the recording
             var sessionIdx = getIdxFromPath(sessionIdxs[prevSessionIdx]);
             var sessionObject = addRecording(prevSessionData, sessionData, sessionIdx, value['recordings'], recording);
-            console.log(sessionObject);
-            $localForage.setItem(sessionIdxs[prevSessionIdx], sessionObject).then(function(value){
-              alert('recording saved!');
-              console.log(value);
-            });
+            $localForage.setItem(sessionIdxs[prevSessionIdx], sessionObject);
           } else {
             // haven't seen this session before, need to add a session
             addNewSession(sessionData, recording, sessionIdxs);
