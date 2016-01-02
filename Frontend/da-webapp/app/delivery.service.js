@@ -51,7 +51,7 @@ function deliveryService($http, $q, localDbService) {
       reqHandler.failedSessionSends = 0;
       // we failed at sending session, save it to the database again.
       // function doesn't work yet
-      //dbService.saveSession(lastSession);
+      dbService.saveSession(lastSession);
       reqHandler.syncDoneCallback(false);
       return;
     }

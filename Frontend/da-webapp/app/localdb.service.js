@@ -199,11 +199,29 @@ function localDbService($localForage, $q) {
 
   // takes in session obejct: { 'metadata':sessionData, 'recordings':{'blob':blob, 'title':title} }
   // and saves it to local db
-  // NOT FUNCTIONAL
   function saveSession(session) {
-    var recs = session.recordings;
-    for (var i = 0; i < recs.length; i++) {
-      saveRecording(session.metadata, recs[i]);
-    }
+    $localForage.getItem(sessionIdxsPath).then(function(sessionIdxs){
+      // get next new index for our session
+      var sessionIdx;
+      if (sessionIdxs && sessionIdxs.length > 0) {
+        sessionIdx = getIdxFromPath(sessionIdxs[sessionIdxs.length - 1]) + 1;
+      } else {
+        sessionIdx = 0;
+      }
+      // save all our recordings as blobs by using addRecording function.
+      var newRecs = [];
+      var newSession;
+      var recs = session.recordings;
+      for (var i = 0; i < recs.length; i++) {
+        newSession = addRecording(null, null, sessionIdx, newRecs, recs[i]);
+        newRecs = newSession.recordings;
+      }
+      // finally we can save our session knowing the blobs/paths are now correct
+      var sessionPath = sessionsPath + sessionIdx;
+      $localForage.setItem(sessionPath, { 'metadata':session.metadata, 'recordings':newRecs }).then(function(value){
+        sessionIdxs.push(sessionPath);
+        $localForage.setItem(sessionIdxsPath, sessionIdxs);
+      });
+    });
   }
 }
