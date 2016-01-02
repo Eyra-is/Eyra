@@ -7,7 +7,7 @@
 *Submit recordings, 1 or more, including metadata.*
 
 Current implementation:
-* json format:
+* json format for session data:
 ```
         {    
             "type":"session",

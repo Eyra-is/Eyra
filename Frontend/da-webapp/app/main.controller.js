@@ -1,4 +1,4 @@
-// record and submit recordings/data to server
+// main controller for application
 
 'use strict';
 
@@ -6,27 +6,37 @@ angular.module('daApp')
 .controller('MainController', MainController);
 
 MainController.$inject = ['$scope',
+                          'deliveryService',
+                          'localDbService',
                           'recordingService',
                           'tokenService'];
 
-function MainController($scope, recordingService, tokenService) {
+function MainController($scope, deliveryService, localDbService, recordingService, tokenService) {
   var recCtrl = this; // record control
   var recService = recordingService;
+  var delService = deliveryService;
+  var dbService = localDbService;
 
   recCtrl.clearLocalDb = clearLocalDb;
   recCtrl.getTokens = getTokens;
   recCtrl.record = record;
   recCtrl.stop = stop;
+  recCtrl.sync = sync;
+  recCtrl.test = test;
 
   recCtrl.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
 
   recCtrl.recordBtnDisabled = false;
   recCtrl.stopBtnDisabled = true;
+  recCtrl.syncBtnDisabled = false;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
   recCtrl.displayToken = currentToken['token'];
 
+  var invalidTitle = recService.invalidTitle; // sentinel value for title of recording
+  var start_time = new Date().toISOString(); // session start time
+  var end_time;
 
   activate();
 
@@ -40,8 +50,7 @@ function MainController($scope, recordingService, tokenService) {
 
   // dev function, clear the entire local forage database
   function clearLocalDb() {
-    if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.'))
-    {
+    if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
       recCtrl.msg = 'Clearing entire local db...';
       tokenService.clearLocalDb();      
     }
@@ -57,9 +66,10 @@ function MainController($scope, recordingService, tokenService) {
     recCtrl.msg = 'Recording now...';
 
     recCtrl.recordBtnDisabled = true;
-    recCtrl.stopBtnDisabled = false;
 
     recService.record();
+
+    recCtrl.stopBtnDisabled = false;
 
     // show token on record/newToken button hit
     tokenService.nextToken().then(function(data){
@@ -69,30 +79,98 @@ function MainController($scope, recordingService, tokenService) {
   }
 
   // function passed to our recording service, notified when a recording has been finished
-  function recordingCompleteCallback() {
-    send(); // attempt to send current recording
-    // TODO if unsuccessful, save it locally
+  function recordingCompleteCallback() {   
+    end_time = new Date().toISOString();
+    // these scope variables connected to user input obviously have to be sanitized.
+    var sessionData =  {                                                                  
+                      "type":'session', 
+                      "data":
+                      {
+                        "speakerId"      : (recCtrl.speakerId || 1),
+                        "instructorId"   : (recCtrl.instructorId || 1),
+                        "deviceId"       : (recCtrl.deviceId || 1),
+                        "location"       : (recCtrl.curLocation || 'unknown'),
+                        "start"          : start_time,
+                        "end"            : end_time,
+                        "comments"       : (recCtrl.comments || 'no comments'),
+                        "recordingsInfo" : {}
+                      }
+                    };
+    sessionData['data']['recordingsInfo']
+                [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
+
+    send(sessionData); // attempt to send current recording
+    // if unsuccessful, save it locally, see send()->delService.submit()
+
+    recCtrl.recordBtnDisabled = false;
   }
 
-  function send() {
+  function send(sessionData) {
     recCtrl.msg = 'Sending recs...';
 
-    // these scope variables connected to user input obviously have to be sanitized.
-    recService.send(recCtrl.speakerId,
-                    recCtrl.isntructorId,
-                    recCtrl.deviceId,
-                    recCtrl.curLocation,
-                    recCtrl.comments,
-                    currentToken['id']);
+    // and send it to remote server
+    // test CORS is working
+    delService.testServerGet()
+    .then(
+      function success(response) {
+        console.log(response);
+      }, 
+      function error(response) {
+        console.log(response);
+      }
+    );
+
+    // plump out the recording!
+    delService.submitRecordings(sessionData, recCtrl.curRec, invalidTitle)
+    .then(
+      function success(response) {
+        console.log(response);
+      }, 
+      function error(response) {
+        console.log(response);
+
+        // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
+        var rec = recCtrl.curRec[0];
+        var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
+        if (rec.title !== invalidTitle && tokenId !== 0) {
+          recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
+          // only need blob and title from recording
+          dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
+        }
+      }
+    );
   }
 
   function stop() {
     recCtrl.msg = 'Processing wav...';
 
     recCtrl.stopBtnDisabled = true;
-    recCtrl.recordBtnDisabled = false;
     
     recService.stop();
+  }
+
+  // sends all available sessions from local db to server, one session at a time
+  // assumes internet connection
+  function sync() {
+    recCtrl.msg = 'Syncing...';
+
+    recCtrl.syncBtnDisabled = true;
+
+    delService.sendLocalSessions(invalidTitle, syncDoneCallback);
+  }
+
+  // result is true if sync completed successfully
+  function syncDoneCallback(result) {
+    recCtrl.syncBtnDisabled = false;
+  }
+
+  function test() {
+    dbService.countAvailableSessions().then(function(value){
+      if (value > 0)
+        console.log('Aw yeah, '+value);
+      else
+        console.log('Nope');
+    });
   }
 
   function updateBindingsCallback() {

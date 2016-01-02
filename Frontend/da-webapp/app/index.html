@@ -23,13 +23,19 @@
         <button type="button" ng-click="main.getTokens()">
             Get tokens
         </button>
+        <button type="button" ng-disabled="main.syncBtnDisabled" ng-click="main.sync()">
+            Sync
+        </button>
         <button type="button" ng-click="main.clearLocalDb()">
             Clear local db (dev)
+        </button>
+        <button type="button" ng-click="main.test()">
+            Test (dev)
         </button>
 
         <div id="playback">
             <audio ng-src="{{main.curRec[0].url | trustUrl}}" controls></audio>
-            <a ng-href="main.curRec[0].url">{{main.curRec[0].title}}</a>
+            <a ng-href="{{main.curRec[0].url}}">{{main.curRec[0].title}}</a>
         </div>
 
         <div>{{main.msg}}</div>
@@ -62,6 +68,8 @@
     <script src="recorderjs/dist/recorder.js"></script>
 
     <script src="app.js"></script>
+    <script src="localdb.service.js"></script>
+    <script src="delivery.service.js"></script>
     <script src="recording.service.js"></script>
     <script src="token.service.js"></script>
     <script src="main.controller.js"></script>
