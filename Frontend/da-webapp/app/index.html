@@ -23,7 +23,7 @@
         <button type="button" ng-click="main.getTokens()">
             Get tokens
         </button>
-        <button type="button" ng-click="main.sync()">
+        <button type="button" ng-disabled="main.syncBtnDisabled" ng-click="main.sync()">
             Sync
         </button>
         <button type="button" ng-click="main.clearLocalDb()">

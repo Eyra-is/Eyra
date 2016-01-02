@@ -24,9 +24,10 @@ function localDbService($localForage, $q) {
   var sessionsPath = lfPrefix + 'sessions/';
   var blobsPrefix = 'blobs/';
 
-  dbHandler.saveRecording = saveRecording;
   dbHandler.countAvailableSessions = countAvailableSessions;
   dbHandler.pullSession = pullSession;
+  dbHandler.saveRecording = saveRecording;
+  dbHandler.saveSession = saveSession;
 
   return dbHandler;
 
@@ -194,5 +195,15 @@ function localDbService($localForage, $q) {
         addNewSession(sessionData, recording, sessionIdxs);
       }
     });
+  }
+
+  // takes in session obejct: { 'metadata':sessionData, 'recordings':{'blob':blob, 'title':title} }
+  // and saves it to local db
+  // NOT FUNCTIONAL
+  function saveSession(session) {
+    var recs = session.recordings;
+    for (var i = 0; i < recs.length; i++) {
+      saveRecording(session.metadata, recs[i]);
+    }
   }
 }

@@ -29,6 +29,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
 
   recCtrl.recordBtnDisabled = false;
   recCtrl.stopBtnDisabled = true;
+  recCtrl.syncBtnDisabled = false;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
   recCtrl.displayToken = currentToken['token'];
@@ -36,6 +37,8 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   var invalidTitle = recService.invalidTitle; // sentinel value for title of recording
   var start_time = new Date().toISOString(); // session start time
   var end_time;
+
+  recCtrl.failedSessionSends = 0;
 
   activate();
 
@@ -53,6 +56,23 @@ function MainController($scope, deliveryService, localDbService, recordingServic
       recCtrl.msg = 'Clearing entire local db...';
       tokenService.clearLocalDb();      
     }
+  }
+
+  function deliverSession(session) {
+    delService.submitRecordings(session.metadata, session.recordings, invalidTitle)
+    .then(
+      function success(response) {
+        console.log(response);
+
+        sendSession(null); // send next session
+      },
+      function error(response) {
+        console.log(response);
+
+        recCtrl.failedSessionSends++;
+        sendSession(session); // failed to send, try again to send same session
+      }
+    );
   }
 
   function getTokens() {
@@ -141,25 +161,34 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   }
 
   // send session from localdb to server
+  // lastSession, is the session failed to send from last sendSession, null otherwise
   // recursive function, calls itself as long as there are sessions in localdb
-  function sendSession() {
+  // aborts after 5 failed sends.
+  function sendSession(lastSession) {
+    if (recCtrl.failedSessionSends > 4) {
+      console.log('Failed sending session too many times. Aborting sync...');
+      recCtrl.failedSessionSends = 0;
+      // we failed at sending session, save it to the database again.
+      // function doesn't work yet
+      //dbService.saveSession(lastSession);
+      return;
+    }
+    // if we have a lastSession, it means last transmission was a failure, attempt to send again
+    if (lastSession) {
+      deliverSession(lastSession); // recursively calls sendSession
+      return;
+    }
     dbService.countAvailableSessions().then(function(availSessions){
+      console.log('avail sess: ' + availSessions);
       if (availSessions > 0) {
         console.log('Sending session as part of sync...');
         dbService.pullSession().then(function(session){
-          delService.submitRecordings(session.metadata, session.recordings, invalidTitle)
-          .then(
-            function success(response) {
-              console.log(response);
-
-              // recursively call this function
-              sendSession();
-            },
-            function error(response) {
-              console.log(response);
-            }
-          );
+          deliverSession(session); // recursively calls sendSession
         });
+      } else {
+        alert('All synced up!');
+        recCtrl.syncBtnDisabled = false;
+        recCtrl.failedSessionSends = 0;
       }
     });
   }
@@ -175,7 +204,11 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-    sendSession(); // recursive
+    recCtrl.msg = 'Syncing...';
+
+    recCtrl.syncBtnDisabled = true;
+
+    sendSession(null); // recursive
   }
 
   function test() {
