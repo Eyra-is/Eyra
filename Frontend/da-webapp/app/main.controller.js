@@ -38,8 +38,6 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   var start_time = new Date().toISOString(); // session start time
   var end_time;
 
-  recCtrl.failedSessionSends = 0;
-
   activate();
 
   //////////
@@ -56,23 +54,6 @@ function MainController($scope, deliveryService, localDbService, recordingServic
       recCtrl.msg = 'Clearing entire local db...';
       tokenService.clearLocalDb();      
     }
-  }
-
-  function deliverSession(session) {
-    delService.submitRecordings(session.metadata, session.recordings, invalidTitle)
-    .then(
-      function success(response) {
-        console.log(response);
-
-        sendSession(null); // send next session
-      },
-      function error(response) {
-        console.log(response);
-
-        recCtrl.failedSessionSends++;
-        sendSession(session); // failed to send, try again to send same session
-      }
-    );
   }
 
   function getTokens() {
@@ -160,39 +141,6 @@ function MainController($scope, deliveryService, localDbService, recordingServic
     );
   }
 
-  // send session from localdb to server
-  // lastSession, is the session failed to send from last sendSession, null otherwise
-  // recursive function, calls itself as long as there are sessions in localdb
-  // aborts after 5 failed sends.
-  function sendSession(lastSession) {
-    if (recCtrl.failedSessionSends > 4) {
-      console.log('Failed sending session too many times. Aborting sync...');
-      recCtrl.failedSessionSends = 0;
-      // we failed at sending session, save it to the database again.
-      // function doesn't work yet
-      //dbService.saveSession(lastSession);
-      return;
-    }
-    // if we have a lastSession, it means last transmission was a failure, attempt to send again
-    if (lastSession) {
-      deliverSession(lastSession); // recursively calls sendSession
-      return;
-    }
-    dbService.countAvailableSessions().then(function(availSessions){
-      console.log('avail sess: ' + availSessions);
-      if (availSessions > 0) {
-        console.log('Sending session as part of sync...');
-        dbService.pullSession().then(function(session){
-          deliverSession(session); // recursively calls sendSession
-        });
-      } else {
-        alert('All synced up!');
-        recCtrl.syncBtnDisabled = false;
-        recCtrl.failedSessionSends = 0;
-      }
-    });
-  }
-
   function stop() {
     recCtrl.msg = 'Processing wav...';
 
@@ -208,7 +156,12 @@ function MainController($scope, deliveryService, localDbService, recordingServic
 
     recCtrl.syncBtnDisabled = true;
 
-    sendSession(null); // recursive
+    delService.sendLocalSessions(invalidTitle, syncDoneCallback);
+  }
+
+  // result is true if sync completed successfully
+  function syncDoneCallback(result) {
+    recCtrl.syncBtnDisabled = false;
   }
 
   function test() {

@@ -1,24 +1,87 @@
 // handles http post and get requests to server
-// "implements" the Client-Server API
+// "implements" the Client-Server API and also handles sending recs from local db when syncing
 
 'use strict';
 
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q'];
+deliveryService.$inject = ['$http', '$q', 'localDbService'];
 
-function deliveryService($http, $q) {
+function deliveryService($http, $q, localDbService) {
   var reqHandler = {};
+  var dbService = localDbService;
   var TOKENURL = '/submit/gettokens';
 
   reqHandler.getTokens = getTokens;
+  reqHandler.sendLocalSessions = sendLocalSessions;
   reqHandler.submitRecordings = submitRecordings;
   reqHandler.testServerGet = testServerGet;
 
+  reqHandler.failedSessionSends = 0;
+
   return reqHandler;
 
-  //////////
+  ////////// local db functions
+
+  function deliverSession(session) {
+    submitRecordings(session.metadata, session.recordings, reqHandler.invalidTitle)
+    .then(
+      function success(response) {
+        console.log(response);
+
+        sendLocalSession(null); // send next session
+      },
+      function error(response) {
+        console.log(response);
+
+        reqHandler.failedSessionSends++;
+        sendLocalSession(session); // failed to send, try again to send same session
+      }
+    );
+  }
+
+  // send session from localdb to server
+  // lastSession, is the session failed to send from last sendLocalSession, null otherwise
+  // recursive function, calls itself as long as there are sessions in localdb
+  // aborts after 5 failed sends.
+  function sendLocalSession(lastSession) {
+    if (reqHandler.failedSessionSends > 4) {
+      console.log('Failed sending session too many times. Aborting sync...');
+      reqHandler.failedSessionSends = 0;
+      // we failed at sending session, save it to the database again.
+      // function doesn't work yet
+      //dbService.saveSession(lastSession);
+      reqHandler.syncDoneCallback(false);
+      return;
+    }
+    // if we have a lastSession, it means last transmission was a failure, attempt to send again
+    if (lastSession) {
+      deliverSession(lastSession); // recursively calls sendLocalSession
+      return;
+    }
+    dbService.countAvailableSessions().then(function(availSessions){
+      if (availSessions > 0) {
+        console.log('Sending session as part of sync...');
+        dbService.pullSession().then(function(session){
+          deliverSession(session); // recursively calls sendLocalSession
+        });
+      } else {
+        alert('All synced up!');
+        reqHandler.failedSessionSends = 0;
+        reqHandler.syncDoneCallback(true);
+      }
+    });
+  }
+
+  // callback is function to call when all local sessions have been sent or failed to send
+  function sendLocalSessions(invalidTitle, callback) {
+    reqHandler.invalidTitle = invalidTitle;
+    reqHandler.syncDoneCallback = callback;
+    sendLocalSession(null); // recursive
+  }
+
+  ////////// client-server API functions
 
   function getTokens(numTokens) {
     return $http({
