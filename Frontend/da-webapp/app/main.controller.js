@@ -54,10 +54,8 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
   function clearLocalDb() {
     if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
       mainCtrl.msg = 'Clearing entire local db...';
-      tokenService.clearLocalDb().then(
-        angular.noop,
-        util.stdErrCallback
-      );
+      dbService.clearLocalDb()
+        .then(angular.noop, util.stdErrCallback);
     }
   }
 
@@ -66,6 +64,7 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
 
     tokenService.getTokens(25).then(function(tokens){
       alert('Tokens acquired!');
+      mainCtrl.msg = 'Tokens acquired.';
     },
     util.stdErrCallback);
   }
@@ -79,38 +78,59 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
 
     mainCtrl.stopBtnDisabled = false;
 
+    currentToken = {'id':0, 'token':'Waiting for new token...'};
     // show token on record/newToken button hit
-    tokenService.nextToken().then(function(data){
-      mainCtrl.displayToken = data['token'];
-      currentToken = data;
-    });
+    tokenService.nextToken().then(function(token){
+      mainCtrl.displayToken = token['token'];
+      currentToken = token;
+    },
+    util.stdErrCallback);
   }
 
   // function passed to our recording service, notified when a recording has been finished
-  function recordingCompleteCallback() {   
+  function recordingCompleteCallback() {
     var end_time = new Date().toISOString();
     // these scope variables connected to user input obviously have to be sanitized.
-    var sessionData =  {                                                                  
-                      "type":'session', 
-                      "data":
-                      {
-                        "speakerId"      : (mainCtrl.speakerId || 1),
-                        "instructorId"   : (mainCtrl.instructorId || 1),
-                        "deviceId"       : (mainCtrl.deviceId || 1),
-                        "location"       : (mainCtrl.curLocation || 'unknown'),
-                        "start"          : start_time,
-                        "end"            : end_time,
-                        "comments"       : (mainCtrl.comments || 'no comments'),
-                        "recordingsInfo" : {}
-                      }
-                    };
+    var sessionData = {                                                                  
+                        "type":'session', 
+                        "data":
+                        {
+                          "speakerId"      : (mainCtrl.speakerId || 1),
+                          "instructorId"   : (mainCtrl.instructorId || 1),
+                          "deviceId"       : (mainCtrl.deviceId || 1),
+                          "location"       : (mainCtrl.curLocation || 'Unknown.'),
+                          "start"          : start_time,
+                          "end"            : end_time,
+                          "comments"       : (mainCtrl.comments || 'No comments.'),
+                          "recordingsInfo" : {}
+                        }
+                      };
     sessionData['data']['recordingsInfo']
                 [mainCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
 
-    send(sessionData); // attempt to send current recording
-    // if unsuccessful, save it locally, see send()->delService.submit()
+    // attempt to send current recording
+    send(sessionData)
+    .then(
+      function success(response) {
+        logger.log(response); // DEBUG
+      }, 
+      function error(response) {
+        // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
+        var rec = mainCtrl.curRec[0];
+        var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
+        if (rec.title !== invalidTitle && tokenId !== 0) {
+          mainCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
+          // only need blob and title from recording
+          dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
+        } else {
+          logger.error('Invalid token in submission.');
+        }
 
-    mainCtrl.recordBtnDisabled = false;
+        util.stdErrCallback(response);
+      }
+    );
+
+    mainCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
   }
 
   function send(sessionData) {
@@ -129,24 +149,7 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
     );
 
     // plump out the recording!
-    delService.submitRecordings(sessionData, mainCtrl.curRec)
-    .then(
-      function success(response) {
-        logger.log(response);
-      }, 
-      function error(response) {
-        logger.log(response);
-
-        // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
-        var rec = mainCtrl.curRec[0];
-        var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
-        if (rec.title !== invalidTitle && tokenId !== 0) {
-          mainCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
-          // only need blob and title from recording
-          dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
-        }
-      }
-    );
+    return delService.submitRecordings(sessionData, mainCtrl.curRec);
   }
 
   function stop() {

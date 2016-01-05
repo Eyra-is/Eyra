@@ -16,19 +16,12 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
   var delService = deliveryService;
   var util = utilityService;
 
-  tokenHandler.clearLocalDb = clearLocalDb;
   tokenHandler.getTokens = getTokens;
   tokenHandler.nextToken = nextToken;
 
   return tokenHandler;
 
   //////////
-
-  // dev function, clear the entire local forage database
-  function clearLocalDb() {
-    logger.log('Deleting entire local database...');
-    return $localForage.clear();
-  }
 
   // returns promise, 
   function getTokens(numTokens) {
@@ -39,8 +32,13 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
       function success(response) {
         // seems like response is automatically parsed as JSON for us
 
-        // some validation of 'data' perhaps here
-        saveTokens(response.data, tokensPromise); // save to local forage
+        // some validation of 'data'
+        var tokens = response.data;
+        if (tokens && tokens.length > 0) {
+          saveTokens(tokens, tokensPromise); // save to local forage
+        } else {
+          logger.error('Tokens from server not on right format or empty.');
+        }
       },
       util.stdErrCallback
     );
@@ -66,14 +64,19 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
           // don't delete token until we have updated the index, then if
           // user exits browser after get but before update of index,
           // at least it will still show the last token.
-          $localForage.removeItem('tokens/' + (minFreeIdx+1));
-        });
-      });
-    });
+          $localForage.removeItem('tokens/' + (minFreeIdx+1))
+            .then(angular.noop, util.stdErrCallback);
+        },
+        util.stdErrCallback);
+      },
+      util.stdErrCallback);
+    },
+    util.stdErrCallback);
     return next.promise;
   }
 
   // save tokens locally. tokens should be on format depicted in getTokens in client-server API
+  // should not be called with tokens.length===0
   // tokensPromise is an angular q.defer(), resolved with tokens on completion of save
   function saveTokens(tokens, tokensPromise) {
     $localForage.getItem('minFreeTokenIdx').then(function(value) {
@@ -97,6 +100,7 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
         tokensPromise.resolve(tokens);
       },
       util.stdErrCallback);
-    });
+    },
+    util.stdErrCallback);
   }
 }

@@ -24,6 +24,7 @@ function localDbService($localForage, $q, logger) {
   var sessionsPath = lfPrefix + 'sessions/';
   var blobsPrefix = 'blobs/';
 
+  dbHandler.clearLocalDb = clearLocalDb;
   dbHandler.countAvailableSessions = countAvailableSessions;
   dbHandler.pullSession = pullSession;
   dbHandler.saveRecording = saveRecording;
@@ -86,6 +87,12 @@ function localDbService($localForage, $q, logger) {
       sessionIdxs.push(sessionsPath + idx);
       $localForage.setItem(sessionIdxsPath, sessionIdxs);
     });
+  }
+
+  // dev function, clear the entire local forage database
+  function clearLocalDb() {
+    logger.log('Deleting entire local database...');
+    return $localForage.clear();
   }
 
   // e.g if path === 'localDb/sessions/blob/5'

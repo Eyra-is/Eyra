@@ -15,14 +15,14 @@ function recordingService(logger, utilityService) {
   recHandler.record = record;
   recHandler.stop = stop;
 
-  var invalidTitle = util.getConstant('invalidTitle');
-
   // for some reason, putting this in an array, makes angular updates this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),
                                     "url":'',
                                     "title":invalidTitle}];
 
   // local variable definitions for service
+  var invalidTitle = util.getConstant('invalidTitle');
+
   var audio_context;
   var recorder;
 
@@ -50,7 +50,7 @@ function recordingService(logger, utilityService) {
     }
     
     navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
-      logger.log('No live audio input: ' + e);
+      logger.error('No live audio input: ' + e);
     });
   }
 
