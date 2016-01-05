@@ -14,27 +14,27 @@ MainController.$inject = ['$scope',
                           'tokenService'];
 
 function MainController($scope, deliveryService, invalidTitle, localDbService, logger, recordingService, tokenService) {
-  var recCtrl = this; // record control
+  var mainCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
 
-  recCtrl.clearLocalDb = clearLocalDb;
-  recCtrl.getTokens = getTokens;
-  recCtrl.record = record;
-  recCtrl.stop = stop;
-  recCtrl.sync = sync;
-  recCtrl.test = test;
+  mainCtrl.clearLocalDb = clearLocalDb;
+  mainCtrl.getTokens = getTokens;
+  mainCtrl.record = record;
+  mainCtrl.stop = stop;
+  mainCtrl.sync = sync;
+  mainCtrl.test = test;
 
-  recCtrl.msg = ''; // single debug/information msg
-  recCtrl.curRec = recService.currentRecording;
+  mainCtrl.msg = ''; // single debug/information msg
+  mainCtrl.curRec = recService.currentRecording;
 
-  recCtrl.recordBtnDisabled = false;
-  recCtrl.stopBtnDisabled = true;
-  recCtrl.syncBtnDisabled = false;
+  mainCtrl.recordBtnDisabled = false;
+  mainCtrl.stopBtnDisabled = true;
+  mainCtrl.syncBtnDisabled = false;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
-  recCtrl.displayToken = currentToken['token'];
+  mainCtrl.displayToken = currentToken['token'];
 
   var start_time = new Date().toISOString(); // session start time
   var end_time;
@@ -52,29 +52,29 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
   // dev function, clear the entire local forage database
   function clearLocalDb() {
     if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
-      recCtrl.msg = 'Clearing entire local db...';
+      mainCtrl.msg = 'Clearing entire local db...';
       tokenService.clearLocalDb();      
     }
   }
 
   function getTokens() {
-    recCtrl.msg = 'Getting tokens...';
+    mainCtrl.msg = 'Getting tokens...';
 
     tokenService.getTokens(25);
   }
 
   function record() {
-    recCtrl.msg = 'Recording now...';
+    mainCtrl.msg = 'Recording now...';
 
-    recCtrl.recordBtnDisabled = true;
+    mainCtrl.recordBtnDisabled = true;
 
     recService.record();
 
-    recCtrl.stopBtnDisabled = false;
+    mainCtrl.stopBtnDisabled = false;
 
     // show token on record/newToken button hit
     tokenService.nextToken().then(function(data){
-      recCtrl.displayToken = data['token'];
+      mainCtrl.displayToken = data['token'];
       currentToken = data;
     });
   }
@@ -87,27 +87,27 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
                       "type":'session', 
                       "data":
                       {
-                        "speakerId"      : (recCtrl.speakerId || 1),
-                        "instructorId"   : (recCtrl.instructorId || 1),
-                        "deviceId"       : (recCtrl.deviceId || 1),
-                        "location"       : (recCtrl.curLocation || 'unknown'),
+                        "speakerId"      : (mainCtrl.speakerId || 1),
+                        "instructorId"   : (mainCtrl.instructorId || 1),
+                        "deviceId"       : (mainCtrl.deviceId || 1),
+                        "location"       : (mainCtrl.curLocation || 'unknown'),
                         "start"          : start_time,
                         "end"            : end_time,
-                        "comments"       : (recCtrl.comments || 'no comments'),
+                        "comments"       : (mainCtrl.comments || 'no comments'),
                         "recordingsInfo" : {}
                       }
                     };
     sessionData['data']['recordingsInfo']
-                [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
+                [mainCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
 
     send(sessionData); // attempt to send current recording
     // if unsuccessful, save it locally, see send()->delService.submit()
 
-    recCtrl.recordBtnDisabled = false;
+    mainCtrl.recordBtnDisabled = false;
   }
 
   function send(sessionData) {
-    recCtrl.msg = 'Sending recs...';
+    mainCtrl.msg = 'Sending recs...';
 
     // and send it to remote server
     // test CORS is working
@@ -122,7 +122,7 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
     );
 
     // plump out the recording!
-    delService.submitRecordings(sessionData, recCtrl.curRec)
+    delService.submitRecordings(sessionData, mainCtrl.curRec)
     .then(
       function success(response) {
         logger.log(response);
@@ -131,10 +131,10 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
         logger.log(response);
 
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
-        var rec = recCtrl.curRec[0];
+        var rec = mainCtrl.curRec[0];
         var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
         if (rec.title !== invalidTitle && tokenId !== 0) {
-          recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
+          mainCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
           // only need blob and title from recording
           dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
         }
@@ -143,9 +143,9 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
   }
 
   function stop() {
-    recCtrl.msg = 'Processing wav...';
+    mainCtrl.msg = 'Processing wav...';
 
-    recCtrl.stopBtnDisabled = true;
+    mainCtrl.stopBtnDisabled = true;
     
     recService.stop();
   }
@@ -153,16 +153,16 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-    recCtrl.msg = 'Syncing...';
+    mainCtrl.msg = 'Syncing...';
 
-    recCtrl.syncBtnDisabled = true;
+    mainCtrl.syncBtnDisabled = true;
 
     delService.sendLocalSessions(syncDoneCallback);
   }
 
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
-    recCtrl.syncBtnDisabled = false;
+    mainCtrl.syncBtnDisabled = false;
   }
 
   function test() {
@@ -174,7 +174,7 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
     });
 
     logger.getLogs().then(function(logs){
-      logger.log(logs);
+      console.log(logs);
     });
   }
 
