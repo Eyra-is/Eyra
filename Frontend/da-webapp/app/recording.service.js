@@ -5,14 +5,17 @@
 angular.module('daApp')
   .factory('recordingService', recordingService);
 
-recordingService.$inject = ['logger', 'invalidTitle'];
+recordingService.$inject = ['logger', 'utilityService'];
 
-function recordingService(logger, invalidTitle) {
+function recordingService(logger, utilityService) {
   var recHandler = {};
+  var util = utilityService;
 
   recHandler.init = init;
   recHandler.record = record;
   recHandler.stop = stop;
+
+  var invalidTitle = util.getConstant('invalidTitle');
 
   // for some reason, putting this in an array, makes angular updates this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),

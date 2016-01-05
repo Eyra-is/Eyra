@@ -17,8 +17,6 @@ var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
 
 angular.module('daApp', ['LocalForageModule'])
 
-.constant('invalidTitle', 'no_data.wav') // sentinel value for invalid recordings
-
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
 .config( [
       '$compileProvider',

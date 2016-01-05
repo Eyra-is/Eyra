@@ -7,17 +7,18 @@ angular.module('daApp')
 
 MainController.$inject = ['$scope',
                           'deliveryService',
-                          'invalidTitle',
                           'localDbService',
                           'logger',
                           'recordingService',
-                          'tokenService'];
+                          'tokenService',
+                          'utilityService'];
 
-function MainController($scope, deliveryService, invalidTitle, localDbService, logger, recordingService, tokenService) {
+function MainController($scope, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
   var mainCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
+  var util = utilityService;
 
   mainCtrl.clearLocalDb = clearLocalDb;
   mainCtrl.getTokens = getTokens;
@@ -37,7 +38,7 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
   mainCtrl.displayToken = currentToken['token'];
 
   var start_time = new Date().toISOString(); // session start time
-  var end_time;
+  var invalidTitle = util.getConstant('invalidTitle');
 
   activate();
 
@@ -81,7 +82,7 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, l
 
   // function passed to our recording service, notified when a recording has been finished
   function recordingCompleteCallback() {   
-    end_time = new Date().toISOString();
+    var end_time = new Date().toISOString();
     // these scope variables connected to user input obviously have to be sanitized.
     var sessionData =  {                                                                  
                       "type":'session', 

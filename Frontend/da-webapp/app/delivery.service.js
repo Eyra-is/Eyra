@@ -6,12 +6,15 @@
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q', 'logger', 'invalidTitle', 'localDbService'];
+deliveryService.$inject = ['$http', '$q', 'logger', 'localDbService', 'utilityService'];
 
-function deliveryService($http, $q, logger, invalidTitle, localDbService) {
+function deliveryService($http, $q, logger, localDbService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
+  var util = utilityService;
+
   var TOKENURL = '/submit/gettokens';
+  var invalidTitle = util.getConstant('invalidTitle');
 
   reqHandler.getTokens = getTokens;
   reqHandler.sendLocalSessions = sendLocalSessions;
