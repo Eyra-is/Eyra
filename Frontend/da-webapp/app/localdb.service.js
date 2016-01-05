@@ -15,20 +15,22 @@
 angular.module('daApp')
   .factory('localDbService', localDbService);
 
-localDbService.$inject = ['$localForage', '$q', 'logger'];
+localDbService.$inject = ['$localForage', '$q', 'logger', 'utilityService'];
 
-function localDbService($localForage, $q, logger) {
+function localDbService($localForage, $q, logger, utilityService) {
   var dbHandler = {};
-  var lfPrefix = 'localDb/'; // local forage prefix, stuff stored at 'localDb/stuff'
-  var sessionIdxsPath = lfPrefix + 'sessionIdxs';
-  var sessionsPath = lfPrefix + 'sessions/';
-  var blobsPrefix = 'blobs/';
+  var util = utilityService;
 
   dbHandler.clearLocalDb = clearLocalDb;
   dbHandler.countAvailableSessions = countAvailableSessions;
   dbHandler.pullSession = pullSession;
   dbHandler.saveRecording = saveRecording;
   dbHandler.saveSession = saveSession;
+  
+  var lfPrefix = 'localDb/'; // local forage prefix, stuff stored at 'localDb/stuff'
+  var sessionIdxsPath = lfPrefix + 'sessionIdxs';
+  var sessionsPath = lfPrefix + 'sessions/';
+  var blobsPrefix = 'blobs/';
 
   return dbHandler;
 
@@ -68,7 +70,8 @@ function localDbService($localForage, $q, logger) {
     recordings.push({ 'blobPath' : blobPath, 'title' : recording.title });
 
     // finally save blob object to our blobPath
-    $localForage.setItem(blobPath, recording.blob);
+    $localForage.setItem(blobPath, recording.blob)
+      .then(angular.noop, util.stdErrCallback);
 
     return { 'metadata' : newSessionData, 'recordings' : recordings };
   }
@@ -85,8 +88,10 @@ function localDbService($localForage, $q, logger) {
     $localForage.setItem(sessionsPath + idx, sessionObject).then(function(value){
       // and update sessionIdxs
       sessionIdxs.push(sessionsPath + idx);
-      $localForage.setItem(sessionIdxsPath, sessionIdxs);
-    });
+      $localForage.setItem(sessionIdxsPath, sessionIdxs)
+        .then(angular.noop, util.stdErrCallback);
+    },
+    util.stdErrCallback);
   }
 
   // dev function, clear the entire local forage database
@@ -97,33 +102,57 @@ function localDbService($localForage, $q, logger) {
 
   // e.g if path === 'localDb/sessions/blob/5'
   // this will return 5
+  // returns -1 on error
   function getIdxFromPath(path) {
-    var tokens = path.split('/');
-    var idx = parseInt(tokens[tokens.length - 1]);
+    var idx = -1;
+    try {
+      var tokens = path.split('/');
+      idx = parseInt(tokens[tokens.length - 1]) || -1;
+    } catch (e) {
+      util.stdErrCallback(e);
+    }
     return idx;
   }
 
   // returns promise, number of sessions in local db, 0 if no session data
   function countAvailableSessions() {
     var isAvail = $q.defer();
-    $localForage.getItem(sessionIdxsPath).then(function(value){
-      if (value && value.length > 0) {
-        isAvail.resolve(value.length);
-      } else {
-        isAvail.resolve(0);
+    $localForage.getItem(sessionIdxsPath).then(
+      function success(value){
+        if (value && value.length > 0) {
+          isAvail.resolve(value.length);
+        } else {
+          isAvail.resolve(0);
+        }
+      }, 
+      function error(response){
+        isAvail.reject(response);
       }
-    });
+    );
     return isAvail.promise;
   }
 
   function isSameSession(sessionData, prevSessionData) {
-    var data = sessionData['data'];
-    var prevData = prevSessionData['data'];
-    return  data['speakerId'] === prevData['speakerId'] && 
-            data['instructorId'] === prevData['instructorId'] &&
-            data['deviceId'] === prevData['deviceId'] &&
-            data['location'] === prevData['location'] &&
-            data['start'] === prevData['start'];
+    try {
+      var data = sessionData['data'];
+      var prevData = prevSessionData['data'];
+      return  data['speakerId'] === prevData['speakerId'] && 
+              data['instructorId'] === prevData['instructorId'] &&
+              data['deviceId'] === prevData['deviceId'] &&
+              data['location'] === prevData['location'] &&
+              data['start'] === prevData['start'];
+    } catch (e) {
+      logger.error('Invalid format of sessionData or prevSessionData');
+      util.stdErrCallback(e);
+      return false;
+    }
+  }
+
+  // writes sessionIdxs to sessionIdxsPath with 1 element popped
+  // used when sessionIdxs has at least one invalid index at the top
+  function popSessionIdxs(sessionIdxs) {
+    logger.error('Invalid session idx: ' + sessionIdxs[sessionIdxs.length - 1] + ', deleting index.');
+    return $localForage.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1));
   }
 
   // gets a single session data / recordings pair from local db and deletes it afterwards
@@ -135,29 +164,47 @@ function localDbService($localForage, $q, logger) {
     $localForage.getItem(sessionIdxsPath).then(function(sessionIdxs){
       // pull newest session (delete it afterwards)
       $localForage.pull(sessionIdxs[sessionIdxs.length - 1]).then(function(session){
-        // update our sessionIdxs in db
-        $localForage.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1));
-        // now we just have to replace recordings[i].blobPath:blobPath with blob:blob
-        var recordings = session.recordings;
-        var blobPromises = []; // an array of blob promises
-        // get all blobs for this session from our local db
-        for (var i = 0; i < recordings.length; i++) {
-          blobPromises.push($localForage.getItem(recordings[i].blobPath));
+        if (!session) {
+          // must have been a leftover index, not pointing to a session, lets delete it
+          popSessionIdxs(sessionIdxs)
+            .then(angular.noop, failedPullCallback);
+          return;
         }
-        // q.all waits on all blobs to resolve, or one to reject
-        $q.all(blobPromises).then(function(blobs){
-          for (var i = 0; i < blobs.length; i++) {
-            $localForage.removeItem(recordings[i].blobPath); // delete blob from local db
-            delete recordings[i].blobPath;
-            recordings[i].blob = blobs[i];
+        // update our sessionIdxs in db
+        $localForage.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1))
+        .then(function(sessionIdxs){
+          // now we just have to replace recordings[i].blobPath:blobPath with blob:blob
+          var recordings = session.recordings;
+          var blobPromises = []; // an array of blob promises
+          // get all blobs for this session from our local db
+          for (var i = 0; i < recordings.length; i++) {
+            blobPromises.push($localForage.getItem(recordings[i].blobPath));
           }
-          // finally we have our updated session to return!
-          pulledSession.resolve(session);
-        });
-      });
-    });
+          // q.all waits on all blobs to resolve, or one to reject
+          $q.all(blobPromises).then(function(blobs){
+            for (var i = 0; i < blobs.length; i++) {
+              // delete blob from local db, don't fail on a failure here, 
+              // if a single blob doesn't get deleted, we don't care too much
+              // it will get overwritten later most likely.
+              $localForage.removeItem(recordings[i].blobPath)
+                .then(angular.noop, util.stdErrCallback); 
+              delete recordings[i].blobPath;
+              recordings[i].blob = blobs[i];
+            }
+            // finally we have our updated session to return!
+            pulledSession.resolve(session);
+          },
+          failedPullCallback);
+        }, failedPullCallback);
+      }, failedPullCallback);
+    }, failedPullCallback);
 
     return pulledSession.promise;
+
+    // local callback, for errors in this function
+    function failedPullCallback(response) {
+      pulledSession.reject(response);
+    }
   }
 
   // sessionData is on format in Client-Server API
@@ -178,10 +225,10 @@ function localDbService($localForage, $q, logger) {
         var prevSessionIdx = sessionIdxs.length - 1;
         $localForage.getItem(sessionIdxs[prevSessionIdx]).then(function(session){
           if (!session) {
-            // error, must have not deleted session idx from sessionIdxs, for now,
-            // ignore this error, and just give up on saving this recording
-            // delete the index though
-            $localForage.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1));
+            // error, must have not deleted session idx from sessionIdxs, for now
+            // give up on saving this recording, delete the index though
+            popSessionIdxs(sessionIdxs)
+              .then(angular.noop, util.stdErrCallback);
             return;
           }
           // compare previous session with this session
@@ -191,22 +238,26 @@ function localDbService($localForage, $q, logger) {
             // and add the recording
             var sessionIdx = getIdxFromPath(sessionIdxs[prevSessionIdx]);
             var sessionObject = addRecording(prevSessionData, sessionData, sessionIdx, session['recordings'], recording);
-            $localForage.setItem(sessionIdxs[prevSessionIdx], sessionObject);
+            $localForage.setItem(sessionIdxs[prevSessionIdx], sessionObject)
+              .then(angular.noop, util.stdErrCallback);
           } else {
             // haven't seen this session before, need to add a session
             addNewSession(sessionData, recording, sessionIdxs);
           }
-        });
+        }, util.stdErrCallback);
       } else {
         // no previous session, in fact, no session at all stored
         addNewSession(sessionData, recording, sessionIdxs);
       }
-    });
+    }, util.stdErrCallback);
   }
 
   // takes in session obejct: { 'metadata':sessionData, 'recordings':{'blob':blob, 'title':title} }
   // and saves it to local db
+  // returns promise, resolved as true on save completion, otherwise rejected
+  // (will resolve as true even if saving the blob fails (addRecording))
   function saveSession(session) {
+    var successfulSave = $q.defer();
     $localForage.getItem(sessionIdxsPath).then(function(sessionIdxs){
       // get next new index for our session
       var sessionIdx;
@@ -227,8 +278,20 @@ function localDbService($localForage, $q, logger) {
       var sessionPath = sessionsPath + sessionIdx;
       $localForage.setItem(sessionPath, { 'metadata':session.metadata, 'recordings':newRecs }).then(function(value){
         sessionIdxs.push(sessionPath);
-        $localForage.setItem(sessionIdxsPath, sessionIdxs);
-      });
-    });
+        $localForage.setItem(sessionIdxsPath, sessionIdxs)
+        .then(
+          function success(sessionIdxs){
+            successfulSave.resolve(true);
+          }, 
+          failedSaveCallback);
+      }, failedSaveCallback);
+    }, failedSaveCallback);
+
+    return successfulSave.promise;
+
+    // local callback, for errors in this function
+    function failedSaveCallback(response) {
+      successfulSave.reject(response);
+    }
   }
 }

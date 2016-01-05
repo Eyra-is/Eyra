@@ -13,15 +13,14 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
   var dbService = localDbService;
   var util = utilityService;
 
-  var TOKENURL = '/submit/gettokens';
-  var invalidTitle = util.getConstant('invalidTitle');
-
   reqHandler.getTokens = getTokens;
   reqHandler.sendLocalSessions = sendLocalSessions;
   reqHandler.submitRecordings = submitRecordings;
   reqHandler.testServerGet = testServerGet;
 
-  reqHandler.failedSessionSends = 0;
+  var TOKENURL = '/submit/gettokens';
+  var invalidTitle = util.getConstant('invalidTitle');
+  var failedSessionSends = 0;
 
   return reqHandler;
 
@@ -31,15 +30,18 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
     submitRecordings(session.metadata, session.recordings)
     .then(
       function success(response) {
-        logger.log(response);
+        logger.log('Sent session.');
+        logger.log(response.data); // DEBUG
 
         sendLocalSession(null); // send next session
       },
       function error(response) {
-        logger.log(response);
+        logger.log('Failed sending session, trying again.');
 
-        reqHandler.failedSessionSends++;
+        failedSessionSends++;
         sendLocalSession(session); // failed to send, try again to send same session
+
+        util.stdErrCallback(response);
       }
     );
   }
@@ -49,13 +51,14 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
   // recursive function, calls itself as long as there are sessions in localdb
   // aborts after 5 failed sends.
   function sendLocalSession(lastSession) {
-    if (reqHandler.failedSessionSends > 4) {
+    if (failedSessionSends > 4) {
       logger.log('Failed sending session too many times. Aborting sync...');
-      reqHandler.failedSessionSends = 0;
+      failedSessionSends = 0;
       // we failed at sending session, save it to the database again.
-      // function doesn't work yet
-      dbService.saveSession(lastSession);
-      reqHandler.syncDoneCallback(false);
+      dbService.saveSession(lastSession).then(function(successfulSave){
+        reqHandler.syncDoneCallback(false);
+      },
+      util.stdErrCallback);
       return;
     }
     // if we have a lastSession, it means last transmission was a failure, attempt to send again
@@ -68,13 +71,15 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
         logger.log('Sending session as part of sync...');
         dbService.pullSession().then(function(session){
           deliverSession(session); // recursively calls sendLocalSession
-        });
+        },
+        util.stdErrCallback);
       } else {
         alert('All synced up!');
-        reqHandler.failedSessionSends = 0;
+        failedSessionSends = 0;
         reqHandler.syncDoneCallback(true);
       }
-    });
+    },
+    util.stdErrCallback);
   }
 
   // callback is function to call when all local sessions have been sent or failed to send
@@ -97,16 +102,21 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
   // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
   function submitRecordings(sessionData, recordings) {
     var fd = new FormData();
-    fd.append('json', JSON.stringify(sessionData));
     var validSubmit = false;
-    for (var i = 0; i < recordings.length; i++) {
-      // send our recording/s, and metadata as json, so long as it is valid
-      var rec = recordings[i];
-      var tokenId = sessionData["data"]["recordingsInfo"][rec.title]["tokenId"];
-      if (rec.title !== invalidTitle && tokenId !== 0) {
-        fd.append('rec' + i, rec.blob, rec.title);
-        validSubmit = true;
+    try {
+      fd.append('json', JSON.stringify(sessionData));
+
+      for (var i = 0; i < recordings.length; i++) {
+        // send our recording/s, and metadata as json, so long as it is valid
+        var rec = recordings[i];
+        var tokenId = sessionData["data"]["recordingsInfo"][rec.title]["tokenId"];
+        if (rec.title !== invalidTitle && tokenId !== 0) {
+          fd.append('rec' + i, rec.blob, rec.title);
+          validSubmit = true;
+        }
       }
+    } catch (e) {
+      util.stdErrCallback(e);
     }
     if (validSubmit) {
       return $http.post('//'+BACKENDURL+'/submit/session', fd, {

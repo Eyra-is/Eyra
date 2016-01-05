@@ -55,7 +55,10 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
     if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
       mainCtrl.msg = 'Clearing entire local db...';
       dbService.clearLocalDb()
-        .then(angular.noop, util.stdErrCallback);
+        .then(function(val){
+          alert('Database cleared!');
+          mainCtrl.msg = 'Database cleared.';
+        }, util.stdErrCallback);
     }
   }
 
@@ -112,7 +115,7 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
     send(sessionData)
     .then(
       function success(response) {
-        logger.log(response); // DEBUG
+        logger.log(response.data); // DEBUG
       }, 
       function error(response) {
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
@@ -172,6 +175,7 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
 
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
+    mainCtrl.msg = result ? 'Sync complete.' : 'Sync failed.';
     mainCtrl.syncBtnDisabled = false;
   }
 

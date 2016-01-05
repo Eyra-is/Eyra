@@ -9,8 +9,7 @@ utilityService.$inject = ['logger'];
 
 function utilityService(logger) {
   var utilityHandler = {};
-  // CONSTANTS
-  var constants = { 
+  var CONSTANTS = { 
     // sentinel value for invalid recordings
     'invalidTitle' : 'no_data.wav' 
   };
@@ -23,7 +22,7 @@ function utilityService(logger) {
   //////////
 
   function getConstant(constant) {
-    return constants[constant];
+    return CONSTANTS[constant];
   }
 
   // standard error function to put as callback for rejected promises
