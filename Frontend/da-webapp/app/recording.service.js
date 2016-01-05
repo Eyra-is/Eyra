@@ -5,21 +5,19 @@
 angular.module('daApp')
   .factory('recordingService', recordingService);
 
-//recordingService.$inject = [];
+recordingService.$inject = ['invalidTitle'];
 
-function recordingService() {
+function recordingService(invalidTitle) {
   var recHandler = {};
 
   recHandler.init = init;
   recHandler.record = record;
   recHandler.stop = stop;
 
-  // give caller info on what is the title sentinel value
-  recHandler.invalidTitle = 'no_data.wav';
   // for some reason, putting this in an array, makes angular updates this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),
                                     "url":'',
-                                    "title":recHandler.invalidTitle}];
+                                    "title":invalidTitle}];
 
   // local variable definitions for service
   var audio_context;

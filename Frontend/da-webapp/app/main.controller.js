@@ -7,11 +7,12 @@ angular.module('daApp')
 
 MainController.$inject = ['$scope',
                           'deliveryService',
+                          'invalidTitle',
                           'localDbService',
                           'recordingService',
                           'tokenService'];
 
-function MainController($scope, deliveryService, localDbService, recordingService, tokenService) {
+function MainController($scope, deliveryService, invalidTitle, localDbService, recordingService, tokenService) {
   var recCtrl = this; // record control
   var recService = recordingService;
   var delService = deliveryService;
@@ -34,7 +35,6 @@ function MainController($scope, deliveryService, localDbService, recordingServic
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
   recCtrl.displayToken = currentToken['token'];
 
-  var invalidTitle = recService.invalidTitle; // sentinel value for title of recording
   var start_time = new Date().toISOString(); // session start time
   var end_time;
 
@@ -121,7 +121,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
     );
 
     // plump out the recording!
-    delService.submitRecordings(sessionData, recCtrl.curRec, invalidTitle)
+    delService.submitRecordings(sessionData, recCtrl.curRec)
     .then(
       function success(response) {
         console.log(response);
@@ -156,7 +156,7 @@ function MainController($scope, deliveryService, localDbService, recordingServic
 
     recCtrl.syncBtnDisabled = true;
 
-    delService.sendLocalSessions(invalidTitle, syncDoneCallback);
+    delService.sendLocalSessions(syncDoneCallback);
   }
 
   // result is true if sync completed successfully

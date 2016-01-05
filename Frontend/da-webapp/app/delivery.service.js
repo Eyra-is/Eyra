@@ -6,9 +6,9 @@
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q', 'localDbService'];
+deliveryService.$inject = ['$http', '$q', 'invalidTitle', 'localDbService'];
 
-function deliveryService($http, $q, localDbService) {
+function deliveryService($http, $q, invalidTitle, localDbService) {
   var reqHandler = {};
   var dbService = localDbService;
   var TOKENURL = '/submit/gettokens';
@@ -25,7 +25,7 @@ function deliveryService($http, $q, localDbService) {
   ////////// local db functions
 
   function deliverSession(session) {
-    submitRecordings(session.metadata, session.recordings, reqHandler.invalidTitle)
+    submitRecordings(session.metadata, session.recordings)
     .then(
       function success(response) {
         console.log(response);
@@ -75,8 +75,7 @@ function deliveryService($http, $q, localDbService) {
   }
 
   // callback is function to call when all local sessions have been sent or failed to send
-  function sendLocalSessions(invalidTitle, callback) {
-    reqHandler.invalidTitle = invalidTitle;
+  function sendLocalSessions(callback) {
     reqHandler.syncDoneCallback = callback;
     sendLocalSession(null); // recursive
   }
@@ -93,7 +92,7 @@ function deliveryService($http, $q, localDbService) {
   // invalid title is just a sentinel value for a 'no_data' wav recording.
   // sessionData is on the json format depicted in client-server API.
   // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
-  function submitRecordings(sessionData, recordings, invalidTitle) {
+  function submitRecordings(sessionData, recordings) {
     var fd = new FormData();
     fd.append('json', JSON.stringify(sessionData));
     var validSubmit = false;
@@ -107,7 +106,7 @@ function deliveryService($http, $q, localDbService) {
       }
     }
     if (validSubmit) {
-      return $http.post('http://'+BACKENDURL+'/submit/session', fd, {
+      return $http.post('//'+BACKENDURL+'/submit/session', fd, {
           // this is so angular sets the correct headers/info itself
           transformRequest: angular.identity,
           headers: {'Content-Type': undefined}
