@@ -7,36 +7,38 @@ angular.module('daApp')
 
 MainController.$inject = ['$scope',
                           'deliveryService',
-                          'invalidTitle',
                           'localDbService',
+                          'logger',
                           'recordingService',
-                          'tokenService'];
+                          'tokenService',
+                          'utilityService'];
 
-function MainController($scope, deliveryService, invalidTitle, localDbService, recordingService, tokenService) {
-  var recCtrl = this; // record control
+function MainController($scope, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
+  var mainCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
+  var util = utilityService;
 
-  recCtrl.clearLocalDb = clearLocalDb;
-  recCtrl.getTokens = getTokens;
-  recCtrl.record = record;
-  recCtrl.stop = stop;
-  recCtrl.sync = sync;
-  recCtrl.test = test;
+  mainCtrl.clearLocalDb = clearLocalDb;
+  mainCtrl.getTokens = getTokens;
+  mainCtrl.record = record;
+  mainCtrl.stop = stop;
+  mainCtrl.sync = sync;
+  mainCtrl.test = test;
 
-  recCtrl.msg = ''; // single debug/information msg
-  recCtrl.curRec = recService.currentRecording;
+  mainCtrl.msg = ''; // single debug/information msg
+  mainCtrl.curRec = recService.currentRecording;
 
-  recCtrl.recordBtnDisabled = false;
-  recCtrl.stopBtnDisabled = true;
-  recCtrl.syncBtnDisabled = false;
+  mainCtrl.recordBtnDisabled = false;
+  mainCtrl.stopBtnDisabled = true;
+  mainCtrl.syncBtnDisabled = false;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
-  recCtrl.displayToken = currentToken['token'];
+  mainCtrl.displayToken = currentToken['token'];
 
   var start_time = new Date().toISOString(); // session start time
-  var end_time;
+  var invalidTitle = util.getConstant('invalidTitle');
 
   activate();
 
@@ -51,100 +53,112 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, r
   // dev function, clear the entire local forage database
   function clearLocalDb() {
     if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
-      recCtrl.msg = 'Clearing entire local db...';
-      tokenService.clearLocalDb();      
+      mainCtrl.msg = 'Clearing entire local db...';
+      dbService.clearLocalDb()
+        .then(function(val){
+          alert('Database cleared!');
+          mainCtrl.msg = 'Database cleared.';
+        }, util.stdErrCallback);
     }
   }
 
   function getTokens() {
-    recCtrl.msg = 'Getting tokens...';
+    mainCtrl.msg = 'Getting tokens...';
 
-    tokenService.getTokens(25);
+    tokenService.getTokens(25).then(function(tokens){
+      alert('Tokens acquired!');
+      mainCtrl.msg = 'Tokens acquired.';
+    },
+    util.stdErrCallback);
   }
 
   function record() {
-    recCtrl.msg = 'Recording now...';
+    mainCtrl.msg = 'Recording now...';
 
-    recCtrl.recordBtnDisabled = true;
+    mainCtrl.recordBtnDisabled = true;
 
     recService.record();
 
-    recCtrl.stopBtnDisabled = false;
+    mainCtrl.stopBtnDisabled = false;
 
+    currentToken = {'id':0, 'token':'Waiting for new token...'};
     // show token on record/newToken button hit
-    tokenService.nextToken().then(function(data){
-      recCtrl.displayToken = data['token'];
-      currentToken = data;
-    });
+    tokenService.nextToken().then(function(token){
+      mainCtrl.displayToken = token['token'];
+      currentToken = token;
+    },
+    util.stdErrCallback);
   }
 
   // function passed to our recording service, notified when a recording has been finished
-  function recordingCompleteCallback() {   
-    end_time = new Date().toISOString();
+  function recordingCompleteCallback() {
+    var end_time = new Date().toISOString();
     // these scope variables connected to user input obviously have to be sanitized.
-    var sessionData =  {                                                                  
-                      "type":'session', 
-                      "data":
-                      {
-                        "speakerId"      : (recCtrl.speakerId || 1),
-                        "instructorId"   : (recCtrl.instructorId || 1),
-                        "deviceId"       : (recCtrl.deviceId || 1),
-                        "location"       : (recCtrl.curLocation || 'unknown'),
-                        "start"          : start_time,
-                        "end"            : end_time,
-                        "comments"       : (recCtrl.comments || 'no comments'),
-                        "recordingsInfo" : {}
-                      }
-                    };
+    var sessionData = {                                                                  
+                        "type":'session', 
+                        "data":
+                        {
+                          "speakerId"      : (mainCtrl.speakerId || 1),
+                          "instructorId"   : (mainCtrl.instructorId || 1),
+                          "deviceId"       : (mainCtrl.deviceId || 1),
+                          "location"       : (mainCtrl.curLocation || 'Unknown.'),
+                          "start"          : start_time,
+                          "end"            : end_time,
+                          "comments"       : (mainCtrl.comments || 'No comments.'),
+                          "recordingsInfo" : {}
+                        }
+                      };
     sessionData['data']['recordingsInfo']
-                [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
+                [mainCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
 
-    send(sessionData); // attempt to send current recording
-    // if unsuccessful, save it locally, see send()->delService.submit()
+    // attempt to send current recording
+    send(sessionData)
+    .then(
+      function success(response) {
+        logger.log(response.data); // DEBUG
+      }, 
+      function error(response) {
+        // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
+        var rec = mainCtrl.curRec[0];
+        var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
+        if (rec.title !== invalidTitle && tokenId !== 0) {
+          mainCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
+          // only need blob and title from recording
+          dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
+        } else {
+          logger.error('Invalid token in submission.');
+        }
 
-    recCtrl.recordBtnDisabled = false;
+        util.stdErrCallback(response);
+      }
+    );
+
+    mainCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
   }
 
   function send(sessionData) {
-    recCtrl.msg = 'Sending recs...';
+    mainCtrl.msg = 'Sending recs...';
 
     // and send it to remote server
     // test CORS is working
     delService.testServerGet()
     .then(
       function success(response) {
-        console.log(response);
+        logger.log(response);
       }, 
       function error(response) {
-        console.log(response);
+        logger.log(response);
       }
     );
 
     // plump out the recording!
-    delService.submitRecordings(sessionData, recCtrl.curRec)
-    .then(
-      function success(response) {
-        console.log(response);
-      }, 
-      function error(response) {
-        console.log(response);
-
-        // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
-        var rec = recCtrl.curRec[0];
-        var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
-        if (rec.title !== invalidTitle && tokenId !== 0) {
-          recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
-          // only need blob and title from recording
-          dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
-        }
-      }
-    );
+    return delService.submitRecordings(sessionData, mainCtrl.curRec);
   }
 
   function stop() {
-    recCtrl.msg = 'Processing wav...';
+    mainCtrl.msg = 'Processing wav...';
 
-    recCtrl.stopBtnDisabled = true;
+    mainCtrl.stopBtnDisabled = true;
     
     recService.stop();
   }
@@ -152,24 +166,29 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, r
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-    recCtrl.msg = 'Syncing...';
+    mainCtrl.msg = 'Syncing...';
 
-    recCtrl.syncBtnDisabled = true;
+    mainCtrl.syncBtnDisabled = true;
 
     delService.sendLocalSessions(syncDoneCallback);
   }
 
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
-    recCtrl.syncBtnDisabled = false;
+    mainCtrl.msg = result ? 'Sync complete.' : 'Sync failed.';
+    mainCtrl.syncBtnDisabled = false;
   }
 
   function test() {
     dbService.countAvailableSessions().then(function(value){
       if (value > 0)
-        console.log('Aw yeah, '+value);
+        logger.log('Aw yeah, '+value);
       else
-        console.log('Nope');
+        logger.log('Nope');
+    });
+
+    logger.getLogs().then(function(logs){
+      console.log(logs);
     });
   }
 
