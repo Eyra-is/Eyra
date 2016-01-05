@@ -15,9 +15,9 @@
 angular.module('daApp')
   .factory('localDbService', localDbService);
 
-localDbService.$inject = ['$localForage', '$q'];
+localDbService.$inject = ['$localForage', '$q', 'logger'];
 
-function localDbService($localForage, $q) {
+function localDbService($localForage, $q, logger) {
   var dbHandler = {};
   var lfPrefix = 'localDb/'; // local forage prefix, stuff stored at 'localDb/stuff'
   var sessionIdxsPath = lfPrefix + 'sessionIdxs';
@@ -123,7 +123,7 @@ function localDbService($localForage, $q) {
   // returns { 'metadata' : sessionData, 'recordings' : [ {'blob':blob, 'title':title}, ...]}
   // There should be some session data before calling this function, that's what 'countAvailableSessionsData()' is for.
   function pullSession() {
-    console.log('Getting session data...');
+    logger.log('Getting session data...');
     var pulledSession = $q.defer();
     $localForage.getItem(sessionIdxsPath).then(function(sessionIdxs){
       // pull newest session (delete it afterwards)
@@ -155,7 +155,7 @@ function localDbService($localForage, $q) {
 
   // sessionData is on format in Client-Server API
   function saveRecording(sessionData, recording) {
-    console.log('Saving rec locally.');
+    logger.log('Saving rec locally.');
     // first check if this recording is part of a previous session, only need to
     // look at the newest session.
     $localForage.getItem(sessionIdxsPath).then(function(value){

@@ -7,9 +7,10 @@ angular.module('daApp')
 
 tokenService.$inject = ['$localForage', 
                         '$q',
-                        'deliveryService'];
+                        'deliveryService',
+                        'logger'];
 
-function tokenService($localForage, $q, deliveryService) {
+function tokenService($localForage, $q, deliveryService, logger) {
   var tokenHandler = {};
   var delService = deliveryService;
 
@@ -23,7 +24,7 @@ function tokenService($localForage, $q, deliveryService) {
 
   // dev function, clear the entire local forage database
   function clearLocalDb() {
-    console.log('Deleting entire local database...');
+    logger.log('Deleting entire local database...');
     $localForage.clear();
   }
 
@@ -38,7 +39,7 @@ function tokenService($localForage, $q, deliveryService) {
         saveTokens(response.data); // save to local forage
       }, 
       function error(response) {
-        console.log(response);
+        logger.log(response);
       }
     );
   }
@@ -46,7 +47,7 @@ function tokenService($localForage, $q, deliveryService) {
   function nextToken() {
     var next = $q.defer();
     $localForage.getItem('minFreeTokenIdx').then(function(value) {
-      console.log('Local db index: ' + value);
+      logger.log('Local db index: ' + value);
 
       var minFreeIdx = value === -1 ? 0 : (value || 0);
       $localForage.getItem('tokens/' + minFreeIdx).then(function(value){

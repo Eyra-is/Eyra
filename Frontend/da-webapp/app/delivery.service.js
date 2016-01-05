@@ -6,9 +6,9 @@
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q', 'invalidTitle', 'localDbService'];
+deliveryService.$inject = ['$http', '$q', 'logger', 'invalidTitle', 'localDbService'];
 
-function deliveryService($http, $q, invalidTitle, localDbService) {
+function deliveryService($http, $q, logger, invalidTitle, localDbService) {
   var reqHandler = {};
   var dbService = localDbService;
   var TOKENURL = '/submit/gettokens';
@@ -28,12 +28,12 @@ function deliveryService($http, $q, invalidTitle, localDbService) {
     submitRecordings(session.metadata, session.recordings)
     .then(
       function success(response) {
-        console.log(response);
+        logger.log(response);
 
         sendLocalSession(null); // send next session
       },
       function error(response) {
-        console.log(response);
+        logger.log(response);
 
         reqHandler.failedSessionSends++;
         sendLocalSession(session); // failed to send, try again to send same session
@@ -47,7 +47,7 @@ function deliveryService($http, $q, invalidTitle, localDbService) {
   // aborts after 5 failed sends.
   function sendLocalSession(lastSession) {
     if (reqHandler.failedSessionSends > 4) {
-      console.log('Failed sending session too many times. Aborting sync...');
+      logger.log('Failed sending session too many times. Aborting sync...');
       reqHandler.failedSessionSends = 0;
       // we failed at sending session, save it to the database again.
       // function doesn't work yet
@@ -62,7 +62,7 @@ function deliveryService($http, $q, invalidTitle, localDbService) {
     }
     dbService.countAvailableSessions().then(function(availSessions){
       if (availSessions > 0) {
-        console.log('Sending session as part of sync...');
+        logger.log('Sending session as part of sync...');
         dbService.pullSession().then(function(session){
           deliverSession(session); // recursively calls sendLocalSession
         });

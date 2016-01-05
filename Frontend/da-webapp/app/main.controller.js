@@ -9,10 +9,11 @@ MainController.$inject = ['$scope',
                           'deliveryService',
                           'invalidTitle',
                           'localDbService',
+                          'logger',
                           'recordingService',
                           'tokenService'];
 
-function MainController($scope, deliveryService, invalidTitle, localDbService, recordingService, tokenService) {
+function MainController($scope, deliveryService, invalidTitle, localDbService, logger, recordingService, tokenService) {
   var recCtrl = this; // record control
   var recService = recordingService;
   var delService = deliveryService;
@@ -113,10 +114,10 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, r
     delService.testServerGet()
     .then(
       function success(response) {
-        console.log(response);
+        logger.log(response);
       }, 
       function error(response) {
-        console.log(response);
+        logger.log(response);
       }
     );
 
@@ -124,10 +125,10 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, r
     delService.submitRecordings(sessionData, recCtrl.curRec)
     .then(
       function success(response) {
-        console.log(response);
+        logger.log(response);
       }, 
       function error(response) {
-        console.log(response);
+        logger.log(response);
 
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
         var rec = recCtrl.curRec[0];
@@ -167,9 +168,13 @@ function MainController($scope, deliveryService, invalidTitle, localDbService, r
   function test() {
     dbService.countAvailableSessions().then(function(value){
       if (value > 0)
-        console.log('Aw yeah, '+value);
+        logger.log('Aw yeah, '+value);
       else
-        console.log('Nope');
+        logger.log('Nope');
+    });
+
+    logger.getLogs().then(function(logs){
+      logger.log(logs);
     });
   }
 

@@ -5,9 +5,9 @@
 angular.module('daApp')
   .factory('recordingService', recordingService);
 
-recordingService.$inject = ['invalidTitle'];
+recordingService.$inject = ['logger', 'invalidTitle'];
 
-function recordingService(invalidTitle) {
+function recordingService(logger, invalidTitle) {
   var recHandler = {};
 
   recHandler.init = init;
@@ -40,25 +40,25 @@ function recordingService(invalidTitle) {
       window.URL = window.URL || window.webkitURL;
       
       audio_context = new AudioContext;
-      console.log('Audio context set up.');
-      console.log('navigator.getUserMedia ' + (navigator.getUserMedia ? 'available.' : 'not present!'));
+      logger.log('Audio context set up.');
+      logger.log('navigator.getUserMedia ' + (navigator.getUserMedia ? 'available.' : 'not present!'));
     } catch (e) {
       alert('No web audio support in this browser!');
     }
     
     navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
-      console.log('No live audio input: ' + e);
+      logger.log('No live audio input: ' + e);
     });
   }
 
   function record() {
-    console.log('Recording...');
+    logger.log('Recording...');
     recorder && recorder.record();
   }
 
   function stop() {
     recorder && recorder.stop();
-    console.log('Stopped recording.');
+    logger.log('Stopped recording.');
     
     // create WAV download link using audio data blob and display on website
     createWav();
@@ -88,12 +88,12 @@ function recordingService(invalidTitle) {
 
   function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
-    console.log('Media stream created.');
+    logger.log('Media stream created.');
     // Uncomment if you want the audio to feedback directly
     //input.connect(audio_context.destination);
-    //console.log('Input connected to audio context destination.');
+    //logger.log('Input connected to audio context destination.');
     
     recorder = new Recorder(input);
-    console.log('Recorder initialised.');
+    logger.log('Recorder initialised.');
   }
 }
