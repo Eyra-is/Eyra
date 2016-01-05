@@ -8,11 +8,13 @@ angular.module('daApp')
 tokenService.$inject = ['$localForage', 
                         '$q',
                         'deliveryService',
-                        'logger'];
+                        'logger',
+                        'utilityService'];
 
-function tokenService($localForage, $q, deliveryService, logger) {
+function tokenService($localForage, $q, deliveryService, logger, utilityService) {
   var tokenHandler = {};
   var delService = deliveryService;
+  var util = utilityService;
 
   tokenHandler.clearLocalDb = clearLocalDb;
   tokenHandler.getTokens = getTokens;
@@ -25,10 +27,12 @@ function tokenService($localForage, $q, deliveryService, logger) {
   // dev function, clear the entire local forage database
   function clearLocalDb() {
     logger.log('Deleting entire local database...');
-    $localForage.clear();
+    return $localForage.clear();
   }
 
+  // returns promise, 
   function getTokens(numTokens) {
+    var tokensPromise = $q.defer();
     // query server for tokens
     delService.getTokens(numTokens)
     .then(
@@ -36,12 +40,11 @@ function tokenService($localForage, $q, deliveryService, logger) {
         // seems like response is automatically parsed as JSON for us
 
         // some validation of 'data' perhaps here
-        saveTokens(response.data); // save to local forage
-      }, 
-      function error(response) {
-        logger.log(response);
-      }
+        saveTokens(response.data, tokensPromise); // save to local forage
+      },
+      util.stdErrCallback
     );
+    return tokensPromise.promise;
   }
 
   function nextToken() {
@@ -71,18 +74,29 @@ function tokenService($localForage, $q, deliveryService, logger) {
   }
 
   // save tokens locally. tokens should be on format depicted in getTokens in client-server API
-  function saveTokens(tokens) {
+  // tokensPromise is an angular q.defer(), resolved with tokens on completion of save
+  function saveTokens(tokens, tokensPromise) {
     $localForage.getItem('minFreeTokenIdx').then(function(value) {
       var minFreeIdx = value === -1 ? 0 : (value || 0);
       var oldMinFreeIdx = minFreeIdx;
 
+      var finishedPromises = []; // promises to wait for until we can say this saveTokens is finished
       for (var i = 0; i < tokens.length; i++) {
-        $localForage.setItem('tokens/' + minFreeIdx, tokens[i]);
+        finishedPromises.push(
+          $localForage.setItem('tokens/' + minFreeIdx, tokens[i])
+        );
         minFreeIdx++;
       }
 
       // update our minFreeIdx to reflect newly input tokens, 0 counts as 1, so only add length-1
-      $localForage.setItem('minFreeTokenIdx', oldMinFreeIdx + (tokens.length - 1));
+      finishedPromises.push(
+        $localForage.setItem('minFreeTokenIdx', oldMinFreeIdx + (tokens.length - 1))
+      );
+
+      $q.all(finishedPromises).then(function(val){
+        tokensPromise.resolve(tokens);
+      },
+      util.stdErrCallback);
     });
   }
 }

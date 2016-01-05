@@ -54,14 +54,20 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
   function clearLocalDb() {
     if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
       mainCtrl.msg = 'Clearing entire local db...';
-      tokenService.clearLocalDb();      
+      tokenService.clearLocalDb().then(
+        angular.noop,
+        util.stdErrCallback
+      );
     }
   }
 
   function getTokens() {
     mainCtrl.msg = 'Getting tokens...';
 
-    tokenService.getTokens(25);
+    tokenService.getTokens(25).then(function(tokens){
+      alert('Tokens acquired!');
+    },
+    util.stdErrCallback);
   }
 
   function record() {
