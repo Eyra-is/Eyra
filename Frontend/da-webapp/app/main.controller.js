@@ -5,7 +5,7 @@
 angular.module('daApp')
 .controller('MainController', MainController);
 
-MainController.$inject = ['$scope',
+MainController.$inject = ['$http', '$scope',  // DEBUG HTTP
                           'deliveryService',
                           'localDbService',
                           'logger',
@@ -13,7 +13,7 @@ MainController.$inject = ['$scope',
                           'tokenService',
                           'utilityService'];
 
-function MainController($scope, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
+function MainController($http, $scope, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
   var mainCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
@@ -115,7 +115,7 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
     send(sessionData)
     .then(
       function success(response) {
-        logger.log(response.data); // DEBUG
+        logger.log(response); // DEBUG
       }, 
       function error(response) {
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
@@ -180,7 +180,7 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
   }
 
   function test() {
-    dbService.countAvailableSessions().then(function(value){
+    /*dbService.countAvailableSessions().then(function(value){
       if (value > 0)
         logger.log('Aw yeah, '+value);
       else
@@ -189,7 +189,14 @@ function MainController($scope, deliveryService, localDbService, logger, recordi
 
     logger.getLogs().then(function(logs){
       console.log(logs);
-    });
+    });*/
+
+    $http.post(
+      '//' + BACKENDURL + '/submit/session'
+    ).then(function(response){
+      console.log(response);
+    },
+    util.stdErrCallback);
   }
 
   function updateBindingsCallback() {

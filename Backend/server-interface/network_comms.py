@@ -13,10 +13,14 @@
 from flask import Flask, request
 from db_handler import DbHandler
 from flask.ext.cors import CORS
+import json
 
 from util import log
 
+
+
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024 # limit at 2 GB
 
 dbHandler = DbHandler(app)
 
@@ -30,7 +34,9 @@ def submit_session():
     jsonData = None
     recordings = []
     if request.method == 'GET':
-        log('GET success baby')
+        msg = 'GET success baby'
+        log(msg)
+        return msg, 200
     if request.method == 'POST':
         log('Form: ' + str(request.form) + '\nFiles: ' + str(request.files) + '\n')
         log('Headers: ' + str(request.headers))
@@ -38,8 +44,9 @@ def submit_session():
         if 'json' in request.form:
             jsonData = request.form['json']
         else:
-            log('No metadata found, aborting.')
-            return 'asd'
+            msg = 'No metadata found, aborting.'
+            log(msg)
+            return msg, 400
 
         i = 0
         while True:
@@ -52,27 +59,31 @@ def submit_session():
                 break
             i += 1
 
-        try:
-            result = dbHandler.processSessionData(jsonData, recordings)
-            log(result)
-        # these error excepts are ONLY for debug right now
-        except TypeError as e:
-            log('error: ' + str(e) + '\n' + str(jsonData))
-        except KeyError as e:
-            log('error: ' + str(e) + '\n' + str(jsonData))
-        except ValueError as e:
-            log('error: ' + str(e) + '\n' + str(jsonData))
+        if i==0:
+            msg = 'No recordings received, aborting.'
+            log(msg)
+            return msg, 400
 
-    return ''
+        result = dbHandler.processSessionData(jsonData, recordings)
+        return result['msg'], result['statusCode']
+
+    return 'Unexpected error.', 500
 
 @app.route('/submit/gettokens/<int:numTokens>', methods=['GET'])
 def submit_gettokens(numTokens):
-    response = ''
-
     if request.method == 'GET':
-        response += str(dbHandler.getTokens(numTokens))
+        response = ''
+        tokens = dbHandler.getTokens(numTokens)
+        if len(tokens) > 0:
+            response += json.dumps(tokens)
+            log('Got tokens from db: ' + response)
+            return response, 200
+        else:
+            msg = 'Failed getting tokens from database.'
+            log(msg)
+            return msg, 500
 
-    return response
+    return 'Unexpected error.', 500
 
 if __name__ == '__main__':
     app.run(debug=True)
