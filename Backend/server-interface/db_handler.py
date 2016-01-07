@@ -54,7 +54,7 @@ class DbHandler:
 
         except (KeyError, TypeError, ValueError) as e:
             msg = 'Session data not on correct format, aborting.'
-            log(msg + ' ' + repr(e))
+            log(msg, e)
             return dict(msg=msg, statusCode=400)
 
         try: # one big try block simply for readability of code
@@ -112,15 +112,15 @@ class DbHandler:
 
         except MySQLError as e:
             msg = 'Database error.'
-            log(msg + ' ' + repr(e))
+            log(msg, e)
             return dict(msg=msg, statusCode=500)
         except os.error as e:
             msg = 'Error saving recordings to file.'
-            log(msg + ' ' + repr(e))
+            log(msg, e)
             return dict(msg=msg, statusCode=500)
         except KeyError as e:
             msg = 'Missing recording info in session data.'
-            log(msg + ' ' + repr(e))
+            log(msg, e)
             return dict(msg=msg, statusCode=400)
 
         return dict(msg='Successful process of session data.', statusCode=200)
@@ -145,7 +145,7 @@ class DbHandler:
             tokens = cur.fetchall()
         except MySQLError as e:
             msg = 'Error getting tokens from database.'
-            log(msg + ' ' + repr(e))
+            log(msg, e)
             return dict(msg=msg, statusCode=500)
 
         jsonTokens = []
