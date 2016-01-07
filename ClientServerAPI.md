@@ -31,6 +31,7 @@ Current implementation:
 ```
   * Each tokenId must match it's corresponding recording filename including extension.
   * Server looks at sessions with the same info (minus end time of course), and if it is the same, it simply adds the recording to that session, and updates the end time of that session.
+* The recordings in the submission (request.files) should be stored with keys 'rec0','rec1',..,'recn'
 * url:
 ```
         /submit/session

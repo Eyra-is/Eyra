@@ -31,7 +31,7 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
     .then(
       function success(response) {
         logger.log('Sent session.');
-        logger.log(response.data); // DEBUG
+        logger.log(response); // DEBUG
 
         sendLocalSession(null); // send next session
       },
