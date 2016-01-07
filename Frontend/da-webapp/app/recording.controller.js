@@ -1,11 +1,11 @@
-// main controller for application
+// recording controller for application
 
 'use strict';
 
 angular.module('daApp')
-.controller('MainController', MainController);
+.controller('RecordingController', RecordingController);
 
-MainController.$inject = ['$http', '$scope',  // DEBUG HTTP
+RecordingController.$inject = ['$http', '$scope',  // DEBUG HTTP
                           'deliveryService',
                           'localDbService',
                           'logger',
@@ -13,29 +13,31 @@ MainController.$inject = ['$http', '$scope',  // DEBUG HTTP
                           'tokenService',
                           'utilityService'];
 
-function MainController($http, $scope, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
-  var mainCtrl = this;
+function RecordingController($http, $scope, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
+  var recCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
   var util = utilityService;
 
-  mainCtrl.clearLocalDb = clearLocalDb;
-  mainCtrl.getTokens = getTokens;
-  mainCtrl.record = record;
-  mainCtrl.stop = stop;
-  mainCtrl.sync = sync;
-  mainCtrl.test = test;
+  recCtrl.clearLocalDb = clearLocalDb;
+  recCtrl.getTokens = getTokens;
+  recCtrl.record = record;
+  recCtrl.stop = stop;
+  recCtrl.sync = sync;
+  recCtrl.test = test;
 
-  mainCtrl.msg = ''; // single debug/information msg
-  mainCtrl.curRec = recService.currentRecording;
+  recCtrl.isLoaded = false; // is page loaded?
 
-  mainCtrl.recordBtnDisabled = false;
-  mainCtrl.stopBtnDisabled = true;
-  mainCtrl.syncBtnDisabled = false;
+  recCtrl.msg = ''; // single debug/information msg
+  recCtrl.curRec = recService.currentRecording;
+
+  recCtrl.recordBtnDisabled = false;
+  recCtrl.stopBtnDisabled = true;
+  recCtrl.syncBtnDisabled = false;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
-  mainCtrl.displayToken = currentToken['token'];
+  recCtrl.displayToken = currentToken['token'];
 
   var start_time = new Date().toISOString(); // session start time
   var invalidTitle = util.getConstant('invalidTitle');
@@ -47,44 +49,48 @@ function MainController($http, $scope, deliveryService, localDbService, logger, 
   function activate() {
     // provide updateBindings function so recordingService can 
     // call that function when it needs to update bindings
-    recService.init(updateBindingsCallback, recordingCompleteCallback);    
+    recService.init(recServiceInitDoneCallback, updateBindingsCallback, recordingCompleteCallback);    
   }
 
   // dev function, clear the entire local forage database
   function clearLocalDb() {
     if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
-      mainCtrl.msg = 'Clearing entire local db...';
+      recCtrl.msg = 'Clearing entire local db...';
       dbService.clearLocalDb()
         .then(function(val){
           alert('Database cleared!');
-          mainCtrl.msg = 'Database cleared.';
+          recCtrl.msg = 'Database cleared.';
         }, util.stdErrCallback);
     }
   }
 
+  function recServiceInitDoneCallback(result) {
+    recCtrl.isLoaded = true;
+  }
+
   function getTokens() {
-    mainCtrl.msg = 'Getting tokens...';
+    recCtrl.msg = 'Getting tokens...';
 
     tokenService.getTokens(25).then(function(tokens){
       alert('Tokens acquired!');
-      mainCtrl.msg = 'Tokens acquired.';
+      recCtrl.msg = 'Tokens acquired.';
     },
     util.stdErrCallback);
   }
 
   function record() {
-    mainCtrl.msg = 'Recording now...';
+    recCtrl.msg = 'Recording now...';
 
-    mainCtrl.recordBtnDisabled = true;
+    recCtrl.recordBtnDisabled = true;
 
     recService.record();
 
-    mainCtrl.stopBtnDisabled = false;
+    recCtrl.stopBtnDisabled = false;
 
     currentToken = {'id':0, 'token':'Waiting for new token...'};
     // show token on record/newToken button hit
     tokenService.nextToken().then(function(token){
-      mainCtrl.displayToken = token['token'];
+      recCtrl.displayToken = token['token'];
       currentToken = token;
     },
     util.stdErrCallback);
@@ -98,18 +104,18 @@ function MainController($http, $scope, deliveryService, localDbService, logger, 
                         "type":'session', 
                         "data":
                         {
-                          "speakerId"      : (mainCtrl.speakerId || 1),
-                          "instructorId"   : (mainCtrl.instructorId || 1),
-                          "deviceId"       : (mainCtrl.deviceId || 1),
-                          "location"       : (mainCtrl.curLocation || 'Unknown.'),
+                          "speakerId"      : (recCtrl.speakerId || 1),
+                          "instructorId"   : (recCtrl.instructorId || 1),
+                          "deviceId"       : (recCtrl.deviceId || 1),
+                          "location"       : (recCtrl.curLocation || 'Unknown.'),
                           "start"          : start_time,
                           "end"            : end_time,
-                          "comments"       : (mainCtrl.comments || 'No comments.'),
+                          "comments"       : (recCtrl.comments || 'No comments.'),
                           "recordingsInfo" : {}
                         }
                       };
     sessionData['data']['recordingsInfo']
-                [mainCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
+                [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
 
     // attempt to send current recording
     send(sessionData)
@@ -119,10 +125,10 @@ function MainController($http, $scope, deliveryService, localDbService, logger, 
       }, 
       function error(response) {
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
-        var rec = mainCtrl.curRec[0];
+        var rec = recCtrl.curRec[0];
         var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
         if (rec.title !== invalidTitle && tokenId !== 0) {
-          mainCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
+          recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
           // only need blob and title from recording
           dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
         } else {
@@ -133,11 +139,11 @@ function MainController($http, $scope, deliveryService, localDbService, logger, 
       }
     );
 
-    mainCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
+    recCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
   }
 
   function send(sessionData) {
-    mainCtrl.msg = 'Sending recs...';
+    recCtrl.msg = 'Sending recs...';
 
     // and send it to remote server
     // test CORS is working
@@ -152,13 +158,13 @@ function MainController($http, $scope, deliveryService, localDbService, logger, 
     );
 
     // plump out the recording!
-    return delService.submitRecordings(sessionData, mainCtrl.curRec);
+    return delService.submitRecordings(sessionData, recCtrl.curRec);
   }
 
   function stop() {
-    mainCtrl.msg = 'Processing wav...';
+    recCtrl.msg = 'Processing wav...';
 
-    mainCtrl.stopBtnDisabled = true;
+    recCtrl.stopBtnDisabled = true;
     
     recService.stop();
   }
@@ -166,17 +172,17 @@ function MainController($http, $scope, deliveryService, localDbService, logger, 
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-    mainCtrl.msg = 'Syncing...';
+    recCtrl.msg = 'Syncing...';
 
-    mainCtrl.syncBtnDisabled = true;
+    recCtrl.syncBtnDisabled = true;
 
     delService.sendLocalSessions(syncDoneCallback);
   }
 
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
-    mainCtrl.msg = result ? 'Sync complete.' : 'Sync failed.';
-    mainCtrl.syncBtnDisabled = false;
+    recCtrl.msg = result ? 'Sync complete.' : 'Sync failed.';
+    recCtrl.syncBtnDisabled = false;
   }
 
   function test() {

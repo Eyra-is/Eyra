@@ -14,15 +14,29 @@
 var putOnline = false;
 var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
 
-angular.module('daApp', ['LocalForageModule'])
+angular.module('daApp', ['ngRoute', 'LocalForageModule'])
 
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
 .config( [
-      '$compileProvider',
-      function( $compileProvider )
-      {   
-          $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
-      }
+  '$compileProvider',
+  function( $compileProvider )
+  {   
+      $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+  }
+])
+
+.config([
+  '$routeProvider',
+  function($routeProvider) {
+    $routeProvider.
+      when('/recording', {
+        templateUrl: 'views/recording.html',
+        controller: 'RecordingController'
+      }).
+      otherwise({
+        redirectTo: '/recording'
+      });
+  }
 ])
 
 // fix some angular issue with <audio ng-src="{{var}}"></audio>

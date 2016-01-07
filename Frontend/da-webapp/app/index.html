@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Minimal app</title>
+    <title>D.A. App</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="app.css">
@@ -13,54 +13,15 @@
     <!--<script src="http://jsconsole.com/remote.js?51B729F1-B396-4E9A-9F1E-4B1B1F30F619"></script>-->
 </head>
 <body>
-    <div ng-controller="MainController as main">
-        <button type="button" ng-disabled="main.recordBtnDisabled" ng-click="main.record()">
-            Record
-        </button>
-        <button type="button" ng-disabled="main.stopBtnDisabled" ng-click="main.stop()">
-            Stop
-        </button>
-        <button type="button" ng-click="main.getTokens()">
-            Get tokens
-        </button>
-        <button type="button" ng-disabled="main.syncBtnDisabled" ng-click="main.sync()">
-            Sync
-        </button>
-        <button type="button" ng-click="main.clearLocalDb()">
-            Clear local db (dev)
-        </button>
-        <button type="button" ng-click="main.test()">
-            Test (dev)
-        </button>
-
-        <div id="playback">
-            <audio ng-src="{{main.curRec[0].url | trustUrl}}" controls></audio>
-            <a ng-href="{{main.curRec[0].url}}">{{main.curRec[0].title}}</a>
-        </div>
-
-        <div>{{main.msg}}</div>
-
-        </br></br>
-
-        <p>{{main.displayToken}}</p>
-
-        </br></br>
-
-        <h3>Session info</h3>
-        <div class="dataEntry">
-            <label><input type="text" ng-model="main.speakerId" placeholder="1"> speakerId</label>
-            <label><input type="text" ng-model="main.instructorId" placeholder="1"> instructorId</label>
-            <label><input type="text" ng-model="main.deviceId" placeholder="1"> deviceId</label>
-            <label><input type="text" ng-model="main.curLocation" placeholder="rvk iceland"> location</label>
-            <label><input type="text" ng-model="main.comments" placeholder="birds chirping in background"> comments</label>
-        </div>
-    </div>
+    
+    <div ng-view></div>
 
     <!-- In production use:
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
     -->
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
+
     <script src="bower_components/localforage/dist/localforage.js"></script>
     <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
 
@@ -68,12 +29,14 @@
     <script src="recorderjs/dist/recorder.js"></script>
 
     <script src="app.js"></script>
+
     <script src="logger.service.js"></script>
     <script src="utility.service.js"></script>
     <script src="localdb.service.js"></script>
     <script src="delivery.service.js"></script>
     <script src="recording.service.js"></script>
     <script src="token.service.js"></script>
-    <script src="main.controller.js"></script>
+    
+    <script src="recording.controller.js"></script>
 </body>
 </html>

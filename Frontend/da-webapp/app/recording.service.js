@@ -30,9 +30,10 @@ function recordingService(logger, utilityService) {
 
   //////////
 
-  function init(updateBindingsCallback, recordingCompleteCallback) {
+  function init(initCompleteCallback, updateBindingsCallback, recordingCompleteCallback) {
     recHandler.updateBindingsCallback = updateBindingsCallback;
     recHandler.recordingCompleteCallback = recordingCompleteCallback;
+    recHandler.initCompleteCallback = initCompleteCallback;
 
     // kick it off
     try {
@@ -51,6 +52,8 @@ function recordingService(logger, utilityService) {
     
     navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
       logger.error('No live audio input: ' + e);
+
+      recHandler.initCompleteCallback(false);
     });
   }
 
@@ -98,5 +101,7 @@ function recordingService(logger, utilityService) {
     
     recorder = new Recorder(input);
     logger.log('Recorder initialised.');
+
+    recHandler.initCompleteCallback(true);
   }
 }
