@@ -15,6 +15,7 @@ function utilityService(logger) {
   };
 
   utilityHandler.getConstant = getConstant;
+  utilityHandler.getIdxFromPath = getIdxFromPath;
   utilityHandler.stdErrCallback = stdErrCallback;
 
   return utilityHandler;

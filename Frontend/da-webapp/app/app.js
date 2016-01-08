@@ -55,7 +55,12 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
       when('/recording', {
         templateUrl: 'views/recording.html',
         controller: 'RecordingController',
-        controllerAs: 'recCtrl'
+        controllerAs: 'recCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
       }).
       when('/register-device', {
         templateUrl: 'views/register-device.html',
