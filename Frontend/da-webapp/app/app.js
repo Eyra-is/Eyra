@@ -31,7 +31,8 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
     $routeProvider.
       when('/recording', {
         templateUrl: 'views/recording.html',
-        controller: 'RecordingController'
+        controller: 'RecordingController',
+        controllerAs: 'recCtrl'
       }).
       otherwise({
         redirectTo: '/recording'
