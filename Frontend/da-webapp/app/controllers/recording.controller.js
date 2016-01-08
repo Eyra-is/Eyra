@@ -38,8 +38,6 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
   var start_time = new Date().toISOString(); // session start time
   var invalidTitle = util.getConstant('invalidTitle');
 
-  $scope.isLoaded = false; // is page loaded?
-
   activate();
 
   //////////
@@ -47,7 +45,8 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
   function activate() {
     // provide updateBindings function so recordingService can 
     // call that function when it needs to update bindings
-    recService.init(recServiceInitDoneCallback, updateBindingsCallback, recordingCompleteCallback);    
+    recService.setupCallbacks(updateBindingsCallback, recordingCompleteCallback);
+    $scope.isLoaded = true; // is page loaded?  
   }
 
   // dev function, clear the entire local forage database
@@ -136,10 +135,6 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
     recCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
   }
 
-  function recServiceInitDoneCallback(result) {
-    $scope.isLoaded = true;
-  }
-
   function send(sessionData) {
     recCtrl.msg = 'Sending recs...';
 
@@ -195,12 +190,16 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
       console.log(logs);
     });*/
 
-    $http.post(
+    /*$http.post(
       '//' + BACKENDURL + '/submit/session'
     ).then(function(response){
       console.log(response);
     },
-    util.stdErrCallback);
+    util.stdErrCallback);*/
+
+    tokenService.countAvailableTokens().then(function(n){
+      console.log(n);
+    });
   }
 
   function updateBindingsCallback() {

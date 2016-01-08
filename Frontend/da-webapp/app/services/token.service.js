@@ -16,12 +16,31 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
   var delService = deliveryService;
   var util = utilityService;
 
+  tokenHandler.countAvailableTokens = countAvailableTokens;
   tokenHandler.getTokens = getTokens;
   tokenHandler.nextToken = nextToken;
 
   return tokenHandler;
 
   //////////
+
+  // returns promise, number of tokens in local db, 0 if no tokens
+  function countAvailableTokens() {
+    var isAvail = $q.defer();
+    $localForage.getItem('minFreeTokenIdx').then(
+      function success(idx){
+        if (idx && idx >= 0) {
+          isAvail.resolve(idx + 1);
+        } else {
+          isAvail.resolve(0);
+        }
+      },
+      function error(response){
+        isAvail.reject(response);
+      }
+    );
+    return isAvail.promise;
+  }
 
   // returns promise, 
   function getTokens(numTokens) {

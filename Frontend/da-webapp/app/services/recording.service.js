@@ -13,6 +13,7 @@ function recordingService(logger, utilityService) {
 
   recHandler.init = init;
   recHandler.record = record;
+  recHandler.setupCallbacks = setupCallbacks;
   recHandler.stop = stop;
 
   // for some reason, putting this in an array, makes angular updates this correctly
@@ -30,9 +31,7 @@ function recordingService(logger, utilityService) {
 
   //////////
 
-  function init(initCompleteCallback, updateBindingsCallback, recordingCompleteCallback) {
-    recHandler.updateBindingsCallback = updateBindingsCallback;
-    recHandler.recordingCompleteCallback = recordingCompleteCallback;
+  function init(initCompleteCallback) {
     recHandler.initCompleteCallback = initCompleteCallback;
 
     // kick it off
@@ -60,6 +59,12 @@ function recordingService(logger, utilityService) {
   function record() {
     logger.log('Recording...');
     recorder && recorder.record();
+  }
+
+  // setup callbacks for any controller which needs to use this service
+  function setupCallbacks(updateBindingsCallback, recordingCompleteCallback) {
+    recHandler.updateBindingsCallback = updateBindingsCallback;
+    recHandler.recordingCompleteCallback = recordingCompleteCallback;
   }
 
   function stop() {
