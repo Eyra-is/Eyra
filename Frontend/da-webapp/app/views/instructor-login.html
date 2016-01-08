@@ -1,0 +1,14 @@
+<h1 ng-show="!isLoaded">Loading...</h1>
+
+<div ng-show="isLoaded">
+    <h3>Instructor login</h3>
+    <div class="dataEntry">
+        <label for="instructor-username">Username</label>
+        <input id="instructor-username" type="text" ng-model="iloginCtrl.username" placeholder="josh9">
+        <label for="password">Password</label>
+        <input id="password" type="password" ng-model="iloginCtrl.password">
+        <button type="button" ng-click="iloginCtrl.go()">
+            Ok
+        </button>
+    </div>
+</div>

@@ -17,26 +17,11 @@ var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
 angular.module('daApp', ['ngRoute', 'LocalForageModule'])
 
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
-.config( [
+.config([
   '$compileProvider',
   function( $compileProvider )
   {   
       $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
-  }
-])
-
-.config([
-  '$routeProvider',
-  function($routeProvider) {
-    $routeProvider.
-      when('/recording', {
-        templateUrl: 'views/recording.html',
-        controller: 'RecordingController',
-        controllerAs: 'recCtrl'
-      }).
-      otherwise({
-        redirectTo: '/recording'
-      });
   }
 ])
 
@@ -46,8 +31,57 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
   return function (url) {
     return $sce.trustAsResourceUrl(url);
   };
-}]);
+}])
 
+.config([
+  '$routeProvider',
+  function($routeProvider) {
+    $routeProvider.
+      when('/instructor-login', {
+        templateUrl: 'views/instructor-login.html',
+        controller: 'InstructorLoginController',
+        controllerAs: 'iloginCtrl'
+      }).
+      when('/main', {
+        templateUrl: 'views/main.html',
+        controller: 'MainController',
+        controllerAs: 'mainCtrl'
+      }).
+      when('/more', {
+        templateUrl: 'views/more.html',
+        controller: 'MoreController',
+        controllerAs: 'moreCtrl'
+      }).
+      when('/recording', {
+        templateUrl: 'views/recording.html',
+        controller: 'RecordingController',
+        controllerAs: 'recCtrl'
+      }).
+      when('/register-device', {
+        templateUrl: 'views/register-device.html',
+        controller: 'RegisterDeviceController',
+        controllerAs: 'regdCtrl'
+      }).
+      when('/set-instructor', {
+        templateUrl: 'views/set-instructor.html',
+        controller: 'SetInstructorController',
+        controllerAs: 'setiCtrl'
+      }).
+      when('/speaker-info', {
+        templateUrl: 'views/speaker-info.html',
+        controller: 'SpeakerInfoController',
+        controllerAs: 'sinfoCtrl'
+      }).
+      when('/start', {
+        templateUrl: 'views/start.html',
+        controller: 'StartController',
+        controllerAs: 'startCtrl'
+      }).
+      otherwise({
+        redirectTo: '/main'
+      });
+  }
+]);
 
 
 

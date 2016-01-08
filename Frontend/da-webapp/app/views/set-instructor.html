@@ -1,0 +1,18 @@
+<h1 ng-show="!isLoaded">Loading...</h1>
+
+<div ng-show="isLoaded">
+    <div class="dataEntry">
+        <label for="name">Full name</label>
+        <input id="name" type="text" ng-model="setiCtrl.name" placeholder="Jane Doe">
+        <label for="email">Email</label>
+        <input id="email" type="email" ng-model="setiCtrl.email" placeholder="email@example.com">
+        <!-- think about adding pattern="" attribute here for regex eval of phone no. -->
+        <label for="phone">Phone</label>
+        <input id="phone" type="tel" ng-model="setiCtrl.phone" placeholder="7777777">
+        <label for="address">Address</label>
+        <input id="address" type="text" ng-model="setiCtrl.address" placeholder="21 Example Lane">
+        <button type="button" ng-click="setiCtrl.go()">
+            Ok
+        </button>
+    </div>
+</div>

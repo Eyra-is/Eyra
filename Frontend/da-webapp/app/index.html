@@ -14,7 +14,7 @@
 </head>
 <body>
     
-    <div ng-view></div>
+    <div ng-view><h1>Loading...</h1></div>
 
     <!-- In production use:
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
@@ -30,13 +30,20 @@
 
     <script src="app.js"></script>
 
-    <script src="logger.service.js"></script>
-    <script src="utility.service.js"></script>
-    <script src="localdb.service.js"></script>
-    <script src="delivery.service.js"></script>
-    <script src="recording.service.js"></script>
-    <script src="token.service.js"></script>
+    <script src="services/logger.service.js"></script>
+    <script src="services/utility.service.js"></script>
+    <script src="services/localdb.service.js"></script>
+    <script src="services/delivery.service.js"></script>
+    <script src="services/recording.service.js"></script>
+    <script src="services/token.service.js"></script>
     
-    <script src="recording.controller.js"></script>
+    <script src="controllers/instructorlogin.controller.js"></script>
+    <script src="controllers/main.controller.js"></script>
+    <script src="controllers/more.controller.js"></script>
+    <script src="controllers/recording.controller.js"></script>
+    <script src="controllers/registerdevice.controller.js"></script>
+    <script src="controllers/setinstructor.controller.js"></script>
+    <script src="controllers/speakerinfo.controller.js"></script>
+    <script src="controllers/start.controller.js"></script>
 </body>
 </html>

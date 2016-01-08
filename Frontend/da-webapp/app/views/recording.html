@@ -1,46 +1,44 @@
-<div>
-    <h1 ng-show="!recCtrl.isLoaded">Loading...</h1>
+<h1 ng-show="!isLoaded">Loading...</h1>
 
-    <div ng-show="recCtrl.isLoaded">
-        <button type="button" ng-disabled="recCtrl.recordBtnDisabled" ng-click="recCtrl.record()">
-            Record
-        </button>
-        <button type="button" ng-disabled="recCtrl.stopBtnDisabled" ng-click="recCtrl.stop()">
-            Stop
-        </button>
-        <button type="button" ng-click="recCtrl.getTokens()">
-            Get tokens
-        </button>
-        <button type="button" ng-disabled="recCtrl.syncBtnDisabled" ng-click="recCtrl.sync()">
-            Sync
-        </button>
-        <button type="button" ng-click="recCtrl.clearLocalDb()">
-            Clear local db (dev)
-        </button>
-        <button type="button" ng-click="recCtrl.test()">
-            Test (dev)
-        </button>
+<div ng-show="isLoaded">
+    <button type="button" ng-disabled="recCtrl.recordBtnDisabled" ng-click="recCtrl.record()">
+        Record
+    </button>
+    <button type="button" ng-disabled="recCtrl.stopBtnDisabled" ng-click="recCtrl.stop()">
+        Stop
+    </button>
+    <button type="button" ng-click="recCtrl.getTokens()">
+        Get tokens
+    </button>
+    <button type="button" ng-disabled="recCtrl.syncBtnDisabled" ng-click="recCtrl.sync()">
+        Sync
+    </button>
+    <button type="button" ng-click="recCtrl.clearLocalDb()">
+        Clear local db (dev)
+    </button>
+    <button type="button" ng-click="recCtrl.test()">
+        Test (dev)
+    </button>
 
-        <div id="playback">
-            <audio ng-src="{{recCtrl.curRec[0].url | trustUrl}}" controls></audio>
-            <a ng-href="{{recCtrl.curRec[0].url}}">{{recCtrl.curRec[0].title}}</a>
-        </div>
+    <div id="playback">
+        <audio ng-src="{{recCtrl.curRec[0].url | trustUrl}}" controls></audio>
+        <a ng-href="{{recCtrl.curRec[0].url}}">{{recCtrl.curRec[0].title}}</a>
+    </div>
 
-        <div>{{recCtrl.msg}}</div>
+    <div>{{recCtrl.msg}}</div>
 
-        </br></br>
+    </br></br>
 
-        <p>{{recCtrl.displayToken}}</p>
+    <p>{{recCtrl.displayToken}}</p>
 
-        </br></br>
+    </br></br>
 
-        <h3>Session info</h3>
-        <div class="dataEntry">
-            <label><input type="text" ng-model="recCtrl.speakerId" placeholder="1"> speakerId</label>
-            <label><input type="text" ng-model="recCtrl.instructorId" placeholder="1"> instructorId</label>
-            <label><input type="text" ng-model="recCtrl.deviceId" placeholder="1"> deviceId</label>
-            <label><input type="text" ng-model="recCtrl.curLocation" placeholder="rvk iceland"> location</label>
-            <label><input type="text" ng-model="recCtrl.comments" placeholder="birds chirping in background"> comments</label>
-        </div>
+    <h3>Session info</h3>
+    <div class="dataEntry">
+        <label><input type="text" ng-model="recCtrl.speakerId" placeholder="1"> speakerId</label>
+        <label><input type="text" ng-model="recCtrl.instructorId" placeholder="1"> instructorId</label>
+        <label><input type="text" ng-model="recCtrl.deviceId" placeholder="1"> deviceId</label>
+        <label><input type="text" ng-model="recCtrl.curLocation" placeholder="rvk iceland"> location</label>
+        <label><input type="text" ng-model="recCtrl.comments" placeholder="birds chirping in background"> comments</label>
     </div>
 </div>

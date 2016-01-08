@@ -1,0 +1,13 @@
+<h1 ng-show="!isLoaded">Loading...</h1>
+
+<div ng-show="isLoaded">
+    <button type="button" ng-click="moreCtrl.addSpeaker()">
+        Add speaker
+    </button>
+    <button type="button" ng-click="moreCtrl.setInstructor()">
+        Set instructor
+    </button>
+    <button type="button" ng-click="moreCtrl.registerDevice()">
+        Register device
+    </button>
+</div>

@@ -1,5 +1,3 @@
-// recording controller for application
-
 'use strict';
 
 angular.module('daApp')
@@ -27,8 +25,6 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
   recCtrl.sync = sync;
   recCtrl.test = test;
 
-  recCtrl.isLoaded = false; // is page loaded?
-
   recCtrl.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
 
@@ -41,6 +37,8 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
 
   var start_time = new Date().toISOString(); // session start time
   var invalidTitle = util.getConstant('invalidTitle');
+
+  $scope.isLoaded = false; // is page loaded?
 
   activate();
 
@@ -62,10 +60,6 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
           recCtrl.msg = 'Database cleared.';
         }, util.stdErrCallback);
     }
-  }
-
-  function recServiceInitDoneCallback(result) {
-    recCtrl.isLoaded = true;
   }
 
   function getTokens() {
@@ -140,6 +134,10 @@ function RecordingController($http, $scope, deliveryService, localDbService, log
     );
 
     recCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
+  }
+
+  function recServiceInitDoneCallback(result) {
+    $scope.isLoaded = true;
   }
 
   function send(sessionData) {
