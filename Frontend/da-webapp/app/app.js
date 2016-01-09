@@ -40,7 +40,12 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
       when('/instructor-login', {
         templateUrl: 'views/instructor-login.html',
         controller: 'InstructorLoginController',
-        controllerAs: 'iloginCtrl'
+        controllerAs: 'iloginCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
       }).
       when('/main', {
         templateUrl: 'views/main.html',
@@ -50,7 +55,12 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
       when('/more', {
         templateUrl: 'views/more.html',
         controller: 'MoreController',
-        controllerAs: 'moreCtrl'
+        controllerAs: 'moreCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
       }).
       when('/recording', {
         templateUrl: 'views/recording.html',
@@ -65,22 +75,42 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
       when('/register-device', {
         templateUrl: 'views/register-device.html',
         controller: 'RegisterDeviceController',
-        controllerAs: 'regdCtrl'
+        controllerAs: 'regdCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
       }).
       when('/set-instructor', {
         templateUrl: 'views/set-instructor.html',
         controller: 'SetInstructorController',
-        controllerAs: 'setiCtrl'
+        controllerAs: 'setiCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
       }).
       when('/speaker-info', {
         templateUrl: 'views/speaker-info.html',
         controller: 'SpeakerInfoController',
-        controllerAs: 'sinfoCtrl'
+        controllerAs: 'sinfoCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
       }).
       when('/start', {
         templateUrl: 'views/start.html',
         controller: 'StartController',
-        controllerAs: 'startCtrl'
+        controllerAs: 'startCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
       }).
       otherwise({
         redirectTo: '/main'

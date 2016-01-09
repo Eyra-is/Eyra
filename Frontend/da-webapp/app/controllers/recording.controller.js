@@ -4,6 +4,7 @@ angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
 RecordingController.$inject = ['$http', '$scope',  // DEBUG HTTP
+                          'dataService',
                           'deliveryService',
                           'localDbService',
                           'logger',
@@ -11,7 +12,7 @@ RecordingController.$inject = ['$http', '$scope',  // DEBUG HTTP
                           'tokenService',
                           'utilityService'];
 
-function RecordingController($http, $scope, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
+function RecordingController($http, $scope, dataService, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
   var recCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;

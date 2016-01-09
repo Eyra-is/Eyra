@@ -40,7 +40,7 @@ function MainController($location, $q, $rootScope, $scope, logger, recordingServ
 
     $q.all(initPromises).then(function(tasksComplete){
       $rootScope.appInitialized = true;
-      logger.log('App initialized.asd');
+      logger.log('App initialized.');
 
       $scope.isLoaded = true;
     },
