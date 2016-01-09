@@ -13,7 +13,8 @@ function localDbMiscService($localForage, $q, logger, utilityService) {
   var dbHandler = {};
   var util = utilityService;
 
-  dbHandler.userExist = userExist;
+  dbHandler.setSpeaker = setSpeaker;
+  dbHandler.speakerExist = speakerExist;
 
   var speakersPrefix = 'speakers/';
 
@@ -21,21 +22,25 @@ function localDbMiscService($localForage, $q, logger, utilityService) {
 
   //////////
 
-  // returns user info if he exists, otherwise rejects promise
-  function userExist(username) {
-    var user = $q.defer();
-    $localForage.getItem(speakersPrefix + username).then(
+  function setSpeaker(speakerName, speakerInfo) {
+    return $localForage.setItem(speakersPrefix + speakerName, speakerInfo);
+  }
+
+  // returns speaker info if he exists, otherwise rejects promise
+  function speakerExist(speakerName) {
+    var speakerPromise = $q.defer();
+    $localForage.getItem(speakersPrefix + speakerName).then(
       function success(speaker){
         if (speaker) {
-          user.resolve(speaker);
+          speakerPromise.resolve(speaker);
         } else {
-          user.reject('Speaker doesn\t exist.');
+          speakerPromise.reject('Speaker doesn\t exist.');
         }
       },
       function error(data){
-        user.reject(data);
+        speakerPromise.reject(data);
       }
     );
-    return user.promise;
+    return speakerPromise.promise;
   }
 }

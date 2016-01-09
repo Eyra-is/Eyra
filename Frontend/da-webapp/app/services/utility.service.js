@@ -12,7 +12,7 @@ function utilityService(logger) {
   var CONSTANTS = { 
     // sentinel value for invalid recordings
     'invalidTitle' : 'no_data.wav',
-    'defaultUsername' : 'user'
+    'defaultSpeakerName' : 'speaker'
   };
 
   utilityHandler.getConstant = getConstant;

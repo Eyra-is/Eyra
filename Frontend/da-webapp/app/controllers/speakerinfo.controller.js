@@ -3,11 +3,12 @@
 angular.module('daApp')
 .controller('SpeakerInfoController', SpeakerInfoController);
 
-SpeakerInfoController.$inject = ['$location', '$scope', 'dataService', 'utilityService'];
+SpeakerInfoController.$inject = ['$location', '$scope', 'dataService', 'localDbMiscService', 'utilityService'];
 
-function SpeakerInfoController($location, $scope, dataService, utilityService) {
+function SpeakerInfoController($location, $scope, dataService, localDbMiscService, utilityService) {
   var sinfoCtrl = this;
   var util = utilityService;
+  var dbService = localDbMiscService;
   
   sinfoCtrl.go = go;
 
@@ -15,10 +16,10 @@ function SpeakerInfoController($location, $scope, dataService, utilityService) {
   sinfoCtrl.gender = '';
   sinfoCtrl.dob = '';
   sinfoCtrl.height = '';
-  var username = dataService.get('username'); // username should be set from start.html
-  if (!username || username === '') {
-    logger.error('No username. Setting default.');
-    username = util.getConstant('defaultUsername');
+  var speakerName = dataService.get('speakerName'); // speakerName should be set from start.html
+  if (!speakerName || speakerName === '') {
+    logger.error('No speaker name. Setting default.');
+    speakerName = util.getConstant('defaultSpeakerName');
   }
 
   sinfoCtrl.genders = ['Male', 'Female', 'Other'];
@@ -47,9 +48,16 @@ function SpeakerInfoController($location, $scope, dataService, utilityService) {
                         'dob':sinfoCtrl.dob,
                         'height':sinfoCtrl.height};
     var setData = dataService.set('speakerInfo', speakerInfo);
-    if (!setData) {
-      logger.error('Failed setting speaker info: ' + JSON.stringify(speakerInfo));
-    }
+    if (!setData) logger.error('Failed setting speaker info. This shouldn\'t happen.');
+
+    // set user in local db async
+    dbService.setSpeaker(speakerName, speakerInfo).then(
+      angular.noop,
+      function error(value) {
+        logger.error( 'Failed setting speaker in local db, speakerName: ' + speakerName + 
+                      ', speakerInfo: ' + JSON.stringify(speakerInfo) + ', with error: ' + value);
+      }
+    );
 
     $location.path('/recording');
   }
