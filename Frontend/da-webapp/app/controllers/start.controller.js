@@ -29,8 +29,12 @@ function StartController($location, $scope, dataService, localDbMiscService, log
     var setData = dataService.set('speakerName', startCtrl.speakerName);
     if (!setData) logger.error('Error writing speaker name: ' + startCtrl.speakerName);
 
+    setData = dataService.set('comments', startCtrl.comments);
+    if (!setData) logger.error('Error writing comments: ' + startCtrl.comments);
+
     setData = dataService.set('doneBefore', startCtrl.doneBefore);
     if (!setData) logger.error('Error writing doneBefore: ' + startCtrl.doneBefore);
+
 
     dbService.speakerExist(startCtrl.speakerName).then(
       function exists(speaker){

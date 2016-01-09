@@ -3,8 +3,10 @@
 <div ng-show="isLoaded">
     <h3>Enter your info</h3>
     <div class="dataEntry">
-        <label for="speakerName">Username</label>
+        <label for="speakerName">Username *</label>
         <input id="speakerName" type="text" ng-model="startCtrl.speakerName" placeholder="josh9">
+        <label for="comments">Session comments</label>
+        <input id="comments" type="text" ng-model="startCtrl.comments" placeholder="Cars driving close by.">
         <label for="doneBefore">Done this before?</label>
         <input id="doneBefore" type="checkbox" ng-model="startCtrl.doneBefore">
         <button type="button" ng-click="startCtrl.go()">
