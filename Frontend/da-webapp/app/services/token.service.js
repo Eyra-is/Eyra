@@ -56,10 +56,12 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
         if (tokens && tokens.length > 0) {
           saveTokens(tokens, tokensPromise); // save to local forage
         } else {
-          logger.error('Tokens from server not on right format or empty.');
+          tokensPromise.reject('Tokens from server not on right format or empty.');
         }
       },
-      util.stdErrCallback
+      function error(data) {
+        tokensPromise.reject(data);
+      }
     );
     return tokensPromise.promise;
   }
@@ -118,8 +120,12 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
       $q.all(finishedPromises).then(function(val){
         tokensPromise.resolve(tokens);
       },
-      util.stdErrCallback);
+      function error(data){
+        tokensPromise.reject(data);
+      });
     },
-    util.stdErrCallback);
+    function error(data){
+        tokensPromise.reject(data);
+    });
   }
 }

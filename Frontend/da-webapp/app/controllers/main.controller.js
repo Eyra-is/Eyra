@@ -22,10 +22,13 @@ function MainController($location, $q, $rootScope, $scope, logger, recordingServ
   mainCtrl.more = more;
 
   $scope.isLoaded = false;
+  $scope.msg = 'Loading...';
 
   // promises for everything that needs to be done for app to count as initialized
-  var initPromises = {'recorder' : $q.defer(), 
-                      'tokens'   : $q.defer()};
+  var recorderPromise = $q.defer();
+  var tokensPromise = $q.defer();
+  var initPromises = {'recorder' : recorderPromise.promise, 
+                      'tokens'   : tokensPromise.promise};
 
   activate();
 
@@ -42,25 +45,35 @@ function MainController($location, $q, $rootScope, $scope, logger, recordingServ
       $scope.isLoaded = true;
     },
     // this means our app didn't initialize.. we should probably do something if that happens
-    util.stdErrCallback);
+    function error(data){
+      $scope.msg = 'App failed to initialize. Try refreshing the page and check your connection.';
+      util.stdErrCallback(data);
+    });
   }
 
   function getTokensIfNeeded() {
     tokenService.countAvailableTokens().then(function(numTokens){
       if (numTokens < 50) {
         tokenService.getTokens(100).then(function(tokens){
-          initPromises.tokens.resolve(true);
+          tokensPromise.resolve(true);
         },
-        util.stdErrCallback);
+        function error(data){
+          tokensPromise.reject(data);
+        });
+      } else {
+        // we are still okay, just didn't get any tokens, so resolve not reject here.
+        tokensPromise.resolve(false);
       }
-    }, util.stdErrCallback);
+    }, function error(data){
+      tokensPromise.reject(data);
+    });
   }
 
   function recServiceInitDoneCallback(result) {
     if (result)
-      initPromises.recorder.resolve(true);
+      recorderPromise.resolve(true);
     else
-      initPromises.recorder.reject('Recorder not initialized.');
+      recorderPromise.reject('Recorder not initialized.');
   }
 
   // NAVIGATION //
@@ -70,6 +83,6 @@ function MainController($location, $q, $rootScope, $scope, logger, recordingServ
   }
 
   function more() {
-    $location.path('/more')
+    $location.path('/more');
   }
 }
