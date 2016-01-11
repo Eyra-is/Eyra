@@ -15,37 +15,99 @@ class DbHandler:
 
         self.mysql = MySQL(app)
 
-    # instructorData = look at format in the client-server API
-    def processInstructorData(self, instructorData):
-        name, email, phone, address = \
-            None, None, None, None
-        instructorId = None
-
+    # name is i.e. 'instructor' and is a representation of the data, for errors and such
+    # data is a json object whose keys will be used as table column names and those values
+    #   will be inserted into table
+    # returns the id of the newly inserted row or errors in the format
+    #   dict(msg=id or msg, statusCode=htmlStatusCode)
+    #
+    # Example:
+    #    name='device'
+    #    data = {'imei':245, 'userAgent':'Mozilla'}
+    #    table = 'device'
+    #
+    #    In which case, this function will 
+    #    insert into device (imei, userAgent) 
+    #                values ('245','Mozilla')
+    #    and return said rows newly generated id.
+    #
+    # WARNING: appends the keys of data straight into a python string using %
+    #          so at least this should be sanitized.
+    def processGeneralData(self, name, data, table):
+        keys = []
+        vals = []
+        dataId = None
         try:
-            instructorData = json.loads(instructorData)
+            data = json.loads(data)
 
-            name = instructorData['name']
-            email = instructorData['email']
-            phone = instructorData['phone']
-            address = instructorData['address']
+            for key, val in data.items(): # use data.iteritems() for python 2.7
+                keys.append(key)
+                vals.append(val)
         except (KeyError, TypeError, ValueError) as e:
-            msg = 'Instructor data not on correct format, aborting.'
+            msg = '%s data not on correct format, aborting.' % name
             log(msg, e)
             return dict(msg=msg, statusCode=400)
-        
+
         try: 
-            # insert into instructor
+            # insert into table
             cur = self.mysql.connection.cursor()
 
-            # create new instructor entry in database
-            cur.execute('INSERT INTO instructor (name, email, phone, address) \
-                         VALUES (%s, %s, %s, %s)', 
-                        (name, email, phone, address))
-            # get the newly auto generated instructor.id 
-            cur.execute('SELECT id FROM instructor WHERE \
-                         name=%s AND email=%s AND phone=%s AND address=%s',
-                        (name, email, phone, address))
-            instructorId = cur.fetchone()[0] # fetchone returns a tuple
+            # make our query something like (with 4 key/value pairs)
+            # 'INSERT INTO %s (%s, %s, %s, %s) \
+            #              VALUES (%s, %s, %s, %s)',
+            # depending on number of data keys/values 
+            queryStr = 'INSERT INTO %s ('
+
+            queryStrMid = '' # since we can reuse the (%s,%s,...)
+            for i in range(len(keys)):
+                queryStrMid += '%s'
+                if (i != len(keys) - 1):
+                    queryStrMid += ', '
+
+            queryStr += queryStrMid
+            queryStr += ') '
+
+            # input the keys first, because we don't want the '' quotes that cur.execute
+            #   automatically puts there
+            queryStr = queryStr % tuple([table] + keys)
+
+            queryStr += 'VALUES ('
+            queryStr += queryStrMid
+            queryStr += ')'
+
+            # make the replacement tuple which is set in place of the %s's in the query
+            queryTuple = tuple(vals)
+
+            cur.execute(queryStr, queryTuple)
+
+            # get the newly auto generated id
+
+            # create our query something like
+            # 'SELECT id FROM %s WHERE \
+            #              %s=%s AND %s=%s AND %s=%s AND %s=%s'
+            # but now the order is WHERE key=val AND key1=val1 and so
+            # we have to interleave our lists instead of appending them 
+            # to get the correct order 
+            interleavedList = []
+            for i in range(len(keys)):
+                interleavedList.append(keys[i])
+                # just a hack, because of the quote thing mentioned above
+                #   will be replaces with vals in query
+                interleavedList.append('%s') 
+            
+            queryStr = 'SELECT id FROM %s WHERE '
+            for i in range(len(keys)):
+                queryStr += '%s=%s'
+                if (i != len(keys) - 1):
+                    queryStr += ' AND '
+
+            queryStr = queryStr % tuple([table] + interleavedList)
+
+            log(queryStr)
+            log(queryTuple)
+
+            cur.execute(queryStr, queryTuple)
+            dataId = cur.fetchone()[0] # fetchone returns a tuple
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
@@ -55,12 +117,19 @@ class DbHandler:
             log(msg, e)
             return dict(msg=msg, statusCode=500)
 
-        if instructorId is None:
-            msg = 'Couldn\'t get instructor id.'
+        if dataId is None:
+            msg = 'Couldn\'t get %s id.' % name
             log(msg)
             return dict(msg=msg, statusCode=500)
         else:
-            return dict(msg='{"instructorId":'+str(instructorId)+'}', statusCode=200)
+            return dict(msg='{"%sId":' % name + str(dataId) + '}', statusCode=200)
+
+    # instructorData = look at format in the client-server API
+    def processInstructorData(self, instructorData):
+        return self.processGeneralData('instructor', instructorData, 'instructor')
+
+    def processDeviceData(self, deviceData):
+        return self.processGeneralData('device', deviceData, 'device')
 
     # jsonData = look at format in the client-server API
     # recordings = an array of file objects representing the submitted recordings

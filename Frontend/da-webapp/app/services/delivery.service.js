@@ -17,6 +17,7 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
   reqHandler.sendLocalSessions = sendLocalSessions;
   // API
   reqHandler.getTokens = getTokens;
+  reqHandler.submitDevice = submitDevice;
   reqHandler.submitInstructor = submitInstructor;
   reqHandler.submitRecordings = submitRecordings;
   reqHandler.testServerGet = testServerGet;
@@ -100,20 +101,32 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
       });
   }
 
-  function submitInstructor(instructorData) {
+  function submitDevice(device) {
+    return submitGeneralJson(device, '/submit/general/device');
+  }
+
+  function submitGeneralJson(jsonData, url) {
     var fd = new FormData();
     var validSubmit = false;
     try {
-      fd.append('json', JSON.stringify(instructorData));
+      fd.append('json', JSON.stringify(jsonData));
       validSubmit = true;
     } catch (e) {
       logger.error(e);
     }
-    return $http.post('//'+BACKENDURL+'/submit/instructor', fd, {
-        // this is so angular sets the correct headers/info itself
-        transformRequest: angular.identity,
-        headers: {'Content-Type': undefined}
-      });
+    if (validSubmit) {
+      return $http.post('//'+BACKENDURL+url, fd, {
+          // this is so angular sets the correct headers/info itself
+          transformRequest: angular.identity,
+          headers: {'Content-Type': undefined}
+        });
+    } else {
+      return $q.reject('Error submitting data.');
+    }
+  }
+
+  function submitInstructor(instructorData) {
+    return submitGeneralJson(instructorData, '/submit/general/instructor');
   }
 
   // sessionData is on the json format depicted in client-server API.

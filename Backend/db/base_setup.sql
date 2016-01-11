@@ -16,9 +16,8 @@ create table token (
 );
 create table device (
     id int not null auto_increment primary key,
-    hardware varchar(255) not null,
-    os varchar(50) not null,
-    software varchar(255) not null
+    userAgent varchar(255) not null,
+    imei varchar(255) -- phone hardcoded ID
 );
 create table instructor (
     id int not null auto_increment primary key,

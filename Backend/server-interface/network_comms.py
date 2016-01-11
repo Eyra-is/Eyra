@@ -7,6 +7,9 @@
 # Add code to calculate duration of wav files if needed
 
 # Make CORS more secure, e.g. not origins='*' but from a specific domain only.
+# Because of the abstraction in db_handler, the keys have to be put manually into the 
+#   string without being semi prepared, which means at least the keys of the data should be
+#   somewhat sanitized
 
 # ***************************************************************************************** #
 
@@ -27,23 +30,52 @@ cors = CORS(app,    resources=r'/submit/*',
                     origins='*',
                     methods='GET, POST, OPTIONS')
 
-@app.route('/submit/instructor', methods=['POST'])
-def submit_instructor():
-    instructorData = None
-    if request.method == 'POST':
-        log('Data: ' + str(request.form) + '\n')
+# supports everything in the client-server API
+# right now, /submit/general/{device,instuctor}
+@app.route('/submit/general/<method>', methods=['POST'])
+def submit_general(method):
+    processingFunction = None
+    if method=='device':
+        processingFunction = dbHandler.processDeviceData
+    elif method=='instructor':
+        processingFunction = dbHandler.processInstructorData
 
-        if 'json' in request.form:
-            instructorData = request.form['json']
-        else:
-            msg = 'No instructor data found in submission, aborting.'
-            log(msg)
-            return msg, 400
+    if method is not None:
+        data = None
+        if request.method == 'POST':
+            log('Data: ' + str(request.form) + '\n')
 
-        result = dbHandler.processInstructorData(instructorData)
-        return result['msg'], result['statusCode']
+            if 'json' in request.form:
+                data = request.form['json']
+            else:
+                msg = 'No %s data found in submission, aborting.' % method
+                log(msg)
+                return msg, 400
 
-    return 'Unexpected error.', 500
+            result = processingFunction(data)
+            return result['msg'], result['statusCode']
+
+        return 'Unexpected error.', 500
+
+    return 'Not a valid submission method url.', 404
+
+# @app.route('/submit/instructor', methods=['POST'])
+# def submit_instructor():
+#     instructorData = None
+#     if request.method == 'POST':
+#         log('Data: ' + str(request.form) + '\n')
+
+#         if 'json' in request.form:
+#             instructorData = request.form['json']
+#         else:
+#             msg = 'No instructor data found in submission, aborting.'
+#             log(msg)
+#             return msg, 400
+
+#         result = dbHandler.processInstructorData(instructorData)
+#         return result['msg'], result['statusCode']
+
+#     return 'Unexpected error.', 500
 
 @app.route('/submit/session', methods=['GET', 'POST'])
 def submit_session():

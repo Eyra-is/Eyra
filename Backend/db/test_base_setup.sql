@@ -9,10 +9,10 @@ values
     ('Mhm'),
     ('Akkúrat'),
     ('Þannig er það');
-insert into device (hardware, os, software)
+insert into device (userAgent, imei)
 values
-    ('hp mini TURBO edition', 'debian 5.41', 'chrome browser 37'),
-    ('super cluster', 'homebrew OS', 'netscape');
+    ('Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30', '35145120840121'),
+    ('Mozilla/5.0 (X11; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0 Iceweasel/38.4.0', '');
 insert into instructor (name, email, phone, address)
 values
     ('muhammad', 'muhammadTOUCHE@jq.is', '+012-515-8989', 'australia'),

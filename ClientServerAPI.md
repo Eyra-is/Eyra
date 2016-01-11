@@ -29,6 +29,7 @@ Current implementation:
             }
         }
 ```
+  * The 'json' key is the key in the form data itself.
   * Each tokenId must match it's corresponding recording filename including extension.
   * Server looks at sessions with the same info (minus end time of course), and if it is the same, it simply adds the recording to that session, and updates the end time of that session.
 * The recordings in the submission (request.files) should be stored with keys 'rec0','rec1',..,'recn'
@@ -56,7 +57,7 @@ Where X is number of tokens.
 3. submitInstructor
 ------------
 
-*Submit instructor data, receives in return some way to ID said instructor.
+*Submit instructor data, receives in return some way to ID said instructor.*
 
 Current implementation:
 * json format of submission:
@@ -76,5 +77,23 @@ Current implementation:
 ```
 * url:
 ```
-        /submit/instructor
+        /submit/general/instructor
+```
+
+4. submitDevice
+------------
+
+*Submit device data.*
+
+Current implementation:
+* json format of submission:
+```
+'json': {
+            "userAgent" : "Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30",
+            "imei" : "35145120840121"
+        }
+```
+* url:
+```
+        /submit/general/device
 ```
