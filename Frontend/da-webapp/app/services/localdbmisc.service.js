@@ -13,14 +13,20 @@ function localDbMiscService($localForage, $q, logger, utilityService) {
   var dbHandler = {};
   var util = utilityService;
 
+  dbHandler.setInstructorId = setInstructorId;
   dbHandler.setSpeaker = setSpeaker;
   dbHandler.speakerExist = speakerExist;
 
+  var instructorIdPath = 'instructorId';
   var speakersPrefix = 'speakers/';
 
   return dbHandler;
 
   //////////
+
+  function setInstructorId(instructorId) {
+    return $localForage.setItem(instructorIdPath, instructorId);
+  }
 
   function setSpeaker(speakerName, speakerInfo) {
     return $localForage.setItem(speakersPrefix + speakerName, speakerInfo);

@@ -15,6 +15,53 @@ class DbHandler:
 
         self.mysql = MySQL(app)
 
+    # instructorData = look at format in the client-server API
+    def processInstructorData(self, instructorData):
+        name, email, phone, address = \
+            None, None, None, None
+        instructorId = None
+
+        try:
+            instructorData = json.loads(instructorData)
+
+            name = instructorData['name']
+            email = instructorData['email']
+            phone = instructorData['phone']
+            address = instructorData['address']
+        except (KeyError, TypeError, ValueError) as e:
+            msg = 'Instructor data not on correct format, aborting.'
+            log(msg, e)
+            return dict(msg=msg, statusCode=400)
+        
+        try: 
+            # insert into instructor
+            cur = self.mysql.connection.cursor()
+
+            # create new instructor entry in database
+            cur.execute('INSERT INTO instructor (name, email, phone, address) \
+                         VALUES (%s, %s, %s, %s)', 
+                        (name, email, phone, address))
+            # get the newly auto generated instructor.id 
+            cur.execute('SELECT id FROM instructor WHERE \
+                         name=%s AND email=%s AND phone=%s AND address=%s',
+                        (name, email, phone, address))
+            instructorId = cur.fetchone()[0] # fetchone returns a tuple
+
+            # only commit if we had no exceptions until this point
+            self.mysql.connection.commit()
+
+        except MySQLError as e:
+            msg = 'Database error.'
+            log(msg, e)
+            return dict(msg=msg, statusCode=500)
+
+        if instructorId is None:
+            msg = 'Couldn\'t get instructor id.'
+            log(msg)
+            return dict(msg=msg, statusCode=500)
+        else:
+            return dict(msg='{"instructorId":'+str(instructorId)+'}', statusCode=200)
+
     # jsonData = look at format in the client-server API
     # recordings = an array of file objects representing the submitted recordings
     # returns a dict (msg=msg, statusCode=200,400,..)

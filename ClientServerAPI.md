@@ -9,7 +9,7 @@
 Current implementation:
 * json format for session data:
 ```
-        {    
+'json': {    
             "type":"session",
             "data": 
             {
@@ -52,3 +52,29 @@ Current implementation:
         /submit/gettokens/X
 ```
 Where X is number of tokens.
+
+3. submitInstructor
+------------
+
+*Submit instructor data, receives in return some way to ID said instructor.
+
+Current implementation:
+* json format of submission:
+```
+'json': {
+            "name" : "Jane Doe",
+            "email" : "email@example.com",
+            "phone" : 9999999,
+            "address" : 23 Roseberry Lane
+        }
+```
+* json format of response:
+```
+        {
+            "instructorId" : 5
+        }
+```
+* url:
+```
+        /submit/instructor
+```

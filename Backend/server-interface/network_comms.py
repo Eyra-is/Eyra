@@ -17,8 +17,6 @@ import json
 
 from util import log
 
-
-
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024 # limit at 2 GB
 
@@ -29,9 +27,27 @@ cors = CORS(app,    resources=r'/submit/*',
                     origins='*',
                     methods='GET, POST, OPTIONS')
 
+@app.route('/submit/instructor', methods=['POST'])
+def submit_instructor():
+    instructorData = None
+    if request.method == 'POST':
+        log('Data: ' + str(request.form) + '\n')
+
+        if 'json' in request.form:
+            instructorData = request.form['json']
+        else:
+            msg = 'No instructor data found in submission, aborting.'
+            log(msg)
+            return msg, 400
+
+        result = dbHandler.processInstructorData(instructorData)
+        return result['msg'], result['statusCode']
+
+    return 'Unexpected error.', 500
+
 @app.route('/submit/session', methods=['GET', 'POST'])
 def submit_session():
-    jsonData = None
+    sessionData = None
     recordings = []
     if request.method == 'GET':
         msg = 'GET success baby'
@@ -42,7 +58,7 @@ def submit_session():
         log('Headers: ' + str(request.headers))
 
         if 'json' in request.form:
-            jsonData = request.form['json']
+            sessionData = request.form['json']
         else:
             msg = 'No metadata found, aborting.'
             log(msg)
@@ -64,7 +80,7 @@ def submit_session():
             log(msg)
             return msg, 400
 
-        result = dbHandler.processSessionData(jsonData, recordings)
+        result = dbHandler.processSessionData(sessionData, recordings)
         return result['msg'], result['statusCode']
 
     return 'Unexpected error.', 500

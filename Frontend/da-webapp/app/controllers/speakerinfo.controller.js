@@ -43,22 +43,26 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
 
   function go() {
     // set info used by recording
-    // these are all dropdown lists, so no need for sanitation here.
-    var speakerInfo = { 'gender':sinfoCtrl.gender,
-                        'dob':sinfoCtrl.dob,
-                        'height':sinfoCtrl.height};
-    var setData = dataService.set('speakerInfo', speakerInfo);
-    if (!setData) logger.error('Failed setting speaker info. This shouldn\'t happen.');
+    // these are all dropdown lists, so only need to check for empty fields.
+    if (sinfoCtrl.gender === '' || sinfoCtrl.dob === '' || sinfoCtrl.height === '') {
+      $scope.msg = 'Please fill out all entries.';
+    } else {
+      var speakerInfo = { 'gender':sinfoCtrl.gender,
+                          'dob':sinfoCtrl.dob,
+                          'height':sinfoCtrl.height};
+      var setData = dataService.set('speakerInfo', speakerInfo);
+      if (!setData) logger.error('Failed setting speaker info. This shouldn\'t happen.');
 
-    // set user in local db async
-    dbService.setSpeaker(speakerName, speakerInfo).then(
-      angular.noop,
-      function error(value) {
-        logger.error( 'Failed setting speaker in local db, speakerName: ' + speakerName + 
-                      ', speakerInfo: ' + JSON.stringify(speakerInfo) + ', with error: ' + value);
-      }
-    );
+      // set user in local db async
+      dbService.setSpeaker(speakerName, speakerInfo).then(
+        angular.noop,
+        function error(value) {
+          logger.error( 'Failed setting speaker in local db, speakerName: ' + speakerName + 
+                        ', speakerInfo: ' + JSON.stringify(speakerInfo) + ', with error: ' + value);
+        }
+      );
 
-    $location.path('/recording');
+      $location.path('/recording');
+    }
   }
 }

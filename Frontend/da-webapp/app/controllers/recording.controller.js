@@ -185,11 +185,11 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
         logger.log('Aw yeah, '+value);
       else
         logger.log('Nope');
-    });
+    });*/
 
     logger.getLogs().then(function(logs){
       console.log(logs);
-    });*/
+    });
 
     /*$http.post(
       '//' + BACKENDURL + '/submit/session'

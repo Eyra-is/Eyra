@@ -35,7 +35,8 @@ function StartController($location, $scope, dataService, localDbMiscService, log
     setData = dataService.set('doneBefore', startCtrl.doneBefore);
     if (!setData) logger.error('Error writing doneBefore: ' + startCtrl.doneBefore);
 
-
+    // this is a little bit slow for a go button, consider pulling up all previous users on app load
+    // and store in memory so this would be faster (can save info async, but navigate straight away)
     dbService.speakerExist(startCtrl.speakerName).then(
       function exists(speaker){
         var speakerInfo = { 'gender':speaker.gender,

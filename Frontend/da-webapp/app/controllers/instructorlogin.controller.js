@@ -16,6 +16,6 @@ function InstructorLoginController($location, $scope) {
   //////////
 
   function go() {
-    $location.path('/recording');
+    $location.path('/set-instructor');
   }
 }

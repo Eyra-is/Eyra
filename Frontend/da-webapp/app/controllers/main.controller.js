@@ -21,20 +21,25 @@ function MainController($location, $q, $rootScope, $scope, logger, recordingServ
   mainCtrl.start = start;
   mainCtrl.more = more;
 
-  $scope.isLoaded = false;
   $scope.msg = 'Loading...';
+  $scope.isLoaded = false;
 
-  // promises for everything that needs to be done for app to count as initialized
-  var recorderPromise = $q.defer();
-  var tokensPromise = $q.defer();
-  var initPromises = {'recorder' : recorderPromise.promise, 
+  var recorderPromise, tokensPromise, initPromises;
+  if (!$rootScope.appInitialized) {
+    // promises for everything that needs to be done for app to count as initialized
+    recorderPromise = $q.defer();
+    tokensPromise = $q.defer();
+    initPromises = {  'recorder' : recorderPromise.promise, 
                       'tokens'   : tokensPromise.promise};
 
-  activate();
+    init();
+  } else {
+    $scope.isLoaded = true;
+  }
 
   //////////
 
-  function activate() {
+  function init() {
     recService.init(recServiceInitDoneCallback);
     getTokensIfNeeded();
 

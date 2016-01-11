@@ -13,8 +13,11 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
   var dbService = localDbService;
   var util = utilityService;
 
-  reqHandler.getTokens = getTokens;
+  // LOCAL DB
   reqHandler.sendLocalSessions = sendLocalSessions;
+  // API
+  reqHandler.getTokens = getTokens;
+  reqHandler.submitInstructor = submitInstructor;
   reqHandler.submitRecordings = submitRecordings;
   reqHandler.testServerGet = testServerGet;
 
@@ -97,7 +100,22 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
       });
   }
 
-  // invalid title is just a sentinel value for a 'no_data' wav recording.
+  function submitInstructor(instructorData) {
+    var fd = new FormData();
+    var validSubmit = false;
+    try {
+      fd.append('json', JSON.stringify(instructorData));
+      validSubmit = true;
+    } catch (e) {
+      logger.error(e);
+    }
+    return $http.post('//'+BACKENDURL+'/submit/instructor', fd, {
+        // this is so angular sets the correct headers/info itself
+        transformRequest: angular.identity,
+        headers: {'Content-Type': undefined}
+      });
+  }
+
   // sessionData is on the json format depicted in client-server API.
   // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
   function submitRecordings(sessionData, recordings) {
@@ -116,7 +134,7 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
         }
       }
     } catch (e) {
-      util.stdErrCallback(e);
+      logger.error(e);
     }
     if (validSubmit) {
       return $http.post('//'+BACKENDURL+'/submit/session', fd, {

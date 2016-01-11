@@ -23,8 +23,10 @@ create table device (
 create table instructor (
     id int not null auto_increment primary key,
     name varchar(255) not null,
+    email varchar(255) not null,
+    phone varchar(50) not null,
     address varchar(255) not null,
-    phone varchar(50) not null
+    unique (name, email)
 );
 create table speaker (
     id int not null auto_increment primary key,
