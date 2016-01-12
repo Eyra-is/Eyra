@@ -111,15 +111,19 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
     sessionData['data']['recordingsInfo']
                 [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
 
-    // attempt to send current recording
-    send(sessionData)
+    // attempt to send current recording, 
+    // remember to take a copy of the reference to curRec, 
+    //   because they might change when it is actually sent (this is async)
+    //   or more likely when it is saved locally at least.
+    var oldCurRec = recCtrl.curRec[0];
+    send(sessionData, oldCurRec)
     .then(
       function success(response) {
         logger.log(response); // DEBUG
       }, 
       function error(response) {
         // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
-        var rec = recCtrl.curRec[0];
+        var rec = oldCurRec;
         var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
         if (rec.title !== invalidTitle && tokenId !== 0) {
           recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
@@ -136,7 +140,9 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
     recCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
   }
 
-  function send(sessionData) {
+  // oldCurRec is a reference to the possibly previous recCtrl.curRec, because
+  //   it might have changed when it is sent (although almost impossible atm)
+  function send(sessionData, oldCurRec) {
     recCtrl.msg = 'Sending recs...';
 
     // and send it to remote server
@@ -152,7 +158,7 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
     );
 
     // plump out the recording!
-    return delService.submitRecordings(sessionData, recCtrl.curRec);
+    return delService.submitRecordings(sessionData, [oldCurRec]);
   }
 
   function stop() {
