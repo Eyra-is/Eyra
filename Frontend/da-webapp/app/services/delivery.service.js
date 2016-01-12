@@ -6,11 +6,12 @@
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q', 'logger', 'localDbService', 'utilityService'];
+deliveryService.$inject = ['$http', '$q', 'logger', 'localDbMiscService', 'localDbService', 'utilityService'];
 
-function deliveryService($http, $q, logger, localDbService, utilityService) {
+function deliveryService($http, $q, logger, localDbMiscService, localDbService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
+  var dbMiscService = localDbMiscService;
   var util = utilityService;
 
   // LOCAL DB
@@ -102,6 +103,11 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
   }
 
   function submitDevice(device) {
+    // make sure always to send the user agent string, even in case of some erraneous programming
+    //   before this function call
+    if (!device.userAgent) {
+      device.userAgent = navigator.userAgent;
+    }
     return submitGeneralJson(device, '/submit/general/device');
   }
 
@@ -157,6 +163,30 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
         });
     }
     return $q.reject('No valid recordings in submission, not sending anything.');
+  }
+
+  // here speakerData does not necessarily contain the optional imei, therefore
+  //   always check if we can get that and submit before we send.
+  function submitSpeaker(speakerData){
+    var submission = $q.defer();
+    dbMiscService.getDevice().then(
+      function success(device){
+        if (device && device['imei'] !== '') {
+          speakerData['deviceImei'] = device['imei'];
+        }
+        $q.resolve(
+          submitGeneralJson(speakerData, '/submit/general/speaker')
+        );
+      },
+      function error(response) {
+        // still resolve, just without device imei
+        $q.resolve(
+          submitGeneralJson(speakerData, '/submit/general/speaker')
+        );
+        logger.error(response);
+      }
+    );
+    return submission.promise;
   }
 
   // send a simple get request to the server, just to see if we have connection

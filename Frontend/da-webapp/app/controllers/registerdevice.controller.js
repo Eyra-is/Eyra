@@ -33,8 +33,6 @@ function RegisterDeviceController($location, $scope, deliveryService, localDbMis
                     }
       delService.submitDevice(device).then(
         function success(response) {
-          dbService.setDevice(device)
-            .then(angular.noop, util.stdErrCallback);
 
           alert('Device info submitted!');
 
@@ -45,6 +43,8 @@ function RegisterDeviceController($location, $scope, deliveryService, localDbMis
           logger.error(response);
         }
       );
+      dbService.setDevice(device)
+        .then(angular.noop, util.stdErrCallback);
     } else {
       logger.error('Unexpected error, no imei typed.');
     }

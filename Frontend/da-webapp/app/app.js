@@ -6,6 +6,7 @@
 // CONSIDER moving logic in recordingsCallback() to a service or something, 
 //   and out of main controller 
 // Think about if we want to have a limit on how many sessions are sent in "sync"
+// Think about adding underscore for service private functions
 
 // ***************************************************************************************** //
 

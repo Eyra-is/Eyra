@@ -17,7 +17,7 @@ create table token (
 create table device (
     id int not null auto_increment primary key,
     userAgent varchar(255) not null,
-    imei varchar(255) -- phone hardcoded ID
+    imei varchar(255) -- phone hardcoded ID, have to manually make this unique
 );
 create table instructor (
     id int not null auto_increment primary key,
@@ -29,8 +29,11 @@ create table instructor (
 );
 create table speaker (
     id int not null auto_increment primary key,
-    height int not null,
-    birthdate varchar(25) not null
+    name varchar(255) not null, -- just like a username
+    gender varchar(25) not null,
+    height varchar(25) not null,
+    dob varchar(25) not null, -- date of birth
+    deviceImei varchar(255) -- optional id of device speaker was made on
 );
 create table session (
     id int not null auto_increment primary key,

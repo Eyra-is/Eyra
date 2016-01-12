@@ -1,6 +1,8 @@
 // handles local forage actions regarding instructor, speaker and device setting
 
 // stores speakers thusly: speakers/username = {'gender':gender, 'dob':dob, 'height':height}
+// stores instructors as: instructorId = 13
+// stores devices as: device = {'userAgent':'user agent string', 'imei':12363563456}
 
 'use strict';
 
@@ -13,8 +15,11 @@ function localDbMiscService($localForage, $q, logger, utilityService) {
   var dbHandler = {};
   var util = utilityService;
 
+  dbHandler.getDevice = getDevice;
   dbHandler.setDevice = setDevice;
+  dbHandler.getInstructorId = getInstructorId;
   dbHandler.setInstructorId = setInstructorId;
+  dbHandler.getSpeaker = getSpeaker;
   dbHandler.setSpeaker = setSpeaker;
   dbHandler.speakerExist = speakerExist;
 
@@ -26,13 +31,25 @@ function localDbMiscService($localForage, $q, logger, utilityService) {
 
   //////////
 
+  function getDevice() {
+    return $localForage.getItem(devicePath);
+  }
+
   // device on format as in client-server API
   function setDevice(device) {
     return $localForage.setItem(devicePath, device);  
   }
 
+  function getInstructorId() {
+    return $localForage.getItem(instructorIdPath);
+  }
+
   function setInstructorId(instructorId) {
     return $localForage.setItem(instructorIdPath, instructorId);
+  }
+
+  function getSpeaker(speakerName) {
+    return $localForage.getItem(speakersPrefix + speakerName);
   }
 
   function setSpeaker(speakerName, speakerInfo) {
@@ -47,7 +64,7 @@ function localDbMiscService($localForage, $q, logger, utilityService) {
         if (speaker) {
           speakerPromise.resolve(speaker);
         } else {
-          speakerPromise.reject('Speaker doesn\t exist.');
+          speakerPromise.reject('Speaker doesn\'t exist.');
         }
       },
       function error(data){

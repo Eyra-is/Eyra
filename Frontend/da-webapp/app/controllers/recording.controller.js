@@ -9,10 +9,11 @@ RecordingController.$inject = ['$http', '$scope',  // DEBUG HTTP
                           'localDbService',
                           'logger',
                           'recordingService',
+                          'sessionService',
                           'tokenService',
                           'utilityService'];
 
-function RecordingController($http, $scope, dataService, deliveryService, localDbService, logger, recordingService, tokenService, utilityService) {
+function RecordingController($http, $scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
   var recCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
@@ -36,7 +37,7 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
   recCtrl.displayToken = currentToken['token'];
 
-  var start_time = new Date().toISOString(); // session start time
+  sessionService.setStartTime(new Date().toISOString());
   var invalidTitle = util.getConstant('invalidTitle');
 
   activate();
@@ -92,49 +93,37 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
 
   // function passed to our recording service, notified when a recording has been finished
   function recordingCompleteCallback() {
-    var end_time = new Date().toISOString();
-    // these scope variables connected to user input obviously have to be sanitized.
-    var sessionData = {                                                                  
-                        "type":'session', 
-                        "data":
-                        {
-                          "speakerId"      : (recCtrl.speakerId || 1),
-                          "instructorId"   : (recCtrl.instructorId || 1),
-                          "deviceId"       : (recCtrl.deviceId || 1),
-                          "location"       : (recCtrl.curLocation || 'Unknown.'),
-                          "start"          : start_time,
-                          "end"            : end_time,
-                          "comments"       : (recCtrl.comments || 'No comments.'),
-                          "recordingsInfo" : {}
-                        }
-                      };
-    sessionData['data']['recordingsInfo']
-                [recCtrl.curRec[0].title] = { 'tokenId' : currentToken['id'] };
-
-    // attempt to send current recording, 
+    // attempt to send current recording
     // remember to take a copy of the reference to curRec, 
     //   because they might change when it is actually sent (this is async)
     //   or more likely when it is saved locally at least.
     var oldCurRec = recCtrl.curRec[0];
-    send(sessionData, oldCurRec)
-    .then(
-      function success(response) {
-        logger.log(response); // DEBUG
-      }, 
-      function error(response) {
-        // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
-        var rec = oldCurRec;
-        var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
-        if (rec.title !== invalidTitle && tokenId !== 0) {
-          recCtrl.msg = 'Submitting recording to server was unsuccessful, saving locally...';
-          // only need blob and title from recording
-          dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
-        } else {
-          logger.error('Invalid token in submission.');
-        }
 
-        util.stdErrCallback(response);
-      }
+    // get the data for the session to be sent to the server or saved locally on failure
+    sessionService.assembleSessionData(oldCurRec, currentToken['id']).then(
+      function success(sessionData) {
+        send(sessionData, oldCurRec)
+        .then(
+          function success(response) {
+            logger.log(response); // DEBUG
+          }, 
+          function error(response) {
+            // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
+            var rec = oldCurRec;
+            var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];
+            if (rec.title !== invalidTitle && tokenId !== 0) {
+              logger.log('Submitting recording to server was unsuccessful, saving locally...');
+              // only need blob and title from recording
+              dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
+            } else {
+              logger.error('Invalid token in submission.');
+            }
+
+            logger.error(response);
+          }
+        );
+      },
+      util.stdErrCallback
     );
 
     recCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.

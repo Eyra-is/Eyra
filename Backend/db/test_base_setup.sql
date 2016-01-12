@@ -17,11 +17,11 @@ insert into instructor (name, email, phone, address)
 values
     ('muhammad', 'muhammadTOUCHE@jq.is', '+012-515-8989', 'australia'),
     ('john', 'example@john.com', '+0156-823459', 'britain');
-insert into speaker (height, birthdate)
+insert into speaker (name, gender, height, dob, deviceImei)
 values
-    (150, '1991/10/10'),
-    (190, '2000/01/01'),
-    (220, '1970/12/12');
+    ('tom', 'male', '150-155', '1991-1995', '3485686875'),
+    ('tommy', 'female', '160-170', '1991-1995', '9465467467'),
+    ('thomas', 'male', '150-155', '1986-1990', '24523453254');
 insert into session (speakerId, instructorId, deviceId, location, start, end, comments)
 values 
     (1, 1, 1, 'Norway etc.', '2015/10/1 15:00:00.00', '2015/10/1 15:00:30.05', 'much wind'),

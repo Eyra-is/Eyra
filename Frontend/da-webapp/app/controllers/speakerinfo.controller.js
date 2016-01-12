@@ -50,7 +50,7 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
       var speakerInfo = { 'gender':sinfoCtrl.gender,
                           'dob':sinfoCtrl.dob,
                           'height':sinfoCtrl.height};
-      var setData = dataService.set('speakerInfo', speakerInfo);
+      var setData = dataService.set('speakerInfo', speakerInfo); // set in ram
       if (!setData) logger.error('Failed setting speaker info. This shouldn\'t happen.');
 
       // set user in local db async
