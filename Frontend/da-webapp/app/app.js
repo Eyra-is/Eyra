@@ -7,6 +7,7 @@
 //   and out of main controller 
 // Think about if we want to have a limit on how many sessions are sent in "sync"
 // Think about adding underscore for service private functions
+// Think about sending the token itself instead of the id (in case the id's get mixed up later in the db)
 
 // ***************************************************************************************** //
 

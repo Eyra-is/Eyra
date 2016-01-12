@@ -47,7 +47,8 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
     if (sinfoCtrl.gender === '' || sinfoCtrl.dob === '' || sinfoCtrl.height === '') {
       $scope.msg = 'Please fill out all entries.';
     } else {
-      var speakerInfo = { 'gender':sinfoCtrl.gender,
+      var speakerInfo = { 'name':speakerName,
+                          'gender':sinfoCtrl.gender,
                           'dob':sinfoCtrl.dob,
                           'height':sinfoCtrl.height};
       var setData = dataService.set('speakerInfo', speakerInfo); // set in ram

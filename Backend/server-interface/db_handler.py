@@ -15,6 +15,8 @@ class DbHandler:
 
         self.mysql = MySQL(app)
 
+    # inserts data into appropriate table
+    #
     # name is i.e. 'instructor' and is a representation of the data, for errors and such
     # data is a json object whose keys will be used as table column names and those values
     #   will be inserted into table
@@ -33,12 +35,13 @@ class DbHandler:
     #
     # WARNING: appends the keys of data straight into a python string using %
     #          so at least this should be sanitized.
-    def processGeneralData(self, name, data, table):
+    def insertGeneralData(self, name, data, table):
         keys = []
         vals = []
         dataId = None
         try:
-            data = json.loads(data)
+            if isinstance(data, str):
+                data = json.loads(data)
 
             for key, val in data.items(): # use data.iteritems() for python 2.7
                 keys.append(key)
@@ -126,10 +129,90 @@ class DbHandler:
 
     # instructorData = look at format in the client-server API
     def processInstructorData(self, instructorData):
-        return self.processGeneralData('instructor', instructorData, 'instructor')
+        return self.insertGeneralData('instructor', instructorData, 'instructor')
 
     def processDeviceData(self, deviceData):
-        return self.processGeneralData('device', deviceData, 'device')
+        # we have to make sure not to insert device with same IMEI
+        #   as is already in the database if so. Otherwise, we create new device
+        deviceImei = None
+        try:
+            if isinstance(deviceData, str):
+                deviceData = json.loads(deviceData)
+            deviceImei = deviceData['imei']
+        except (TypeError, ValueError) as e:
+            msg = 'Device data not on correct format, aborting.'
+            log(msg, e)
+            return dict(msg=msg, statusCode=400)
+        except (KeyError) as e:
+            # we don't care if device has no ['imei']
+            pass
+
+        if deviceImei is not None and deviceImei != '':
+            try: 
+                cur = self.mysql.connection.cursor()
+
+                # firstly, check if this device already exists, if so, update end time, otherwise add device
+                cur.execute('SELECT id FROM device WHERE imei=%s', (deviceImei,)) # have to pass in a tuple, with only one parameter
+                deviceId = cur.fetchone()
+                if (deviceId is None):
+                    # no device with this imei in database, insert it
+                    return self.insertGeneralData('device', deviceData, 'device')
+                else:
+                    # device already exists, return it
+                    return dict(msg='{"deviceId":' + str(deviceId) + '}', statusCode=200)
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+
+        # no imei present, wouldn't be able to recognize the device
+        return self.insertGeneralData('device', deviceData, 'device')
+
+    def processSpeakerData(self, speakerData):
+        # we have to make sure not to insert device with same IMEI
+        #   as is already in the database if so. Otherwise, we create new device
+        name, gender, height, dob, deviceImei = None, None, None, None, None
+        try:
+            if isinstance(speakerData, str):
+                speakerData = json.loads(speakerData)
+            name = speakerData['name']
+            gender = speakerData['gender']
+            height = speakerData['height']
+            dob = speakerData['dob']
+        except (KeyError, TypeError, ValueError) as e:
+            msg = 'Speaker data not on correct format, aborting.'
+            log(msg, e)
+            return dict(msg=msg, statusCode=400)
+
+        try:
+            deviceImei = speakerData['deviceImei']
+        except (KeyError) as e:
+            # we don't care if speaker has no ['imei']
+            pass
+
+        if deviceImei is not None and deviceImei != '':
+            try: 
+                cur = self.mysql.connection.cursor()
+
+                # firstly, check if this speaker already exists, if so, update end time, otherwise add speaker
+                cur.execute('SELECT id FROM speaker WHERE \
+                         name=%s AND gender=%s AND height=%s AND dob=%s AND deviceImei=%s',
+                        (name, gender, height, dob, deviceImei))
+                speakerId = cur.fetchone() # it's possible there are more than 1 speaker, in which case just fetch anyone, 
+                                           # it's the statistical data that matters anyway
+                if (speakerId is None):
+                    # no speaker with this info in database, insert it
+                    return self.insertGeneralData('speaker', speakerData, 'speaker')
+                else:
+                    # speaker already exists, return it
+                    return dict(msg='{"speakerId":' + str(speakerId) + '}', statusCode=200)
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+
+        # no imei present, wouldn't be able to recognize the speaker
+        return self.insertGeneralData('speaker', speakerData, 'speaker')
 
     # jsonData = look at format in the client-server API
     # recordings = an array of file objects representing the submitted recordings
@@ -138,7 +221,6 @@ class DbHandler:
         RECORDINGS_ROOT = 'recordings' # root path to recordings
         jsonDecoded = None
         sessionId = None
-        output = ''
 
         # vars from jsonData
         speakerId, instructorId, deviceId, location, start, end, comments = \
@@ -152,13 +234,21 @@ class DbHandler:
         # extract json data
         try:
             jsonDecoded = json.loads(jsonData)
-            output += str(jsonDecoded)
+            log(jsonDecoded)
      
             if jsonDecoded['type'] == 'session':
                 jsonDecoded = jsonDecoded['data']
-                speakerId = jsonDecoded['speakerId']
+                speakerId = json.loads(
+                                self.processSpeakerData(
+                                    jsonDecoded['speakerInfo']
+                                )['msg']
+                            )['speakerId']
                 instructorId = jsonDecoded['instructorId']
-                deviceId = jsonDecoded['deviceId']
+                deviceId =  json.loads(
+                                self.processDeviceData(
+                                    jsonDecoded['deviceInfo']
+                                )['msg']
+                            )['deviceId']
                 location = jsonDecoded['location']
                 start = jsonDecoded['start']
                 end = jsonDecoded['end']

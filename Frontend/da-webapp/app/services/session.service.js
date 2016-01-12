@@ -82,8 +82,6 @@ function sessionService($q, dataService, localDbMiscService, logger) {
   //   getGeneralInfo('speakerInfo', $q.defer(), dbService.getSpeaker, 'josh9')
   // would resolve returnPromise with either data from dataService or localDb
   function getGeneralInfo(key, returnPromise, dbServiceFunction, dbServiceArg) {
-    console.log(key);
-    console.log(dbServiceFunction);
     // start by checking if we have key-data in memory
     var keyInfo = dataService.get(key);
     if (keyInfo) {

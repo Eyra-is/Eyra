@@ -18,12 +18,12 @@ Current implementation:
                                         'gender': female,
                                         'dob': '1991-1995',
                                         'height':'151-156'
-                                        [, 'deviceImei':435763486]
+                                        [, 'deviceImei':"435763486"]
                                     },
                 "instructorId"   : 1,
                 "deviceInfo"     :  {
-                                        "userAgent" : "Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30",
-                                        "imei" : "35145120840121"
+                                        "userAgent" : "Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30"
+                                        [, "imei" : "435763486"]
                                     },
                 "location"       : "reykjavik iceland",
                 "start"          : "2015/12/12 15:00:00",
