@@ -37,22 +37,25 @@ function StartController($location, $scope, dataService, localDbMiscService, log
 
     // this is a little bit slow for a go button, consider pulling up all previous users on app load
     // and store in memory so this would be faster (can save info async, but navigate straight away)
-    dbService.speakerExist(startCtrl.speakerName).then(
-      function exists(speaker){
-        var speakerInfo = { 'gender':speaker.gender,
-                            'dob':speaker.dob,
-                            'height':speaker.height};
-        dataService.set('speakerInfo', speakerInfo);
+    dbService.getSpeaker(startCtrl.speakerName).then(
+      function success(speakerInfo){
+        if (speakerInfo) {
+          dataService.set('speakerInfo', speakerInfo);
 
-        if (startCtrl.doneBefore) {
-          // speaker has done this before, and is in db, go record!
-          $location.path('/recording');
+          if (startCtrl.doneBefore) {
+            // speaker has done this before, and is in db, go record!
+            $location.path('/recording');
+          } else {
+            $scope.msg = 'Speaker already in database. Choose a different name, unless you have done this before on this device, then tick the box.';
+          }
         } else {
-          $scope.msg = 'Speaker already in database. Choose a different name, unless you have done this before on this device, then tick the box.';
+          // speaker doesn't exist
+          $location.path('/speaker-info');
         }
       },
-      function notExists(value){
-        $location.path('/speaker-info');
+      function error(value){
+        $scope.msg = 'Something went wrong.';
+        logger.error(value);
       }
     );
   }

@@ -51,12 +51,14 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
                           'gender':sinfoCtrl.gender,
                           'dob':sinfoCtrl.dob,
                           'height':sinfoCtrl.height};
-      var setData = dataService.set('speakerInfo', speakerInfo); // set in ram
-      if (!setData) logger.error('Failed setting speaker info. This shouldn\'t happen.');
+      dataService.set('speakerInfo', speakerInfo); // set in ram
 
       // set user in local db async
       dbService.setSpeaker(speakerName, speakerInfo).then(
-        angular.noop,
+        function success(info){
+          // on success, set the info in dataservice, with now updated speakerInfo['deviceImei']
+          if (info) dataService.set('speakerInfo', info);
+        },
         function error(value) {
           logger.error( 'Failed setting speaker in local db, speakerName: ' + speakerName + 
                         ', speakerInfo: ' + JSON.stringify(speakerInfo) + ', with error: ' + value);

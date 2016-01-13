@@ -21,7 +21,6 @@ function localDbMiscService($localForage, $q, dataService, logger, utilityServic
   dbHandler.setInstructorId = setInstructorId;
   dbHandler.getSpeaker = getSpeaker;
   dbHandler.setSpeaker = setSpeaker;
-  dbHandler.speakerExist = speakerExist;
 
   var devicePath = 'device';
   var instructorIdPath = 'instructorId';
@@ -80,23 +79,5 @@ function localDbMiscService($localForage, $q, dataService, logger, utilityServic
       );
       return res.promise;
     }
-  }
-
-  // returns speaker info if he exists, otherwise rejects promise
-  function speakerExist(speakerName) {
-    var speakerPromise = $q.defer();
-    $localForage.getItem(speakersPrefix + speakerName).then(
-      function success(speaker){
-        if (speaker) {
-          speakerPromise.resolve(speaker);
-        } else {
-          speakerPromise.reject('Speaker doesn\'t exist.');
-        }
-      },
-      function error(data){
-        speakerPromise.reject(data);
-      }
-    );
-    return speakerPromise.promise;
   }
 }

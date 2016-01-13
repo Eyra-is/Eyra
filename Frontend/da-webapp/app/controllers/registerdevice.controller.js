@@ -31,7 +31,7 @@ function RegisterDeviceController($location, $scope, dataService, deliveryServic
       var device =  {
                       'userAgent':navigator.userAgent,
                       'imei':regdCtrl.imei
-                    }
+                    };
       dataService.set('device', device);
       delService.submitDevice(device).then(
         function success(response) {
@@ -48,7 +48,7 @@ function RegisterDeviceController($location, $scope, dataService, deliveryServic
       dbService.setDevice(device)
         .then(angular.noop, util.stdErrCallback);
     } else {
-      logger.error('Unexpected error, no imei typed.');
+      logger.error('Error, no imei typed.');
     }
   }
 }

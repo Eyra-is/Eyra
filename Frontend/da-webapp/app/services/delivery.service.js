@@ -126,9 +126,8 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
           transformRequest: angular.identity,
           headers: {'Content-Type': undefined}
         });
-    } else {
-      return $q.reject('Error submitting data.');
     }
+    return $q.reject('Error submitting data.');
   }
 
   function submitInstructor(instructorData) {
