@@ -16,20 +16,24 @@ create table token (
 );
 create table device (
     id int not null auto_increment primary key,
-    hardware varchar(255) not null,
-    os varchar(50) not null,
-    software varchar(255) not null
+    userAgent varchar(255) not null,
+    imei varchar(255) not null default '' -- phone hardcoded ID, have to manually make this unique, optional
 );
 create table instructor (
     id int not null auto_increment primary key,
     name varchar(255) not null,
+    email varchar(255) not null,
+    phone varchar(50) not null,
     address varchar(255) not null,
-    phone varchar(50) not null
+    unique (name, email)
 );
 create table speaker (
     id int not null auto_increment primary key,
-    height int not null,
-    birthdate varchar(25) not null
+    name varchar(255) not null, -- just like a username
+    gender varchar(25) not null,
+    height varchar(25) not null,
+    dob varchar(25) not null, -- date of birth
+    deviceImei varchar(255) not null default '' -- optional id of device speaker was made on
 );
 create table session (
     id int not null auto_increment primary key,
@@ -39,7 +43,7 @@ create table session (
     location varchar(255) not null,
     start varchar(50) not null,
     end varchar(50) not null,
-    comments text,
+    comments text not null default '',
     foreign key (speakerId) references speaker(id),
     foreign key (instructorId) references instructor(id),
     foreign key (deviceId) references device(id),

@@ -13,6 +13,7 @@ function recordingService(logger, utilityService) {
 
   recHandler.init = init;
   recHandler.record = record;
+  recHandler.setupCallbacks = setupCallbacks;
   recHandler.stop = stop;
 
   // for some reason, putting this in an array, makes angular updates this correctly
@@ -30,9 +31,8 @@ function recordingService(logger, utilityService) {
 
   //////////
 
-  function init(updateBindingsCallback, recordingCompleteCallback) {
-    recHandler.updateBindingsCallback = updateBindingsCallback;
-    recHandler.recordingCompleteCallback = recordingCompleteCallback;
+  function init(initCompleteCallback) {
+    recHandler.initCompleteCallback = initCompleteCallback;
 
     // kick it off
     try {
@@ -51,12 +51,20 @@ function recordingService(logger, utilityService) {
     
     navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
       logger.error('No live audio input: ' + e);
+
+      recHandler.initCompleteCallback(false);
     });
   }
 
   function record() {
     logger.log('Recording...');
     recorder && recorder.record();
+  }
+
+  // setup callbacks for any controller which needs to use this service
+  function setupCallbacks(updateBindingsCallback, recordingCompleteCallback) {
+    recHandler.updateBindingsCallback = updateBindingsCallback;
+    recHandler.recordingCompleteCallback = recordingCompleteCallback;
   }
 
   function stop() {
@@ -98,5 +106,7 @@ function recordingService(logger, utilityService) {
     
     recorder = new Recorder(input);
     logger.log('Recorder initialised.');
+
+    recHandler.initCompleteCallback(true);
   }
 }

@@ -16,12 +16,31 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
   var delService = deliveryService;
   var util = utilityService;
 
+  tokenHandler.countAvailableTokens = countAvailableTokens;
   tokenHandler.getTokens = getTokens;
   tokenHandler.nextToken = nextToken;
 
   return tokenHandler;
 
   //////////
+
+  // returns promise, number of tokens in local db, 0 if no tokens
+  function countAvailableTokens() {
+    var isAvail = $q.defer();
+    $localForage.getItem('minFreeTokenIdx').then(
+      function success(idx){
+        if (idx && idx >= 0) {
+          isAvail.resolve(idx + 1);
+        } else {
+          isAvail.resolve(0);
+        }
+      },
+      function error(response){
+        isAvail.reject(response);
+      }
+    );
+    return isAvail.promise;
+  }
 
   // returns promise, 
   function getTokens(numTokens) {
@@ -37,10 +56,12 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
         if (tokens && tokens.length > 0) {
           saveTokens(tokens, tokensPromise); // save to local forage
         } else {
-          logger.error('Tokens from server not on right format or empty.');
+          tokensPromise.reject('Tokens from server not on right format or empty.');
         }
       },
-      util.stdErrCallback
+      function error(data) {
+        tokensPromise.reject(data);
+      }
     );
     return tokensPromise.promise;
   }
@@ -99,8 +120,12 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
       $q.all(finishedPromises).then(function(val){
         tokensPromise.resolve(tokens);
       },
-      util.stdErrCallback);
+      function error(data){
+        tokensPromise.reject(data);
+      });
     },
-    util.stdErrCallback);
+    function error(data){
+        tokensPromise.reject(data);
+    });
   }
 }

@@ -27,26 +27,35 @@ function logger($localForage) {
       } catch (e) { angluar.noop(); }
     }
     console.log(arg);
-    $localForage.getItem(LOGKEY).then(function(logs){
-      $localForage.setItem(LOGKEY, logs + arg + '\n');
-    });
+    save(arg);
   }
 
   function error(arg) {
     if (typeof arg === 'object') {
+      if (arg.message) {
+        // probably a javascript thrown error
+        console.log(arg);
+        save('Error: ' + arg.message + ', Stack: ' + arg.stack);
+        return;
+      }
       try {
         arg = JSON.stringify(arg, null, 4);
       } catch (e) { angluar.noop(); }
     }
     var msg = 'Error: ';
     console.log(msg + arg);
-    $localForage.getItem(LOGKEY).then(function(logs){
-      $localForage.setItem(LOGKEY, logs + msg + arg + '\n');
-    });
+    save(msg + arg);
   }
 
   // returns promise of logs
   function getLogs() {
     return $localForage.getItem(LOGKEY);
+  }
+
+  // save to local db
+  function save(arg) {
+    $localForage.getItem(LOGKEY).then(function(logs){
+      $localForage.setItem(LOGKEY, logs + arg + '\n');
+    });
   }
 }

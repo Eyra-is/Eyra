@@ -6,15 +6,20 @@
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q', 'logger', 'localDbService', 'utilityService'];
+deliveryService.$inject = ['$http', '$q', 'logger', 'localDbMiscService', 'localDbService', 'utilityService'];
 
-function deliveryService($http, $q, logger, localDbService, utilityService) {
+function deliveryService($http, $q, logger, localDbMiscService, localDbService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
+  var dbMiscService = localDbMiscService;
   var util = utilityService;
 
-  reqHandler.getTokens = getTokens;
+  // LOCAL DB
   reqHandler.sendLocalSessions = sendLocalSessions;
+  // API
+  reqHandler.getTokens = getTokens;
+  reqHandler.submitDevice = submitDevice;
+  reqHandler.submitInstructor = submitInstructor;
   reqHandler.submitRecordings = submitRecordings;
   reqHandler.testServerGet = testServerGet;
 
@@ -97,7 +102,38 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
       });
   }
 
-  // invalid title is just a sentinel value for a 'no_data' wav recording.
+  function submitDevice(device) {
+    // make sure always to send the user agent string, even in case of some erraneous programming
+    //   before this function call
+    if (!device.userAgent) {
+      device.userAgent = navigator.userAgent;
+    }
+    return submitGeneralJson(device, '/submit/general/device');
+  }
+
+  function submitGeneralJson(jsonData, url) {
+    var fd = new FormData();
+    var validSubmit = false;
+    try {
+      fd.append('json', JSON.stringify(jsonData));
+      validSubmit = true;
+    } catch (e) {
+      logger.error(e);
+    }
+    if (validSubmit) {
+      return $http.post('//'+BACKENDURL+url, fd, {
+          // this is so angular sets the correct headers/info itself
+          transformRequest: angular.identity,
+          headers: {'Content-Type': undefined}
+        });
+    }
+    return $q.reject('Error submitting data.');
+  }
+
+  function submitInstructor(instructorData) {
+    return submitGeneralJson(instructorData, '/submit/general/instructor');
+  }
+
   // sessionData is on the json format depicted in client-server API.
   // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
   function submitRecordings(sessionData, recordings) {
@@ -116,7 +152,7 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
         }
       }
     } catch (e) {
-      util.stdErrCallback(e);
+      logger.error(e);
     }
     if (validSubmit) {
       return $http.post('//'+BACKENDURL+'/submit/session', fd, {
@@ -127,6 +163,31 @@ function deliveryService($http, $q, logger, localDbService, utilityService) {
     }
     return $q.reject('No valid recordings in submission, not sending anything.');
   }
+
+  // NOT USED
+  // here speakerData does not necessarily contain the optional imei, therefore
+  //   always check if we can get that and submit before we send.
+  /*function submitSpeaker(speakerData){
+    var submission = $q.defer();
+    dbMiscService.getDevice().then(
+      function success(device){
+        if (device && device['imei'] !== '') {
+          speakerData['deviceImei'] = device['imei'];
+        }
+        $q.resolve(
+          submitGeneralJson(speakerData, '/submit/general/speaker')
+        );
+      },
+      function error(response) {
+        // still resolve, just without device imei
+        $q.resolve(
+          submitGeneralJson(speakerData, '/submit/general/speaker')
+        );
+        logger.error(response);
+      }
+    );
+    return submission.promise;
+  }*/
 
   // send a simple get request to the server, just to see if we have connection
   function testServerGet() {

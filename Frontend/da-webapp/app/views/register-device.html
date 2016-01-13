@@ -1,0 +1,11 @@
+<h1 ng-show="!isLoaded">Loading...</h1>
+
+<div ng-show="isLoaded">
+    <form class="dataEntry" ng-submit="regdCtrl.submit()">
+        <label for="imei">IMEI/Device ID</label>
+        <input id="imei" type="text" ng-model="regdCtrl.imei" placeholder="000000000000000" 
+            pattern="[\dA-Za-z-_ ]+" required>
+        <input type="submit" value="Ok"></input>
+        <div>{{msg}}</div>
+    </form>
+</div>

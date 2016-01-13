@@ -9,24 +9,22 @@ values
     ('Mhm'),
     ('Akkúrat'),
     ('Þannig er það');
-insert into device (hardware, os, software)
+insert into device (userAgent, imei)
 values
-    ('hp mini TURBO edition', 'debian 5.41', 'chrome browser 37'),
-    ('super cluster', 'homebrew OS', 'netscape');
-insert into instructor (name, address, phone)
+    ('Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30', '35145120840121'),
+    ('Mozilla/5.0 (X11; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0 Iceweasel/38.4.0', '');
+insert into instructor (name, email, phone, address)
 values
-    ('muhammad', 'australia', '+012-515-8989'),
-    ('john', 'britain', '+0156-823459'),
-    ('guðmundur', 'Iceland', '+354-515-0000'),
-    ('sirry', 'Norway', '+002999999');
-insert into speaker (height, birthdate)
+    ('muhammad', 'muhammadTOUCHE@jq.is', '+012-515-8989', 'australia'),
+    ('john', 'example@john.com', '+0156-823459', 'britain');
+insert into speaker (name, gender, height, dob, deviceImei)
 values
-    (150, '1991/10/10'),
-    (190, '2000/01/01'),
-    (220, '1970/12/12');
+    ('tom', 'male', '150-155', '1991-1995', '3485686875'),
+    ('tommy', 'female', '160-170', '1991-1995', '9465467467'),
+    ('thomas', 'male', '150-155', '1986-1990', '24523453254');
 insert into session (speakerId, instructorId, deviceId, location, start, end, comments)
 values 
-    (1, 4, 1, 'Norway etc.', '2015/10/1 15:00:00.00', '2015/10/1 15:00:30.05', 'much wind'),
+    (1, 1, 1, 'Norway etc.', '2015/10/1 15:00:00.00', '2015/10/1 15:00:30.05', 'much wind'),
     (1, 2, 2, 'UK', '2015/10/1 16:00:00.00', '2015/10/1 16:01:20.00', 'rain'),
     (2, 2, 2, 'UK', '2015/10/1 10:00:00.00', '2015/10/1 10:00:54.00', 'rain');
 insert into recording (tokenId, speakerId, sessionId, duration, rel_path)

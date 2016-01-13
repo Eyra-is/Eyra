@@ -64,7 +64,7 @@ function localDbService($localForage, $q, logger, utilityService) {
       blobIdx = 0;
     } else {
       // we have some recordings already, set our idx as last idx + 1
-      blobIdx = getIdxFromPath(recordings[recordings.length - 1].blobPath) + 1;
+      blobIdx = util.getIdxFromPath(recordings[recordings.length - 1].blobPath) + 1;
     }
     var blobPath = sessionsPath + sessionIdx + '/' + blobsPrefix + blobIdx;
     recordings.push({ 'blobPath' : blobPath, 'title' : recording.title });
@@ -81,7 +81,7 @@ function localDbService($localForage, $q, logger, utilityService) {
     var idx = 0;
     if (sessionIdxs.length > 0) {
       // we have some sessions already, set our idx as last idx + 1
-      idx = getIdxFromPath(sessionIdxs[sessionIdxs.length - 1]) + 1;
+      idx = util.getIdxFromPath(sessionIdxs[sessionIdxs.length - 1]) + 1;
     }
     // now add our session
     var sessionObject = addRecording(null, sessionData, idx, [], recording);
@@ -98,20 +98,6 @@ function localDbService($localForage, $q, logger, utilityService) {
   function clearLocalDb() {
     logger.log('Deleting entire local database...');
     return $localForage.clear();
-  }
-
-  // e.g if path === 'localDb/sessions/blob/5'
-  // this will return 5
-  // returns -1 on error
-  function getIdxFromPath(path) {
-    var idx = -1;
-    try {
-      var tokens = path.split('/');
-      idx = parseInt(tokens[tokens.length - 1]) || -1;
-    } catch (e) {
-      util.stdErrCallback(e);
-    }
-    return idx;
   }
 
   // returns promise, number of sessions in local db, 0 if no session data
@@ -236,7 +222,7 @@ function localDbService($localForage, $q, logger, utilityService) {
           if (isSameSession(sessionData, prevSessionData)) {
             // we have seen this session before, simply replace that session metadata (updated end-time) 
             // and add the recording
-            var sessionIdx = getIdxFromPath(sessionIdxs[prevSessionIdx]);
+            var sessionIdx = util.getIdxFromPath(sessionIdxs[prevSessionIdx]);
             var sessionObject = addRecording(prevSessionData, sessionData, sessionIdx, session['recordings'], recording);
             $localForage.setItem(sessionIdxs[prevSessionIdx], sessionObject)
               .then(angular.noop, util.stdErrCallback);
@@ -262,7 +248,7 @@ function localDbService($localForage, $q, logger, utilityService) {
       // get next new index for our session
       var sessionIdx;
       if (sessionIdxs && sessionIdxs.length > 0) {
-        sessionIdx = getIdxFromPath(sessionIdxs[sessionIdxs.length - 1]) + 1;
+        sessionIdx = util.getIdxFromPath(sessionIdxs[sessionIdxs.length - 1]) + 1;
       } else {
         sessionIdx = 0;
       }

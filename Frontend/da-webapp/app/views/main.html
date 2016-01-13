@@ -1,0 +1,10 @@
+<h1 ng-show="!isLoaded">{{msg}}</h1>
+
+<div ng-show="isLoaded">
+    <button type="button" ng-click="mainCtrl.start()">
+        Start
+    </button>
+    <button type="button" ng-click="mainCtrl.more()">
+        More
+    </button>
+</div>

@@ -3,7 +3,7 @@
     max-width: 100%;
 }
 
-.dataEntry label {
+.dataEntry > * {
     float: left;
     clear: both;
 }
