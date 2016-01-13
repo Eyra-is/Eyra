@@ -165,9 +165,10 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
     return $q.reject('No valid recordings in submission, not sending anything.');
   }
 
+  // NOT USED
   // here speakerData does not necessarily contain the optional imei, therefore
   //   always check if we can get that and submit before we send.
-  function submitSpeaker(speakerData){
+  /*function submitSpeaker(speakerData){
     var submission = $q.defer();
     dbMiscService.getDevice().then(
       function success(device){
@@ -187,7 +188,7 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
       }
     );
     return submission.promise;
-  }
+  }*/
 
   // send a simple get request to the server, just to see if we have connection
   function testServerGet() {

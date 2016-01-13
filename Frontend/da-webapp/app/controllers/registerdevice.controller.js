@@ -5,12 +5,13 @@ angular.module('daApp')
 
 RegisterDeviceController.$inject = ['$location', 
                                     '$scope', 
+                                    'dataService',
                                     'deliveryService', 
                                     'localDbMiscService', 
                                     'logger', 
                                     'utilityService'];
 
-function RegisterDeviceController($location, $scope, deliveryService, localDbMiscService, logger, utilityService) {
+function RegisterDeviceController($location, $scope, dataService, deliveryService, localDbMiscService, logger, utilityService) {
   var regdCtrl = this;
   var delService = deliveryService;
   var dbService = localDbMiscService;
@@ -31,6 +32,7 @@ function RegisterDeviceController($location, $scope, deliveryService, localDbMis
                       'userAgent':navigator.userAgent,
                       'imei':regdCtrl.imei
                     }
+      dataService.set('device', device);
       delService.submitDevice(device).then(
         function success(response) {
 

@@ -9,9 +9,9 @@
 angular.module('daApp')
   .factory('localDbMiscService', localDbMiscService);
 
-localDbMiscService.$inject = ['$localForage', '$q', 'logger', 'utilityService'];
+localDbMiscService.$inject = ['$localForage', '$q', 'dataService', 'logger', 'utilityService'];
 
-function localDbMiscService($localForage, $q, logger, utilityService) {
+function localDbMiscService($localForage, $q, dataService, logger, utilityService) {
   var dbHandler = {};
   var util = utilityService;
 
@@ -52,8 +52,34 @@ function localDbMiscService($localForage, $q, logger, utilityService) {
     return $localForage.getItem(speakersPrefix + speakerName);
   }
 
+  // here speakerData does not necessarily contain the optional imei, therefore
+  //   always check if we can get that and submit before we send.
   function setSpeaker(speakerName, speakerInfo) {
-    return $localForage.setItem(speakersPrefix + speakerName, speakerInfo);
+    var device = dataService.get('device');
+    if (device && device['imei'] && device['imei'] !== '') {
+      speakerInfo['deviceImei'] = device['imei'];
+      return $localForage.setItem(speakersPrefix + speakerName, speakerInfo);
+    } else {
+      var res = $q.defer();
+      getDevice().then(
+        function success(device){
+          if (device && device['imei'] && device['imei'] !== '') {
+            speakerInfo['deviceImei'] = device['imei'];
+          }
+          $q.resolve(
+            $localForage.setItem(speakersPrefix + speakerName, speakerInfo)
+          );
+        },
+        function error(response) {
+          // still resolve, just without device imei
+          $q.resolve(
+            $localForage.setItem(speakersPrefix + speakerName, speakerInfo)
+          );
+          logger.error(response);
+        }
+      );
+      return res.promise;
+    }
   }
 
   // returns speaker info if he exists, otherwise rejects promise

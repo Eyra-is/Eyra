@@ -159,6 +159,7 @@ class DbHandler:
                     return self.insertGeneralData('device', deviceData, 'device')
                 else:
                     # device already exists, return it
+                    deviceId = deviceId[0] # fetchone returns tuple on success
                     return dict(msg='{"deviceId":' + str(deviceId) + '}', statusCode=200)
             except MySQLError as e:
                 msg = 'Database error.'
@@ -198,13 +199,14 @@ class DbHandler:
                 cur.execute('SELECT id FROM speaker WHERE \
                          name=%s AND gender=%s AND height=%s AND dob=%s AND deviceImei=%s',
                         (name, gender, height, dob, deviceImei))
-                speakerId = cur.fetchone() # it's possible there are more than 1 speaker, in which case just fetch anyone, 
-                                           # it's the statistical data that matters anyway
+                speakerId = cur.fetchone()   # it's possible there are more than 1 speaker, in which case just fetch anyone, 
+                                                # it's the statistical data that matters anyway
                 if (speakerId is None):
                     # no speaker with this info in database, insert it
                     return self.insertGeneralData('speaker', speakerData, 'speaker')
                 else:
                     # speaker already exists, return it
+                    speakerId = speakerId[0] # fetchone returns tuple on success
                     return dict(msg='{"speakerId":' + str(speakerId) + '}', statusCode=200)
             except MySQLError as e:
                 msg = 'Database error.'

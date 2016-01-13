@@ -121,7 +121,7 @@ function sessionService($q, dataService, localDbMiscService, logger) {
         'instructorId' : instructorIdPromise.promise,
         'deviceInfo'   : deviceInfoPromise.promise
       };
-    var speakerName = dataService.get('speakerName')
+    var speakerName = dataService.get('speakerName');
     if (!speakerName) speakerName = undefined; // make sure it's undefined for our getGeneralInfo call
     // the infoPromises will be changed after the function calls
     getGeneralInfo('speakerInfo', speakerInfoPromise, dbService.getSpeaker, speakerName);
