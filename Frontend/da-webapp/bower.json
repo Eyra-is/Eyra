@@ -10,6 +10,7 @@
     "angular-route": "~1.4.0",
     "angular-loader": "~1.4.0",
     "angular-mocks": "~1.4.0",
-    "angular-localforage": "~1.2.3"
+    "angular-localforage": "~1.2.3",
+    "satellizer": "~0.13.4"
   }
 }

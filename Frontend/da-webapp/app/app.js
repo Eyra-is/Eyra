@@ -8,6 +8,9 @@
 // Think about if we want to have a limit on how many sessions are sent in "sync"
 // Think about adding underscore for service private functions
 // Think about sending the token itself instead of the id (in case the id's get mixed up later in the db)
+// Add (function(){}) around every js code to avoid putting stuff in global scope
+
+// in production, the logger.error should NOT LOG ANYTHING
 
 // ***************************************************************************************** //
 
@@ -16,13 +19,12 @@
 var putOnline = false;
 var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
 
-angular.module('daApp', ['ngRoute', 'LocalForageModule'])
+angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
 
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
 .config([
   '$compileProvider',
-  function( $compileProvider )
-  {   
+  function($compileProvider) {   
       $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
   }
 ])
@@ -36,13 +38,20 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
 }])
 
 .config([
+  '$authProvider',
+  function($authProvider) {
+    $authProvider.loginUrl = '//' + BACKENDURL + '/auth/login';
+  }
+])
+
+.config([
   '$routeProvider',
   function($routeProvider) {
     $routeProvider.
-      when('/instructor-login', {
-        templateUrl: 'views/instructor-login.html',
-        controller: 'InstructorLoginController',
-        controllerAs: 'iloginCtrl',
+      when('/login', {
+        templateUrl: 'views/login.html',
+        controller: 'LoginController',
+        controllerAs: 'loginCtrl',
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
@@ -61,6 +70,9 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule'])
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
+          },
+          loggedIn: function(routeService){
+            return routeService.loggedIn();
           }
         }
       }).
