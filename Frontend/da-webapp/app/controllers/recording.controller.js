@@ -3,29 +3,26 @@
 angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
-RecordingController.$inject = ['$http', '$scope',  // DEBUG HTTP
-                          'dataService',
-                          'deliveryService',
-                          'localDbService',
-                          'logger',
-                          'recordingService',
-                          'sessionService',
-                          'tokenService',
-                          'utilityService'];
+RecordingController.$inject = [ '$scope',  
+                                'dataService',
+                                'deliveryService',
+                                'localDbService',
+                                'logger',
+                                'recordingService',
+                                'sessionService',
+                                'tokenService',
+                                'utilityService'];
 
-function RecordingController($http, $scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
+function RecordingController($scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
   var recCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
   var util = utilityService;
 
-  recCtrl.clearLocalDb = clearLocalDb;
-  recCtrl.getTokens = getTokens;
   recCtrl.record = record;
   recCtrl.stop = stop;
   recCtrl.sync = sync;
-  recCtrl.test = test;
 
   recCtrl.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
@@ -49,28 +46,6 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
     // call that function when it needs to update bindings
     recService.setupCallbacks(updateBindingsCallback, recordingCompleteCallback);
     $scope.isLoaded = true; // is page loaded?  
-  }
-
-  // dev function, clear the entire local forage database
-  function clearLocalDb() {
-    if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
-      recCtrl.msg = 'Clearing entire local db...';
-      dbService.clearLocalDb()
-        .then(function(val){
-          alert('Database cleared!');
-          recCtrl.msg = 'Database cleared.';
-        }, util.stdErrCallback);
-    }
-  }
-
-  function getTokens() {
-    recCtrl.msg = 'Getting tokens...';
-
-    tokenService.getTokens(25).then(function(tokens){
-      alert('Tokens acquired!');
-      recCtrl.msg = 'Tokens acquired.';
-    },
-    util.stdErrCallback);
   }
 
   function record() {
@@ -172,30 +147,6 @@ function RecordingController($http, $scope, dataService, deliveryService, localD
   function syncDoneCallback(result) {
     recCtrl.msg = result ? 'Sync complete.' : 'Sync failed.';
     recCtrl.syncBtnDisabled = false;
-  }
-
-  function test() {
-    /*dbService.countAvailableSessions().then(function(value){
-      if (value > 0)
-        logger.log('Aw yeah, '+value);
-      else
-        logger.log('Nope');
-    });*/
-
-    logger.getLogs().then(function(logs){
-      console.log(logs);
-    });
-
-    /*$http.post(
-      '//' + BACKENDURL + '/submit/session'
-    ).then(function(response){
-      console.log(response);
-    },
-    util.stdErrCallback);*/
-
-    tokenService.countAvailableTokens().then(function(n){
-      console.log(n);
-    });
   }
 
   function updateBindingsCallback() {

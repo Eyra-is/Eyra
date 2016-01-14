@@ -1,0 +1,37 @@
+These are the permissions that (currently) need to be granted to whichever user is specified in
+the backend code to connect to the sql database.
+
+Permissions:
+SELECT on recordings_master.{device,instructor,session,speaker,token}
+
+INSERT on recordings_master.{device,instructor,recording,session,speaker}
+
+UPDATE on recordings_master.session
+
+
+Example MySQL syntax to do the whole setup:
+
+WARNING: THE FIRST STEP DELETES THE RECORDINGS_MASTER DATABASE USE WITH CAUTION
+         AND FOR GOD SAKES TAKE BACKUPS
+
+run
+\. schema_setup.sql -- WARNING THIS DELETES THE RECORDINGS_MASTER DATABASE USE WITH CAUTION
+\. populate_db.sql
+\. malromur_tokens.sql
+
+create user 'default'@'localhost';
+grant select on recordings_master.device to 'default'@'localhost';
+grant select on recordings_master.instructor to 'default'@'localhost';
+grant select on recordings_master.session to 'default'@'localhost';
+grant select on recordings_master.speaker to 'default'@'localhost';
+grant select on recordings_master.token to 'default'@'localhost';
+
+grant insert on recordings_master.device to 'default'@'localhost';
+grant insert on recordings_master.instructor to 'default'@'localhost';
+grant insert on recordings_master.recording to 'default'@'localhost';
+grant insert on recordings_master.session to 'default'@'localhost';
+grant insert on recordings_master.speaker to 'default'@'localhost';
+
+grant update on recordings_master.session to 'default'@'localhost';
+
+

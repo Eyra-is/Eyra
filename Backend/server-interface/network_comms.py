@@ -6,14 +6,20 @@
 # Add code to calculate duration of wav files if needed
 
 # Make CORS more secure, e.g. not origins='*' but from a specific domain only.
-# WARNING Because of the abstraction in db_handler, the keys have to be put manually into the 
-#   string without being semi prepared, which means at least the keys of the data should be
-#   somewhat sanitized
 # Add functionality frontend and backend, to save the speaker and device ID's returned from server
 #   and thusly be able to identify devices even if no IMEI is present and to avoid speaker ambiguities
-# Generalize even further, generalize the 'if in database, return that id, otherwise insert'
+#   note: this might not be desirable, to minimize damage if someone gets id's from laptop and then
+#         submits to the remote server, although this can be fixed by comparing the 2
+# Generalize even further, generalize the 'if in database, return that id, otherwise insert' (the processData functions)
 # Remove Flask-MySQLdb and simply use MySQLdb, no need for the flask extension (low usage on github) I think
 # REMEMBER TO CHANGE SECRET KEY IN AUTH HANDLER FOR GITHUB RELEASE/PRODUCTION
+
+# allow instructorId not to be correct (in case someone for example got instructor from
+#   laptop and then submitted to the remote server)
+
+# make it so RECORDINGS_ROOT works as a relative path for 
+#   saving recordings without any meddling on apache server (for example find absolute path of this __file__
+#   and save relative to that)
 
 # ***************************************************************************************** #
 

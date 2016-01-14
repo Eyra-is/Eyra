@@ -6,7 +6,6 @@
         <input id="name" type="text" ng-model="setiCtrl.name" placeholder="Jane Doe" required>
         <label for="email">Email</label>
         <input id="email" type="email" ng-model="setiCtrl.email" placeholder="email@example.com" required>
-        <!-- think about adding pattern="" attribute here for regex eval of phone no. -->
         <label for="phone">Phone</label>
         <input id="phone" type="tel" ng-model="setiCtrl.phone" placeholder="7777777" 
             pattern="[\d-\(\)\+ ]+" required>
@@ -14,6 +13,6 @@
         <input id="address" type="text" ng-model="setiCtrl.address" placeholder="21 Example Lane" required>
         <input type="submit" value="Ok"></input>
         <div>{{msg}}</div>
-        <div ng-repeat="error in setiCtrl.errors">{{error}}</div>
+        <div ng-repeat="error in setiCtrl.msgs">{{error}}</div>
     </form>
 </div>
