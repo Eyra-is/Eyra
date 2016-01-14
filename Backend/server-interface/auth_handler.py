@@ -36,7 +36,7 @@ class AuthHandler:
         # Flask-JWT configurations
 
         # obviously this key needs to be changed for the github releases... (it's gonna be in the commit logs) 
-        app.config['SECRET_KEY'] = 'SZE8d9m48#Bg9C76xW3n5#DFQHCpCGZUf9HYll2Wlvs&tPXshr'
+        app.config['SECRET_KEY'] = 'SUPER_SECRET_KEY_CHANGE_IN_PRODUCTION_SLASH_GITHUB_RELEASE'
 
         app.config['JWT_AUTH_USERNAME_KEY'] = 'email'
         app.config['JWT_AUTH_PASSWORD_KEY'] = 'password'

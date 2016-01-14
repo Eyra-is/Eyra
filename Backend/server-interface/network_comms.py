@@ -13,6 +13,7 @@
 #   and thusly be able to identify devices even if no IMEI is present and to avoid speaker ambiguities
 # Generalize even further, generalize the 'if in database, return that id, otherwise insert'
 # Remove Flask-MySQLdb and simply use MySQLdb, no need for the flask extension (low usage on github) I think
+# REMEMBER TO CHANGE SECRET KEY IN AUTH HANDLER FOR GITHUB RELEASE/PRODUCTION
 
 # ***************************************************************************************** #
 
