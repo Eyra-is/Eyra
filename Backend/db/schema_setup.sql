@@ -12,7 +12,7 @@ start transaction;
 
 create table token (
     id int not null auto_increment primary key,
-    inputToken text not null unique
+    inputToken text not null
 );
 create table device (
     id int not null auto_increment primary key,
