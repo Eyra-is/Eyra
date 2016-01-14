@@ -1,7 +1,7 @@
 <h1 ng-show="!isLoaded">Loading...</h1>
 
 <div ng-show="isLoaded">
-    <div class="dataEntry">
+    <form class="dataEntry" ng-submit="sinfoCtrl.submit()">
         <label for="gender">Gender</label>
         <select id="gender" ng-model="sinfoCtrl.gender">
             <option ng-repeat="gender in sinfoCtrl.genders" value="{{gender}}">{{gender}}</option>
@@ -14,9 +14,7 @@
         <select id="height" ng-model="sinfoCtrl.height">
             <option ng-repeat="height in sinfoCtrl.heights" value="{{height}}">{{height}}</option>
         </select>
-        <button type="button" ng-click="sinfoCtrl.go()">
-            Ok
-        </button>
+        <input type="submit" value="Ok"></input>
         <div>{{msg}}</div>
-    </div>
+    </form>
 </div>

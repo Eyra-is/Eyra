@@ -12,38 +12,56 @@
 # Add functionality frontend and backend, to save the speaker and device ID's returned from server
 #   and thusly be able to identify devices even if no IMEI is present and to avoid speaker ambiguities
 # Generalize even further, generalize the 'if in database, return that id, otherwise insert'
+# Remove Flask-MySQLdb and simply use MySQLdb, no need for the flask extension (low usage on github) I think
+# REMEMBER TO CHANGE SECRET KEY IN AUTH HANDLER FOR GITHUB RELEASE/PRODUCTION
 
 # ***************************************************************************************** #
 
-from flask import Flask, request
-from db_handler import DbHandler
+from flask import Flask, request, Response
 from flask.ext.cors import CORS
 import json
+
+from db_handler import DbHandler
+from auth_handler import AuthHandler
 
 from util import log
 
 app = Flask(__name__)
 
 dbHandler = DbHandler(app)
+authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
 
-cors = CORS(app,    resources=r'/submit/*', 
-                    allow_headers='Content-Type', # 'Content-Type, *'
+# allow pretty much everything, this will be removed in production! since we will serve
+#   the backend and frontend on the same origin/domain
+cors = CORS(app,    resources=r'/*', 
+                    allow_headers='*', 
                     origins='*',
                     methods='GET, POST, OPTIONS')
 
+# SUBMISSION ROUTES
+
 # supports everything in the client-server API
-# right now, /submit/general/{device,instuctor,speaker}
+# right now, /submit/general/{device,instuctor}
+#
+# requires sender to be authenticated with JWT, see auth_handler.py 
+# remove @authHandler.login_required() if you don't want that
 @app.route('/submit/general/<method>', methods=['POST'])
+@authHandler.login_required()
 def submit_general(method):
+    validMethod = False
     processingFunction = None
     if method=='device':
         processingFunction = dbHandler.processDeviceData
+        validMethod = True
     elif method=='instructor':
         processingFunction = dbHandler.processInstructorData
-    elif method=='speaker':
-        processingFunction = dbHandler.processSpeakerData
+        validMethod = True
+    # not used currently, speaker data is sent with each session
+    #elif method=='speaker':
+    #    processingFunction = dbHandler.processSpeakerData
+    #    validMethod = True
 
-    if method is not None:
+    if method is not None and validMethod:
         data = None
         if request.method == 'POST':
             log('Data: ' + str(request.form) + '\n')

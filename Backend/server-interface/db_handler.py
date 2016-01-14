@@ -106,9 +106,6 @@ class DbHandler:
 
             queryStr = queryStr % tuple([table] + interleavedList)
 
-            log(queryStr)
-            log(queryTuple)
-
             cur.execute(queryStr, queryTuple)
             dataId = cur.fetchone()[0] # fetchone returns a tuple
 

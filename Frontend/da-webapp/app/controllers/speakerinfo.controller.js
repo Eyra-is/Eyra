@@ -10,7 +10,7 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
   var util = utilityService;
   var dbService = localDbMiscService;
   
-  sinfoCtrl.go = go;
+  sinfoCtrl.submit = submit;
 
   $scope.isLoaded = true;
   sinfoCtrl.gender = '';
@@ -41,7 +41,7 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
 
   //////////
 
-  function go() {
+  function submit() {
     // set info used by recording
     // these are all dropdown lists, so only need to check for empty fields.
     if (sinfoCtrl.gender === '' || sinfoCtrl.dob === '' || sinfoCtrl.height === '') {
