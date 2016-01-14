@@ -19,6 +19,8 @@ function LoginController($http, $location, $scope, authenticationService, logger
   //////////
 
   function submit() {
+    console.log($scope.email);
+    console.log($scope.password);
     /*$http({
         method:'POST',
         url:'//'+BACKENDURL+'/auth/login',

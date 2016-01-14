@@ -3,7 +3,7 @@ from werkzeug.security import safe_str_cmp
 
 from util import log
 
-# setup
+# minimal setup JWT using Flask-JWT
 class User(object):
     def __init__(self, id, username, password):
         self.id = id

@@ -28,7 +28,7 @@ from util import log
 app = Flask(__name__)
 
 dbHandler = DbHandler(app)
-authHandler = AuthHandler(app) # sets up /auth/login @app.route among other things
+authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
 
 # allow pretty much everything, this will be removed in production! since we will serve
 #   the backend and frontend on the same origin/domain
@@ -40,19 +40,27 @@ cors = CORS(app,    resources=r'/*',
 # SUBMISSION ROUTES
 
 # supports everything in the client-server API
-# right now, /submit/general/{device,instuctor,speaker}
+# right now, /submit/general/{device,instuctor}
+#
+# requires sender to be authenticated with JWT, see auth_handler.py 
+# remove @authHandler.login_required() if you don't want that
 @app.route('/submit/general/<method>', methods=['POST'])
+@authHandler.login_required()
 def submit_general(method):
+    validMethod = False
     processingFunction = None
     if method=='device':
         processingFunction = dbHandler.processDeviceData
+        validMethod = True
     elif method=='instructor':
         processingFunction = dbHandler.processInstructorData
+        validMethod = True
     # not used currently, speaker data is sent with each session
     #elif method=='speaker':
     #    processingFunction = dbHandler.processSpeakerData
+    #    validMethod = True
 
-    if method is not None:
+    if method is not None and validMethod:
         data = None
         if request.method == 'POST':
             log('Data: ' + str(request.form) + '\n')
