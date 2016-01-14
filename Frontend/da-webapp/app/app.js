@@ -96,6 +96,9 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
+          },
+          loggedIn: function(routeService){
+            return routeService.loggedIn();
           }
         }
       }).
@@ -106,6 +109,9 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
+          },
+          loggedIn: function(routeService){
+            return routeService.loggedIn();
           }
         }
       }).

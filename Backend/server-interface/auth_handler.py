@@ -16,7 +16,7 @@ class User(object):
 # allowed users.. right now passwords stored as plaintexts, but this is
 #   server side, so anyone with access to this could do a lot of damage anyway.
 users = [
-    User(1, 'rooney', 'suchPass'),
+    User(1, 'rooney@ru.is', 'suchPass'),
 ]
 
 username_table = {u.username: u for u in users}

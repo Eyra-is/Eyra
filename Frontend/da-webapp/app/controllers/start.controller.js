@@ -10,17 +10,18 @@ function StartController($location, $scope, dataService, localDbMiscService, log
   var util = utilityService;
   var dbService = localDbMiscService;
   
-  startCtrl.go = go;
+  startCtrl.submit = submit;
 
   startCtrl.speakerName = '';
+  startCtrl.comments = '';
   startCtrl.doneBefore = false;
 
   $scope.isLoaded = true;
 
   //////////
 
-  function go() {
-    // sanitize speakerName input here if needed
+  function submit() {
+    // validate inputs here if needed
     if (startCtrl.speakerName === '') {
       logger.log('No speaker name set, using default.');
       startCtrl.speakerName = util.getConstant('defaultSpeakerName');
@@ -35,7 +36,7 @@ function StartController($location, $scope, dataService, localDbMiscService, log
     setData = dataService.set('doneBefore', startCtrl.doneBefore);
     if (!setData) logger.error('Error writing doneBefore: ' + startCtrl.doneBefore);
 
-    // this is a little bit slow for a go button, consider pulling up all previous users on app load
+    // this might be a little bit slow for a submit button, consider pulling up all previous users on app load
     // and store in memory so this would be faster (can save info async, but navigate straight away)
     dbService.getSpeaker(startCtrl.speakerName).then(
       function success(speakerInfo){

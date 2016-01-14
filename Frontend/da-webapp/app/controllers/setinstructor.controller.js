@@ -64,11 +64,15 @@ function SetInstructorController($location, $scope, dataService, deliveryService
     }
   }
 
+  // sets/removes from setiCtrl.msgs with all validation errors.
   function validateInputs() {
     // not sure we want to do anything here
     // ideally we would whitelist only letters, spaces for name
     // and letters, spaces and numbers for address, but if this should
     // work for any language, that's not going to be pretty regex.
+
+    // the only secure sanitation has to be done on server side anyway.
+    // validation here would only be for user comfort, nicer error msgs etc.
     return;
   }
 }

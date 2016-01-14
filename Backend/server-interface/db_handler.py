@@ -15,9 +15,31 @@ class DbHandler:
 
         self.mysql = MySQL(app)
 
+        # needed to sanitize the dynamic sql creation in insertGeneralData
+        # keep a list of allowed column names for insertions etc. depending on the table (device, isntructor, etc)
+        self.allowedColumnNames = {
+            'device': [
+                'userAgent',
+                'imei'
+            ],
+            'instructor': [
+                'name',
+                'email',
+                'phone',
+                'address'
+            ],
+            'speaker': [
+                'name',
+                'gender',
+                'height',
+                'dob',
+                'deviceImei'
+            ]
+        }
+
     # inserts data into appropriate table
     #
-    # name is i.e. 'instructor' and is a representation of the data, for errors and such
+    # name is i.e. 'instructor' and is a representation of the data, for errors and general identification
     # data is a json object whose keys will be used as table column names and those values
     #   will be inserted into table
     # returns the id of the newly inserted row or errors in the format
@@ -34,7 +56,8 @@ class DbHandler:
     #    and return said rows newly generated id.
     #
     # WARNING: appends the keys of data straight into a python string using %
-    #          so at least this should be sanitized.
+    #          so at least this should be sanitized. Sanitized by a whitelist of
+    #          allowed keys in self.allowedColumnNames
     def insertGeneralData(self, name, data, table):
         keys = []
         vals = []
@@ -44,8 +67,13 @@ class DbHandler:
                 data = json.loads(data)
 
             for key, val in data.items(): # use data.iteritems() for python 2.7
+                # allow only keys from the appropriate list in self.allowedColumnNames
+                if key not in self.allowedColumnNames[name]:
+                    raise ValueError('Unallowed column name used! Did someone hack the frontend? name: %s' % key)
                 keys.append(key)
                 vals.append(val)
+
+            data = None # data is untrusted, should not be used unless it's filtered
         except (KeyError, TypeError, ValueError) as e:
             msg = '%s data not on correct format, aborting.' % name
             log(msg, e)
@@ -301,6 +329,7 @@ class DbHandler:
                 if not os.path.exists(sessionPath):
                     os.mkdir(sessionPath)
                 wavePath = os.path.join(sessionPath, rec.filename)
+                # rec is a werkzeug FileStorage object
                 rec.save(wavePath)
 
                 # find duration

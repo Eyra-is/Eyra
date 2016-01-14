@@ -1,0 +1,14 @@
+These are the permissions that need to be granted to whichever user is specified in
+the backend code to connect to the sql database.
+
+Permissions:
+SELECT on recordings_master.{device,instructor,session,speaker,token}
+
+INSERT on recordings_master.{device,instructor,recording,session,speaker}
+
+UPDATE on recordings_master.session
+
+
+Example MySQL syntax to do that:
+
+
