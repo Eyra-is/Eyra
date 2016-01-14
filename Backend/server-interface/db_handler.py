@@ -69,7 +69,7 @@ class DbHandler:
             for key, val in data.items(): # use data.iteritems() for python 2.7
                 # allow only keys from the appropriate list in self.allowedColumnNames
                 if key not in self.allowedColumnNames[name]:
-                    raise ValueError('Unallowed column name used! Did someone hack the frontend? name: %s' % key)
+                    raise KeyError('Unallowed column name used! Did someone hack the frontend? name: %s' % key)
                 keys.append(key)
                 vals.append(val)
 
@@ -332,14 +332,11 @@ class DbHandler:
                 # rec is a werkzeug FileStorage object
                 rec.save(wavePath)
 
-                # find duration
-                duration = 0 # temp duration until we code it
-
                 # insert into database
-                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, duration, rel_path) \
-                             VALUES (%s, %s, %s, %s, %s)', 
+                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, rel_path) \
+                             VALUES (%s, %s, %s, %s)', 
                             (jsonDecoded['recordingsInfo'][rec.filename]['tokenId'], speakerId, 
-                             sessionId, duration, wavePath))
+                             sessionId, wavePath))
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
