@@ -1,4 +1,4 @@
-// right now only handles route errors in route resolves
+// right now only handles route errors in route resolves and login reroutes
 
 'use strict';
 

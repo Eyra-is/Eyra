@@ -26,6 +26,7 @@ function MoreController($location, $scope, authenticationService) {
 
   function logout() {
     authService.logout();
+    alert('Logged out successfully!');
   }
 
   function setInstructor() {

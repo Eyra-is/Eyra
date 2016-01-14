@@ -1,4 +1,5 @@
-// service to log errors/console output. Also saves it to localForage, with key 'logs' as one big string.
+// right now pretty useless to have it as a special service, but if authentication scheme
+//   is ever changed or modified, it might be nice, so why not have it?
 
 'use strict';
 

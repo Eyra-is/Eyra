@@ -41,6 +41,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
   '$authProvider',
   function($authProvider) {
     $authProvider.loginUrl = '//' + BACKENDURL + '/auth/login';
+    $authProvider.tokenName = 'access_token'; // to accomodate for the Flask-JWT response token
   }
 ])
 

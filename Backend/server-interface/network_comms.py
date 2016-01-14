@@ -12,24 +12,32 @@
 # Add functionality frontend and backend, to save the speaker and device ID's returned from server
 #   and thusly be able to identify devices even if no IMEI is present and to avoid speaker ambiguities
 # Generalize even further, generalize the 'if in database, return that id, otherwise insert'
+# Remove Flask-MySQLdb and simply use MySQLdb, no need for the flask extension (low usage on github) I think
 
 # ***************************************************************************************** #
 
-from flask import Flask, request
-from db_handler import DbHandler
+from flask import Flask, request, Response
 from flask.ext.cors import CORS
 import json
+
+from db_handler import DbHandler
+from auth_handler import AuthHandler
 
 from util import log
 
 app = Flask(__name__)
 
 dbHandler = DbHandler(app)
+authHandler = AuthHandler(app) # sets up /auth/login @app.route among other things
 
-cors = CORS(app,    resources=r'/submit/*', 
-                    allow_headers='Content-Type', # 'Content-Type, *'
+# allow pretty much everything, this will be removed in production! since we will serve
+#   the backend and frontend on the same origin/domain
+cors = CORS(app,    resources=r'/*', 
+                    allow_headers='*', 
                     origins='*',
                     methods='GET, POST, OPTIONS')
+
+# SUBMISSION ROUTES
 
 # supports everything in the client-server API
 # right now, /submit/general/{device,instuctor,speaker}
@@ -40,8 +48,9 @@ def submit_general(method):
         processingFunction = dbHandler.processDeviceData
     elif method=='instructor':
         processingFunction = dbHandler.processInstructorData
-    elif method=='speaker':
-        processingFunction = dbHandler.processSpeakerData
+    # not used currently, speaker data is sent with each session
+    #elif method=='speaker':
+    #    processingFunction = dbHandler.processSpeakerData
 
     if method is not None:
         data = None

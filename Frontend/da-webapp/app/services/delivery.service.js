@@ -164,7 +164,7 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
     return $q.reject('No valid recordings in submission, not sending anything.');
   }
 
-  // NOT USED
+  // NOT USED, speaker data is sent with each session
   // here speakerData does not necessarily contain the optional imei, therefore
   //   always check if we can get that and submit before we send.
   /*function submitSpeaker(speakerData){
