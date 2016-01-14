@@ -26,15 +26,13 @@ function StartController($location, $scope, dataService, localDbMiscService, log
       logger.log('No speaker name set, using default.');
       startCtrl.speakerName = util.getConstant('defaultSpeakerName');
     }
+    if (startCtrl.comments === '') {
+      startCtrl.comments = 'No comments.';
+    }
     // set these values for use by next page
-    var setData = dataService.set('speakerName', startCtrl.speakerName);
-    if (!setData) logger.error('Error writing speaker name: ' + startCtrl.speakerName);
-
-    setData = dataService.set('comments', startCtrl.comments);
-    if (!setData) logger.error('Error writing comments: ' + startCtrl.comments);
-
-    setData = dataService.set('doneBefore', startCtrl.doneBefore);
-    if (!setData) logger.error('Error writing doneBefore: ' + startCtrl.doneBefore);
+    dataService.set('speakerName', startCtrl.speakerName);
+    dataService.set('comments', startCtrl.comments);
+    dataService.set('doneBefore', startCtrl.doneBefore);
 
     // this might be a little bit slow for a submit button, consider pulling up all previous users on app load
     // and store in memory so this would be faster (can save info async, but navigate straight away)
