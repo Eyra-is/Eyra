@@ -1,3 +1,4 @@
+(function () {
 // service with utility functions for the app
 
 'use strict';
@@ -47,3 +48,4 @@ function utilityService(logger) {
     logger.error(arg);
   }
 }
+}());

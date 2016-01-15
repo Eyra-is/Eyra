@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -90,3 +91,4 @@ function MoreController($location, $scope, authenticationService, localDbService
     });
   }
 }
+}());

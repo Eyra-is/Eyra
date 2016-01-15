@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -43,3 +44,4 @@ function LoginController($http, $location, $scope, authenticationService, logger
     );
   }
 }
+}());

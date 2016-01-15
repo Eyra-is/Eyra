@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -76,3 +77,4 @@ function SetInstructorController($location, $scope, dataService, deliveryService
     return;
   }
 }
+}());

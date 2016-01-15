@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -52,3 +53,4 @@ function RegisterDeviceController($location, $scope, dataService, deliveryServic
     }
   }
 }
+}());

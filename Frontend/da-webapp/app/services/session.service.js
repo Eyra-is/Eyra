@@ -1,3 +1,4 @@
+(function () {
 // service to handle some session logic, 
 // info about start of session
 // and logic to assemble the session (from speaker, instructor, device, rec, token and all that info)
@@ -135,3 +136,4 @@ function sessionService($q, dataService, localDbMiscService, logger) {
     start_time = time;
   }
 }
+}());

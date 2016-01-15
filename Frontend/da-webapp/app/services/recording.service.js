@@ -1,3 +1,4 @@
+(function () {
 // service to handle recording, basically a wrapper around recorderjs
 
 'use strict';
@@ -110,3 +111,4 @@ function recordingService(logger, utilityService) {
     recHandler.initCompleteCallback(true);
   }
 }
+}());

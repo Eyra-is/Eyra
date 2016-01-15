@@ -1,3 +1,4 @@
+(function () {
 // handles local forage actions, saves recordings to local db
 
 // stores indices of session objects in 'localDb/sessionIdxs'
@@ -282,3 +283,4 @@ function localDbService($q, logger, myLocalForageService, utilityService) {
     }
   }
 }
+}());

@@ -16,10 +16,13 @@
 
 // ***************************************************************************************** //
 
-'use strict';
+
 
 var putOnline = false;
 var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
+
+(function () {
+'use strict';
 
 angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
 
@@ -142,6 +145,4 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
       });
   }
 ]);
-
-
-
+}());

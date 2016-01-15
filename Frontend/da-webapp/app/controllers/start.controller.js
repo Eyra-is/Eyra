@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -59,3 +60,4 @@ function StartController($location, $scope, dataService, localDbMiscService, log
     );
   }
 }
+}());

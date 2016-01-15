@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -153,4 +154,4 @@ function RecordingController($scope, dataService, deliveryService, localDbServic
     $scope.$apply();
   }
 }
-
+}());

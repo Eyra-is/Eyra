@@ -1,3 +1,4 @@
+(function () {
 // handles local forage actions regarding instructor, speaker and device setting
 
 // stores speakers thusly: speakers/username = {'gender':gender, 'dob':dob, 'height':height}
@@ -82,3 +83,4 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
     }
   }
 }
+}());
