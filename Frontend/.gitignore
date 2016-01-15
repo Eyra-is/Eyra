@@ -1,7 +1,6 @@
 # user added
 # ignore temp grunt files
 */app/min/*
-!*/app/min/script.*.min.js
 
 # bower installed packages
 bower_components
