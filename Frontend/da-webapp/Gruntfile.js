@@ -15,7 +15,29 @@ module.exports = function(grunt) {
     },
     clean: {
       min_scripts: ['app/min/*.min.js'],
-      temp: ['app/min/temp/']
+      temp: ['app/min/temp/', 'app/min/script.cat.js']
+    },
+    concat: {
+      app: {
+        files: [{
+          src:  [
+                  'app/min/temp/app/bower_components/angular/angular.js',
+                  'app/min/temp/app/bower_components/angular-route/angular-route.js',
+
+                  'app/min/temp/app/bower_components/localforage/dist/localforage.js',
+                  'app/min/temp/app/bower_components/angular-localforage/dist/angular-localForage.js',
+                  'app/min/temp/app/bower_components/satellizer/satellizer.js',
+                  'app/min/temp/app/recorderjs/dist/recorderWorker.js',
+                  'app/min/temp/app/recorderjs/dist/recorder.js',
+
+                  'app/min/temp/app.js', 
+                  'app/min/temp/app/services/**/*.js',
+                  'app/min/temp/app/controllers/**/*.js'
+                ],
+          dest: 'app/min/script.cat.js'
+        }]
+      }
+    
     },
     jshint: {
       all: ['Gruntfile.js', 'app/**/*.js']
@@ -57,15 +79,11 @@ module.exports = function(grunt) {
                  <%= grunt.template.today("yyyy-mm-dd") %> */',
         mangle: false,
         sourceMap: true,
-        sourceMapName: 'sourceMap.map'
+        sourceMapName: 'app/script.min.map'
       },
       minify: {
         files: [{
-          src:  [
-                  'app/min/temp/app/app.js', 
-                  'app/min/temp/app/services/**/*.js',
-                  'app/min/temp/app/controllers/**/*.js'
-                ],
+          src:  'app/min/script.cat.js',
           dest: 'app/min/script.'+cache_breaker+'.min.js'
         }]
       }
@@ -73,6 +91,7 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-appcache');
@@ -82,6 +101,7 @@ module.exports = function(grunt) {
   grunt.registerTask('default', []);
   grunt.registerTask('deploy',  [
                                   'ngAnnotate', 
+                                  'concat',
                                   'clean:min_scripts', // delete previous script.DATA.min.js
                                   'uglify',
                                   'clean:temp', // delete the temp files from ngAnnotate 

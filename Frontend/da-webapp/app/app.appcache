@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# rev 42 - 2016-01-15T17:58:42.043Z
+# rev 46 - 2016-01-15T18:27:38.130Z
 
 CACHE:
 app.css
@@ -63,7 +63,7 @@ controllers/setinstructor.controller.js
 controllers/speakerinfo.controller.js
 controllers/start.controller.js
 index.html
-min/script.20160115-1758.min.js
+min/script.20160115-1827.min.js
 recorderjs/README.md
 recorderjs/dist/recorder.js
 recorderjs/dist/recorderWorker.js
@@ -73,6 +73,7 @@ recorderjs/lib/recorder.js
 recorderjs/package.json
 recorderjs/src/index.js
 recorderjs/src/recorder.js
+script.min.map
 services/authentication.service.js
 services/data.service.js
 services/delivery.service.js
