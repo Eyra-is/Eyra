@@ -53,6 +53,7 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
 
         // https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload
         // browsers still seem to ignore this message, at least some..
+        //   at least they show a warning
         (e || $window.event).returnValue = msg;
         return msg;
       }

@@ -34,9 +34,10 @@ function utilityService(logger) {
     var idx = -1;
     try {
       var tokens = path.split('/');
-      idx = parseInt(tokens[tokens.length - 1]) || -1;
+      idx = parseInt(tokens[tokens.length - 1]);
+      if (!idx && idx !== 0) idx = -1; // allow 0 as index
     } catch (e) {
-      util.stdErrCallback(e);
+      logger.error(e);
     }
     return idx;
   }
