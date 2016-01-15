@@ -1,4 +1,4 @@
-<h1 ng-show="!isLoaded">{{msg}}</h1>
+<h1 ng-show="!isLoaded" ng-cloak>{{msg}}</h1>
 
 <div ng-show="isLoaded">
     <button type="button" ng-click="mainCtrl.start()">

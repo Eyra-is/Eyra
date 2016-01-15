@@ -5,15 +5,16 @@
 angular.module('daApp')
   .factory('tokenService', tokenService);
 
-tokenService.$inject = ['$localForage', 
-                        '$q',
+tokenService.$inject = ['$q',
                         'deliveryService',
                         'logger',
+                        'myLocalForageService',
                         'utilityService'];
 
-function tokenService($localForage, $q, deliveryService, logger, utilityService) {
+function tokenService($q, deliveryService, logger, myLocalForageService, utilityService) {
   var tokenHandler = {};
   var delService = deliveryService;
+  var lfService = myLocalForageService;
   var util = utilityService;
 
   tokenHandler.countAvailableTokens = countAvailableTokens;
@@ -27,7 +28,7 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
   // returns promise, number of tokens in local db, 0 if no tokens
   function countAvailableTokens() {
     var isAvail = $q.defer();
-    $localForage.getItem('minFreeTokenIdx').then(
+    lfService.getItem('minFreeTokenIdx').then(
       function success(idx){
         if (idx && idx >= 0) {
           isAvail.resolve(idx + 1);
@@ -68,11 +69,11 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
 
   function nextToken() {
     var next = $q.defer();
-    $localForage.getItem('minFreeTokenIdx').then(function(value) {
+    lfService.getItem('minFreeTokenIdx').then(function(value) {
       logger.log('Local db index: ' + value);
 
       var minFreeIdx = value === -1 ? 0 : (value || 0);
-      $localForage.getItem('tokens/' + minFreeIdx).then(function(value){
+      lfService.getItem('tokens/' + minFreeIdx).then(function(value){
         if (value) {
           next.resolve(value);
         } else {
@@ -81,11 +82,11 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
 
         // update our minFreeIdx
         if (minFreeIdx > -1) minFreeIdx--;
-        $localForage.setItem('minFreeTokenIdx', minFreeIdx).then(function(value){
+        lfService.setItem('minFreeTokenIdx', minFreeIdx).then(function(value){
           // don't delete token until we have updated the index, then if
           // user exits browser after get but before update of index,
           // at least it will still show the last token.
-          $localForage.removeItem('tokens/' + (minFreeIdx+1))
+          lfService.removeItem('tokens/' + (minFreeIdx+1))
             .then(angular.noop, util.stdErrCallback);
         },
         util.stdErrCallback);
@@ -100,21 +101,21 @@ function tokenService($localForage, $q, deliveryService, logger, utilityService)
   // should not be called with tokens.length===0
   // tokensPromise is an angular q.defer(), resolved with tokens on completion of save
   function saveTokens(tokens, tokensPromise) {
-    $localForage.getItem('minFreeTokenIdx').then(function(value) {
+    lfService.getItem('minFreeTokenIdx').then(function(value) {
       var minFreeIdx = value === -1 ? 0 : (value || 0);
       var oldMinFreeIdx = minFreeIdx;
 
       var finishedPromises = []; // promises to wait for until we can say this saveTokens is finished
       for (var i = 0; i < tokens.length; i++) {
         finishedPromises.push(
-          $localForage.setItem('tokens/' + minFreeIdx, tokens[i])
+          lfService.setItem('tokens/' + minFreeIdx, tokens[i])
         );
         minFreeIdx++;
       }
 
       // update our minFreeIdx to reflect newly input tokens, 0 counts as 1, so only add length-1
       finishedPromises.push(
-        $localForage.setItem('minFreeTokenIdx', oldMinFreeIdx + (tokens.length - 1))
+        lfService.setItem('minFreeTokenIdx', oldMinFreeIdx + (tokens.length - 1))
       );
 
       $q.all(finishedPromises).then(function(val){

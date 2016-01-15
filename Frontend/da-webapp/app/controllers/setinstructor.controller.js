@@ -3,7 +3,7 @@
 angular.module('daApp')
 .controller('SetInstructorController', SetInstructorController);
 
-SetInstructorController.$inject = ['$location', 
+SetInstructorController.$inject = [ '$location', 
                                     '$scope', 
                                     'dataService', 
                                     'deliveryService', 

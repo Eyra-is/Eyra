@@ -5,15 +5,17 @@
 angular.module('daApp')
   .factory('logger', logger);
 
-logger.$inject = ['$localForage'];
+logger.$inject = ['myLocalForageService'];
 
-function logger($localForage) {
+function logger(myLocalForageService) {
   var logHandler = {};
-  var LOGKEY = 'logs';
+  var lfService = myLocalForageService;
 
   logHandler.error = error;
   logHandler.getLogs = getLogs; // not the wood kind
   logHandler.log = log;
+  
+  var LOGKEY = 'logs';
 
   return logHandler;
 
@@ -49,13 +51,13 @@ function logger($localForage) {
 
   // returns promise of logs
   function getLogs() {
-    return $localForage.getItem(LOGKEY);
+    return lfService.getItem(LOGKEY);
   }
 
   // save to local db
   function save(arg) {
-    $localForage.getItem(LOGKEY).then(function(logs){
-      $localForage.setItem(LOGKEY, logs + arg + '\n');
+    lfService.getItem(LOGKEY).then(function(logs){
+      lfService.setItem(LOGKEY, logs + arg + '\n');
     });
   }
 }

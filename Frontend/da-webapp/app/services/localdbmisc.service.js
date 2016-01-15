@@ -9,10 +9,11 @@
 angular.module('daApp')
   .factory('localDbMiscService', localDbMiscService);
 
-localDbMiscService.$inject = ['$localForage', '$q', 'dataService', 'logger', 'utilityService'];
+localDbMiscService.$inject = ['$q', 'dataService', 'logger', 'myLocalForageService', 'utilityService'];
 
-function localDbMiscService($localForage, $q, dataService, logger, utilityService) {
+function localDbMiscService($q, dataService, logger, myLocalForageService, utilityService) {
   var dbHandler = {};
+  var lfService = myLocalForageService;
   var util = utilityService;
 
   dbHandler.getDevice = getDevice;
@@ -31,24 +32,24 @@ function localDbMiscService($localForage, $q, dataService, logger, utilityServic
   //////////
 
   function getDevice() {
-    return $localForage.getItem(devicePath);
+    return lfService.getItem(devicePath);
   }
 
   // device on format as in client-server API
   function setDevice(device) {
-    return $localForage.setItem(devicePath, device);  
+    return lfService.setItem(devicePath, device);  
   }
 
   function getInstructorId() {
-    return $localForage.getItem(instructorIdPath);
+    return lfService.getItem(instructorIdPath);
   }
 
   function setInstructorId(instructorId) {
-    return $localForage.setItem(instructorIdPath, instructorId);
+    return lfService.setItem(instructorIdPath, instructorId);
   }
 
   function getSpeaker(speakerName) {
-    return $localForage.getItem(speakersPrefix + speakerName);
+    return lfService.getItem(speakersPrefix + speakerName);
   }
 
   // here speakerData does not necessarily contain the optional imei, therefore
@@ -57,7 +58,7 @@ function localDbMiscService($localForage, $q, dataService, logger, utilityServic
     var device = dataService.get('device');
     if (device && device['imei'] && device['imei'] !== '') {
       speakerInfo['deviceImei'] = device['imei'];
-      return $localForage.setItem(speakersPrefix + speakerName, speakerInfo);
+      return lfService.setItem(speakersPrefix + speakerName, speakerInfo);
     } else {
       var res = $q.defer();
       getDevice().then(
@@ -66,13 +67,13 @@ function localDbMiscService($localForage, $q, dataService, logger, utilityServic
             speakerInfo['deviceImei'] = device['imei'];
           }
           $q.resolve(
-            $localForage.setItem(speakersPrefix + speakerName, speakerInfo)
+            lfService.setItem(speakersPrefix + speakerName, speakerInfo)
           );
         },
         function error(response) {
           // still resolve, just without device imei
           $q.resolve(
-            $localForage.setItem(speakersPrefix + speakerName, speakerInfo)
+            lfService.setItem(speakersPrefix + speakerName, speakerInfo)
           );
           logger.error(response);
         }

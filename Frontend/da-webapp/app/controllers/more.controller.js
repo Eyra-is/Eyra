@@ -3,11 +3,13 @@
 angular.module('daApp')
 .controller('MoreController', MoreController);
 
-MoreController.$inject = ['$location', '$scope', 'authenticationService'];
+MoreController.$inject = ['$location', '$scope', 'authenticationService', 'localDbService', 'logger', 'tokenService', 'utilityService'];
 
-function MoreController($location, $scope, authenticationService) {
+function MoreController($location, $scope, authenticationService, localDbService, logger, tokenService, utilityService) {
   var moreCtrl = this;
   var authService = authenticationService;
+  var dbService = localDbService;
+  var util = utilityService;
   
   moreCtrl.addSpeaker = addSpeaker;
   moreCtrl.setInstructor = setInstructor;

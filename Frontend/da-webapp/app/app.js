@@ -11,6 +11,8 @@
 // Add (function(){}) around every js code to avoid putting stuff in global scope
 
 // in production, the logger.error should NOT LOG ANYTHING
+// remove all $q.defers (if possible) and use insead return values from .then callbacks
+//   to promise chain, see: http://www.codelord.net/2015/09/24/$q-dot-defer-youre-doing-it-wrong/
 
 // ***************************************************************************************** //
 

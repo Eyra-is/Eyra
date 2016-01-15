@@ -1,4 +1,6 @@
-// right now only handles route errors in route resolves and login reroutes
+// handles 
+//   route errors in route resolves,
+//   login reroutes,
 
 'use strict';
 

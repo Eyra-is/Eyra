@@ -22,6 +22,9 @@
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
 
+    <!-- warning: angular-localforage is later wrapped in a service, myLocalForage.service.js
+                  for extra processing and it only implements functions currently used
+                  and not the directive for example -->
     <script src="bower_components/localforage/dist/localforage.js"></script>
     <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
     <script src="bower_components/satellizer/satellizer.js"></script>
@@ -30,6 +33,9 @@
     <script src="recorderjs/dist/recorder.js"></script>
 
     <script src="app.js"></script>
+
+    <!-- a wrapper for anguler-localforage -->
+    <script src="services/myLocalForage.service.js"></script>
 
     <script src="services/logger.service.js"></script>
     <script src="services/data.service.js"></script>
