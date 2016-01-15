@@ -12,16 +12,18 @@
 <body>
     
     <div ng-view><h1>Loading...</h1></div>
+    
+    <script src="min/script.20160115-1902.min.js"></script><!---->
 
     <!-- In production use:
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
     -->
-    <script src="bower_components/angular/angular.js"></script>
+    <!--<script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
 
     <!-- warning: angular-localforage is later wrapped in a service, myLocalForage.service.js
                   for extra processing and it only implements functions currently used
-                  and not the directive for example -->
+                  and not the directive for example --
     <script src="bower_components/localforage/dist/localforage.js"></script>
     <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
     <script src="bower_components/satellizer/satellizer.js"></script>
@@ -29,12 +31,10 @@
     <script src="recorderjs/dist/recorderWorker.js"></script>
     <script src="recorderjs/dist/recorder.js"></script>
 
-    
-    <!--<script src="min/script.20160115-1844.min.js"></script><!---->
 
     <script src="app.js"></script>
 
-    <!-- a wrapper for angular-localforage -->
+    <!-- a wrapper for angular-localforage --
     <script src="services/myLocalForage.service.js"></script>
 
     <script src="services/logger.service.js"></script>

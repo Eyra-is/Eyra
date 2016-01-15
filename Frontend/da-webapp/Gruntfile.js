@@ -21,16 +21,16 @@ module.exports = function(grunt) {
       app: {
         files: [{
           src:  [
-                  'app/min/temp/app/bower_components/angular/angular.js',
-                  'app/min/temp/app/bower_components/angular-route/angular-route.js',
+                  'app/bower_components/angular/angular.js',
+                  'app/bower_components/angular-route/angular-route.js',
 
-                  'app/min/temp/app/bower_components/localforage/dist/localforage.js',
-                  'app/min/temp/app/bower_components/angular-localforage/dist/angular-localForage.js',
-                  'app/min/temp/app/bower_components/satellizer/satellizer.js',
-                  'app/min/temp/app/recorderjs/dist/recorderWorker.js',
-                  'app/min/temp/app/recorderjs/dist/recorder.js',
+                  'app/bower_components/localforage/dist/localforage.js',
+                  'app/bower_components/angular-localforage/dist/angular-localForage.js',
+                  'app/bower_components/satellizer/satellizer.js',
+                  'app/recorderjs/dist/recorderWorker.js',
+                  'app/recorderjs/dist/recorder.js',
 
-                  'app/min/temp/app.js', 
+                  'app/min/temp/app/app.js', 
                   'app/min/temp/app/services/**/*.js',
                   'app/min/temp/app/controllers/**/*.js'
                 ],
@@ -50,7 +50,7 @@ module.exports = function(grunt) {
             files: [{
                 expand: true,
                 src:  [
-                        'app.js', 
+                        'app/app.js', 
                         'app/services/**/*.js',
                         'app/controllers/**/*.js', 
                       ],
@@ -100,7 +100,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', []);
   grunt.registerTask('deploy',  [
-                                  'ngAnnotate', 
+                                  'ngAnnotate', // make sure angular scripts are ready for minification
                                   'concat',
                                   'clean:min_scripts', // delete previous script.DATA.min.js
                                   'uglify',
