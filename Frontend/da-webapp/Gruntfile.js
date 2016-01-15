@@ -1,33 +1,35 @@
 module.exports = function(grunt) {
   var cache_breaker = '<%= grunt.template.today("yyyymmdd-HHMM") %>';
+  var root = 'app/';
+  var base = 'app';
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     appcache: {
       options: {
-        basePath: 'app'
+        basePath: base
       },
       all: {
-        dest: 'app/app.appcache',
+        dest: root+'app.appcache',
         cache: {
           patterns: [
-                      'app/min/script.*.min.js'
+                      root+'min/script.*.min.js'
                     ],
           literals: [
-                      'app/app.css', 
-                      'app/index.html', 
-                      'app/script.min.map' 
+                      'app.css', 
+                      'index.html', 
+                      'min/script.min.map' 
                     ]
         },
         network: '*'
       }
     },
     clean: {
-      min_scripts: ['app/min/*.min.js'],
-      temp: ['app/min/temp/', 'app/min/script.cat.js']
+      min_scripts: [root+'min/*.min.js'],
+      temp: [root+'min/temp/']
     },
     jshint: {
-      all: ['Gruntfile.js', 'app/**/*.js']
+      all: ['Gruntfile.js', root+'**/*.js']
     },
     ngAnnotate: {
         options: {
@@ -37,11 +39,11 @@ module.exports = function(grunt) {
             files: [{
                 expand: true,
                 src:  [
-                        'app/app.js', 
-                        'app/services/**/*.js',
-                        'app/controllers/**/*.js', 
+                        root+'app.js', 
+                        root+'services/**/*.js',
+                        root+'controllers/**/*.js', 
                       ],
-                dest: 'app/min/temp/'
+                dest: root+'min/temp/'
             }]
         }
     },
@@ -56,7 +58,7 @@ module.exports = function(grunt) {
           ]
         },
         files: [
-          {expand: true, flatten: true, src: ['app/index.html'], dest: 'app/'}
+          {expand: true, flatten: true, src: [root+'index.html'], dest: root+''}
         ]
       }
     },
@@ -66,25 +68,25 @@ module.exports = function(grunt) {
                  <%= grunt.template.today("yyyy-mm-dd") %> */',
         mangle: false,
         sourceMap: true,
-        sourceMapName: 'app/script.min.map'
+        sourceMapName: root+'min/script.min.map'
       },
       minify: {
         files: [{
           src:  [
-                  'app/bower_components/angular/angular.js',
-                  'app/bower_components/angular-route/angular-route.js',
+                  root+'bower_components/angular/angular.js',
+                  root+'bower_components/angular-route/angular-route.js',
 
-                  'app/bower_components/localforage/dist/localforage.js',
-                  'app/bower_components/angular-localforage/dist/angular-localForage.js',
-                  'app/bower_components/satellizer/satellizer.js',
-                  'app/recorderjs/dist/recorderWorker.js',
-                  'app/recorderjs/dist/recorder.js',
+                  root+'bower_components/localforage/dist/localforage.js',
+                  root+'bower_components/angular-localforage/dist/angular-localForage.js',
+                  root+'bower_components/satellizer/satellizer.js',
+                  root+'recorderjs/dist/recorderWorker.js',
+                  root+'recorderjs/dist/recorder.js',
 
-                  'app/min/temp/app/app.js', 
-                  'app/min/temp/app/services/**/*.js',
-                  'app/min/temp/app/controllers/**/*.js'
+                  root+'min/temp/'+root+'app.js', 
+                  root+'min/temp/'+root+'services/**/*.js',
+                  root+'min/temp/'+root+'controllers/**/*.js'
                 ],
-          dest: 'app/min/script.'+cache_breaker+'.min.js'
+          dest: root+'min/script.'+cache_breaker+'.min.js'
         }]
       }
     },
