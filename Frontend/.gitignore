@@ -1,6 +1,6 @@
 # user added
-# ignore temp grunt files
-*/app/min/*
+# ignore deployed files created by grunt
+/da-webapp/app/*
 
 # bower installed packages
 bower_components

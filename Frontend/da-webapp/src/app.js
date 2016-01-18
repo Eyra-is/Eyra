@@ -58,7 +58,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
   function($routeProvider) {
     $routeProvider.
       when('/login', {
-        templateUrl: 'views/login.20160118-1700.html',
+        templateUrl: 'views/login.html',
         controller: 'LoginController',
         controllerAs: 'loginCtrl',
         resolve: {
@@ -68,12 +68,12 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         }
       }).
       when('/main', {
-        templateUrl: 'views/main.20160118-1700.html',
+        templateUrl: 'views/main.html',
         controller: 'MainController',
         controllerAs: 'mainCtrl'
       }).
       when('/more', {
-        templateUrl: 'views/more.20160118-1700.html',
+        templateUrl: 'views/more.html',
         controller: 'MoreController',
         controllerAs: 'moreCtrl',
         resolve: {
@@ -86,7 +86,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         }
       }).
       when('/recording', {
-        templateUrl: 'views/recording.20160118-1700.html',
+        templateUrl: 'views/recording.html',
         controller: 'RecordingController',
         controllerAs: 'recCtrl',
         resolve: {
@@ -96,7 +96,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         }
       }).
       when('/register-device', {
-        templateUrl: 'views/register-device.20160118-1700.html',
+        templateUrl: 'views/register-device.html',
         controller: 'RegisterDeviceController',
         controllerAs: 'regdCtrl',
         resolve: {
@@ -109,7 +109,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         }
       }).
       when('/set-instructor', {
-        templateUrl: 'views/set-instructor.20160118-1700.html',
+        templateUrl: 'views/set-instructor.html',
         controller: 'SetInstructorController',
         controllerAs: 'setiCtrl',
         resolve: {
@@ -122,7 +122,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         }
       }).
       when('/speaker-info', {
-        templateUrl: 'views/speaker-info.20160118-1700.html',
+        templateUrl: 'views/speaker-info.html',
         controller: 'SpeakerInfoController',
         controllerAs: 'sinfoCtrl',
         resolve: {
@@ -132,7 +132,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
         }
       }).
       when('/start', {
-        templateUrl: 'views/start.20160118-1700.html',
+        templateUrl: 'views/start.html',
         controller: 'StartController',
         controllerAs: 'startCtrl',
         resolve: {
