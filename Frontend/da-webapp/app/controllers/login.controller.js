@@ -21,7 +21,7 @@ function LoginController($http, $location, $scope, authenticationService, logger
   function submit() {
     /*$http({
         method:'POST',
-        url:'//'+BACKENDURL+'/auth/login',
+        url:BACKENDURL+'/auth/login',
         data:'{"email":"rooney", "password":"suchPass"}',
         json:{"email":"rooney", "password":"suchPass"},
         headers: {'Content-Type': 'application/json'}

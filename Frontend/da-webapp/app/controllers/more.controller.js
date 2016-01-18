@@ -79,7 +79,7 @@ function MoreController($location, $scope, authenticationService, localDbService
     });
 
     /*$http.post(
-      '//' + BACKENDURL + '/submit/session'
+      BACKENDURL + '/submit/session'
     ).then(function(response){
       console.log(response);
     },
