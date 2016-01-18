@@ -25,7 +25,7 @@ module.exports = function(grunt) {
                       depl+'views/**'
                     ],
           literals: [
-                      depl+'index.html'
+                      'index.html'
                     ]
         },
         network: '*'
