@@ -169,7 +169,7 @@ module.exports = function(grunt) {
                                   'replace:views', // replace 'views/bla.CACHEBREAKER.html' to the new cachebreaker in the routes in app.js
                                   'ngAnnotate:app', // make sure angular scripts are ready for minification
                                   'uglify:minify', // min javascript
-                                  //'clean:temp', // delete the temp app.js used by ngAnnotate
+                                  'clean:temp', // delete the temp app.js used by ngAnnotate
                                   'appcache:all'
                                 ]);
 };
