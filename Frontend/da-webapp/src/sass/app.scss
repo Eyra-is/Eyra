@@ -1,16 +1,28 @@
-html { height: 100%; }
-body { width: 100%; height: 100%; }
+/* variables */
+$mainNavHeight: 15vh; /* doesn't work completely, but does something depending on screen size */
+
+html, body { height: 100%; overflow: auto; }
+body { width: 100%; }
 
 .view {
   height: 100%;
   width: 100%;
   background-color: lightblue;
+  overflow: auto;
 }
 
 .content {
   margin: 0 auto;
   max-height: 100%;
   max-width: 80%;
+}
+
+/* navbar */
+
+.main-nav {
+  max-height: $mainNavHeight;
+  text-align: center;
+  padding: 1%;
 }
 
 /* button stylings */
@@ -24,7 +36,7 @@ body { width: 100%; height: 100%; }
 /* img stylings */
 
 .vertical-center {
-  min-height: 100%;
+  height: 100vh - $mainNavHeight;
 
   display: flex;
   align-items: center;

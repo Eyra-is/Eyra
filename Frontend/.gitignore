@@ -1,6 +1,8 @@
 # user added
 # ignore deployed files created by grunt
 /da-webapp/app/*
+# ignore .css created by sass
+/da-webapp/src/css/*
 
 # bower installed packages
 bower_components
