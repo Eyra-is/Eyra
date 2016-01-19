@@ -2,6 +2,8 @@
 //   for the appcache. Also generates the appcache files itself.
 // It's a bit daunting. Some explanations are in the 'deploy' task down below.
 
+'use strict';
+
 module.exports = function(grunt) {
   // be careful if compile time takes more than 1 minute, this might break since it's used in many places in the script
   var cache_breaker = '<%= grunt.template.today("yyyymmdd-HHMM") %>';
@@ -21,7 +23,7 @@ module.exports = function(grunt) {
           patterns: [
                       depl+'min/script.*.min.js',
                       depl+'min/script.min.*.map',
-                      depl+'app.*.css', 
+                      depl+'css/app.*.css', 
                       depl+'views/**'
                     ],
           literals: [
@@ -35,7 +37,7 @@ module.exports = function(grunt) {
       old_scripts:  [
                       depl+'min/', 
                       depl+'views/', 
-                      depl+'app.*.css', 
+                      depl+'css/app.*.css', 
                       depl+'index.html'
                     ],
       temp: [depl+'app.js']
@@ -51,7 +53,7 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['app.css'],
+            src: ['css/app.css'],
             dest: depl,
             rename: function(dest, src) {
               return dest + src.replace(/\.css$/, '.'+cache_breaker+'.css');
@@ -123,6 +125,19 @@ module.exports = function(grunt) {
         ]
       }
     },
+    sass: {
+      options: {
+        sourceMap: true,
+        expand: true,
+        flatten: true
+      },
+      main: {
+        files: [{
+          dest: source+'css/app.css',
+          src: source+'sass/app.scss'
+        }]
+      }
+    },
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - \
@@ -155,9 +170,12 @@ module.exports = function(grunt) {
       scripts: {
         files: [source+'**/*.js', source+'**/*.html', source+'**/*.css'],
         tasks: ['deploy'],
-        options: {
-          spawn: false,
-        }
+        options: { spawn: false }
+      },
+      sass: {
+        files: [source+'**/*.scss'],
+        tasks: ['sass'],
+        options: { spawn: false }
       }
     }
   });
@@ -170,8 +188,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-appcache');
   grunt.loadNpmTasks('grunt-ng-annotate');
   grunt.loadNpmTasks('grunt-replace');
+  grunt.loadNpmTasks('grunt-sass');
 
   grunt.registerTask('default', ['watch:scripts']);
+  grunt.registerTask('dev', ['watch:sass']);
   grunt.registerTask('deploy',  [
                                   'clean:old_scripts', // delete previous deploy scripts
                                   'copy:main', // copy everything not javascript to depl/ and rename with CACHEBREAKER

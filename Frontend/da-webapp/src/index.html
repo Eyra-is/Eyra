@@ -1,6 +1,6 @@
 <!doctype html>
 
-<html lang="en" ng-app="daApp" manifest="app.appcache">
+<html lang="en" ng-app="daApp"> <!-- manifest="app.appcache"><!-- comment the appcache for quick development -->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,23 +10,25 @@
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="@@app.css">
+    <!--<link rel="stylesheet" href="css/@@app.css"><!-- uncomment this in release-->
+    <link rel="stylesheet" href="css/app.css"><!-- uncomment this for quick development -->
 </head>
 <body>
     
-    <div ng-view><h1>Loading...</h1></div>
+    <div ng-view class="view"><h1>Loading...</h1></div>
     
-    <script src="min/@@script.min.js"></script><!---->
+    <!--<script src="min/@@script.min.js"></script><!-- uncomment this in release -->
 
     <!-- In production use:
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
     -->
-    <!--<script src="bower_components/angular/angular.js"></script>
+    <!-- uncomment this for quick development -->
+    <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
 
     <!-- warning: angular-localforage is later wrapped in a service, myLocalForage.service.js
                   for extra processing and it only implements functions currently used
-                  and not the directive for example --
+                  and not the directive for example -->
     <script src="bower_components/localforage/dist/localforage.js"></script>
     <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
     <script src="bower_components/satellizer/satellizer.js"></script>
@@ -37,7 +39,7 @@
 
     <script src="app.js"></script>
 
-    <!-- a wrapper for angular-localforage --
+    <!-- a wrapper for angular-localforage -->
     <script src="services/myLocalForage.service.js"></script>
 
     <script src="services/logger.service.js"></script>

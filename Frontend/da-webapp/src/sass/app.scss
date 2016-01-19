@@ -1,0 +1,48 @@
+html { height: 100%; }
+body { width: 100%; height: 100%; }
+
+.view {
+  height: 100%;
+  width: 100%;
+  background-color: lightblue;
+}
+
+.content {
+  margin: 0 auto;
+  max-height: 100%;
+  max-width: 80%;
+}
+
+/* button stylings */
+
+.btn-circle {
+  border-radius: 50%;
+  padding: 0.1em;
+  width: 1.8em;
+}
+
+/* img stylings */
+
+.vertical-center {
+  min-height: 100%;
+
+  display: flex;
+  align-items: center;
+}
+
+.main-img {
+  padding-top: 2%;
+  flex-basis: 100%;
+}
+
+/* misc stylings */
+
+#playback {
+  margin: 1%;
+  max-width: 100%;
+}
+
+.dataEntry > * {
+  float: left;
+  clear: both;
+}
