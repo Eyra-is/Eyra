@@ -1,4 +1,6 @@
 # user added
+# ignore deployed files created by grunt
+/da-webapp/app/*
 
 # bower installed packages
 bower_components

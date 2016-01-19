@@ -1,3 +1,4 @@
+(function () {
 // send data from one pageview to the next by injecting this service on both sides, 
 // and using get/set with strings as keys.
 
@@ -31,3 +32,4 @@ function dataService() {
     return data[key];
   }
 }
+}());

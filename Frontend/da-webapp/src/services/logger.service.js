@@ -1,3 +1,4 @@
+(function () {
 // service to log errors/console output. Also saves it to localForage, with key 'logs' as one big string.
 
 'use strict';
@@ -61,3 +62,4 @@ function logger(myLocalForageService) {
     });
   }
 }
+}());

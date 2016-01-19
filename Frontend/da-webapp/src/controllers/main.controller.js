@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -116,3 +117,4 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
     $location.path('/more');
   }
 }
+}());

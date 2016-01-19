@@ -1,27 +1,29 @@
 <!doctype html>
 
-<html lang="en" ng-app="daApp"><!--manifest="app.appcache"-->
+<html lang="en" ng-app="daApp" manifest="app.appcache">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>D.A. App</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="@@app.css">
 </head>
 <body>
     
     <div ng-view><h1>Loading...</h1></div>
+    
+    <script src="min/@@script.min.js"></script><!---->
 
     <!-- In production use:
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
     -->
-    <script src="bower_components/angular/angular.js"></script>
+    <!--<script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
 
     <!-- warning: angular-localforage is later wrapped in a service, myLocalForage.service.js
                   for extra processing and it only implements functions currently used
-                  and not the directive for example -->
+                  and not the directive for example --
     <script src="bower_components/localforage/dist/localforage.js"></script>
     <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
     <script src="bower_components/satellizer/satellizer.js"></script>
@@ -29,9 +31,10 @@
     <script src="recorderjs/dist/recorderWorker.js"></script>
     <script src="recorderjs/dist/recorder.js"></script>
 
+
     <script src="app.js"></script>
 
-    <!-- a wrapper for anguler-localforage -->
+    <!-- a wrapper for angular-localforage --
     <script src="services/myLocalForage.service.js"></script>
 
     <script src="services/logger.service.js"></script>
@@ -53,6 +56,6 @@
     <script src="controllers/registerdevice.controller.js"></script>
     <script src="controllers/setinstructor.controller.js"></script>
     <script src="controllers/speakerinfo.controller.js"></script>
-    <script src="controllers/start.controller.js"></script>
+    <script src="controllers/start.controller.js"></script><!---->
 </body>
 </html>

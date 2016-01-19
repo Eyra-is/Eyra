@@ -1,3 +1,4 @@
+(function () {
 // handles http post and get requests to server
 // "implements" the Client-Server API and also handles sending recs from local db when syncing
 
@@ -197,3 +198,4 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
       });
   }
 }
+}());

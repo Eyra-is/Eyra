@@ -1,3 +1,4 @@
+(function () {
 // right now pretty useless to have it as a special service, but if authentication scheme
 //   is ever changed or modified, it might be nice, so why not have it?
 
@@ -31,3 +32,4 @@ function authenticationService($auth) {
     $auth.logout();
   }
 }
+}());

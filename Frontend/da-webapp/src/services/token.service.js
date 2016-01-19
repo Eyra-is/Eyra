@@ -1,3 +1,4 @@
+(function () {
 // service to query and process tokens from server
 
 'use strict';
@@ -130,3 +131,4 @@ function tokenService($q, deliveryService, logger, myLocalForageService, utility
     });
   }
 }
+}());

@@ -13,13 +13,17 @@
 // in production, the logger.error should NOT LOG ANYTHING
 // remove all $q.defers (if possible) and use insead return values from .then callbacks
 //   to promise chain, see: http://www.codelord.net/2015/09/24/$q-dot-defer-youre-doing-it-wrong/
+// rename minFreeTokenIdx to highest used token idx
 
 // ***************************************************************************************** //
 
-'use strict';
+
 
 var putOnline = false;
 var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
+
+(function () {
+'use strict';
 
 angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
 
@@ -142,6 +146,4 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
       });
   }
 ]);
-
-
-
+}());

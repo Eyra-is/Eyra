@@ -1,3 +1,4 @@
+(function () {
 // handles 
 //   route errors in route resolves,
 //   login reroutes,
@@ -53,3 +54,4 @@ function routeService($location, $q, $rootScope, authenticationService, logger) 
     }
   }
 }
+}());

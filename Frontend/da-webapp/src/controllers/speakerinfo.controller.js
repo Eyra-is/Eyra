@@ -1,3 +1,4 @@
+(function () {
 'use strict';
 
 angular.module('daApp')
@@ -69,3 +70,4 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
     }
   }
 }
+}());

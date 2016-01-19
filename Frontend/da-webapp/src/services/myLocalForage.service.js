@@ -1,3 +1,4 @@
+(function () {
 // simple wrapper for the angular-localForage library.
 // does nothing except keep a single boolean whether there are any indexed db operations
 //   still ongoing
@@ -83,3 +84,4 @@ function myLocalForageService($localForage) {
     return generalWrapper($localForage.clear);
   }
 }
+}());
