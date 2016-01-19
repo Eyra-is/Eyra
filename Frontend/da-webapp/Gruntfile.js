@@ -151,17 +151,27 @@ module.exports = function(grunt) {
         }]
       }
     },
+    watch: {
+      scripts: {
+        files: [source+'**/*.js', source+'**/*.html', source+'**/*.css'],
+        tasks: ['deploy'],
+        options: {
+          spawn: false,
+        }
+      }
+    }
   });
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-appcache');
   grunt.loadNpmTasks('grunt-ng-annotate');
   grunt.loadNpmTasks('grunt-replace');
 
-  grunt.registerTask('default', []);
+  grunt.registerTask('default', ['watch:scripts']);
   grunt.registerTask('deploy',  [
                                   'clean:old_scripts', // delete previous deploy scripts
                                   'copy:main', // copy everything not javascript to depl/ and rename with CACHEBREAKER
