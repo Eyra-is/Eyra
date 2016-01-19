@@ -1,11 +1,9 @@
 <h1 ng-show="!isLoaded" ng-cloak>{{msg}}</h1>
 
 <div ng-show="isLoaded">
-    <div class="content">
-        <div class="vertical-center">
-            <img class="img-responsive img-circle main-img" src="img/bear.jpg" alt="A bear.">
-        </div>
-        <div class="navbar navbar-fixed-bottom main-nav flex-nav">
+    <div class="content vertical-center">
+        <img class="img-responsive img-circle main-img" src="img/bear.jpg" alt="A bear.">
+        <div class="navbar main-nav">
             <button class="btn-primary btn" type="button" ng-click="mainCtrl.start()">
                 Start
             </button>

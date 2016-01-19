@@ -1,6 +1,9 @@
 /* variables */
-$mainNavHeight: 15vh; /* doesn't work completely, but does something depending on screen size */
 
+/* reusables */
+
+
+/* main css */
 html, body { height: 100%; overflow: auto; }
 body { width: 100%; }
 
@@ -14,19 +17,16 @@ body { width: 100%; }
 .content {
   margin: 0 auto;
   max-height: 100%;
+  max-width: 100%;
+}
+
+/* data entry (form) layout */
+.data-entry {
+  min-width: 80%;
   max-width: 80%;
 }
 
-/* navbar */
-
-.main-nav {
-  max-height: $mainNavHeight;
-  text-align: center;
-  padding: 1%;
-}
-
 /* button stylings */
-
 .btn-circle {
   border-radius: 50%;
   padding: 0.1em;
@@ -34,27 +34,32 @@ body { width: 100%; }
 }
 
 /* img stylings */
-
-.vertical-center {
-  height: 100vh - $mainNavHeight;
-
-  display: flex;
-  align-items: center;
+.main-img {
+  margin: 0 auto;
+  padding: 0.5%;
+  flex-basis: 50%;  
 }
 
-.main-img {
-  padding-top: 2%;
-  flex-basis: 100%;
+/* navbar */
+.main-nav {
+  text-align: center;
+  padding: 1%;
+  flex-basis: 20%;
 }
 
 /* misc stylings */
-
 #playback {
   margin: 1%;
   max-width: 100%;
 }
 
-.dataEntry > * {
-  float: left;
-  clear: both;
+/* give parent of centered element this class */
+.vertical-center {
+  height: 100%; /* fallback */
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 }
