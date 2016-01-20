@@ -1,5 +1,6 @@
 from flask_jwt import JWT, jwt_required, current_identity
 from werkzeug.security import safe_str_cmp
+from datetime import timedelta
 
 from util import log
 
@@ -41,6 +42,7 @@ class AuthHandler:
         app.config['JWT_AUTH_USERNAME_KEY'] = 'email'
         app.config['JWT_AUTH_PASSWORD_KEY'] = 'password'
         app.config['JWT_AUTH_URL_RULE']     = '/auth/login'
+        app.config['JWT_EXPIRATION_DELTA']  = timedelta(days=1)
 
         self.jwt = JWT(app, authenticate, identity)
 
