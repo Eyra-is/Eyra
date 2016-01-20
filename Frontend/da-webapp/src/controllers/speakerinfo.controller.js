@@ -49,8 +49,8 @@ function SpeakerInfoController($location, $scope, dataService, logger, localDbMi
       $scope.msg = 'Please fill out all required entries.';
     } else {
       var speakerInfo = { 'name':speakerName,
-                          'gender':(sinfoCtrl.gender || ''),
-                          'dob':(sinfoCtrl.dob || ''),
+                          'gender':sinfoCtrl.gender,
+                          'dob':sinfoCtrl.dob,
                           'height':(sinfoCtrl.height || '')};
       dataService.set('speakerInfo', speakerInfo); // set in ram
 
