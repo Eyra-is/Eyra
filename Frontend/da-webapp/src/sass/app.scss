@@ -1,5 +1,6 @@
 /* variables */
 $glyphSize: 4em;
+$bootstrapInfo: lightblue;
 
 /* reusables */
 /* default layout for the stuff you can interact with on the screen */
@@ -17,7 +18,7 @@ body { width: 100%; }
 .view {
   height: 100%;
   width: 100%;
-  background-color: lightblue;
+  background-color: $bootstrapInfo;
   overflow: auto;
 }
 .content {
@@ -56,6 +57,10 @@ body { width: 100%; }
 }
 
 /* button stylings */
+.btn-list {
+  margin: 1%;
+  width: 100%;
+}
 .btn-record, .btn-stop {
   width: $glyphSize;
   height: $glyphSize;

@@ -14,6 +14,9 @@
 //   to promise chain, see: http://www.codelord.net/2015/09/24/$q-dot-defer-youre-doing-it-wrong/
 // rename minFreeTokenIdx to highest used token idx
 
+// consider using something like Jade or angular-blocks for blocking and reusing the common pattern
+//   of all the forms
+
 // ***************************************************************************************** //
 
 

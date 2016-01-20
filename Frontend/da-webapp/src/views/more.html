@@ -1,29 +1,38 @@
 <h1 ng-show="!isLoaded">Loading...</h1>
 
 <div ng-show="isLoaded">
-    <button type="button" ng-click="moreCtrl.addSpeaker()">
-        Add speaker
-    </button>
-    <button type="button" ng-click="moreCtrl.setInstructor()">
-        Set instructor
-    </button>
-    <button type="button" ng-click="moreCtrl.registerDevice()">
-        Register device
-    </button>
-    <button type="button" ng-click="moreCtrl.sync()">
-        Sync
-    </button>
-    <button type="button" ng-click="moreCtrl.getTokens()">
-        Get tokens (dev)
-    </button>
-    <button type="button" ng-click="moreCtrl.clearLocalDb()">
-        Clear local db (dev)
-    </button>
-    <button type="button" ng-click="moreCtrl.test()">
-        Test (dev)
-    </button>
-    <button type="button" ng-click="moreCtrl.logout()">
-        Logout
-    </button>
-    <div>{{msg}}</div>
+    <div class="content vertical-center">
+        <div class="main-view">
+            <ul class="nav navbar-nav">
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.addSpeaker()">
+                    Add speaker
+                </button></li>
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.setInstructor()">
+                    Set instructor
+                </button></li>
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.registerDevice()">
+                    Register device
+                </button></li>
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.sync()">
+                    Sync
+                </button></li>
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.logout()">
+                    Logout
+                </button></li>
+            </ul>
+
+            <ul class="nav navbar-nav">
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.getTokens()">
+                    Get tokens (dev)
+                </button></li>
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.clearLocalDb()">
+                    Clear local db (dev)
+                </button></li>
+                <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.test()">
+                    Test (dev)
+                </button></li>
+            </ul>
+            <div class="message">{{msg}}</div>
+        </div>
+    </div>
 </div>
