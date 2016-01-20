@@ -34,7 +34,7 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
 
   function logout() {
     authService.logout();
-    alert('Logged out successfully!');
+    $location.path('/main');
   }
 
   function setInstructor() {
