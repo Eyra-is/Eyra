@@ -16,7 +16,6 @@
 
 // consider using something like Jade or angular-blocks for blocking and reusing the common pattern
 //   of all the forms
-// change div msg to p msg
 
 // ***************************************************************************************** //
 
