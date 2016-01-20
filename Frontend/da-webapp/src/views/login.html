@@ -1,15 +1,23 @@
 <h1 ng-show="!isLoaded">Loading...</h1>
 
 <div ng-show="isLoaded">
-    <div class="content">
-        <h3 class="main-heading">Login</h3>
-        <form class="dataEntry" ng-submit="loginCtrl.submit()">
-            <label for="email">Email</label>
-            <input id="email" type="email" ng-model="email" placeholder="josh9@dataacquisition.da">
-            <label for="password">Password</label>
-            <input id="password" type="password" ng-model="password" placeholder="****************">
-            <input type="submit" value="Ok"></input>
-            <div>{{msg}}</div>
-        </form>
+    <div class="content vertical-center">
+        <div class="data-entry">
+            <h3 class="default-heading">Login</h3>
+            <form class="dataEntry" ng-submit="loginCtrl.submit()">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input class="form-control" id="email" type="email" ng-model="email" placeholder="josh9@dataacquisition.da">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input class="form-control" id="password" type="password" ng-model="password" placeholder="****************">
+                </div>
+                <button class="form-control btn btn-primary" type="submit" value="">
+                    <span class="glyphicon glyphicon-ok"></span>
+                </button>
+            </form>
+            <div class="message">{{msg}}</div>
+        </div>
     </div>
 </div>
