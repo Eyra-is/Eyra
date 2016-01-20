@@ -4,7 +4,8 @@
 angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
-RecordingController.$inject = [ '$scope',  
+RecordingController.$inject = [ '$rootScope',
+                                '$scope',  
                                 'dataService',
                                 'deliveryService',
                                 'localDbService',
@@ -14,7 +15,7 @@ RecordingController.$inject = [ '$scope',
                                 'tokenService',
                                 'utilityService'];
 
-function RecordingController($scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
+function RecordingController($rootScope, $scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
   var recCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
@@ -44,7 +45,7 @@ function RecordingController($scope, dataService, deliveryService, localDbServic
     // provide updateBindings function so recordingService can 
     // call that function when it needs to update bindings
     recService.setupCallbacks(updateBindingsCallback, recordingCompleteCallback);
-    $scope.isLoaded = true; // is page loaded?  
+    $rootScope.isLoaded = true; // is page loaded?  
   }
 
   function record() {

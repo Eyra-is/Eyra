@@ -1,19 +1,15 @@
-<h1 ng-show="!isLoaded">Loading...</h1>
-
-<div ng-show="isLoaded">
-    <div class="content vertical-center">
-        <div class="data-entry">
-            <form ng-submit="regdCtrl.submit()">
-                <div class="form-group">
-                    <label for="imei">IMEI/Device ID</label>
-                    <input class="form-control" id="imei" type="text" ng-model="regdCtrl.imei" placeholder="000000000000000" 
-                    pattern="[\dA-Za-z-_ ]+" required>
-                </div>
-                <button class="form-control btn btn-primary" type="submit" value="">
-                    <span class="glyphicon glyphicon-ok"></span>
-                </button>
-            </form>
-            <div class="message">{{msg}}</div>
-        </div>
+<div class="content vertical-center">
+    <div class="data-entry">
+        <form ng-submit="regdCtrl.submit()">
+            <div class="form-group">
+                <label for="imei">IMEI/Device ID</label>
+                <input class="form-control" id="imei" type="text" ng-model="regdCtrl.imei" placeholder="000000000000000" 
+                pattern="[\dA-Za-z-_ ]+" required>
+            </div>
+            <button class="form-control btn btn-primary" type="submit" value="">
+                <span class="glyphicon glyphicon-ok"></span>
+            </button>
+        </form>
+        <div class="message">{{msg}}</div>
     </div>
 </div>

@@ -15,7 +15,10 @@
 </head>
 <body>
     
-    <div ng-view class="view"><h1>Loading...</h1></div>
+    <h1 ng-show="!isLoaded">Loading...</h1>
+    <div ng-show="isLoaded">
+        <div ng-view class="view"><h1>Loading...</h1></div>
+    </div>
     
     <!--<script src="min/@@script.min.js"></script><!-- uncomment this in release -->
 

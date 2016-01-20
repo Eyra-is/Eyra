@@ -27,7 +27,7 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
   mainCtrl.more = more;
 
   $scope.msg = 'Loading...';
-  $scope.isLoaded = false;
+  $rootScope.isLoaded = false;
 
   var recorderPromise, tokensPromise, initPromises;
   if (!$rootScope.appInitialized) {
@@ -39,7 +39,7 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
 
     init();
   } else {
-    $scope.isLoaded = true;
+    $rootScope.isLoaded = true;
   }
 
   //////////
@@ -68,7 +68,7 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
       $rootScope.appInitialized = true;
       logger.log('App initialized.');
 
-      $scope.isLoaded = true;
+      $rootScope.isLoaded = true;
     },
     // this means our app didn't initialize.. we should probably do something if that happens
     function error(data){

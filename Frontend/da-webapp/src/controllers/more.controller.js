@@ -4,9 +4,9 @@
 angular.module('daApp')
 .controller('MoreController', MoreController);
 
-MoreController.$inject = ['$location', '$scope', 'authenticationService', 'deliveryService', 'localDbService', 'logger', 'tokenService', 'utilityService'];
+MoreController.$inject = ['$location', '$rootScope', '$scope', 'authenticationService', 'deliveryService', 'localDbService', 'logger', 'tokenService', 'utilityService'];
 
-function MoreController($location, $scope, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
+function MoreController($location, $rootScope, $scope, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
   var moreCtrl = this;
   var authService = authenticationService;
   var dbService = localDbService;
@@ -23,7 +23,7 @@ function MoreController($location, $scope, authenticationService, deliveryServic
 
   moreCtrl.logout = logout;
 
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
 
   
   //////////

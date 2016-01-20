@@ -4,9 +4,9 @@
 angular.module('daApp')
 .controller('StartController', StartController);
 
-StartController.$inject = ['$location', '$scope', 'dataService', 'localDbMiscService', 'logger', 'utilityService'];
+StartController.$inject = ['$location', '$rootScope', '$scope', 'dataService', 'localDbMiscService', 'logger', 'utilityService'];
 
-function StartController($location, $scope, dataService, localDbMiscService, logger, utilityService) {
+function StartController($location, $rootScope, $scope, dataService, localDbMiscService, logger, utilityService) {
   var startCtrl = this;
   var util = utilityService;
   var dbService = localDbMiscService;
@@ -17,7 +17,7 @@ function StartController($location, $scope, dataService, localDbMiscService, log
   startCtrl.comments = '';
   startCtrl.doneBefore = false;
 
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
 
   //////////
 

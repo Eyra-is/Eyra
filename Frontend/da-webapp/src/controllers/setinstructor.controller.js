@@ -5,6 +5,7 @@ angular.module('daApp')
 .controller('SetInstructorController', SetInstructorController);
 
 SetInstructorController.$inject = [ '$location', 
+                                    '$rootScope',
                                     '$scope', 
                                     'dataService', 
                                     'deliveryService', 
@@ -12,7 +13,7 @@ SetInstructorController.$inject = [ '$location',
                                     'logger',
                                     'utilityService'];
 
-function SetInstructorController($location, $scope, dataService, deliveryService, localDbMiscService, logger, utilityService) {
+function SetInstructorController($location, $rootScope, $scope, dataService, deliveryService, localDbMiscService, logger, utilityService) {
   var setiCtrl = this;
   var dbService = localDbMiscService;
   var delService = deliveryService;
@@ -26,7 +27,7 @@ function SetInstructorController($location, $scope, dataService, deliveryService
   setiCtrl.address = '';
   setiCtrl.msgs = []; // error msgs from validation
 
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
 
 
   //////////

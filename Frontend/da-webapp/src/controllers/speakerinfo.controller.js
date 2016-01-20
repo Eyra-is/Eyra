@@ -4,16 +4,16 @@
 angular.module('daApp')
 .controller('SpeakerInfoController', SpeakerInfoController);
 
-SpeakerInfoController.$inject = ['$location', '$scope', 'dataService', 'logger', 'localDbMiscService', 'utilityService'];
+SpeakerInfoController.$inject = ['$location', '$rootScope', '$scope', 'dataService', 'logger', 'localDbMiscService', 'utilityService'];
 
-function SpeakerInfoController($location, $scope, dataService, logger, localDbMiscService, utilityService) {
+function SpeakerInfoController($location, $rootScope, $scope, dataService, logger, localDbMiscService, utilityService) {
   var sinfoCtrl = this;
   var util = utilityService;
   var dbService = localDbMiscService;
   
   sinfoCtrl.submit = submit;
 
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
   sinfoCtrl.gender = '';
   sinfoCtrl.dob = '';
   sinfoCtrl.height = '';

@@ -1,6 +1,8 @@
+/* glyphicons courtesy of http://glyphicons.com/ */
+
 /* variables */
 $glyphSize: 4em;
-$bootstrapInfo: lightblue;
+$mainColor: lightblue;
 
 /* reusables */
 /* default layout for the stuff you can interact with on the screen */
@@ -14,11 +16,13 @@ $bootstrapInfo: lightblue;
 
 /* main css */
 html, body { height: 100%; overflow: auto; }
-body { width: 100%; }
+body { 
+  width: 100%;
+  background-color: $mainColor; 
+}
 .view {
   height: 100%;
   width: 100%;
-  background-color: $bootstrapInfo;
   overflow: auto;
 }
 .content {

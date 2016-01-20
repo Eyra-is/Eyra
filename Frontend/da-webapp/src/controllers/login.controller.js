@@ -4,9 +4,9 @@
 angular.module('daApp')
 .controller('LoginController', LoginController);
 
-LoginController.$inject = ['$http', '$location', '$scope', 'authenticationService', 'logger'];
+LoginController.$inject = ['$http', '$location', '$rootScope', '$scope', 'authenticationService', 'logger'];
 
-function LoginController($http, $location, $scope, authenticationService, logger) {
+function LoginController($http, $location, $rootScope, $scope, authenticationService, logger) {
   var loginCtrl = this;
   var authService = authenticationService;
   
@@ -14,7 +14,7 @@ function LoginController($http, $location, $scope, authenticationService, logger
 
   $scope.email = '';
   $scope.password = '';
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
 
   
   //////////
