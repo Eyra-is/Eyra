@@ -1,9 +1,9 @@
 /* variables */
-$glyphSize: 3em;
+$glyphSize: 4em;
 
 /* reusables */
 /* default layout for the stuff you can interact with on the screen */
-.main-view {
+.default-view {
   width: 80%;
   max-width: 320px;
 }
@@ -26,9 +26,14 @@ body { width: 100%; }
   max-width: 100%;
 }
 
-/* data entry (form) layout */
+/* layout */
+.recording-view {
+  @extend .default-view;
+  text-align: center;
+}
+/* form layout */
 .data-entry {
-  @extend .main-view;
+  @extend .default-view;
 }
 /* http://stackoverflow.com/a/24688640/5272567 */
 .checkbox input[type='checkbox'] {
@@ -42,6 +47,12 @@ body { width: 100%; }
 }
 .checkbox label {
   font-size: 1.1em;
+}
+
+/* token stylings */
+.token {
+  font-weight: bold;
+  font-size: 1.5em;
 }
 
 /* button stylings */
@@ -72,7 +83,7 @@ body { width: 100%; }
   flex-basis: 50%;  
 }
 
-/* navbar */
+/* navbars */
 .main-nav {
   text-align: center;
   padding: 1%;
@@ -84,10 +95,15 @@ body { width: 100%; }
   margin: 1%;
   max-width: 100%;
 }
-.main-heading { 
+.default-heading { 
   margin: 1% auto; 
 }
-
+.message {
+  display: block;
+  padding-top: 5%;
+  font-weight: bold;
+  font-size: 1.25em;
+}
 /* give parent of centered element this class */
 .vertical-center {
   height: 100%; /* fallback */

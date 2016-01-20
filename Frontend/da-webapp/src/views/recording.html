@@ -2,7 +2,7 @@
 
 <div ng-show="isLoaded">
     <div class="content vertical-center">
-        <div class="main-view">
+        <div class="recording-view">
             <p class="token">{{recCtrl.displayToken}}</p>
             <div id="playback">
                 <audio ng-src="{{recCtrl.curRec[0].url | trustUrl}}" controls></audio>
@@ -14,7 +14,7 @@
             <button class="btn btn-glyph-only btn-stop" type="button" ng-disabled="recCtrl.stopBtnDisabled" ng-click="recCtrl.stop()">
                 <span class="glyphicon glyphicon-stop"></span>
             </button>
-            <div>{{msg}}</div>
+            <div class="message">{{msg}}</div>
         </div>
     </div>
 </div>

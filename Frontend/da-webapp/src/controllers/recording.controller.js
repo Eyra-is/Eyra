@@ -30,7 +30,7 @@ function RecordingController($scope, dataService, deliveryService, localDbServic
   recCtrl.recordBtnDisabled = false;
   recCtrl.stopBtnDisabled = true;
 
-  var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
+  var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start.'};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
