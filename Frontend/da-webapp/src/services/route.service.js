@@ -27,7 +27,8 @@ function routeService($location, $q, $rootScope, authenticationService, logger) 
   // used for routing back to main page if other pages are accessed manually (before app can be initialized)
   // returns a promise, true/false
   function appInitialized() {
-    if ($rootScope.appInitialized) {
+    // ONLY DEBUG, DEV, GET RID OF ACCESS CONTROL
+    if (/*$rootScope.appInitialized*/ true /* DEBUG ONLY */) {
       return $q.when(true);
     } else {
       return $q.reject('App is not initialized.');

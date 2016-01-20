@@ -1,19 +1,25 @@
 /* variables */
+$glyphSize: 3em;
 
 /* reusables */
-
+/* default layout for the stuff you can interact with on the screen */
+.main-view {
+  width: 80%;
+  max-width: 320px;
+}
+.glyph-default {
+  font-size: $glyphSize;
+}
 
 /* main css */
 html, body { height: 100%; overflow: auto; }
 body { width: 100%; }
-
 .view {
   height: 100%;
   width: 100%;
   background-color: lightblue;
   overflow: auto;
 }
-
 .content {
   margin: 0 auto;
   max-height: 100%;
@@ -22,15 +28,41 @@ body { width: 100%; }
 
 /* data entry (form) layout */
 .data-entry {
-  min-width: 80%;
-  max-width: 80%;
+  @extend .main-view;
+}
+/* http://stackoverflow.com/a/24688640/5272567 */
+.checkbox input[type='checkbox'] {
+  /* All browsers except webkit*/
+  transform: scale(1.5);
+  /* Webkit browsers*/
+  -webkit-transform: scale(1.5);
+}
+.checkbox { 
+  padding-left: 2%; 
+}
+.checkbox label {
+  font-size: 1.1em;
 }
 
 /* button stylings */
-.btn-circle {
-  border-radius: 50%;
-  padding: 0.1em;
-  width: 1.8em;
+.btn-record, .btn-stop {
+  width: $glyphSize;
+  height: $glyphSize;
+}
+.glyphicon-record {
+  @extend .glyph-default;
+  color: red;
+}
+.glyphicon-stop {
+  @extend .glyph-default;
+}
+/* make button invisible, to allow only glyphicon as button */
+/* http://stackoverflow.com/a/26917133/5272567 */
+.btn-glyph-only {
+  -webkit-appearance: none;
+  outline: none;
+  border: 0;
+  background: transparent;
 }
 
 /* img stylings */
@@ -51,6 +83,9 @@ body { width: 100%; }
 #playback {
   margin: 1%;
   max-width: 100%;
+}
+.main-heading { 
+  margin: 1% auto; 
 }
 
 /* give parent of centered element this class */
