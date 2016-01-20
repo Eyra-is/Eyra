@@ -10,8 +10,8 @@
     <button type="button" ng-click="moreCtrl.registerDevice()">
         Register device
     </button>
-    <button type="button" ng-click="moreCtrl.logout()">
-        Logout
+    <button type="button" ng-click="moreCtrl.sync()">
+        Sync
     </button>
     <button type="button" ng-click="moreCtrl.getTokens()">
         Get tokens (dev)
@@ -22,4 +22,8 @@
     <button type="button" ng-click="moreCtrl.test()">
         Test (dev)
     </button>
+    <button type="button" ng-click="moreCtrl.logout()">
+        Logout
+    </button>
+    <div>{{msg}}</div>
 </div>
