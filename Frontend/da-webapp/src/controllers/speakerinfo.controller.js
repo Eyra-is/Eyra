@@ -4,16 +4,16 @@
 angular.module('daApp')
 .controller('SpeakerInfoController', SpeakerInfoController);
 
-SpeakerInfoController.$inject = ['$location', '$scope', 'dataService', 'localDbMiscService', 'utilityService'];
+SpeakerInfoController.$inject = ['$location', '$rootScope', '$scope', 'dataService', 'logger', 'localDbMiscService', 'utilityService'];
 
-function SpeakerInfoController($location, $scope, dataService, localDbMiscService, utilityService) {
+function SpeakerInfoController($location, $rootScope, $scope, dataService, logger, localDbMiscService, utilityService) {
   var sinfoCtrl = this;
   var util = utilityService;
   var dbService = localDbMiscService;
   
   sinfoCtrl.submit = submit;
 
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
   sinfoCtrl.gender = '';
   sinfoCtrl.dob = '';
   sinfoCtrl.height = '';
@@ -45,13 +45,13 @@ function SpeakerInfoController($location, $scope, dataService, localDbMiscServic
   function submit() {
     // set info used by recording
     // these are all dropdown lists, so only need to check for empty fields.
-    if (sinfoCtrl.gender === '' || sinfoCtrl.dob === '' || sinfoCtrl.height === '') {
-      $scope.msg = 'Please fill out all entries.';
+    if (sinfoCtrl.gender === '' || sinfoCtrl.dob === '') {
+      $scope.msg = 'Please fill out all required entries.';
     } else {
       var speakerInfo = { 'name':speakerName,
                           'gender':sinfoCtrl.gender,
                           'dob':sinfoCtrl.dob,
-                          'height':sinfoCtrl.height};
+                          'height':(sinfoCtrl.height || '')};
       dataService.set('speakerInfo', speakerInfo); // set in ram
 
       // set user in local db async

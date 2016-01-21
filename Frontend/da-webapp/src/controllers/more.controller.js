@@ -4,12 +4,13 @@
 angular.module('daApp')
 .controller('MoreController', MoreController);
 
-MoreController.$inject = ['$location', '$scope', 'authenticationService', 'localDbService', 'logger', 'tokenService', 'utilityService'];
+MoreController.$inject = ['$location', '$rootScope', '$scope', 'authenticationService', 'deliveryService', 'localDbService', 'logger', 'tokenService', 'utilityService'];
 
-function MoreController($location, $scope, authenticationService, localDbService, logger, tokenService, utilityService) {
+function MoreController($location, $rootScope, $scope, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
   var moreCtrl = this;
   var authService = authenticationService;
   var dbService = localDbService;
+  var delService = deliveryService;
   var util = utilityService;
   
   moreCtrl.addSpeaker = addSpeaker;
@@ -17,11 +18,12 @@ function MoreController($location, $scope, authenticationService, localDbService
   moreCtrl.getTokens = getTokens;
   moreCtrl.registerDevice = registerDevice;
   moreCtrl.setInstructor = setInstructor;
+  moreCtrl.sync = sync;
   moreCtrl.test = test;
 
   moreCtrl.logout = logout;
 
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
 
   
   //////////
@@ -32,7 +34,7 @@ function MoreController($location, $scope, authenticationService, localDbService
 
   function logout() {
     authService.logout();
-    alert('Logged out successfully!');
+    $location.path('/main');
   }
 
   function setInstructor() {
@@ -48,23 +50,36 @@ function MoreController($location, $scope, authenticationService, localDbService
   // dev function, clear the entire local forage database
   function clearLocalDb() {
     if (confirm('Are you sure?\nThis will delete the entire local db, including tokens and recordings.')) {
-      moreCtrl.msg = 'Clearing entire local db...';
+      $scope.msg = 'Clearing entire local db...';
       dbService.clearLocalDb()
         .then(function(val){
           alert('Database cleared!');
-          moreCtrl.msg = 'Database cleared.';
+          $scope.msg = 'Database cleared.';
         }, util.stdErrCallback);
     }
   }
   
   function getTokens() {
-    moreCtrl.msg = 'Getting tokens...';
+    $scope.msg = 'Getting tokens...';
 
     tokenService.getTokens(25).then(function(tokens){
       alert('Tokens acquired!');
-      moreCtrl.msg = 'Tokens acquired.';
+      $scope.msg = 'Tokens acquired.';
     },
     util.stdErrCallback);
+  }
+
+  // sends all available sessions from local db to server, one session at a time
+  // assumes internet connection
+  function sync() {
+    $scope.msg = 'Syncing...';
+
+    delService.sendLocalSessions(syncDoneCallback);
+  }
+
+  // result is true if sync completed successfully
+  function syncDoneCallback(result) {
+    $scope.msg = result ? 'Sync complete.' : 'Sync failed.';
   }
 
   function test() {

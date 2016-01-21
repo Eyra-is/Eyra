@@ -4,7 +4,8 @@
 angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
-RecordingController.$inject = [ '$scope',  
+RecordingController.$inject = [ '$rootScope',
+                                '$scope',  
                                 'dataService',
                                 'deliveryService',
                                 'localDbService',
@@ -14,7 +15,7 @@ RecordingController.$inject = [ '$scope',
                                 'tokenService',
                                 'utilityService'];
 
-function RecordingController($scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
+function RecordingController($rootScope, $scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
   var recCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
@@ -23,16 +24,14 @@ function RecordingController($scope, dataService, deliveryService, localDbServic
 
   recCtrl.record = record;
   recCtrl.stop = stop;
-  recCtrl.sync = sync;
 
-  recCtrl.msg = ''; // single debug/information msg
+  $scope.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
 
   recCtrl.recordBtnDisabled = false;
   recCtrl.stopBtnDisabled = true;
-  recCtrl.syncBtnDisabled = false;
 
-  var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start'};
+  var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start.'};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
@@ -46,11 +45,11 @@ function RecordingController($scope, dataService, deliveryService, localDbServic
     // provide updateBindings function so recordingService can 
     // call that function when it needs to update bindings
     recService.setupCallbacks(updateBindingsCallback, recordingCompleteCallback);
-    $scope.isLoaded = true; // is page loaded?  
+    $rootScope.isLoaded = true; // is page loaded?  
   }
 
   function record() {
-    recCtrl.msg = 'Recording now...';
+    $scope.msg = 'Recording now...';
 
     recCtrl.recordBtnDisabled = true;
 
@@ -108,7 +107,7 @@ function RecordingController($scope, dataService, deliveryService, localDbServic
   // oldCurRec is a reference to the possibly previous recCtrl.curRec, because
   //   it might have changed when it is sent (although almost impossible atm)
   function send(sessionData, oldCurRec) {
-    recCtrl.msg = 'Sending recs...';
+    logger.log('Sending recs...');
 
     // and send it to remote server
     // test CORS is working
@@ -127,27 +126,11 @@ function RecordingController($scope, dataService, deliveryService, localDbServic
   }
 
   function stop() {
-    recCtrl.msg = 'Processing wav...';
+    $scope.msg = 'Stopped.';
 
     recCtrl.stopBtnDisabled = true;
     
     recService.stop();
-  }
-
-  // sends all available sessions from local db to server, one session at a time
-  // assumes internet connection
-  function sync() {
-    recCtrl.msg = 'Syncing...';
-
-    recCtrl.syncBtnDisabled = true;
-
-    delService.sendLocalSessions(syncDoneCallback);
-  }
-
-  // result is true if sync completed successfully
-  function syncDoneCallback(result) {
-    recCtrl.msg = result ? 'Sync complete.' : 'Sync failed.';
-    recCtrl.syncBtnDisabled = false;
   }
 
   function updateBindingsCallback() {

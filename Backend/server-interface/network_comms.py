@@ -2,14 +2,9 @@
 
 #                                         TODO                                             #
 
-# Reevaluate submit_session route format, e.g. have just a /submit and look at type through json data
 # Add code to calculate duration of wav files if needed
 
-# Make CORS more secure, e.g. not origins='*' but from a specific domain only.
-# Add functionality frontend and backend, to save the speaker and device ID's returned from server
-#   and thusly be able to identify devices even if no IMEI is present and to avoid speaker ambiguities
-#   note: this might not be desirable, to minimize damage if someone gets id's from laptop and then
-#         submits to the remote server, although this can be fixed by comparing the 2
+# Make CORS more secure, e.g. not origins='*' but from a specific domain only. CORS SHOULD BE REMOVED FROM PRODUCTION
 # Generalize even further, generalize the 'if in database, return that id, otherwise insert' (the processData functions)
 # Remove Flask-MySQLdb and simply use MySQLdb, no need for the flask extension (low usage on github) I think
 # REMEMBER TO CHANGE SECRET KEY IN AUTH HANDLER FOR GITHUB RELEASE/PRODUCTION

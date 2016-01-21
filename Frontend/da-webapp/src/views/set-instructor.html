@@ -1,18 +1,28 @@
-<h1 ng-show="!isLoaded">Loading...</h1>
-
-<div ng-show="isLoaded">
-    <form class="dataEntry" ng-submit="setiCtrl.submit()">
-        <label for="name">Full name</label>
-        <input id="name" type="text" ng-model="setiCtrl.name" placeholder="Jane Doe" required>
-        <label for="email">Email</label>
-        <input id="email" type="email" ng-model="setiCtrl.email" placeholder="email@example.com" required>
-        <label for="phone">Phone</label>
-        <input id="phone" type="tel" ng-model="setiCtrl.phone" placeholder="7777777" 
-            pattern="[\d-\(\)\+ ]+" required>
-        <label for="address">Address</label>
-        <input id="address" type="text" ng-model="setiCtrl.address" placeholder="21 Example Lane" required>
-        <input type="submit" value="Ok"></input>
-        <div>{{msg}}</div>
-        <div ng-repeat="error in setiCtrl.msgs">{{error}}</div>
-    </form>
+<div class="content vertical-center">
+    <div class="data-entry">
+        <form ng-submit="setiCtrl.submit()">
+            <div class="form-group">
+                <label for="name">Full name *</label>
+                <input class="form-control" id="name" type="text" ng-model="setiCtrl.name" placeholder="Jane Doe" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input class="form-control" id="email" type="email" ng-model="setiCtrl.email" placeholder="email@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input class="form-control" id="phone" type="tel" ng-model="setiCtrl.phone" placeholder="7777777" 
+                pattern="[\d-\(\)\+ ]+">
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input class="form-control" id="address" type="text" ng-model="setiCtrl.address" placeholder="21 Example Lane">
+            </div>
+            <button class="form-control btn btn-primary" type="submit" value="">
+                <span class="glyphicon glyphicon-ok"></span>
+            </button>
+        </form>
+        <p class="message">{{msg}}</p>
+        <p class="message" ng-repeat="error in setiCtrl.msgs">{{error}}</p>
+    </div>
 </div>

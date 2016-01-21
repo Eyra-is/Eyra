@@ -1,15 +1,25 @@
-<h1 ng-show="!isLoaded">Loading...</h1>
-
-<div ng-show="isLoaded">
-    <h3>Enter your info</h3>
-    <form class="dataEntry" ng-submit="startCtrl.submit()">
-        <label for="speakerName">Username *</label>
-        <input id="speakerName" type="text" ng-model="startCtrl.speakerName" placeholder="josh9">
-        <label for="comments">Session comments</label>
-        <input id="comments" type="text" ng-model="startCtrl.comments" placeholder="Cars driving close by.">
-        <label for="doneBefore">Done this before?</label>
-        <input id="doneBefore" type="checkbox" ng-model="startCtrl.doneBefore">
-        <input type="submit" value="Ok"></input>
-        <div>{{msg}}</div>
-    </form>
+<div class="content vertical-center">
+    <div class="data-entry">
+        <h3 class="default-heading">Enter your info</h3>
+        <form ng-submit="startCtrl.submit()">
+            <div class="form-group">
+                <label for="speakerName">Username</label>
+                <input class="form-control" id="speakerName" type="text" ng-model="startCtrl.speakerName" placeholder="josh9">
+            </div>
+            <div class="form-group">
+                <label for="comments">Comments</label>
+                <input class="form-control" id="comments" type="text" ng-model="startCtrl.comments" placeholder="Cars driving close by.">
+            </div>
+            <div class="checkbox">
+                <label for="doneBefore">
+                    <input id="doneBefore" type="checkbox" ng-model="startCtrl.doneBefore">
+                    Done this before?
+                </label>
+            </div>
+            <button class="form-control btn btn-primary" type="submit" value="">
+                <span class="glyphicon glyphicon-ok"></span>
+            </button>
+        </form>
+        <p class="message">{{msg}}</p>
+    </div>
 </div>

@@ -1,20 +1,28 @@
-<h1 ng-show="!isLoaded">Loading...</h1>
-
-<div ng-show="isLoaded">
-    <form class="dataEntry" ng-submit="sinfoCtrl.submit()">
-        <label for="gender">Gender</label>
-        <select id="gender" ng-model="sinfoCtrl.gender">
-            <option ng-repeat="gender in sinfoCtrl.genders" value="{{gender}}">{{gender}}</option>
-        </select>
-        <label for="dob">Date of birth</label>
-        <select id="dob" ng-model="sinfoCtrl.dob">
-            <option ng-repeat="dob in sinfoCtrl.dobs" value="{{dob}}">{{dob}}</option>
-        </select>
-        <label for="height">Height</label>
-        <select id="height" ng-model="sinfoCtrl.height">
-            <option ng-repeat="height in sinfoCtrl.heights" value="{{height}}">{{height}}</option>
-        </select>
-        <input type="submit" value="Ok"></input>
-        <div>{{msg}}</div>
-    </form>
+<div class="content vertical-center">
+    <div class="data-entry">
+        <form ng-submit="sinfoCtrl.submit()">
+            <div class="form-group">
+                <label for="gender">Gender *</label>
+                <select class="form-control glyphicon" id="gender" ng-model="sinfoCtrl.gender">
+                    <option ng-repeat="gender in sinfoCtrl.genders" value="{{gender}}">{{gender}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of birth *</label>
+                <select class="form-control" id="dob" ng-model="sinfoCtrl.dob">
+                    <option ng-repeat="dob in sinfoCtrl.dobs" value="{{dob}}">{{dob}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="height">Height</label>
+                <select class="form-control" id="height" ng-model="sinfoCtrl.height">
+                    <option ng-repeat="height in sinfoCtrl.heights" value="{{height}}">{{height}}</option>
+                </select>
+            </div>
+            <button class="form-control btn btn-primary" type="submit" value="">
+                <span class="glyphicon glyphicon-ok"></span>
+            </button>
+            <p class="message">{{msg}}</p>
+        </form>
+    </div>
 </div>

@@ -5,6 +5,7 @@ angular.module('daApp')
 .controller('RegisterDeviceController', RegisterDeviceController);
 
 RegisterDeviceController.$inject = ['$location', 
+                                    '$rootScope',
                                     '$scope', 
                                     'dataService',
                                     'deliveryService', 
@@ -12,7 +13,7 @@ RegisterDeviceController.$inject = ['$location',
                                     'logger', 
                                     'utilityService'];
 
-function RegisterDeviceController($location, $scope, dataService, deliveryService, localDbMiscService, logger, utilityService) {
+function RegisterDeviceController($location, $rootScope, $scope, dataService, deliveryService, localDbMiscService, logger, utilityService) {
   var regdCtrl = this;
   var delService = deliveryService;
   var dbService = localDbMiscService;
@@ -21,7 +22,7 @@ function RegisterDeviceController($location, $scope, dataService, deliveryServic
   regdCtrl.submit = submit;
 
   regdCtrl.imei = ''; // device hardcoded ID, btw many phones can display this by dialing *#06#
-  $scope.isLoaded = true;
+  $rootScope.isLoaded = true;
 
   
   //////////
