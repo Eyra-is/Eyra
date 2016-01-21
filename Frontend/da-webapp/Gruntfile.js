@@ -26,7 +26,6 @@ module.exports = function(grunt) {
         cache: {
           patterns: [
                       depl+'min/script.*.min.js',
-                      depl+'min/script.min.*.map',
                       depl+'css/**',
                       depl+'views/**',
                       depl+'img/**'
@@ -60,10 +59,10 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['css/app.css', 'css/app.css.map'],
+            src: ['css/**'],
             dest: depl,
             rename: function(dest, src) {
-              return dest + src.replace(/\.(css|css.map)$/, '.'+cache_breaker+'.$1');
+              return dest + src.replace(/\.css$/, '.'+cache_breaker+'.css');
             }
           },
           { expand: true, cwd: source,
@@ -154,23 +153,6 @@ module.exports = function(grunt) {
             dest: depl
           }
         ]
-      },
-      sass_map: {
-        options: {
-          patterns: [
-            {
-              match: /app.css.map/,
-              replacement: 'app.'+cache_breaker+'.css.map'
-            }
-          ]
-        },
-        files: [
-          { 
-            expand: true, cwd: depl,
-            src: ['css/app.*.css'], 
-            dest: depl
-          }
-        ]
       }
     },
     sass: {
@@ -192,7 +174,7 @@ module.exports = function(grunt) {
                  <%= grunt.template.today("yyyy-mm-dd") %> */',
         mangle: false,
         sourceMap: true,
-        sourceMapName: depl+'min/script.min.'+cache_breaker+'.js.map'
+        sourceMapName: depl+'min/script.min.js.map'
       },
       minify: {
         files: [{
@@ -247,7 +229,6 @@ module.exports = function(grunt) {
                                   'replace:script_name', // replace previous file.CACHEBREAKER.ext in index.CACHEBREAKER.html 
                                   'replace:views', // replace 'views/bla.CACHEBREAKER.html' to the new cachebreaker in the routes in app.js
                                   'replace:imgs', // replace all 'src="img/i.(jpg|png|gif)' imgs with cachebroken versions in the .html files
-                                  'replace:sass_map', // replace app.css.map auto generated with cachebreaker in app.css
                                   'ngAnnotate:app', // make sure angular scripts are ready for minification
                                   'uglify:minify', // min javascript
                                   'clean:temp', // delete the temp app.js used by ngAnnotate
