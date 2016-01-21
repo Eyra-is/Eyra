@@ -44,6 +44,10 @@
         <div ng-view class="view"><!-- possibly put loading here too --></div>
     </div>
     
+    <!-- this commit of recorderjs (before ES6 support) must be non-minified
+         due to window.postMessage usage. -->
+    <script src="recorderjs/dist/recorderWorker.js"></script>
+    <script src="recorderjs/dist/recorder.js"></script>
     <script src="min/@@script.min.js"></script><!-- uncomment this in release -->
 
     <!-- uncomment this for quick development --

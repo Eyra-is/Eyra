@@ -28,7 +28,11 @@ module.exports = function(grunt) {
                       depl+'min/script.*.min.js',
                       depl+'css/**',
                       depl+'views/**',
-                      depl+'img/**'
+                      depl+'img/**',
+                      // be careful, if these files (recorderjs/) are ever changed, 
+                      // it might not reflect on client end if he has this cached. 
+                      // This is not cache-broken. 
+                      depl+'recorderjs/dist/*' 
                     ],
           literals: [
                       'index.html'
@@ -185,8 +189,11 @@ module.exports = function(grunt) {
                   depl+'bower_components/localforage/dist/localforage.js',
                   depl+'bower_components/angular-localforage/dist/angular-localForage.js',
                   depl+'bower_components/satellizer/satellizer.js',
-                  depl+'recorderjs/dist/recorderWorker.js',
-                  depl+'recorderjs/dist/recorder.js',
+                  // must not be minified as they use window.postMessage. U
+                  //   until code is changed or we use ES6 commit of recorderjs
+                  //   this has to be non-minified.
+                  //depl+'recorderjs/dist/recorderWorker.js',
+                  //depl+'recorderjs/dist/recorder.js',
 
                   depl+'min/old/'+depl+'app.js', 
                   depl+'min/old/'+source+'services/**/*.js',
