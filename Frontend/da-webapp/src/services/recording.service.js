@@ -43,11 +43,12 @@ function recordingService(logger, utilityService) {
                                 navigator.mozGetUserMedia || navigator.msGetUserMedia;
       window.URL = window.URL || window.webkitURL;
       
-      audio_context = new AudioContext;
+      audio_context = new AudioContext();
       logger.log('Audio context set up.');
       logger.log('navigator.getUserMedia ' + (navigator.getUserMedia ? 'available.' : 'not present!'));
     } catch (e) {
       alert('No web audio support in this browser!');
+      logger.error(e);
     }
     
     navigator.getUserMedia({audio: true}, startUserMedia, function(e) {

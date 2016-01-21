@@ -1,7 +1,8 @@
 (function () {
 // handles local forage actions regarding instructor, speaker and device setting
 
-// stores speakers thusly: speakers/username = {'gender':gender, 'dob':dob, 'height':height}
+// see Client-server API for format, but something like this:
+// stores speakers thusly: speakers/username = {'name':name, 'gender':gender, 'dob':dob, 'height':height [, 'deviceImei':imei]}
 // stores instructors as: instructorId = 13
 // stores devices as: device = {'userAgent':'user agent string', 'imei':12363563456}
 

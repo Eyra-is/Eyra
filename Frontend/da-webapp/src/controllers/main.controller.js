@@ -9,6 +9,7 @@ MainController.$inject = ['$location',
                           '$rootScope', 
                           '$scope', 
                           '$window',
+                          'locationService',
                           'logger',
                           'myLocalForageService', 
                           'recordingService', 
@@ -16,8 +17,9 @@ MainController.$inject = ['$location',
                           'tokenService', 
                           'utilityService'];
 
-function MainController($location, $q, $rootScope, $scope, $window, logger, myLocalForageService, recordingService, routeService, tokenService, utilityService) {
+function MainController($location, $q, $rootScope, $scope, $window, locationService, logger, myLocalForageService, recordingService, routeService, tokenService, utilityService) {
   var mainCtrl = this;
+  var locService = locationService;
   var lfService = myLocalForageService;
   var recService = recordingService;
   var tokService = tokenService;
@@ -25,7 +27,6 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
 
   mainCtrl.start = start;
 
-  $scope.msg = 'Loading...';
   $rootScope.isLoaded = false;
 
   var recorderPromise, tokensPromise, initPromises;
@@ -60,6 +61,7 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
     });
 
     // async things
+    locService.init(locServiceInitDoneCallback); // lets not require location
     recService.init(recServiceInitDoneCallback);
     getTokensIfNeeded();
 
@@ -72,7 +74,7 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
     // this means our app didn't initialize.. we should probably do something if that happens
     function error(data){
       $scope.msg = 'App failed to initialize. Try refreshing the page and check your connection.';
-      util.stdErrCallback(data);
+      logger.error(data);
     });
   }
 
@@ -97,6 +99,14 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
       tokensPromise.reject(data);
       logger.error(data);
     });
+  }
+
+  function locServiceInitDoneCallback(result) {
+    if (result) {
+      logger.log('Location successfully set.');
+    } else {
+      logger.log('No location set.');
+    }
   }
 
   function recServiceInitDoneCallback(result) {

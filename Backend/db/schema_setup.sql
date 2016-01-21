@@ -40,7 +40,7 @@ create table session (
     speakerId int not null,
     instructorId int not null,
     deviceId int not null,
-    location varchar(255) not null,
+    location varchar(512) not null,
     start varchar(50) not null,
     end varchar(50) not null,
     comments text not null,
