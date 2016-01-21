@@ -18,7 +18,8 @@ $mainColor: lightblue;
 html, body { height: 100%; overflow: auto; }
 body { 
   width: 100%;
-  background-color: $mainColor; 
+  background-color: $mainColor;
+  font-size: 1.8em;
 }
 .view {
   height: 100%;
@@ -125,3 +126,15 @@ body {
   flex-direction: column;
   justify-content: center;
 }
+
+/* media queries */
+@media only screen 
+  and (max-device-width: 360px) {
+    .default-view {
+      width: 100%;
+      padding: 1%;
+    }
+    .recording-view {
+      padding: 0.1%;
+    }
+} 
