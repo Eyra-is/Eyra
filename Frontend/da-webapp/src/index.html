@@ -17,6 +17,28 @@
     
     <h1 ng-show="!isLoaded">Loading...</h1>
     <div ng-show="isLoaded">
+        <nav class="navbar navbar-inverse navbar-static-top">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".main-nav">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-cd"> DAC</span></a>
+            </div>
+            <div class="collapse navbar-collapse main-nav">
+              <ul class="nav navbar-nav">
+                <li><a ng-href="#/more">
+                    Settings <span class="glyphicon glyphicon-cog navbar-glyph"></span>
+                </a></li>
+                <li><a ng-href="#/info">
+                    Info <span class="glyphicon glyphicon-info-sign navbar-glyph"></span>
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
         <div ng-view class="view"><h1>Loading...</h1></div>
     </div>
     

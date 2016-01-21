@@ -69,6 +69,9 @@ body {
   width: $glyphSize;
   height: $glyphSize;
 }
+.btn-main {
+  font-size: 1.5em;
+}
 .glyphicon-record {
   @extend .glyph-default;
   color: red;
@@ -88,15 +91,14 @@ body {
 /* img stylings */
 .main-img {
   margin: 0 auto;
-  padding: 0.5%;
-  flex-basis: 50%;  
+  padding: 2% 0.5%;
+  flex-basis: 70%;  
 }
 
-/* navbars */
-.main-nav {
-  text-align: center;
-  padding: 1%;
-  flex-basis: 20%;
+/* navbar */
+.navbar-glyph {
+  float: right;
+  display: block;
 }
 
 /* misc stylings */

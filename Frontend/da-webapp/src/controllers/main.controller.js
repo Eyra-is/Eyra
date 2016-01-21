@@ -24,7 +24,6 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
   var util = utilityService;
 
   mainCtrl.start = start;
-  mainCtrl.more = more;
 
   $scope.msg = 'Loading...';
   $rootScope.isLoaded = false;
@@ -111,10 +110,6 @@ function MainController($location, $q, $rootScope, $scope, $window, logger, myLo
 
   function start() {
     $location.path('/start');
-  }
-
-  function more() {
-    $location.path('/more');
   }
 }
 }());

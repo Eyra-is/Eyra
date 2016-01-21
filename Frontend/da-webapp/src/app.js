@@ -16,6 +16,7 @@
 
 // consider using something like Jade or angular-blocks for blocking and reusing the common pattern
 //   of all the forms
+// move bootstrap/jquery to local code, not through internet (because of offline capabilities)
 
 // ***************************************************************************************** //
 
