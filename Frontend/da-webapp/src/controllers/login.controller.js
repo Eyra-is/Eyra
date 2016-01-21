@@ -34,7 +34,6 @@ function LoginController($http, $location, $rootScope, $scope, authenticationSer
     });*/ // <--- this works
     authService.login({'email':$scope.email, 'password':$scope.password}).then(
         function success(res) {
-            alert('Logged in successfully!');
             $location.path('/more');
         },
         function error(res) {

@@ -107,7 +107,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   // oldCurRec is a reference to the possibly previous recCtrl.curRec, because
   //   it might have changed when it is sent (although almost impossible atm)
   function send(sessionData, oldCurRec) {
-    $scope.msg = 'Sending recs...';
+    logger.log('Sending recs...');
 
     // and send it to remote server
     // test CORS is working
@@ -126,7 +126,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   }
 
   function stop() {
-    $scope.msg = 'Processing wav...';
+    $scope.msg = 'Stopped.';
 
     recCtrl.stopBtnDisabled = true;
     

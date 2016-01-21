@@ -9,13 +9,13 @@
 // Think about adding underscore for service private functions
 // Think about sending the token itself instead of the id (in case the id's get mixed up later in the db)
 
-// in production, the logger.error should NOT LOG ANYTHING
+// in production, the logger.error should NOT LOG ANYTHING and CHANGE some ERRORS to LOGS for prod.
 // remove all $q.defers (if possible) and use insead return values from .then callbacks
 //   to promise chain, see: http://www.codelord.net/2015/09/24/$q-dot-defer-youre-doing-it-wrong/
 // rename minFreeTokenIdx to highest used token idx
+// make speaker and No comments. not show in start menu on default ok click
+// remove alerts
 
-// consider using something like Jade or angular-blocks for blocking and reusing the common pattern
-//   of all the forms
 // move bootstrap/jquery to local code, not through internet (because of offline capabilities)
 
 // ***************************************************************************************** //
