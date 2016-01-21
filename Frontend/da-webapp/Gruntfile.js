@@ -1,6 +1,10 @@
 // The meat in this Gruntfile is the renaming of files like bla.html -> bla.DATE.html
 //   for the appcache. Also generates the appcache files itself.
 // It's a bit daunting. Some explanations are in the 'deploy' task down below.
+//
+// This file is sort of caveman-like, on a number of changes including but not limited to
+//   additional content added to the site which needs to be cached, this file needs to be updated
+//   in accordance with that.
 
 'use strict';
 
@@ -24,7 +28,8 @@ module.exports = function(grunt) {
                       depl+'min/script.*.min.js',
                       depl+'min/script.min.*.map',
                       depl+'css/app.*.css', 
-                      depl+'views/**'
+                      depl+'views/**',
+                      depl+'img/**'
                     ],
           literals: [
                       'index.html'
@@ -34,12 +39,13 @@ module.exports = function(grunt) {
       }
     },
     clean: {
-      old_scripts:  [
-                      depl+'min/', 
-                      depl+'views/', 
-                      depl+'css/app.*.css', 
-                      depl+'index.html'
-                    ],
+      old_files:  [
+                    depl+'min/', 
+                    depl+'views/', 
+                    depl+'css/app.*.css', 
+                    depl+'index.html',
+                    depl+'img/**'
+                  ],
       temp: [depl+'app.js']
     },
     copy: {
@@ -59,7 +65,14 @@ module.exports = function(grunt) {
               return dest + src.replace(/\.css$/, '.'+cache_breaker+'.css');
             }
           },
-          { expand: true, flatten: true, cwd: source,
+          { expand: true, cwd: source,
+            src: ['img/**'],
+            dest: depl,
+            rename: function(dest, src) {
+              return dest + src.replace(/\.(jpg|png|gif)$/, '.'+cache_breaker+'.$1');
+            }
+          },
+          { expand: true, cwd: source,
             src: ['app.js', 'index.html'],
             dest: depl
           }
@@ -120,6 +133,23 @@ module.exports = function(grunt) {
           { 
             expand: true, flatten: true, cwd: depl,
             src: ['app.js'], 
+            dest: depl
+          }
+        ]
+      },
+      imgs: {
+        options: {
+          patterns: [
+            {
+              match: /src=\"img\/(.*)\.(jpg|png|gif)\"/g,
+              replacement: 'src="img\/$1.'+cache_breaker+'.$2"'
+            }
+          ]
+        },
+        files: [
+          { 
+            expand: true, cwd: depl,
+            src: ['views/**/*.html', 'index.html'], 
             dest: depl
           }
         ]
@@ -193,10 +223,12 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['watch:scripts']);
   grunt.registerTask('dev', ['watch:sass']);
   grunt.registerTask('deploy',  [
-                                  'clean:old_scripts', // delete previous deploy scripts
-                                  'copy:main', // copy everything not javascript to depl/ and rename with CACHEBREAKER
+                                  'clean:old_files', // delete previous deploy scripts
+                                  'sass', // compile scss to css file/s in source
+                                  'copy:main', // copy everything not javascript from source to depl and rename with CACHEBREAKER
                                   'replace:script_name', // replace previous file.CACHEBREAKER.ext in index.CACHEBREAKER.html 
                                   'replace:views', // replace 'views/bla.CACHEBREAKER.html' to the new cachebreaker in the routes in app.js
+                                  'replace:imgs', // replace all 'src="img/i.(jpg|png|gif)' imgs with cachebroken versions in the .html files
                                   'ngAnnotate:app', // make sure angular scripts are ready for minification
                                   'uglify:minify', // min javascript
                                   'clean:temp', // delete the temp app.js used by ngAnnotate
