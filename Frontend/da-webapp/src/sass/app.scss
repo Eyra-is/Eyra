@@ -61,7 +61,7 @@ body {
   font-size: 1.5em;
 }
 
-/* button stylings */
+/* button/glyph stylings */
 .btn-list {
   margin: 1%;
   width: 100%;
@@ -87,6 +87,17 @@ body {
   outline: none;
   border: 0;
   background: transparent;
+}
+
+/* loading stylings */
+.loading-icon {
+  flex-basis: 20%;
+  font-size: 3.5em;
+}
+.loading-msg {
+  padding: 1%;
+  text-align: center;
+  flex-basis: 5%;
 }
 
 /* img stylings */

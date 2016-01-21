@@ -14,8 +14,10 @@
     <link rel="stylesheet" href="css/app.css"><!-- uncomment this for quick development -->
 </head>
 <body>
-    
-    <h1 ng-show="!isLoaded">Loading...</h1>
+    <div class="vertical-center" ng-show="!isLoaded">
+        <span class="glyphicon glyphicon-hourglass loading-icon"></span>
+        <p class="loading-msg">Note: You have to allow microphone access for app to load.</p>
+    </div>
     <div ng-show="isLoaded">
         <nav class="navbar navbar-inverse navbar-static-top">
           <div class="container-fluid">
@@ -39,7 +41,7 @@
             </div>
           </div>
         </nav>
-        <div ng-view class="view"><h1>Loading...</h1></div>
+        <div ng-view class="view"><!-- possibly put loading here too --></div>
     </div>
     
     <!--<script src="min/@@script.min.js"></script><!-- uncomment this in release -->
