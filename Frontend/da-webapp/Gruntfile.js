@@ -35,7 +35,9 @@ module.exports = function(grunt) {
                       depl+'recorderjs/dist/*' 
                     ],
           literals: [
-                      'index.html'
+                      'index.html',
+                      // same goes for this as with recorderjs/dist comment above
+                      'bower_components/bootstrap/dist/css/bootstrap.min.css'
                     ]
         },
         network: '*'
@@ -48,7 +50,9 @@ module.exports = function(grunt) {
                     depl+'css/**',
                     depl+'sass/**',
                     depl+'index.html',
-                    depl+'img/**'
+                    depl+'img/**',
+                    depl+'bower_components/**',
+                    depl+'recorderjs/**'
                   ],
       temp: [depl+'app.js']
     },
@@ -77,7 +81,7 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['app.js', 'index.html', 'sass/**'],
+            src: ['app.js', 'index.html', 'sass/**', 'bower_components/**', 'recorderjs/**'],
             dest: depl
           }
         ]
@@ -183,6 +187,9 @@ module.exports = function(grunt) {
       minify: {
         files: [{
           src:  [
+                  depl+'bower_components/jquery/dist/jquery.js',
+                  depl+'bower_components/bootstrap/dist/js/bootstrap.js',
+
                   depl+'bower_components/angular/angular.js',
                   depl+'bower_components/angular-route/angular-route.js',
 
