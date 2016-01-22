@@ -1,1 +1,1 @@
-python3-pip libapache2-mod-wsgi-py3 libmysqlclient-dev
+python3-pip libapache2-mod-wsgi-py3 libmysqlclient-dev mysql-server npm nodejs-legacy
