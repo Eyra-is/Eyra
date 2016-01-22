@@ -22,7 +22,7 @@
 'use strict';
 
 // app 'options'
-var BACKENDTYPE = 'localhost';
+var BACKENDTYPE = 'localtunnel';
 var BACKENDOPTS = {
                     'default':'/backend',
                     'localhost':'//localhost:5000',
