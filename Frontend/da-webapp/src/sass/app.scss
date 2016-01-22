@@ -1,0 +1,152 @@
+/* glyphicons courtesy of http://glyphicons.com/ */
+
+/* variables */
+$glyphSize: 4em;
+$mainColor: lightblue;
+
+/* reusables */
+/* default layout for the stuff you can interact with on the screen */
+.default-view {
+  width: 80%;
+  max-width: 320px;
+}
+.glyph-default {
+  font-size: $glyphSize;
+}
+
+/* main css */
+html, body { height: 100%; overflow: auto; }
+body { 
+  width: 100%;
+  background-color: $mainColor;
+  font-size: 1.8em;
+}
+.view {
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+.content {
+  margin: 0 auto;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+/* layout */
+.recording-view {
+  @extend .default-view;
+  text-align: center;
+}
+/* form layout */
+.data-entry {
+  @extend .default-view;
+  font-size: 1.2em;
+}
+/* http://stackoverflow.com/a/24688640/5272567 */
+.checkbox input[type='checkbox'] {
+  /* All browsers except webkit*/
+  transform: scale(1.5);
+  /* Webkit browsers*/
+  -webkit-transform: scale(1.5);
+}
+.checkbox { 
+  padding-left: 2%; 
+}
+
+/* token stylings */
+.token {
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
+/* button/glyph stylings */
+.btn-list {
+  margin: 1%;
+  width: 100%;
+  font-size: 1.2em;
+}
+.btn-record, .btn-stop {
+  width: $glyphSize;
+  height: $glyphSize;
+}
+.btn-main {
+  font-size: 1.5em;
+}
+.glyphicon-record {
+  @extend .glyph-default;
+  color: red;
+}
+.glyphicon-stop {
+  @extend .glyph-default;
+}
+/* make button invisible, to allow only glyphicon as button */
+/* http://stackoverflow.com/a/26917133/5272567 */
+.btn-glyph-only {
+  -webkit-appearance: none;
+  outline: none;
+  border: 0;
+  background: transparent;
+}
+
+/* loading stylings */
+.loading-icon {
+  flex-basis: 20%;
+  font-size: 3.5em;
+}
+.loading-msg {
+  padding: 1%;
+  text-align: center;
+  flex-basis: 5%;
+}
+
+/* img stylings */
+.main-img {
+  margin: 0 auto;
+  padding: 2% 0.5%;
+  flex-basis: 70%;
+}
+
+/* navbar */
+.navbar-glyph {
+  float: right;
+  display: block;
+}
+
+/* misc stylings */
+#playback {
+  margin: 1%;
+  max-width: 100%;
+}
+.default-heading { 
+  margin: 0 auto;
+  padding: 0 0 3% 0;
+  text-align: center;
+}
+.message {
+  display: block;
+  padding-top: 5%;
+  font-weight: bold;
+  font-size: 1.25em;
+}
+/* give parent of centered element this class */
+.vertical-center {
+  height: 100%; /* fallback */
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* media queries */
+@media only screen 
+  and (max-device-width: 360px) {
+    .default-view {
+      width: 100%;
+      padding: 1%;
+    }
+    .recording-view {
+      padding: 0.1%;
+    }
+}

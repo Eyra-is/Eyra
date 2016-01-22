@@ -1,0 +1,90 @@
+<!doctype html>
+
+<html lang="en" ng-app="daApp" manifest="app.appcache"><!-- comment the appcache for quick development -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>D.A. App</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/@@app.css"><!-- uncomment this in release-->
+    <!--<link rel="stylesheet" href="css/app.css"><!-- uncomment this for quick development -->
+</head>
+<body>
+    <div class="vertical-center" ng-show="!isLoaded">
+        <span class="glyphicon glyphicon-hourglass loading-icon"></span>
+        <p class="loading-msg">Note: You have to allow microphone access for app to load.</p>
+    </div>
+    <div ng-show="isLoaded">
+        <nav class="navbar navbar-inverse navbar-static-top">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".main-nav">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-cd"> DAC</span></a>
+            </div>
+            <div class="collapse navbar-collapse main-nav">
+              <ul class="nav navbar-nav">
+                <li><a ng-href="#/more">
+                    Settings <span class="glyphicon glyphicon-cog navbar-glyph"></span>
+                </a></li>
+                <li><a ng-href="#/info">
+                    Info <span class="glyphicon glyphicon-info-sign navbar-glyph"></span>
+                </a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <div ng-view class="view"><!-- possibly put loading here too --></div>
+    </div>
+    
+    <script src="min/@@script.min.js"></script><!-- uncomment this in release -->
+
+    <!-- uncomment this for quick development --
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+
+    <!-- warning: angular-localforage is later wrapped in a service, myLocalForage.service.js
+                  for extra processing and it only implements functions currently used
+                  and not the directive for example --
+    <script src="bower_components/localforage/dist/localforage.js"></script>
+    <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
+    <script src="bower_components/satellizer/satellizer.js"></script>
+
+    <script src="recorderjs/dist/recorderWorker.js"></script>
+    <script src="recorderjs/dist/recorder.js"></script>
+
+    <script src="app.js"></script>
+
+    <!-- a wrapper for angular-localforage --
+    <script src="services/myLocalForage.service.js"></script>
+
+    <script src="services/logger.service.js"></script>
+    <script src="services/data.service.js"></script>
+    <script src="services/location.service.js"></script>
+    <script src="services/route.service.js"></script>
+    <script src="services/utility.service.js"></script>
+    <script src="services/localdb.service.js"></script>
+    <script src="services/localdbmisc.service.js"></script>
+    <script src="services/delivery.service.js"></script>
+    <script src="services/recording.service.js"></script>
+    <script src="services/token.service.js"></script>
+    <script src="services/session.service.js"></script>
+    <script src="services/authentication.service.js"></script>
+    
+    <script src="controllers/login.controller.js"></script>
+    <script src="controllers/main.controller.js"></script>
+    <script src="controllers/more.controller.js"></script>
+    <script src="controllers/recording.controller.js"></script>
+    <script src="controllers/registerdevice.controller.js"></script>
+    <script src="controllers/setinstructor.controller.js"></script>
+    <script src="controllers/speakerinfo.controller.js"></script>
+    <script src="controllers/start.controller.js"></script><!---->
+</body>
+</html>
