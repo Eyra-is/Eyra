@@ -18,7 +18,7 @@ WIFI_DHCPLEA=12h
 
 HOST_PORT='*:80'
 HOST_PORTSSL='_default_:443'
-HOST_NAME='www.datools.is'
+HOST_NAME='www.dasistder.net'
 
 SITEROOT=${BDIR}/Frontend/da-webapp/app
 WSGIROOT=${BDIR}/WSGI
@@ -31,6 +31,13 @@ mkdir -p $LOGROOT
 
 # Get into the scripts directory
 pushd $SDIR > /dev/null
+
+# Install dependencies if needed
+echo "Installing dependencies"
+
+sudo aptitude update
+sudo aptitude install $(cat deps_aptitude)
+sudo pip3 install $(cat deps_pip3)
 
 # 
 mkdir -p ${ODIR}/bin/
@@ -83,7 +90,6 @@ sed -e "s/XXXHOST_NAMEXXX/$HOST_NAME/" \
     ${SDIR}/tmpl/etc_apache2_sites-available_datatool.conf \
 > ${OFILE}
 
-cat szdgfsz
 
 # install the files
 sudo bash <<EOF
@@ -112,31 +118,19 @@ iw $WIFI_DEV info
 EOF
 
 echo
+echo "Setting Up Apache"
+for i in $(ls -1 /etc/apache2/sites-available/); do
+  sudo a2dissite ${i}
+done
+sudo a2ensite datatool.conf
+sudo a2enmod ssl wsgi
+sudo service apache2 restart
+
+echo
 echo "All done"
 echo "    SSID: $WIFI_SSID"
 echo "    PASS: $WIFI_PASS"
 echo "Have Fun!"
 
 
-echo
-echo "Setting Up Apache"
-
-
-cat sdgsdfh
-
-# prepare the files needed to serve this stuff through Apache
-
-USERNAME=$USER
-
-# make sure the needed packages are installed
-echo ...
-
-# set up the Access Point
-
-
-
-echo $USERNAME
-
-cat xlkmjl;kjm
-
-[ $# -ge 1 ] && HOSTPORT="$1" || HOSTPORT='*:80'
+cd ${BDIR}/
