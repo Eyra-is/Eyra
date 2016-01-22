@@ -95,7 +95,7 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
     });
 
     /*$http.post(
-      '//' + BACKENDURL + '/submit/session'
+      BACKENDURL + '/submit/session'
     ).then(function(response){
       console.log(response);
     },

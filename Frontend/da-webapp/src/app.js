@@ -23,7 +23,7 @@
 
 
 var putOnline = false;
-var BACKENDURL = putOnline ? 'bakendi.localtunnel.me' : '127.0.0.1:5000';
+var BACKENDURL = putOnline ? '//bakendi.localtunnel.me' : '/backend';
 
 (function () {
 'use strict';
@@ -49,7 +49,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
 .config([
   '$authProvider',
   function($authProvider) {
-    $authProvider.loginUrl = '//' + BACKENDURL + '/auth/login';
+    $authProvider.loginUrl = BACKENDURL + '/auth/login';
     $authProvider.tokenName = 'access_token'; // to accomodate for the Flask-JWT response token
     $authProvider.storageType = 'sessionStorage';
     $authProvider.authToken = 'JWT'; // sets the token prefix in requests, accomodate for Flask-JWT

@@ -1,0 +1,16 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+auto XXXWIFI_DEVXXX
+iface XXXWIFI_DEVXXX inet static
+  address XXXWIFI_IPXXX
+  netmask XXXWIFI_NMASKXXX
+  broadcast XXXWIFI_BCASTXXX
+
+
