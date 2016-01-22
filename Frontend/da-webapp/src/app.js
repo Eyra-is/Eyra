@@ -3,8 +3,6 @@
 //                                         TODO                                             //
 
 // sanitize user input for speakerId, etc. (maybe no need, only stored in database)
-// CONSIDER moving logic in recordingsCallback() to a service or something, 
-//   and out of main controller 
 // Think about if we want to have a limit on how many sessions are sent in "sync"
 // Think about adding underscore for service private functions
 // Think about sending the token itself instead of the id (in case the id's get mixed up later in the db)
@@ -20,15 +18,21 @@
 
 // ***************************************************************************************** //
 
-
-
-var putOnline = false;
-var BACKENDURL = putOnline ? '//bakendi.localtunnel.me' : '/backend';
-
 (function () {
 'use strict';
 
+// app 'options'
+var BACKENDTYPE = 'localhost';
+var BACKENDOPTS = {
+                    'default':'/backend',
+                    'localhost':'//localhost:5000',
+                    'localtunnel':'//bakendi.localtunnel.me'
+                  };
+var BACKENDURL = BACKENDOPTS[BACKENDTYPE];
+
 angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
+
+.constant('BACKENDURL', BACKENDURL)
 
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
 .config([
@@ -47,8 +51,8 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
 }])
 
 .config([
-  '$authProvider',
-  function($authProvider) {
+  '$authProvider', 'BACKENDURL',
+  function($authProvider, BACKENDURL) {
     $authProvider.loginUrl = BACKENDURL + '/auth/login';
     $authProvider.tokenName = 'access_token'; // to accomodate for the Flask-JWT response token
     $authProvider.storageType = 'sessionStorage';

@@ -10,15 +10,16 @@ utilityService.$inject = ['logger'];
 
 function utilityService(logger) {
   var utilityHandler = {};
+
+  utilityHandler.getConstant = getConstant;
+  utilityHandler.getIdxFromPath = getIdxFromPath;
+  utilityHandler.stdErrCallback = stdErrCallback;
+
   var CONSTANTS = { 
     // sentinel value for invalid recordings
     'invalidTitle' : 'no_data.wav',
     'defaultSpeakerName' : 'speaker'
   };
-
-  utilityHandler.getConstant = getConstant;
-  utilityHandler.getIdxFromPath = getIdxFromPath;
-  utilityHandler.stdErrCallback = stdErrCallback;
 
   return utilityHandler;
 
