@@ -22,10 +22,27 @@
       currCallback;
 
     this.node.onaudioprocess = function(e){
-      if (!recording) return;
+      /*if (!recording) return;
       var buffer = [];
       for (var channel = 0; channel < numChannels; channel++){
           buffer.push(e.inputBuffer.getChannelData(channel));
+      }
+      worker.postMessage({
+        command: 'record',
+        buffer: buffer
+      });*/
+
+      if (!recording) return;
+      var buffer = [];
+      var arr = [[],[]];
+      for (var channel = 0; channel < numChannels; channel++){
+        var inBuffer = e.inputBuffer.getChannelData(channel);
+
+        for (var i = 0; i < inBuffer.length; ++i) {
+           arr[channel].push(inBuffer[i]);
+        }
+        
+        buffer.push(arr[channel]);
       }
       worker.postMessage({
         command: 'record',
