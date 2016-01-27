@@ -7,9 +7,16 @@
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q', 'logger', 'localDbMiscService', 'localDbService', 'utilityService'];
+deliveryService.$inject = [
+                            '$http', 
+                            '$q',
+                            'BACKENDURL', 
+                            'logger', 
+                            'localDbMiscService', 
+                            'localDbService', 
+                            'utilityService'];
 
-function deliveryService($http, $q, logger, localDbMiscService, localDbService, utilityService) {
+function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
   var dbMiscService = localDbMiscService;

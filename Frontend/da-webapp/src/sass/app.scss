@@ -97,6 +97,7 @@ body {
   padding: 1%;
   text-align: center;
   flex-basis: 5%;
+  font-size: 1.3em;
 }
 
 /* img stylings */
@@ -110,12 +111,16 @@ body {
 .navbar-glyph {
   float: right;
   display: block;
+  padding-left: 0.2em; /* just a little bit to make it not stick together when it's expanded */
 }
 
 /* misc stylings */
 #playback {
   margin: 1%;
   max-width: 100%;
+}
+ul {
+  list-style-type: none;
 }
 .default-heading { 
   margin: 0 auto;

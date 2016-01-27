@@ -101,7 +101,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
       util.stdErrCallback
     );
 
-    recCtrl.recordBtnDisabled = false; // think about keeping record disabled until after send.
+    recCtrl.recordBtnDisabled = false;
   }
 
   // oldCurRec is a reference to the possibly previous recCtrl.curRec, because

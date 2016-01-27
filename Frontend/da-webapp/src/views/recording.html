@@ -3,7 +3,6 @@
         <p class="token">{{recCtrl.displayToken}}</p>
         <div id="playback">
             <audio ng-src="{{recCtrl.curRec[0].url | trustUrl}}" controls></audio>
-            <a ng-href="{{recCtrl.curRec[0].url}}">{{recCtrl.curRec[0].title}}</a>
         </div>
         <button class="btn btn-glyph-only btn-record" type="button" ng-disabled="recCtrl.recordBtnDisabled" ng-click="recCtrl.record()">
             <span class="glyphicon glyphicon-record"></span>
