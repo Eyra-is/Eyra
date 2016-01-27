@@ -90,7 +90,6 @@ sed -e "s/XXXHOST_NAMEXXX/$HOST_NAME/" \
     ${SDIR}/tmpl/etc_apache2_sites-available_datatool.conf \
 > ${OFILE}
 
-
 # install the files
 sudo bash <<EOF
 echo 'Checking for dnsmasq and hostapd...';
@@ -117,6 +116,12 @@ echo "WiFi Status:"
 iw $WIFI_DEV info
 EOF
 
+# Setting up the backend
+${BDIR}/Backend/db/erase_and_rewind.sh
+
+# Setting up the frontend
+${BDIR}/Frontend/da-webapp/set_me_up.sh
+
 echo
 echo "Setting Up Apache"
 for i in $(ls -1 /etc/apache2/sites-available/); do
@@ -126,13 +131,11 @@ sudo a2ensite datatool.conf
 sudo a2enmod ssl wsgi
 sudo service apache2 restart
 
+
 echo
 echo "All done"
 echo "    SSID: $WIFI_SSID"
 echo "    PASS: $WIFI_PASS"
 echo "Have Fun!"
-
-
-cd ${BDIR}/
 
 
