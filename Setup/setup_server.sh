@@ -97,6 +97,7 @@ which dnsmasq > /dev/null && \
 which hostapd > /dev/null || \
 ( aptitude -q  update && aptitude -q install hostapd dnsmasq );
 echo "Backing up old configuration files...";
+mkdir -p ${ODIR}/Bak/
 NBAK=\$( ls -1d ${ODIR}/Bak/*/ | wc -l )
 mkdir -p ${ODIR}/Bak/\${NBAK};
 (cd ${ODIR}/Root && find . -type f) | while read line; do
@@ -129,6 +130,8 @@ for i in $(ls -1 /etc/apache2/sites-available/); do
 done
 sudo a2ensite datatool.conf
 sudo a2enmod ssl wsgi
+echo
+echo "iRestarting Apache"
 sudo service apache2 restart
 
 
