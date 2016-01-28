@@ -14,7 +14,7 @@
 // make speaker and No comments. not show in start menu on default ok click
 // remove alerts
 
-// add 'skip token' button in recording.controller.js and recording.html
+// add 'skip token' button in recording.controller.js and recording.html 
 
 // ***************************************************************************************** //
 
