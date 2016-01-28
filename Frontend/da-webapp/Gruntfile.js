@@ -26,13 +26,18 @@ module.exports = function(grunt) {
         cache: {
           patterns: [
                       depl+'min/script.*.min.js',
-                      depl+'min/script.min.*.map',
-                      depl+'css/app.*.css', 
+                      depl+'css/**',
                       depl+'views/**',
-                      depl+'img/**'
+                      depl+'img/**',
+                      // be careful, if these files (recorderjs/) are ever changed, 
+                      // it might not reflect on client end if he has this cached. 
+                      // This is not cache-broken. 
+                      depl+'recorderjs/dist/*' 
                     ],
           literals: [
-                      'index.html'
+                      'index.html',
+                      // same goes for this as with recorderjs/dist comment above
+                      'bower_components/bootstrap/dist/css/bootstrap.min.css'
                     ]
         },
         network: '*'
@@ -42,9 +47,12 @@ module.exports = function(grunt) {
       old_files:  [
                     depl+'min/', 
                     depl+'views/', 
-                    depl+'css/app.*.css', 
+                    depl+'css/**',
+                    depl+'sass/**',
                     depl+'index.html',
-                    depl+'img/**'
+                    depl+'img/**',
+                    depl+'bower_components/**',
+                    depl+'recorderjs/**'
                   ],
       temp: [depl+'app.js']
     },
@@ -59,7 +67,7 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['css/app.css'],
+            src: ['css/**'],
             dest: depl,
             rename: function(dest, src) {
               return dest + src.replace(/\.css$/, '.'+cache_breaker+'.css');
@@ -73,7 +81,7 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['app.js', 'index.html'],
+            src: ['app.js', 'index.html', 'sass/**', 'bower_components/**', 'recorderjs/**'],
             dest: depl
           }
         ]
@@ -174,19 +182,25 @@ module.exports = function(grunt) {
                  <%= grunt.template.today("yyyy-mm-dd") %> */',
         mangle: false,
         sourceMap: true,
-        sourceMapName: depl+'min/script.min.'+cache_breaker+'.map'
+        sourceMapName: depl+'min/script.min.js.map'
       },
       minify: {
         files: [{
           src:  [
+                  depl+'bower_components/jquery/dist/jquery.js',
+                  depl+'bower_components/bootstrap/dist/js/bootstrap.js',
+
                   depl+'bower_components/angular/angular.js',
                   depl+'bower_components/angular-route/angular-route.js',
 
                   depl+'bower_components/localforage/dist/localforage.js',
                   depl+'bower_components/angular-localforage/dist/angular-localForage.js',
                   depl+'bower_components/satellizer/satellizer.js',
-                  depl+'recorderjs/dist/recorderWorker.js',
-                  depl+'recorderjs/dist/recorder.js',
+                  // must not be minified as they use window.postMessage. U
+                  //   until code is changed or we use ES6 commit of recorderjs
+                  //   this has to be non-minified.
+                  //depl+'recorderjs/dist/recorderWorker.js',
+                  //depl+'recorderjs/dist/recorder.js',
 
                   depl+'min/old/'+depl+'app.js', 
                   depl+'min/old/'+source+'services/**/*.js',

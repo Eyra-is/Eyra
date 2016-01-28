@@ -62,7 +62,7 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
   function getTokens() {
     $scope.msg = 'Getting tokens...';
 
-    tokenService.getTokens(25).then(function(tokens){
+    tokenService.getTokens(100).then(function(tokens){
       alert('Tokens acquired!');
       $scope.msg = 'Tokens acquired.';
     },
@@ -95,7 +95,7 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
     });
 
     /*$http.post(
-      '//' + BACKENDURL + '/submit/session'
+      BACKENDURL + '/submit/session'
     ).then(function(response){
       console.log(response);
     },

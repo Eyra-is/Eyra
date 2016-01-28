@@ -7,9 +7,16 @@
 angular.module('daApp')
   .factory('deliveryService', deliveryService);
 
-deliveryService.$inject = ['$http', '$q', 'logger', 'localDbMiscService', 'localDbService', 'utilityService'];
+deliveryService.$inject = [
+                            '$http', 
+                            '$q',
+                            'BACKENDURL', 
+                            'logger', 
+                            'localDbMiscService', 
+                            'localDbService', 
+                            'utilityService'];
 
-function deliveryService($http, $q, logger, localDbMiscService, localDbService, utilityService) {
+function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
   var dbMiscService = localDbMiscService;
@@ -99,7 +106,7 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
   function getTokens(numTokens) {
     return $http({
         method: 'GET',
-        url: '//'+BACKENDURL+TOKENURL+'/'+numTokens
+        url: BACKENDURL+TOKENURL+'/'+numTokens
       });
   }
 
@@ -122,7 +129,7 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
       logger.error(e);
     }
     if (validSubmit) {
-      return $http.post('//'+BACKENDURL+url, fd, {
+      return $http.post(BACKENDURL+url, fd, {
           // this is so angular sets the correct headers/info itself
           transformRequest: angular.identity,
           headers: {'Content-Type': undefined}
@@ -156,7 +163,7 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
       logger.error(e);
     }
     if (validSubmit) {
-      return $http.post('//'+BACKENDURL+'/submit/session', fd, {
+      return $http.post(BACKENDURL+'/submit/session', fd, {
           // this is so angular sets the correct headers/info itself
           transformRequest: angular.identity,
           headers: {'Content-Type': undefined}
@@ -194,7 +201,7 @@ function deliveryService($http, $q, logger, localDbMiscService, localDbService, 
   function testServerGet() {
     return $http({
         method: 'GET',
-        url: '//'+BACKENDURL+'/submit/session'
+        url: BACKENDURL+'/submit/session'
       });
   }
 }

@@ -7,11 +7,12 @@
     <title>D.A. App</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- uncomment this for quick development --
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/app.css"><!---->
     <link rel="stylesheet" href="css/@@app.css"><!-- uncomment this in release-->
-    <!--<link rel="stylesheet" href="css/app.css"><!-- uncomment this for quick development -->
 </head>
 <body>
     <div class="vertical-center" ng-show="!isLoaded">
@@ -44,6 +45,10 @@
         <div ng-view class="view"><!-- possibly put loading here too --></div>
     </div>
     
+    <!-- this commit of recorderjs (before ES6 support) must be non-minified
+         due to window.postMessage usage. -->
+    <script src="recorderjs/dist/recorderWorker.js"></script>
+    <script src="recorderjs/dist/recorder.js"></script>
     <script src="min/@@script.min.js"></script><!-- uncomment this in release -->
 
     <!-- uncomment this for quick development --
@@ -56,9 +61,6 @@
     <script src="bower_components/localforage/dist/localforage.js"></script>
     <script src="bower_components/angular-localforage/dist/angular-localForage.js"></script>
     <script src="bower_components/satellizer/satellizer.js"></script>
-
-    <script src="recorderjs/dist/recorderWorker.js"></script>
-    <script src="recorderjs/dist/recorder.js"></script>
 
     <script src="app.js"></script>
 
