@@ -23,8 +23,8 @@ function LoginController($http, $location, $rootScope, $scope, authenticationSer
     /*$http({
         method:'POST',
         url:BACKENDURL+'/auth/login',
-        data:'{"email":"rooney", "password":"suchPass"}',
-        json:{"email":"rooney", "password":"suchPass"},
+        data:'{"email":email, "password":password}',
+        json:{"email":email, "password":password},
         headers: {'Content-Type': 'application/json'}
     }).then(function(val){
         console.log(val);
