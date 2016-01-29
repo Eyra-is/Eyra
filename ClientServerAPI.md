@@ -108,25 +108,3 @@ Current implementation:
 ```
         /submit/general/device
 ```
-
-5. submitSpeaker
-------------
-
-*Submit speaker data.*
-
-Current implementation:
-* json format of submission:
-```
-'json': { 
-            'name': jacksparrow,
-            'gender': female,
-            'dob': '1991-1995',
-            'height':'151-156'
-            [, 'deviceImei':435763486]
-        }
-```
-  * The device imei is optional, and is a way to link this speaker to the device it was created on.
-* url:
-```
-        /submit/general/speaker
-```

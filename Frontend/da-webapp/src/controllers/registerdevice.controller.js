@@ -43,7 +43,7 @@ function RegisterDeviceController($location, $rootScope, $scope, dataService, de
           $location.path('/main');
         },
         function error(response) {
-          regdCtrl.msg = 'Error submitting device.';
+          $scope.msg = 'Error submitting device.';
           logger.error(response);
         }
       );
