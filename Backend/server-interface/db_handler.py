@@ -4,7 +4,7 @@ import json
 import os # for mkdir
 import random
 
-from util import log
+from util import log, filename
 
 class DbHandler:
     def __init__(self, app):
@@ -252,6 +252,7 @@ class DbHandler:
         # vars from jsonData
         speakerId, instructorId, deviceId, location, start, end, comments = \
             None, None, None, None, None, None, None
+        speakerName = None
 
         if type(recordings)!=list or len(recordings)==0:
             msg = 'No recordings received, aborting.'
@@ -265,12 +266,14 @@ class DbHandler:
      
             if jsonDecoded['type'] == 'session':
                 jsonDecoded = jsonDecoded['data']
+                # this inserts speaker into database
                 speakerId = json.loads(
                                 self.processSpeakerData(
                                     jsonDecoded['speakerInfo']
                                 )['msg']
                             )['speakerId']
                 instructorId = jsonDecoded['instructorId']
+                # this inserts device into database
                 deviceId =  json.loads(
                                 self.processDeviceData(
                                     jsonDecoded['deviceInfo']
@@ -280,6 +283,7 @@ class DbHandler:
                 start = jsonDecoded['start']
                 end = jsonDecoded['end']
                 comments = jsonDecoded['comments']
+                speakerName = jsonDecoded['speakerInfo']['name']
             else:
                 msg = 'Wrong type of data.'
                 log(msg)
@@ -317,26 +321,41 @@ class DbHandler:
                              WHERE id=%s', 
                             (end, sessionId))
         
-            # now populate recordings table
+            # now populate recordings table and save recordings+extra data to file/s
 
             # make sure path to recordings exists
             if not os.path.exists(RECORDINGS_ROOT):
                 os.mkdir(RECORDINGS_ROOT)
 
             for rec in recordings:
+                # grab token to save as extra metadata later
+                tokenId = jsonDecoded['recordingsInfo'][rec.filename]['tokenId']
+                cur.execute('SELECT inputToken FROM token WHERE id=%s', (tokenId,))
+                token = cur.fetchone()
+                if (token is None):
+                    msg = 'No token with supplied id.'
+                    log(msg.replace('id.','id: %d.' % tokenId))
+                    return dict(msg=msg, statusCode=400)
+                else:
+                    token = token[0] # fetchone() returns tuple
+
                 # save recordings to recordings/sessionId/filename
                 sessionPath = os.path.join(RECORDINGS_ROOT, 'session_'+str(sessionId))
                 if not os.path.exists(sessionPath):
                     os.mkdir(sessionPath)
-                wavePath = os.path.join(sessionPath, rec.filename)
+                recName = filename(speakerName) + '_' + filename(rec.filename)
+                wavePath = os.path.join(sessionPath, recName)
                 # rec is a werkzeug FileStorage object
                 rec.save(wavePath)
+                # save additional metadata to text file with same name as recording
+                # right now, only save the token
+                with open(wavePath.replace('.wav','.txt'), 'w') as f:
+                    f.write(token)
 
-                # insert into database
+                # insert recording data into database
                 cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, rel_path) \
                              VALUES (%s, %s, %s, %s)', 
-                            (jsonDecoded['recordingsInfo'][rec.filename]['tokenId'], speakerId, 
-                             sessionId, wavePath))
+                            (tokenId, speakerId, sessionId, wavePath))
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
