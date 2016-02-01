@@ -7,5 +7,5 @@ WPATH=os.path.abspath(FPATH + os.sep + '..'
                             + os.sep + 'server-interface')
 sys.path.insert(0, WPATH)
 os.chdir(WPATH)
-from network_comms import app as application
+from app import app as application
 
