@@ -12,6 +12,8 @@ class DbHandler:
         app.config['MYSQL_HOST'] = 'localhost'
         app.config['MYSQL_USER'] = 'default'
         app.config['MYSQL_DB']   = 'recordings_master'
+        app.config['MYSQL_USE_UNICODE'] = True
+        app.config['MYSQL_CHARSET'] = 'utf8'
 
         self.mysql = MySQL(app)
 

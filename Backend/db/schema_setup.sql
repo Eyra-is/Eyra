@@ -8,17 +8,25 @@ drop database if exists recordings_master;
 create database recordings_master;
 use recordings_master; -- set as default (current)
 
+set collation_connection = 'utf8_general_ci';
+
 start transaction;
+
+alter database recordings_master character set utf8 collate utf8_general_ci;
 
 create table token (
     id int not null auto_increment primary key,
     inputToken text not null
 );
+alter table token convert to character set utf8 collate utf8_general_ci;
+
 create table device (
     id int not null auto_increment primary key,
     userAgent varchar(255) not null,
     imei varchar(255) not null default '' -- phone hardcoded ID, have to manually make this unique, optional
 );
+alter table device convert to character set utf8 collate utf8_general_ci;
+
 create table instructor (
     id int not null auto_increment primary key,
     name varchar(255) not null,
@@ -27,6 +35,8 @@ create table instructor (
     address varchar(255) not null,
     unique (name, email)
 );
+alter table instructor convert to character set utf8 collate utf8_general_ci;
+
 create table speaker (
     id int not null auto_increment primary key,
     name varchar(255) not null, -- just like a username
@@ -35,12 +45,14 @@ create table speaker (
     dob varchar(25) not null, -- date of birth
     deviceImei varchar(255) not null default '' -- optional id of device speaker was made on
 );
+alter table speaker convert to character set utf8 collate utf8_general_ci;
+
 create table session (
     id int not null auto_increment primary key,
     speakerId int not null,
     instructorId int not null,
     deviceId int not null,
-    location varchar(512) not null,
+    location varchar(255) not null, -- it's possible location exceeds 255, but truncation shouldn't be catastrophic.
     start varchar(50) not null,
     end varchar(50) not null,
     comments text not null,
@@ -49,6 +61,8 @@ create table session (
     foreign key (deviceId) references device(id),
     unique (speakerId, instructorId, deviceId, location, start, end)
 );
+alter table session convert to character set utf8 collate utf8_general_ci;
+
 create table recording (
     id int not null auto_increment primary key,
     tokenId int not null,
@@ -59,5 +73,6 @@ create table recording (
     foreign key (speakerId) references speaker(id),
     foreign key (sessionId) references session(id)
 );
+alter table recording convert to character set utf8 collate utf8_general_ci;
 
 commit;
