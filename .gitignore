@@ -2,3 +2,6 @@
 
 # ignore temp recordings
 /Backend/server-interface/recordings
+
+# ignore local files
+/Local
