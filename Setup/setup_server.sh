@@ -23,6 +23,9 @@ if [ "$(id -u)" == "0" ]; then
    exit 1
 fi
 
+# file including the '. /etc/default/locale' line to be uncommented for utf8 support
+ENVVARS='/etc/apache2/envvars'
+
 SDIR=$( dirname $( readlink -f $0 ) ) 
 BDIR=$( dirname $SDIR )
 ODIR=$( readlink -f ${BDIR}/Local )
@@ -151,6 +154,10 @@ parse_file \
   ${SDIR}/tmpl/etc_apache2_sites-available_datatool.conf \
   ${ODIR}/Root/etc/apache2/sites-available/datatool.conf \
   ${ODIR}/rep.sed
+
+# uncomment '. /etc/default/locale' line to use default locale (handle utf8)
+report "Uncommenting default locale line in ${ENVVARS}..."
+sudo sed -i 's/#\. \/etc\/default\/locale/\. \/etc\/default\/locale/' ${ENVVARS} && suc || err
 
 
 # install the files
