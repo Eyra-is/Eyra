@@ -57,6 +57,8 @@ body {
 .token {
   font-weight: bold;
   font-size: 1.5em;
+  overflow-y: auto;
+  max-height: 200px;
 }
 
 /* button/glyph stylings */
@@ -154,5 +156,12 @@ ul {
     }
     .recording-view {
       padding: 0.1%;
+    }
+}
+
+@media only screen 
+  and (max-device-height: 400px) {
+    .token {
+      max-height: 150px;
     }
 }
