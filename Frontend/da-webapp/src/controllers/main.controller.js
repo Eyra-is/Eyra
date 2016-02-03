@@ -82,7 +82,7 @@ function MainController($location, $q, $rootScope, $scope, $window, locationServ
     tokenService.countAvailableTokens().then(function(numTokens){
       if (numTokens < 50) {
         logger.log('Getting tokens..');
-        tokenService.getTokens(100).then(function(tokens){
+        tokenService.getTokens(200).then(function(tokens){
           tokensPromise.resolve(true);
           logger.log('Got tokens.');
         },
