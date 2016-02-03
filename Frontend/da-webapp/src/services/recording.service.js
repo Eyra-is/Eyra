@@ -6,9 +6,9 @@
 angular.module('daApp')
   .factory('recordingService', recordingService);
 
-recordingService.$inject = ['logger', 'utilityService'];
+recordingService.$inject = ['$http', 'logger', 'utilityService'];
 
-function recordingService(logger, utilityService) {
+function recordingService($http, logger, utilityService) {
   var recHandler = {};
   var util = utilityService;
 
@@ -17,7 +17,7 @@ function recordingService(logger, utilityService) {
   recHandler.setupCallbacks = setupCallbacks;
   recHandler.stop = stop;
 
-  // for some reason, putting this in an array, makes angular updates this correctly
+  // for some reason, putting this in an array, makes angular update this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),
                                     "url":'',
                                     "title":invalidTitle}];
@@ -84,18 +84,38 @@ function recordingService(logger, utilityService) {
   function createWav() {
     recorder && recorder.exportWAV(function(blob) {
       var url = URL.createObjectURL(blob);
+      // workaround for mobile playback, where it didn't work on chrome/android.
+      // fetch blob at url using xhr, and use url generated from that blob.
+      // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
+      // thanks, gbrlg
+      $http.get(url).then(
+        function success(response) {
+          var reBlob = response.data;
+          if (reBlob) {
+            url = URL.createObjectURL(reBlob);
+          }
+          finishCreateWav();
+        },
+        function error(response) {
+          logger.error(response);
+          finishCreateWav();
+        }
+      );
 
-      recHandler.prevRecTitle = recHandler.currentRecording[0].title;
-      // display recording on website
-      recHandler.currentRecording[0] = {  "blob":blob,
-                                          "url":url,
-                                          "title":(new Date().toISOString() + '.wav')};
+      // just added because of the async nature of $http
+      function finishCreateWav() {
+        recHandler.prevRecTitle = recHandler.currentRecording[0].title;
+        // display recording on website
+        recHandler.currentRecording[0] = {  "blob":blob,
+                                            "url":url,
+                                            "title":(new Date().toISOString() + '.wav')};
 
-      // angular didn't update bindings on that recordings push, so we do it manually
-      // through this callback function from the controller
-      recHandler.updateBindingsCallback();
-      // notify main controller of completed recording
-      recHandler.recordingCompleteCallback();
+        // angular didn't update bindings on that recordings push, so we do it manually
+        // through this callback function from the controller
+        recHandler.updateBindingsCallback();
+        // notify main controller of completed recording
+        recHandler.recordingCompleteCallback();
+      }
     });
   }
 
