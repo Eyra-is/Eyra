@@ -3,7 +3,6 @@ from MySQLdb import Error as MySQLError
 import json
 import os # for mkdir
 import random
-import codecs # for encoding token file as utf8
 
 from util import log, filename
 
@@ -346,6 +345,7 @@ class DbHandler:
                 sessionPath = os.path.join(RECORDINGS_ROOT, 'session_'+str(sessionId))
                 if not os.path.exists(sessionPath):
                     os.mkdir(sessionPath)
+                
                 recName = filename(speakerName) + '_' + filename(rec.filename)
                 wavePath = os.path.join(sessionPath, recName)
                 # rec is a werkzeug FileStorage object
@@ -353,7 +353,7 @@ class DbHandler:
                 # save additional metadata to text file with same name as recording
                 # open with codecs to avoid encoding issues.
                 # right now, only save the token
-                with codecs.open(wavePath.replace('.wav','.txt'), 'w', 'utf8') as f:
+                with open(wavePath.replace('.wav','.txt'), mode='w', encoding='utf8') as f:
                     f.write(token)
 
                 # insert recording data into database

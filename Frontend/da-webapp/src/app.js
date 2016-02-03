@@ -15,6 +15,11 @@
 // remove alerts
 
 // add 'skip token' button in recording.controller.js and recording.html
+// let token text scroll when it gets too big, just in case.
+// add maxlength on javascript side using database limits and display an error.
+
+// add functionality to set instructor by id
+// use jshint on all javascript
 
 // ***************************************************************************************** //
 

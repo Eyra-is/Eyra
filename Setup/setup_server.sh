@@ -65,10 +65,6 @@ for i in "${!CONF_OPTS_TMP[@]}"; do
   }
 done
 
-
-
-
-
 declare -A CONF_OPTS
 [[ ${CONF_OPTS_TMP["all"]+isthere} ]] && {
   # activating all options
