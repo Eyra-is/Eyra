@@ -65,10 +65,10 @@ def filterOutPuncuation(x):
 def run():
     if len(sys.argv) < 3:
         print( 
-                'Usage: python make_tokens_from_text.py src dest \
-                \
-                Description: Creates tokens 1 on each line from text in src.\
-                '
+'Usage: python %s src dest \
+\
+Description: Creates tokens 1 on each line from text in src.\
+' % sys.argv[0]
              )
         return
     else:
