@@ -26,7 +26,7 @@ cut -d "=" -f 1 ${SRCDIR}/default.conf | \
   grep -v -e "^#" | grep -v -e "^ *$" | \
   while read var; do
     if [[ "${var:0:4}" == "YYY_" ]]; then
-      echo "s|XXX${var:4}XXX|$(realpath -s ${BDIR}/../${!var})|"
+      echo "s|XXX${var:4}XXX|$(realpath -m -s ${BDIR}/../${!var})|"
     else
       echo "s|XXX${var}XXX|${!var}|"
     fi

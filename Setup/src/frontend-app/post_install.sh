@@ -10,7 +10,7 @@ cd ../${YYY_SITEROOT}/..
 report "Running npm install"
 npm install && suc || err
 report "Running grunt deploy"
-grunt deploy  && suc || err
+./node_modules/grunt-cli/bin/grunt deploy  && suc || err
 cd ${TDIR}
 
 sudo service apache2 reload
