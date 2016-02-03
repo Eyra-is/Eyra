@@ -21,8 +21,9 @@ bash ${BDIR}/install_dependencies.sh ${SRCDIR} || err
 SEDF=${TNAME}.sed
 
 # preparing the sed script
+[[ -f ${SRCDIR}/default.conf ]] && {
 cut -d "=" -f 1 ${SRCDIR}/default.conf | \
-  grep -v -e "^#" | \
+  grep -v -e "^#" | grep -v -e "^ *$" | \
   while read var; do
     if [[ "${var:0:4}" == "YYY_" ]]; then
       echo "s|XXX${var:4}XXX|$(realpath -s ${BDIR}/../${!var})|"
@@ -30,6 +31,9 @@ cut -d "=" -f 1 ${SRCDIR}/default.conf | \
       echo "s|XXX${var}XXX|${!var}|"
     fi
   done > ${SEDF}
+} || {
+  : > ${SEDF}
+}
 
 echo "s|XXXUSERXXX|$USER|" >> ${SEDF}
 echo "s|XXXGROUPXXX|$USER|" >> ${SEDF}
