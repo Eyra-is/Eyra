@@ -64,8 +64,7 @@ function recordingService($http, logger, utilityService) {
   }
 
   // setup callbacks for any controller which needs to use this service
-  function setupCallbacks(updateBindingsCallback, recordingCompleteCallback) {
-    recHandler.updateBindingsCallback = updateBindingsCallback;
+  function setupCallbacks(recordingCompleteCallback) {
     recHandler.recordingCompleteCallback = recordingCompleteCallback;
   }
 
