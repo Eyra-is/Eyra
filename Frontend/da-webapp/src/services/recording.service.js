@@ -89,11 +89,9 @@ function recordingService($http, logger, utilityService) {
       // thanks, gbrlg
       $http.get(url, {'responseType':'blob'}).then(
         function success(response) {
-          console.log(response);
           var reBlob = response.data;
           if (reBlob) {
             url = URL.createObjectURL(reBlob);
-            console.log(url);
           }
           finishCreateWav();
         },
