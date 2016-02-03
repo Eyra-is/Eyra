@@ -42,9 +42,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   //////////
 
   function activate() {
-    // provide updateBindings function so recordingService can 
-    // call that function when it needs to update bindings
-    recService.setupCallbacks(updateBindingsCallback, recordingCompleteCallback);
+    recService.setupCallbacks(recordingCompleteCallback);
     $rootScope.isLoaded = true; // is page loaded?  
   }
 
@@ -131,10 +129,6 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
     recCtrl.stopBtnDisabled = true;
     
     recService.stop();
-  }
-
-  function updateBindingsCallback() {
-    $scope.$apply();
   }
 }
 }());

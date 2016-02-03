@@ -112,9 +112,6 @@ function recordingService($http, logger, utilityService) {
                                             "url":url,
                                             "title":(new Date().toISOString() + '.wav')};
 
-        // angular didn't update bindings on that recordings push, so we do it manually
-        // through this callback function from the controller
-        //recHandler.updateBindingsCallback();
         // notify main controller of completed recording
         recHandler.recordingCompleteCallback();
       }
