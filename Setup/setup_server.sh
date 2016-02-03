@@ -1,21 +1,10 @@
 #!/bin/bash -eu
 
-color() {
-      printf '\033[%sm%s\033[m\n' "$@"
-      # usage color "31;5" "string"
-      # 0 default
-      # 5 blink, 1 strong, 4 underlined
-      # fg: 31 red,  32 green, 33 yellow, 34 blue, 35 purple, 36 cyan, 37 white
-      # bg: 40 black, 41 red, 44 blue, 45 purple
-      }
+# Get the script directory
+SDIR=$( dirname $( readlink -f $0 ) ) 
 
-report () {
-  color "32;1" "$@"
-}
-
-report_err () {
-  color "31;1" "$@"
-}
+# load helper functions
+. ${SDIR}/fn_report.sh
 
 # Avoid problems when running as root
 if [ "$(id -u)" == "0" ]; then
@@ -23,192 +12,131 @@ if [ "$(id -u)" == "0" ]; then
    exit 1
 fi
 
-SDIR=$( dirname $( readlink -f $0 ) ) 
-BDIR=$( dirname $SDIR )
-ODIR=$( readlink -f ${BDIR}/Local )
+available_opts=("ap"
+                "apache"
+                "mysqldb" 
+                "backend-wsgi"
+                "backend-db"
+                "backend-204"
+                "frontend-app" )
 
-# These should probably be read from a config file
-# for now keep it here...
-WIFI_DEV=wlan0
-WIFI_DRIVER=nl80211
-WIFI_SSID=FeedMeData
-WIFI_PASS=ThisIsSparta
-WIFI_CHAN=8
-WIFI_IP=192.168.8.1
-WIFI_NMASK=255.255.255.0
-WIFI_BCAST=192.168.8.255
-WIFI_DHCPSTA=192.168.8.20
-WIFI_DHCPSTO=192.168.8.220
-WIFI_DHCPLEA=12h
+declare -A AV_OPTS=(
+['ap']='          WiFi Access Point'
+['apache']='      Apache Web Server'
+['mysqldb']='     MySQL Database'
+['backend-wsgi']='WSGI for Apache'
+['backend-db']='  Backend: Database Related'
+['backend-204']=' Backend: Spoofing Android Online Check'
+['frontend-app']='Frontend: Web App'
+)
 
-HOST_PORT='*:80'
-HOST_PORTSSL='_default_:443'
-HOST_NAME='www.dasistder.net'
+usage () {
+  echo "Usage:"
+  echo "@0 [options] [config-file [...] ]"
+  echo "config-file: Contain variable definitions. See /src/<xxx>/default.conf for defaults"
+  echo "Options: (default: none)"
+  echo "  --all           enable all options"
+  echo "  --no-<xxx>      disable option <xxx>"
+  echo "    ------------------------------"
+  for i in ${!AV_OPTS[@]}; do
+    echo "  --${i}  ${AV_OPTS[$i]}"
+  done
+  exit 0
+}
 
-SITEROOT=${BDIR}/Frontend/da-webapp/app
-WSGIROOT=${BDIR}/WSGI
-LOGROOT=${ODIR}/Log
+declare -a CONF_FILES=
+declare -A CONF_OPTS_TMP
+while [ $# -gt 0 ]; do
+  ARG=$1
+  if [[ "${ARG:0:2}" == '--' ]]; then
+    opt="${ARG:2}"
+    CONF_OPTS_TMP+=([$opt]=true)
+  else
+    CONF_FILES+=( "$ARG" )
+  fi
+  shift
+done
 
-WSGI_NPROC=2
-WSGI_NTHREAD=5
+# check for contradicting options
+for i in "${!CONF_OPTS_TMP[@]}"; do
+  [[ "${i:0:3}" == "no-" ]] && [[ ${CONF_OPTS_TMP["${i:3}"]+isthere} ]] && {
+    report_err "ERROR: You can not specify both --${i} and --${i:3}."
+    exit 1
+  }
+done
 
-# end of configuration section
 
-suc () {
-  report "success!"
+
+
+
+declare -A CONF_OPTS
+[[ ${CONF_OPTS_TMP["all"]+isthere} ]] && {
+  # activating all options
+  for opt in ${available_opts[@]}; do
+    [[ ${CONF_OPTS_TMP["no-$opt"]+isthere} ]] || CONF_OPTS+=([$opt]=true)
+  done
+} || {
+  for opt in ${!CONF_OPTS_TMP[@]}; do
+     [[ "${opt:0:3}" == "no-" ]] || CONF_OPTS+=([$opt]=true)
+  done
+}
+
+for opt in ${!CONF_OPTS[@]}; do
+  [[ ${AV_OPTS["$opt"]+isthere} ]] || {
+    report_err "ERROR: Unknown option '${opt}'."
+    exit 1
+  }
+done
+
+# Testing ${#CONF_OPTS[@]} gave an error for empty array...
+# hence workaround
+[[ -z "${CONF_OPTS[@]-}" ]] && {
+  report "Nothing to do."
   echo
-  return 0
+  usage
+  exit 0
 }
 
-err () {
-  report_err "failure!"
-  echo 
-  return 1
-}
+# source all default config files
+for i in ${SDIR}/src/*/default.conf; do
+  [[ -e ${i} ]] && . ${i}
+done
 
-report "Creating Directory $LOGROOT for logging..." 
-mkdir -p $LOGROOT && suc || err
+# source user provided config files
+for i in ${CONF_FILES[@]}; do
+  report_nnl "Reading configuration in '${i}' ... "
+  [[ -e ${i} ]] && . ${i} && suc || err  
+done
 
-# Get into the scripts directory
-pushd $SDIR > /dev/null
+# Get into a well defined directory
+WDIR=$(readlink -f ${SDIR}/../Local )
 
-# Install dependencies if needed
-report "Installing dependencies..."
-sudo aptitude -q2 update && \
-sudo aptitude -y install $(cat deps_aptitude) && \
-sudo pip3 install $(cat deps_pip3) && suc || err
+report_nnl "Preparing working directory ${WDIR} ... "
+mkdir -p ${WDIR} && cd ${WDIR} && suc || err
+report_nnl "Preparing log directory ${WDIR}/Log for logging..." 
+mkdir -p Log && suc || err
 
-# Placing scripts
-report "Placing control scripts in ${ODIR}/bin/ ..."
-mkdir -p ${ODIR}/bin/ && \
-cp ${SDIR}/bin/*.sh ${ODIR}/bin/ && suc || err
+# get global dependencies
+bash ${SDIR}/install_dependencies.sh ${SDIR}/src || err
 
-# Preparing config files
-report "Setting up config files..."
+GFILES=$(mktemp)
+for opt in "${available_opts[@]}"; do
+  [[ ${CONF_OPTS["$opt"]+isthere} ]] && {
+    report "Setting up directory $(readlink -f ${SDIR}/src/${opt} )"
+    . ${SDIR}/setup_component.sh ${SDIR}/src/$opt && suc || err
+    [[ -f ${SDIR}/src/$opt/global.files ]] && \
+      cat ${SDIR}/src/$opt/global.files >> $GFILES
+  }
+done
 
-mkdir -p ${ODIR}/Root/
-rm -rf ${ODIR}/Root/*
+bash ${SDIR}/install_and_backup.sh $GFILES $WDIR/Root $WDIR/Bak
 
-cat > ${ODIR}/rep.sed <<EOF
-s:XXXGROUPXXX:$USER:
-s/XXXHOST_NAMEXXX/$HOST_NAME/
-s:XXXLOGROOTXXX:$LOGROOT:
-s:XXXSITEROOTXXX:$SITEROOT:
-s:XXXUSERXXX:$USER:
-s/XXXWIFI_BCASTXXX/${WIFI_BCAST}/
-s/XXXWIFI_CHANXXX/${WIFI_CHAN}/
-s/XXXWIFI_DEVXXX/${WIFI_DEV}/
-s/XXXWIFI_DHCPLEAXXX/${WIFI_DHCPLEA}/
-s/XXXWIFI_DHCPSTAXXX/${WIFI_DHCPSTA}/
-s/XXXWIFI_DHCPSTOXXX/${WIFI_DHCPSTO}/
-s/XXXWIFI_DRIVERXXX/${WIFI_DRIVER}/
-s/XXXWIFI_IPXXX/${WIFI_IP}/
-s/XXXWIFI_NMASKXXX/${WIFI_NMASK}/
-s/XXXWIFI_PASSXXX/${WIFI_PASS}/
-s/XXXWIFI_SSIDXXX/${WIFI_SSID}/
-s:XXXWSGI_NPROCXXX:$WSGI_NPROC:
-s:XXXWSGI_NTHREADXXX:$WSGI_NTHREAD:
-s:XXXWSGIROOTXXX:$WSGIROOT:
-EOF
+for opt in "${available_opts[@]}"; do
+  [[ ${CONF_OPTS["$opt"]+isthere} ]] && {
+    report "Activating $(readlink -f ${SDIR}/src/${opt} ) ..."
+    [[ -f ${SDIR}/src/${opt}/post_install.sh ]] && \
+      . ${SDIR}/src/${opt}/post_install.sh && suc || err
+  }
+done
 
-parse_file () {
-TMPLF=$1
-OUTF=$2
-[[ $# -gt 2 ]] && SUBF=$3 || SUBF=""
-report "Processing template $TMPLF ..."
-mkdir -p $( dirname ${OUTF} ) && \
-if [[ -z $SUBF ]]; then
-  cp $TMPLF $OUTF
-else
-  sed -f "$SUBF" $TMPLF > $OUTF
-fi && suc || err
-}
-
-parse_file \
-  ${SDIR}/tmpl/etc_hostapd_hostapd.conf \
-  ${ODIR}/Root/etc/hostapd/hostapd.conf \
-  ${ODIR}/rep.sed  
-
-parse_file \
-  ${SDIR}/tmpl/etc_network_interfaces.d_wlan0.conf \
-  ${ODIR}/Root/etc/network/interfaces.d/wlan0.conf \
-  ${ODIR}/rep.sed
-
-parse_file \
-  ${SDIR}/tmpl/etc_network_interfaces \
-  ${ODIR}/Root/etc/network/interfaces
-
-parse_file \
-  ${SDIR}/tmpl/etc_default_hostapd \
-  ${ODIR}/Root/etc/default/hostapd
-
-parse_file \
-  ${SDIR}/tmpl/etc_dnsmasq.conf \
-  ${ODIR}/Root/etc/dnsmasq.conf \
-  ${ODIR}/rep.sed
-
-parse_file \
-  ${SDIR}/tmpl/etc_apache2_sites-available_datatool.conf \
-  ${ODIR}/Root/etc/apache2/sites-available/datatool.conf \
-  ${ODIR}/rep.sed
-
-
-# install the files
-
-
-report 'Checking for dnsmasq and hostapd...'
-sudo which dnsmasq hostapd > /dev/null || \
-( sudo aptitude -q2 update && sudo aptitude -y install hostapd dnsmasq ) && suc || err
-
-report "Backing up old configuration files...";
-mkdir -p ${ODIR}/Bak/
-NBAK=$( ls -1d ${ODIR}/Bak/*/ | wc -l )
-report "Found $NBAK backup(s)."
-mkdir -p ${ODIR}/Bak/${NBAK} && cd ${ODIR}/Root && find . -type f | while read line; do
-  if [[ -e $line ]] ; then
-    mkdir -p ${ODIR}/Bak/${NBAK}/$( dirname $line )
-    cp /$line ${ODIR}/Bak/${NBAK}/$line ;
-    sudo cp ${ODIR}/Root/$line /$line
-  fi
-done && suc || err
-
-if [ $NBAK -ge 1 ]; then
-  if diff -r ${ODIR}/Bak/${NBAK} ${ODIR}/Bak/$(( ${NBAK} - 1 )) > /dev/null ; then
-    report "Last Config unchanged. Reverting backup..."
-    rm -r ${ODIR}/Bak/${NBAK} && suc || err
-  fi
-fi
-
-report  "Restarting Network..."
-sudo ${ODIR}/bin/restart_wifi_ap.sh && suc || err
-
-report "WiFi Status:"
-sudo iw $WIFI_DEV info
-
-# Setting up the frontend
-report "Setting up Frontend ..."
-${BDIR}/Frontend/da-webapp/set_me_up.sh && suc || err
-
-
-report "Setting Up Apache ..."
-for i in $(ls -1 /etc/apache2/sites-available/); do
-  sudo a2dissite ${i} 
-done && \
-sudo a2ensite datatool.conf && \
-sudo a2enmod ssl wsgi && \
-sudo service apache2 restart && suc || err
-
-report "All done"
-report "    SSID: $WIFI_SSID"
-report "    PASS: $WIFI_PASS"
-report "Have Fun!"
-echo
-
-# Setting up the backend
-report "Did not touch any MySQL stuff."
-report "Run: ${BDIR}/Backend/db/erase_and_rewind.sh to setup MySQL database"
-report_err "WARNING: All Databases will be dropped then..."
-
-
-
-
+exit 0
