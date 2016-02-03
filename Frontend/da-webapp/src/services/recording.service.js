@@ -88,11 +88,13 @@ function recordingService($http, logger, utilityService) {
       // fetch blob at url using xhr, and use url generated from that blob.
       // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
       // thanks, gbrlg
-      $http.get(url).then(
+      $http.get(url, {'responseType':'blob'}).then(
         function success(response) {
+          console.log(response);
           var reBlob = response.data;
           if (reBlob) {
             url = URL.createObjectURL(reBlob);
+            console.log(url);
           }
           finishCreateWav();
         },
@@ -112,7 +114,7 @@ function recordingService($http, logger, utilityService) {
 
         // angular didn't update bindings on that recordings push, so we do it manually
         // through this callback function from the controller
-        recHandler.updateBindingsCallback();
+        //recHandler.updateBindingsCallback();
         // notify main controller of completed recording
         recHandler.recordingCompleteCallback();
       }
