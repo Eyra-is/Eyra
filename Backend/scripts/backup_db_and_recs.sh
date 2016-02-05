@@ -1,5 +1,14 @@
 #!/bin/bash
 
+display_usage() { 
+    echo -e "Usage:\n$0" 
+} 
+if [[ ( $1 == "--help") ||  $1 == "-h" ]] 
+then 
+    display_usage
+    exit 0
+fi 
+
 # Get the script directory
 SDIR=$( dirname $( readlink -f $0 ) )
 cd "$SDIR"
