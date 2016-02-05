@@ -35,10 +35,16 @@ function SetInstructorController($location, $rootScope, $scope, dataService, del
   function submit() {
     validateInputs(); // currently empty function
     if (setiCtrl.msgs.length === 0) {
-      var instructorData = {'name':setiCtrl.name,
+      var instructorData;
+      if (setiCtrl.name !== '' && setiCtrl.email !== '') {
+        instructorData = {  'name':setiCtrl.name,
                             'email':setiCtrl.email,
                             'phone':(setiCtrl.phone || ''),
                             'address':(setiCtrl.address || '')};
+      } else {
+        // special submit by ID for existing instructors
+        instructorData = {'id':(setiCtrl.instructorId || 1)};
+      }
       delService.submitInstructor(instructorData).then(
         function success(response){
           try {

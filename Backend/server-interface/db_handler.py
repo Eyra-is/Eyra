@@ -156,6 +156,36 @@ class DbHandler:
 
     # instructorData = look at format in the client-server API
     def processInstructorData(self, instructorData):
+        try:
+            if isinstance(instructorData, str):
+                instructorData = json.loads(instructorData)
+        except (ValueError) as e:
+            msg = '%s data not on correct format, aborting.' % name
+            log(msg, e)
+            return dict(msg=msg, statusCode=400)
+
+        if 'id' in instructorData:
+            # instructor was submitted as an id, see if he exists in database
+            try: 
+                cur = self.mysql.connection.cursor()
+
+                cur.execute('SELECT id FROM instructor WHERE id=%s', (instructorData['id'],)) # have to pass in a tuple, with only one parameter
+                instructorId = cur.fetchone()
+                if (instructorId is None):
+                    # no instructor
+                    msg = 'No instructor with that id.'
+                    log(msg)
+                    return dict(msg=msg, statusCode=400)
+                else:
+                    # instructor already exists, return it
+                    instructorId = instructorId[0] # fetchone returns tuple on success
+                    return dict(msg='{"instructorId":' + str(instructorId) + '}', statusCode=200)
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+            return 'Unexpected error.', 500
+
         return self.insertGeneralData('instructor', instructorData, 'instructor')
 
     def processDeviceData(self, deviceData):
