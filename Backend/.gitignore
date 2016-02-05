@@ -1,3 +1,12 @@
+# user added
+
+# ignore temp recordings
+/server-interface/recordings
+
+# ignore backup
+/backup
+
+
 # python gitignore https://github.com/github/gitignore/blob/master/Python.gitignore
 
 # Byte-compiled / optimized / DLL files

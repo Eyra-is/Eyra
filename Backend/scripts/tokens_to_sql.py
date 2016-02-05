@@ -2,6 +2,17 @@
 # Usage: python tokens_to_sql.py src dest 
 #
 # turns tokens in src, 1 on each line, into sql ready to be run and placed into database
+#
+# Example: run on 'go
+#                  get
+#                  some
+#                  pie' 
+#              -> 'insert into token (inputToken)
+#                  values
+#                  ('go'),
+#                  ('get'),
+#                  ('some'),
+#                  ('pie');'
 
 import sys
 

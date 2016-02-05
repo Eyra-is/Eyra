@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd ../server-interface/recordings
 for ses in $(ls -1)
 do
