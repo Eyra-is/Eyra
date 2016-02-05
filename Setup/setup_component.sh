@@ -44,6 +44,7 @@ for f in $( cat ${SRCDIR}/global.files ); do
   RSTR=${f//\//_}
   INF=${SRCDIR}/tmpl/${RSTR:1}
   parse_file $INF $OUTF $SEDF
+echo $INF $OUTF $SEDF
 done
 
 [[ -e ${SRCDIR}/local.files ]] && \

@@ -35,11 +35,13 @@ report "Found $NBAK backup(s) at ${BDIR}."
 mkdir -p ${BDIR}/${NBAK} || err
 
 for f in $( cat ${FLIST} ); do 
+  echo sudo cp ${SDIR}$f $f
   if [[ -e $f ]] ; then
     mkdir -p ${BDIR}/${NBAK}/$( dirname $f )
-    cp $f ${BDIR}/${NBAK}/$f ;
-    sudo cp ${SDIR}$f $f
+    cp $f ${BDIR}/${NBAK}/$f
   fi
+  sudo mkdir -p $( dirname $f )
+  sudo cp ${SDIR}$f $f
 done && suc || err
 
 if [ $NBAK -ge 1 ]; then

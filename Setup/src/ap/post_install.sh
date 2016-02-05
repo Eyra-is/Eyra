@@ -5,6 +5,9 @@
   exit 1
 }
 
+chmod 755 ./bin/restart_wifi_ap.sh
+chmod 755 ./bin/restart_wifi_client.sh
+
 sudo ./bin/restart_wifi_ap.sh
 
 report "WiFi Status:"

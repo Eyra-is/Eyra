@@ -26,4 +26,10 @@
   suc || err
 }
 
+[[ -e  ${1}/custom.deps.sh ]] &&  {
+  report "Installing dependencies (custom) " && \
+  bash ${1}/custom.deps.sh && \
+  suc || err
+}
+
 exit 0

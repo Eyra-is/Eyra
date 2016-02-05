@@ -18,7 +18,8 @@ available_opts=("ap"
                 "backend-wsgi"
                 "backend-db"
                 "backend-204"
-                "frontend-app" )
+                "frontend-app"
+                "ext-kaldi" )
 
 declare -A AV_OPTS=(
 ['ap']='          WiFi Access Point'
@@ -28,6 +29,7 @@ declare -A AV_OPTS=(
 ['backend-db']='  Backend: Database Related'
 ['backend-204']=' Backend: Spoofing Android Online Check'
 ['frontend-app']='Frontend: Web App'
+['ext-kaldi']='   External: Kaldi and dependencies'
 )
 
 usage () {
@@ -35,7 +37,8 @@ usage () {
   echo "@0 [options] [config-file [...] ]"
   echo "config-file: Contain variable definitions. See /src/<xxx>/default.conf for defaults"
   echo "Options: (default: none)"
-  echo "  --all           enable all options"
+  echo "  --all           enable all options (excluding external)"
+  echo "  --all-ext       enable all external options"
   echo "  --no-<xxx>      disable option <xxx>"
   echo "    ------------------------------"
   for i in ${!AV_OPTS[@]}; do
