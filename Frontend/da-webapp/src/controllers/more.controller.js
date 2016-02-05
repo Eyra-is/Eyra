@@ -62,7 +62,7 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
   function getTokens() {
     $scope.msg = 'Getting tokens...';
 
-    tokenService.getTokens(100).then(function(tokens){
+    tokenService.getTokens(500).then(function(tokens){
       alert('Tokens acquired!');
       $scope.msg = 'Tokens acquired.';
     },

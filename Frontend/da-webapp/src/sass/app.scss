@@ -41,6 +41,9 @@ body {
 .data-entry {
   @extend .default-view;
   font-size: 1.2em;
+  form {
+    padding-bottom: 3%;
+  }
 }
 /* http://stackoverflow.com/a/24688640/5272567 */
 .checkbox input[type='checkbox'] {

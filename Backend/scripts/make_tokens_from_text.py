@@ -3,7 +3,7 @@
 #
 # Creates tokens, 1 on each line, from text
 #
-# 
+# THIS IS NOT USED CURRENTLY, but someone may find it useful.
 
 import sys
 import re
