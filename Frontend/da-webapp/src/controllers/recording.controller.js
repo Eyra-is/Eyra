@@ -23,6 +23,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   var util = utilityService;
 
   recCtrl.record = record;
+  recCtrl.skip = skip;
   recCtrl.stop = stop;
 
   $scope.msg = ''; // single debug/information msg
@@ -30,8 +31,9 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
 
   recCtrl.recordBtnDisabled = false;
   recCtrl.stopBtnDisabled = true;
+  recCtrl.skipBtnDisabled = true;
 
-  var currentToken = {'id':0, 'token':'No token yet. Hit \'Record\' to start.'};
+  var currentToken = {'id':0, 'token':'No token yet. Hit \'Next\' for next token.'};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
@@ -50,6 +52,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
     $scope.msg = 'Recording now...';
 
     recCtrl.recordBtnDisabled = true;
+    recCtrl.skipBtnDisabled = false;
 
     recService.record();
 
@@ -123,12 +126,22 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
     return delService.submitRecordings(sessionData, [oldCurRec]);
   }
 
-  function stop() {
+  function skip() {
+    $scope.msg = 'Token skipped.';
+
+    if (currentToken.id !== 0) {
+      stop(false);
+    }
+    record();
+  }
+
+  function stop(valid) {
     $scope.msg = 'Stopped.';
 
     recCtrl.stopBtnDisabled = true;
+    recCtrl.skipBtnDisabled = true;
     
-    recService.stop();
+    recService.stop(valid);
   }
 }
 }());
