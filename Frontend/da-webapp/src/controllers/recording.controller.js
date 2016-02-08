@@ -22,16 +22,23 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   var dbService = localDbService;
   var util = utilityService;
 
-  recCtrl.record = record;
+  recCtrl.action = action;
   recCtrl.skip = skip;
-  recCtrl.stop = stop;
 
   $scope.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
 
-  recCtrl.recordBtnDisabled = false;
-  recCtrl.stopBtnDisabled = true;
+  recCtrl.actionBtnDisabled = false;
   recCtrl.skipBtnDisabled = true;
+
+  var actionType = 'record'; // current state
+
+  var RECTEXT = 'Next'; // text under the buttons
+  var STOPTEXT = 'Stop';
+  var RECGLYPH = 'glyphicon-record'; // bootstrap glyph class
+  var STOPGLYPH = 'glyphicon-stop';
+  $scope.actionText = RECTEXT;
+  $scope.actionGlyph = RECGLYPH;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Next\' for next token.'};
   recCtrl.displayToken = currentToken['token'];
@@ -48,15 +55,37 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
     $rootScope.isLoaded = true; // is page loaded?  
   }
 
+  // signifies the combined rec/stop button
+  function action() {
+    if (actionType === 'record') {
+      record();
+    } else if (actionType === 'stop') {
+      stop(true);
+    }
+  }
+
+  function toggleActionBtn() {
+    if (actionType === 'record') {
+      actionType = 'stop';
+      $scope.actionText = STOPTEXT;
+      $scope.actionGlyph = STOPGLYPH;
+    } else if (actionType === 'stop') {
+      actionType = 'record';
+      $scope.actionText = RECTEXT;
+      $scope.actionGlyph = RECGLYPH;
+    }
+  }
+
   function record() {
     $scope.msg = 'Recording now...';
 
-    recCtrl.recordBtnDisabled = true;
     recCtrl.skipBtnDisabled = false;
+    if (actionType === 'record') {
+      toggleActionBtn();
+    }
+    recCtrl.actionBtnDisabled = false;
 
     recService.record();
-
-    recCtrl.stopBtnDisabled = false;
 
     currentToken = {'id':0, 'token':'Waiting for new token...'};
     // show token on record/newToken button hit
@@ -102,7 +131,8 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
       util.stdErrCallback
     );
 
-    recCtrl.recordBtnDisabled = false;
+    toggleActionBtn();
+    recCtrl.actionBtnDisabled = false;
   }
 
   // oldCurRec is a reference to the possibly previous recCtrl.curRec, because
@@ -138,7 +168,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   function stop(valid) {
     $scope.msg = 'Stopped.';
 
-    recCtrl.stopBtnDisabled = true;
+    recCtrl.actionBtnDisabled = true;
     recCtrl.skipBtnDisabled = true;
     
     recService.stop(valid);
