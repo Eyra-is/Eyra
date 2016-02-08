@@ -31,7 +31,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
 
   recCtrl.recordBtnDisabled = false;
   recCtrl.stopBtnDisabled = true;
-  recCtrl.skipBtnDisabled = false;
+  recCtrl.skipBtnDisabled = true;
 
   var currentToken = {'id':0, 'token':'No token yet. Hit \'Next\' for next token.'};
   recCtrl.displayToken = currentToken['token'];
