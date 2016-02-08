@@ -81,6 +81,7 @@ body {
     clear: both;
   }
   p {
+    /* thanks romprzy, http://stackoverflow.com/a/16950278/5272567 */
     display: table;
     margin: 0 auto;
     width: 100%;
