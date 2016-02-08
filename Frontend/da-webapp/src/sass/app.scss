@@ -70,9 +70,20 @@ body {
   width: 100%;
   font-size: 1.2em;
 }
-.btn-record, .btn-stop {
+.btn-record-ctrl {
   width: $glyphSize;
   height: $glyphSize;
+  /* glyphs within buttons */
+  span {
+    width:100%;
+    float: right;
+    clear: both;
+  }
+  p {
+    display: table;
+    margin: 0 auto;
+    width: 100%;
+  }
 }
 .btn-main {
   font-size: 1.5em;
@@ -83,6 +94,10 @@ body {
 }
 .glyphicon-stop {
   @extend .glyph-default;
+}
+.glyphicon-ban-circle {
+  @extend .glyph-default;
+  color: red;
 }
 /* make button invisible, to allow only glyphicon as button */
 /* http://stackoverflow.com/a/26917133/5272567 */
