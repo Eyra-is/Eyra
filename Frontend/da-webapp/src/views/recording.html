@@ -4,11 +4,12 @@
         <div id="playback">
             <audio ng-src="{{recCtrl.curRec[0].url | trustUrl}}" controls></audio>
         </div>
-        <button class="btn btn-glyph-only btn-record" type="button" ng-disabled="recCtrl.recordBtnDisabled" ng-click="recCtrl.record()">
-            <span class="glyphicon glyphicon-record"></span>
+        <!-- action = rec or stop -->
+        <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="recCtrl.actionBtnDisabled" ng-click="recCtrl.action()">
+            <span class="glyphicon {{actionGlyph}}"></span><p>{{actionText}}</p>
         </button>
-        <button class="btn btn-glyph-only btn-stop" type="button" ng-disabled="recCtrl.stopBtnDisabled" ng-click="recCtrl.stop()">
-            <span class="glyphicon glyphicon-stop"></span>
+        <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="recCtrl.skipBtnDisabled" ng-click="recCtrl.skip()">
+            <span class="glyphicon glyphicon-ban-circle"></span><p>Skip</p>
         </button>
         <p class="message">{{msg}}</p>
     </div>
