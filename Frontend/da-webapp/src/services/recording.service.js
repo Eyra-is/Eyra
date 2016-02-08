@@ -68,12 +68,14 @@ function recordingService($http, logger, utilityService) {
     recHandler.recordingCompleteCallback = recordingCompleteCallback;
   }
 
-  function stop() {
+  function stop(valid) {
     recorder && recorder.stop();
     logger.log('Stopped recording.');
-    
-    // create WAV download link using audio data blob and display on website
-    createWav();
+
+    if (valid) {
+      // create WAV download link using audio data blob and display on website
+      createWav();
+    }
     
     recorder.clear();
   } 
