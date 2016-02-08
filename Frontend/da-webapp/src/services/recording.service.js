@@ -75,6 +75,8 @@ function recordingService($http, logger, utilityService) {
     if (valid) {
       // create WAV download link using audio data blob and display on website
       createWav();
+    } else {
+      logger.log('Token skipped, no recording made.');
     }
     
     recorder.clear();
