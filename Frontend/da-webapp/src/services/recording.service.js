@@ -121,6 +121,10 @@ function recordingService($http, logger, utilityService) {
 
   function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
+    // Fix for a firefox bug.
+    // save a reference to the media stream source.
+    // thanks, csch, http://stackoverflow.com/a/23486702/5272567
+    window.source = input;
     logger.log('Media stream created.');
     // Uncomment if you want the audio to feedback directly
     //input.connect(audio_context.destination);
