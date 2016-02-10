@@ -112,7 +112,7 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
   }
 
   function queryQC(sessionId) {
-    return submitGeneralJson({'sessionId' : sessionId}, '/qc/report');
+    return $http.get(BACKENDURL + '/qc/report/session/'+sessionId);
   }
 
   function submitDevice(device) {

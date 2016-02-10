@@ -139,12 +139,11 @@ def submit_gettokens(numTokens):
 
 # QC ROUTES
 
-@app.route('/qc/report', methods=['POST'])
-def qc_report():
-    if request.method == 'POST':
-        # you can see in db handler how i handled parsing the inp as json
+@app.route('/qc/report/session/<int:sessionId>', methods=['GET'])
+def qc_report(sessionId):
+    if request.method == 'GET':
         # might be appropriate to have a qc handler here or something
-        log('Form: ' + str(request.form))
+        log('sessionId received: ' + str(sessionId))
         return 'Qc says hello.', 200
 
 

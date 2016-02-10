@@ -121,17 +121,12 @@ Current implementation:
 *Query server for Quality Control reports.*
 
 Current implementation:
-* json format of submission:
-```
-'json': {
-            "sessionId" : 3
-        }
-```
 * json format of response:
 ```
 to be decided
 ```
 * url:
 ```
-        /qc/report
+        /qc/report/session/X
 ```
+Where X is the session id.
