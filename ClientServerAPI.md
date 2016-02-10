@@ -4,7 +4,7 @@
 1. submitRecordings
 ----------------
 
-*Submit recordings, 1 or more, including metadata.*
+*Submit recordings, 1 or more, including metadata. Receives in return some way to ID said session.*
 
 Current implementation:
 * json format for session data:
@@ -43,7 +43,13 @@ Current implementation:
   * Server looks at sessions with the same info (minus end time of course), and if it is the same, it simply adds the recording to that session, and updates the end time of that session.
   * The deviceInfo 'imei' is optional.
     * Same goes for the speakerInfo 'deviceImei'.
-* The recordings in the submission (request.files) should be stored with keys 'rec0','rec1',..,'recn'
+  * The recordings in the submission (request.files) should be stored with keys 'rec0','rec1',..,'recn'
+* json format of response:
+```
+        {
+            "sessionId" : 5
+        }
+```
 * url:
 ```
         /submit/session
@@ -107,4 +113,25 @@ Current implementation:
 * url:
 ```
         /submit/general/device
+```
+
+5. queryQC
+----------
+
+*Query server for Quality Control reports.*
+
+Current implementation:
+* json format of submission:
+```
+'json': {
+            "sessionId" : 3
+        }
+```
+* json format of response:
+```
+to be decided
+```
+* url:
+```
+        /qc/report
 ```

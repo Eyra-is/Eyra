@@ -407,7 +407,7 @@ class DbHandler:
             log(msg, e)
             return dict(msg=msg, statusCode=400)
 
-        return dict(msg='Successful process of session data.', statusCode=200)
+        return dict(msg='{"sessionId":' + str(sessionId) + '}', statusCode=200)
 
     # gets numTokens tokens randomly selected from the database and returns them in a nice json format.
     # look at format in the client-server API

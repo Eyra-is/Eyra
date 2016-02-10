@@ -26,6 +26,7 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
   reqHandler.sendLocalSessions = sendLocalSessions;
   // API
   reqHandler.getTokens = getTokens;
+  reqHandler.queryQC = queryQC;
   reqHandler.submitDevice = submitDevice;
   reqHandler.submitInstructor = submitInstructor;
   reqHandler.submitRecordings = submitRecordings;
@@ -108,6 +109,10 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
         method: 'GET',
         url: BACKENDURL+TOKENURL+'/'+numTokens
       });
+  }
+
+  function queryQC(sessionId) {
+    return submitGeneralJson({'sessionId' : sessionId}, '/qc/report');
   }
 
   function submitDevice(device) {

@@ -137,6 +137,17 @@ def submit_gettokens(numTokens):
 
     return 'Unexpected error.', 500
 
+# QC ROUTES
+
+@app.route('/qc/report', methods=['POST'])
+def qc_report():
+    if request.method == 'POST':
+        # you can see in db handler how i handled parsing the inp as json
+        # might be appropriate to have a qc handler here or something
+        log('Form: ' + str(request.form))
+        return 'Qc says hello.', 200
+
+
 if __name__ == '__main__':
     #import ssl
     #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
