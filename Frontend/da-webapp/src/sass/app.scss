@@ -70,22 +70,25 @@ body {
   width: 100%;
   font-size: 1.2em;
 }
-.btn-record-ctrl {
+.record-ctrl-wrapper {
+  display: inline-block;
   width: $glyphSize;
-  height: $glyphSize;
-  margin-bottom: 2%;
-  /* glyphs within buttons */
-  span {
-    width:100%;
-    float: right;
+  button {
+    width: 100%;
+    float: left;
     clear: both;
   }
   p {
-    /* thanks romprzy, http://stackoverflow.com/a/16950278/5272567 */
-    display: table;
-    margin: 0 auto;
-    width: 100%;
+    float: left;
+    display: block;
+    width: $glyphSize;
+    text-align: center;
+    padding: 0.3em 0 0 0.2em;
   }
+}
+.btn-record-ctrl {
+  width: $glyphSize;
+  height: $glyphSize;
 }
 .btn-main {
   font-size: 1.5em;
