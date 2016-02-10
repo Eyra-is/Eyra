@@ -45,6 +45,16 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
   '$routeProvider',
   function($routeProvider) {
     $routeProvider.
+      when('/info', {
+        templateUrl: 'views/info.html',
+        controller: 'InfoController',
+        controllerAs: 'infoCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
+      }).
       when('/login', {
         templateUrl: 'views/login.html',
         controller: 'LoginController',
