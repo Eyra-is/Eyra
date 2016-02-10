@@ -37,6 +37,9 @@ body {
   @extend .default-view;
   text-align: center;
 }
+.feedbackDisplay {
+  font-size: 1.1em;
+}
 /* form layout */
 .data-entry {
   @extend .default-view;

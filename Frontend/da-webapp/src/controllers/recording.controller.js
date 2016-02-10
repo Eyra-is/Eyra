@@ -31,6 +31,8 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   recCtrl.actionBtnDisabled = false;
   recCtrl.skipBtnDisabled = true;
 
+  $scope.tokensRead = 0; // simple counter
+
   var actionType = 'record'; // current state
 
   var RECTEXT = 'Next'; // text under the buttons
@@ -172,6 +174,11 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
     recCtrl.skipBtnDisabled = true;
     
     recService.stop(valid);
+
+    // whenever stopped is pressed from gui, it should mean a valid token read.
+    if (valid) {
+      $scope.tokensRead++;
+    }
   }
 }
 }());
