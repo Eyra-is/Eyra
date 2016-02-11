@@ -1,5 +1,6 @@
 (function () {
-// service to handle recording, basically a wrapper around recorderjs
+// service for the volume meter, uses volume-meter.js. Code in part from
+//   https://github.com/cwilso/volume-meter
 
 'use strict';
 
@@ -13,7 +14,7 @@ function volumeMeterService(logger) {
 
   volHandler.init = init;
 
-  var canvas = document.getElementById("volume-meter");
+  var canvas = document.getElementById('volume-meter');
   var canvasContext = canvas.getContext('2d');
   var WIDTH = canvas.attributes['width'].value;
   var HEIGHT = canvas.attributes['height'].value;
@@ -44,9 +45,9 @@ function volumeMeterService(logger) {
 
     // check if we're currently clipping
     if (meter.checkClipping())
-        canvasContext.fillStyle = "red";
+        canvasContext.fillStyle = 'red';
     else
-        canvasContext.fillStyle = "green";
+        canvasContext.fillStyle = 'green';
 
     // draw a bar based on the current volume
     canvasContext.fillRect(0, 0, meter.volume*WIDTH*1.4, HEIGHT);
