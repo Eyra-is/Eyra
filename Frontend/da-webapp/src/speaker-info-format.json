@@ -1,0 +1,51 @@
+// modify this depending on what info about the speakers you need
+// allowed types: text, number, checkbox and select
+[
+    {
+        "attribute" : "sex",
+        "type" : "select",
+        "options" : ["Male", "Female", "Other"],
+        "required" : true,
+        "label" : "Sex",
+        "description" : "Select your sex."
+    },
+    {
+        "attribute" : "dob",
+        "type" : "select",
+        "options" : [   "1996-2000",
+                        "1991-1995",
+                        "1986-1990",
+                        "1981-1985",
+                        "1976-1980",
+                        "1971-1975",
+                        "1966-1970",
+                        "1961-1965",
+                        "1956-1960",
+                        "1950-1955",
+                        "< 1950"],
+        "required" : true,
+        "label" : "Date of birth",
+        "description" : "Select the interval which contains the year you were born in."
+    },
+    {
+        "attribute" : "height",
+        "type" : "number",
+        "required" : true,
+        "label" : "Height (cm)",
+        "description" : "Enter your height in centimeters."
+    },
+    {
+        "attribute" : "testText",
+        "type" : "text",
+        "label" : "testText"
+    },
+    {
+        "attribute" : "testCheckbox",
+        "type" : "checkbox",
+        "label" : "Check me please."
+    },
+    {
+        "attribute" : "testNoLabel",
+        "type" : "text"
+    }
+]
