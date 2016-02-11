@@ -12,6 +12,8 @@ function recordingService($http, logger, utilityService) {
   var recHandler = {};
   var util = utilityService;
 
+  recHandler.getAudioContext = getAudioContext;
+  recHandler.getStreamSource = getStreamSource;
   recHandler.init = init;
   recHandler.record = record;
   recHandler.setupCallbacks = setupCallbacks;
@@ -26,6 +28,7 @@ function recordingService($http, logger, utilityService) {
   var invalidTitle = util.getConstant('invalidTitle');
 
   var audio_context;
+  var input;
   var recorder;
 
   return recHandler;
@@ -56,6 +59,14 @@ function recordingService($http, logger, utilityService) {
 
       recHandler.initCompleteCallback(false);
     });
+  }
+
+  function getAudioContext() {
+    return audio_context;
+  }
+
+  function getStreamSource() {
+    return input;
   }
 
   function record() {
@@ -120,7 +131,7 @@ function recordingService($http, logger, utilityService) {
   }
 
   function startUserMedia(stream) {
-    var input = audio_context.createMediaStreamSource(stream);
+    input = audio_context.createMediaStreamSource(stream);
     // Fix for a firefox bug.
     // save a reference to the media stream source.
     // thanks, csch, http://stackoverflow.com/a/23486702/5272567
