@@ -12,16 +12,18 @@ if [ "$(id -u)" == "0" ]; then
    exit 1
 fi
 
-available_opts=("ap"
-                "apache"
-                "mysqldb" 
-                "backend-wsgi"
-                "backend-db"
-                "backend-204"
-                "frontend-app"
-                "ext-kaldi" )
+available_opts_int=("ap"
+                    "apache"
+                    "mysqldb" 
+                    "backend-wsgi"
+                    "backend-db"
+                    "backend-204"
+                    "frontend-app"
+                    )
+available_opts_ext=("ext-kaldi"
+                    )
 
-declare -A AV_OPTS=(
+declare -A AV_OPTS_INT=(
 ['ap']='          WiFi Access Point'
 ['apache']='      Apache Web Server'
 ['mysqldb']='     MySQL Database'
@@ -29,6 +31,9 @@ declare -A AV_OPTS=(
 ['backend-db']='  Backend: Database Related'
 ['backend-204']=' Backend: Spoofing Android Online Check'
 ['frontend-app']='Frontend: Web App'
+)
+
+declare -A AV_OPTS_EXT=(
 ['ext-kaldi']='   External: Kaldi and dependencies'
 )
 
@@ -41,8 +46,11 @@ usage () {
   echo "  --all-ext       enable all external options"
   echo "  --no-<xxx>      disable option <xxx>"
   echo "    ------------------------------"
-  for i in ${!AV_OPTS[@]}; do
-    echo "  --${i}  ${AV_OPTS[$i]}"
+  for i in ${!AV_OPTS_INT[@]}; do
+    echo "  --${i}  ${AV_OPTS_INT[$i]}"
+  done
+  for i in ${!AV_OPTS_EXT[@]}; do
+    echo "  --${i}  ${AV_OPTS_EXT[$i]}"
   done
   exit 0
 }
@@ -69,19 +77,35 @@ for i in "${!CONF_OPTS_TMP[@]}"; do
 done
 
 declare -A CONF_OPTS
+
 [[ ${CONF_OPTS_TMP["all"]+isthere} ]] && {
-  # activating all options
-  for opt in ${available_opts[@]}; do
+  # activating all internal options
+  for opt in ${available_opts_int[@]}; do
     [[ ${CONF_OPTS_TMP["no-$opt"]+isthere} ]] || CONF_OPTS+=([$opt]=true)
   done
 } || {
   for opt in ${!CONF_OPTS_TMP[@]}; do
-     [[ "${opt:0:3}" == "no-" ]] || CONF_OPTS+=([$opt]=true)
+    [[ "${opt}" == "all-ext" ]] && continue
+    [[ "${opt:0:4}" == "ext-" ]] && continue
+    [[ "${opt:0:7}" == "no-ext-" ]] && continue
+    [[ "${opt:0:3}" == "no-" ]] || CONF_OPTS+=([$opt]=true)
+  done
+}
+[[ ${CONF_OPTS_TMP["all-ext"]+isthere} ]] && {
+  # activating all external options
+  for opt in ${available_opts_ext[@]}; do
+    [[ ${CONF_OPTS_TMP["no-$opt"]+isthere} ]] || CONF_OPTS+=([$opt]=true)
+  done
+} || {
+  for opt in ${!CONF_OPTS_TMP[@]}; do
+    [[ "${opt}" == "all" ]] && continue
+    [[ "${opt:0:4}" == "ext-" ]] && CONF_OPTS+=([$opt]=true)
   done
 }
 
 for opt in ${!CONF_OPTS[@]}; do
-  [[ ${AV_OPTS["$opt"]+isthere} ]] || {
+  [[ ${AV_OPTS_INT["$opt"]+isthere} ]] || 
+  [[ ${AV_OPTS_EXT["$opt"]+isthere} ]] || { 
     report_err "ERROR: Unknown option '${opt}'."
     exit 1
   }
@@ -119,7 +143,8 @@ mkdir -p Log && suc || err
 bash ${SDIR}/install_dependencies.sh ${SDIR}/src || err
 
 GFILES=$(mktemp)
-for opt in "${available_opts[@]}"; do
+for opt in "${available_opts_ext[@]}" "${available_opts_int[@]}"; do
+  echo $opt
   [[ ${CONF_OPTS["$opt"]+isthere} ]] && {
     report "Setting up directory $(readlink -f ${SDIR}/src/${opt} )"
     . ${SDIR}/setup_component.sh ${SDIR}/src/$opt && suc || err
@@ -127,10 +152,11 @@ for opt in "${available_opts[@]}"; do
       cat ${SDIR}/src/$opt/global.files >> $GFILES
   }
 done
+exit
 
 bash ${SDIR}/install_and_backup.sh $GFILES $WDIR/Root $WDIR/Bak
 
-for opt in "${available_opts[@]}"; do
+for opt in "${available_opts_ext[@]}" "${available_opts_int[@]}"; do
   [[ ${CONF_OPTS["$opt"]+isthere} ]] && {
     report "Activating $(readlink -f ${SDIR}/src/${opt} ) ..."
     [[ -f ${SDIR}/src/${opt}/post_install.sh ]] && \
