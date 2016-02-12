@@ -14,13 +14,17 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
   sinfoCtrl.submit = submit;
   $scope.msg = '';
 
+  var speakerName = dataService.get('speakerName'); // speakerName should be set from start.html
+  if (!speakerName || speakerName === '') {
+    logger.error('No speaker name. Setting default.');
+    speakerName = util.getConstant('defaultSpeakerName');
+  }
+
   var PATHTOSPEAKERINFOFORMAT = 'speaker-info-format.json';
   $scope.attributes = [];
   $http.get(PATHTOSPEAKERINFOFORMAT).then(
     function success(infoFormat) {
       $scope.attributes = infoFormat.data;
-
-      console.log(infoFormat);
 
       $rootScope.isLoaded = true;
     },
@@ -35,10 +39,14 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
 
   function submit() {
     // set info used by recording
-    /*var speakerInfo = { 'name':speakerName,
-                          'gender':sinfoCtrl.gender,
-                          'dob':sinfoCtrl.dob,
-                          'height':(sinfoCtrl.height || '')};
+    var speakerInfo = {};
+    for (var i = 0; i < $scope.attributes.length; i++) {
+      var attr = $scope.attributes[i].attribute;
+      // populate speakerInfo object with keys as attribute
+      //   and values as the entered values from the template
+      speakerInfo[attr] = sinfoCtrl[attr] || '';
+    }
+    speakerInfo.name = speakerName;
     dataService.set('speakerInfo', speakerInfo); // set in ram
 
     // set user in local db async
@@ -54,7 +62,6 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
     );
 
     $location.path('/recording');
-    */
   }
 }
 }());
