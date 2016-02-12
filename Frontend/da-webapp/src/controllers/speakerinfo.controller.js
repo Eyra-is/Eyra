@@ -20,9 +20,9 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
     speakerName = util.getConstant('defaultSpeakerName');
   }
 
-  var PATHTOSPEAKERINFOFORMAT = 'speaker-info-format.json';
+  var SPEAKERINFOFORMATURL = 'json/speaker-info-format.json';
   $scope.attributes = [];
-  $http.get(PATHTOSPEAKERINFOFORMAT).then(
+  $http.get(SPEAKERINFOFORMATURL).then(
     function success(infoFormat) {
       $scope.attributes = infoFormat.data;
 
@@ -39,6 +39,7 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
 
   function submit() {
     // set info used by recording
+    // input validation could come here
     var speakerInfo = {};
     for (var i = 0; i < $scope.attributes.length; i++) {
       var attr = $scope.attributes[i].attribute;
