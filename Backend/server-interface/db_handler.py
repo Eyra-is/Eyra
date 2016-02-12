@@ -246,6 +246,8 @@ class DbHandler:
         #   into our comma seperated string to insert into the database.
         # ignore name and deviceImei keys from dict and
         #   change all commas in the data into semicolons. Sorry if this affects anyone ever.
+        # beware that s_keys, s_values will not have the items in the same order always
+        #   for example, might get s_keys='height,dob,sex' and then the next day s_keys='dob,height,sex'
         keys = []
         vals = []
         for k, v in speakerData.items():
@@ -266,8 +268,7 @@ class DbHandler:
                 cur.execute('SELECT id FROM speaker WHERE \
                          name=%s AND deviceImei=%s',
                         (name, deviceImei))
-                speakerId = cur.fetchone()  # it's possible there are more than 1 speaker, in which case just fetch anyone, 
-                                            # it's the statistical data that matters anyway
+                speakerId = cur.fetchone()  # it's possible, but unlikely, there are more than 1 speaker, in which case just fetch anyone
                 if (speakerId is None):
                     # no speaker with this info in database, insert it
                     return self.insertGeneralData('speaker', newSpeakerData, 'speaker')
