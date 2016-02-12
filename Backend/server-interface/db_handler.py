@@ -438,3 +438,25 @@ class DbHandler:
             jsonTokens.append({"id":pair[0], "token":pair[1]})
 
         return jsonTokens
+        
+    # gets *ALL* tokens from the database and returns them in a nice json format.
+    # look at format in the client-server API
+    # or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
+    # returns [] on failure
+    def getTokensAll(self):
+        tokens = []
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT id, inputToken FROM token')
+            tokens = cur.fetchall()
+        except MySQLError as e:
+            msg = 'Error getting tokens from database.'
+            log(msg, e)
+            return dict(msg=msg, statusCode=500)
+
+        jsonTokens = []
+        # parse our tuple object from the cursor.execute into our desired json object
+        for pair in tokens:
+            jsonTokens.append({"id":pair[0], "token":pair[1]})
+
+        return jsonTokens

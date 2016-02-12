@@ -137,6 +137,22 @@ def submit_gettokens(numTokens):
 
     return 'Unexpected error.', 500
 
+@app.route('/submit/gettokens/all', methods=['GET'])
+def submit_gettokens_all():
+    if request.method == 'GET':
+        response = ''
+        tokens = dbHandler.getTokensAll()
+        if len(tokens) > 0:
+            response += json.dumps(tokens)
+            log('Got tokens from db: ' + response)
+            return response, 200
+        else:
+            msg = 'Failed getting tokens from database.'
+            log(msg)
+            return msg, 500
+
+    return 'Unexpected error.', 500
+
 # QC ROUTES
 
 @app.route('/qc/report/session/<int:sessionId>', methods=['GET'])
