@@ -1,5 +1,3 @@
-// modify this depending on what info about the speakers you need
-// allowed types: text, number, checkbox and select
 [
     {
         "attribute" : "sex",
@@ -33,19 +31,5 @@
         "required" : true,
         "label" : "Height (cm)",
         "description" : "Enter your height in centimeters."
-    },
-    {
-        "attribute" : "testText",
-        "type" : "text",
-        "label" : "testText"
-    },
-    {
-        "attribute" : "testCheckbox",
-        "type" : "checkbox",
-        "label" : "Check me please."
-    },
-    {
-        "attribute" : "testNoLabel",
-        "type" : "text"
     }
 ]
