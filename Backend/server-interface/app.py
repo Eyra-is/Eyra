@@ -1,23 +1,3 @@
-# **************************************************************************************** #
-
-#                                         TODO                                             #
-
-# Add code to calculate duration of wav files if needed
-
-# Make CORS more secure, e.g. not origins='*' but from a specific domain only. CORS SHOULD BE REMOVED FROM PRODUCTION
-# Generalize even further, generalize the 'if in database, return that id, otherwise insert' (the processData functions)
-# Remove Flask-MySQLdb and simply use MySQLdb, no need for the flask extension (low usage on github) I think
-# REMEMBER TO CHANGE SECRET KEY IN AUTH HANDLER FOR GITHUB RELEASE/PRODUCTION
-
-# allow instructorId not to be correct (in case someone for example got instructor from
-#   laptop and then submitted to the remote server)
-
-# make it so RECORDINGS_ROOT works as a relative path for 
-#   saving recordings without any meddling on apache server (for example find absolute path of this __file__
-#   and save relative to that)
-
-# ***************************************************************************************** #
-
 from flask import Flask, request, Response
 from flask.ext.cors import CORS
 import json

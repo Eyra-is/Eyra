@@ -13,14 +13,16 @@ RecordingController.$inject = [ '$rootScope',
                                 'recordingService',
                                 'sessionService',
                                 'tokenService',
-                                'utilityService'];
+                                'utilityService',
+                                'volumeMeterService'];
 
-function RecordingController($rootScope, $scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService) {
+function RecordingController($rootScope, $scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService, volumeMeterService) {
   var recCtrl = this;
   var recService = recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
   var util = utilityService;
+  var volService = volumeMeterService;
 
   recCtrl.action = action;
   recCtrl.skip = skip;
@@ -31,7 +33,7 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
   recCtrl.actionBtnDisabled = false;
   recCtrl.skipBtnDisabled = true;
 
-  //var tokensRead = 0; // simple counter
+  $scope.tokensRead = 0; // simple counter
 
   var actionType = 'record'; // current state
 
@@ -54,6 +56,8 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
 
   function activate() {
     recService.setupCallbacks(recordingCompleteCallback);
+    var res = volService.init(recService.getAudioContext(), recService.getStreamSource());
+    if (!res) logger.log('Volume meter failed to initialize.');
     $rootScope.isLoaded = true; // is page loaded?  
   }
 
@@ -201,6 +205,11 @@ function RecordingController($rootScope, $scope, dataService, deliveryService, l
     recCtrl.skipBtnDisabled = true;
     
     recService.stop(valid);
+
+    // whenever stopped is pressed from gui, it should mean a valid token read.
+    if (valid) {
+      $scope.tokensRead++;
+    }
   }
 }
 }());
