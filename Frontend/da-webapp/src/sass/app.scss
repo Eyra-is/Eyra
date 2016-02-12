@@ -46,6 +46,9 @@ body {
   font-size: 1.2em;
   form {
     padding-bottom: 3%;
+    button {
+      margin-top: 1em;
+    }
   }
 }
 /* http://stackoverflow.com/a/24688640/5272567 */
@@ -142,6 +145,13 @@ body {
   display: block;
   padding-left: 0.2em; /* just a little bit to make it not stick together when it's expanded */
 }
+/* fix issue with content being blocked by navbar
+   when height of speaker info was x great.
+   http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
+*/
+.view .speaker-info-entry {
+  padding-top: 60px;
+}
 
 /* misc stylings */
 #playback {
@@ -151,16 +161,16 @@ body {
 ul {
   list-style-type: none;
 }
-.default-heading { 
-  margin: 0 auto;
-  padding: 0 0 3% 0;
-  text-align: center;
-}
 .message {
   display: block;
   padding-top: 5%;
   font-weight: bold;
   font-size: 1.25em;
+}
+.default-heading { 
+  margin: 0 auto;
+  padding: 0 0 3% 0;
+  text-align: center;
 }
 /* give parent of centered element this class */
 .vertical-center {
@@ -191,3 +201,4 @@ ul {
       max-height: 150px;
     }
 }
+

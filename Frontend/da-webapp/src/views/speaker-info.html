@@ -1,23 +1,27 @@
-<div class="content vertical-center">
-    <div class="data-entry">
+<div class="content">
+    <div class="data-entry speaker-info-entry">
+        <h3 class="default-heading">Enter your info</h3>
         <form ng-submit="sinfoCtrl.submit()">
-            <div class="form-group">
-                <label for="gender">Gender *</label>
-                <select class="form-control glyphicon" id="gender" ng-model="sinfoCtrl.gender">
-                    <option ng-repeat="gender in sinfoCtrl.genders" value="{{gender}}">{{gender}}</option>
+            <!-- thanks, Ashley Davis, http://stackoverflow.com/a/16669790/5272567 -->
+            <div ng-class="{{attr.type === 'checkbox' && 'checkbox' || 'form-group'}}" ng-repeat="attr in attributes">
+                <!-- text or number -->
+                <label for="{{attr.attribute}}" ng-if="attr.label&&(attr.type==='text'||attr.type==='number')">
+                    {{attr.label}} <span ng-if="attr.required">*</span>
+                </label>
+                <input class="form-control" id="{{attr.attribute}}" type="{{attr.type}}" ng-model="sinfoCtrl[attr.attribute]" placeholder="{{attr.placeholder}}" ng-required="attr.required" ng-if="attr.type==='text'||attr.type==='number'">
+                <!-- select -->
+                <label for="{{attr.attribute}}" ng-if="attr.label&&attr.type==='select'">
+                    {{attr.label}} <span ng-if="attr.required">*</span>
+                </label>
+                <select class="form-control" id="{{attr.attribute}}" name="{{attr.attribute}}" ng-model="sinfoCtrl[attr.attribute]" ng-required="attr.required" ng-if="attr.type==='select'">
+                    <option value=""></option>
+                    <option ng-repeat="opt in attr.options" value="{{opt}}">{{opt}}</option>
                 </select>
-            </div>
-            <div class="form-group">
-                <label for="dob">Date of birth *</label>
-                <select class="form-control" id="dob" ng-model="sinfoCtrl.dob">
-                    <option ng-repeat="dob in sinfoCtrl.dobs" value="{{dob}}">{{dob}}</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="height">Height</label>
-                <select class="form-control" id="height" ng-model="sinfoCtrl.height">
-                    <option ng-repeat="height in sinfoCtrl.heights" value="{{height}}">{{height}}</option>
-                </select>
+                <!-- checkbox -->
+                <label for="{{attr.attribute}}" ng-if="attr.type==='checkbox'">
+                    <input id="{{attr.attribute}}" type="{{attr.type}}" ng-model="sinfoCtrl[attr.attribute]" ng-required="attr.required">
+                    {{attr.label}} <span ng-if="attr.required">*</span>
+                </label>
             </div>
             <button class="form-control btn btn-primary" type="submit" value="">
                 <span class="glyphicon glyphicon-ok"></span>
