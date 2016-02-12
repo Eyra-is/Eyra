@@ -17,14 +17,14 @@ def read_metadata_file(inf):
   return lines
   
 def subdata_string(d):
-  return ("{{'speakerInfo':{{'name':'{9}','gender':'{13}','dob':'{14}','height':'unk','deviceImei':'{11}'}},"+
-        "'instructorId':1,"+
-        "'deviceInfo':{{'userAgent':'Frockend','imei':'{11}'}},"+
-        "'location':'{15}, {16}',"+
-        "'start':'{12}',"+
-        "'end':'{4}',"+
-        "'comments':'{3}',"+
-        "'recordingsInfo':{{'rec1name':{{'tokenId':{8}}}}}}}").format(*d) 
+  return ('{{"speakerInfo":{{"name":"{9}","gender":"{13}","dob":"{14}","height":"unk","deviceImei":"{11}"}},'+
+        '"instructorId":1,'+
+        '"deviceInfo":{{"userAgent":"Frockend","imei":"{11}"}},'+
+        '"location":"{15}, {16}",'+
+        '"start":"{12}",'+
+        '"end":"{4}",'+
+        '"comments":"{3}",'+
+        '"recordingsInfo":{{"{0}":{{"tokenId":{8}}}}}}}').format(*d) 
 
 if __name__ == "__main__":
   

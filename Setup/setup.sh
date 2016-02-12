@@ -152,7 +152,6 @@ for opt in "${available_opts_ext[@]}" "${available_opts_int[@]}"; do
       cat ${SDIR}/src/$opt/global.files >> $GFILES
   }
 done
-exit
 
 bash ${SDIR}/install_and_backup.sh $GFILES $WDIR/Root $WDIR/Bak
 
