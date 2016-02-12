@@ -32,9 +32,8 @@ class DbHandler:
             ],
             'speaker': [
                 'name',
-                'gender',
-                'height',
-                'dob',
+                's_keys',
+                's_values',
                 'deviceImei'
             ]
         }
@@ -227,40 +226,51 @@ class DbHandler:
         return self.insertGeneralData('device', deviceData, 'device')
 
     def processSpeakerData(self, speakerData):
-        # we have to make sure not to insert device with same IMEI
-        #   as is already in the database if so. Otherwise, we create new device
-        name, gender, height, dob, deviceImei = None, None, None, None, None
+        name, deviceImei = None, None
+        s_keys, s_values = '', ''
         try:
             if isinstance(speakerData, str):
                 speakerData = json.loads(speakerData)
             name = speakerData['name']
-            gender = speakerData['gender']
-            height = speakerData['height']
-            dob = speakerData['dob']
         except (KeyError, TypeError, ValueError) as e:
             msg = 'Speaker data not on correct format, aborting.'
             log(msg, e)
             return dict(msg=msg, statusCode=400)
-
         try:
             deviceImei = speakerData['deviceImei']
         except (KeyError) as e:
             # we don't care if speaker has no ['imei']
             pass
 
+        # now, lets turn the dynamic keys/values from speaker data
+        #   into our comma seperated string to insert into the database.
+        # ignore name and deviceImei keys from dict and
+        #   change all commas in the data into semicolons. Sorry if this affects anyone ever.
+        keys = []
+        vals = []
+        for k, v in speakerData.items():
+            if k != 'name' and k != 'deviceImei':
+                keys.append(str(k).replace(',',';'))
+                vals.append(str(v).replace(',',';'))
+        s_keys = ','.join(keys)
+        s_values = ','.join(vals)
+        # recreate our speakerData object ready to store in db
+        newSpeakerData = {'name':name, 's_keys':s_keys, 's_values':s_values}
+
         if deviceImei is not None and deviceImei != '':
+            newSpeakerData['deviceImei'] = deviceImei
             try: 
                 cur = self.mysql.connection.cursor()
 
                 # firstly, check if this speaker already exists, if so, update end time, otherwise add speaker
                 cur.execute('SELECT id FROM speaker WHERE \
-                         name=%s AND gender=%s AND height=%s AND dob=%s AND deviceImei=%s',
-                        (name, gender, height, dob, deviceImei))
-                speakerId = cur.fetchone()   # it's possible there are more than 1 speaker, in which case just fetch anyone, 
-                                                # it's the statistical data that matters anyway
+                         name=%s AND deviceImei=%s',
+                        (name, deviceImei))
+                speakerId = cur.fetchone()  # it's possible there are more than 1 speaker, in which case just fetch anyone, 
+                                            # it's the statistical data that matters anyway
                 if (speakerId is None):
                     # no speaker with this info in database, insert it
-                    return self.insertGeneralData('speaker', speakerData, 'speaker')
+                    return self.insertGeneralData('speaker', newSpeakerData, 'speaker')
                 else:
                     # speaker already exists, return it
                     speakerId = speakerId[0] # fetchone returns tuple on success
@@ -271,7 +281,7 @@ class DbHandler:
                 return dict(msg=msg, statusCode=500)
 
         # no imei present, wouldn't be able to recognize the speaker
-        return self.insertGeneralData('speaker', speakerData, 'speaker')
+        return self.insertGeneralData('speaker', newSpeakerData, 'speaker')
 
     # jsonData = look at format in the client-server API
     # recordings = an array of file objects representing the submitted recordings
