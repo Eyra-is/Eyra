@@ -29,6 +29,7 @@ module.exports = function(grunt) {
                       depl+'css/**',
                       depl+'views/**',
                       depl+'img/**',
+                      depl+'json/**',
                       // be careful, if these files (recorderjs/) are ever changed, 
                       // it might not reflect on client end if he has this cached. 
                       // This is not cache-broken. 
@@ -51,8 +52,10 @@ module.exports = function(grunt) {
                     depl+'sass/**',
                     depl+'index.html',
                     depl+'img/**',
+                    depl+'json/**',
                     depl+'bower_components/**',
-                    depl+'recorderjs/**'
+                    depl+'recorderjs/**',
+                    depl+'volume_meter/**'
                   ],
       temp: [depl+'app.js']
     },
@@ -81,7 +84,9 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['app.js', 'index.html', 'sass/**', 'bower_components/**', 'recorderjs/**'],
+            // careful, json/** is not cache broken, so must be serverd with cache headers like index.html
+            src: ['app.js', 'index.html', 'json/**', 'sass/**', 'bower_components/**', 
+                  'recorderjs/**', 'volume_meter/volume-meter.js'],
             dest: depl
           }
         ]
@@ -201,6 +206,8 @@ module.exports = function(grunt) {
                   //   this has to be non-minified.
                   //depl+'recorderjs/dist/recorderWorker.js',
                   //depl+'recorderjs/dist/recorder.js',
+
+                  depl+'volume_meter/volume-meter.js',
 
                   depl+'min/old/'+depl+'app.js', 
                   depl+'min/old/'+source+'services/**/*.js',
