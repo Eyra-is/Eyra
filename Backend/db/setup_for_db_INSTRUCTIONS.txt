@@ -4,9 +4,9 @@ the backend code to connect to the sql database.
 Permissions:
 SELECT on recordings_master.{device,instructor,session,speaker,token}
 
-INSERT on recordings_master.{device,instructor,recording,session,speaker}
+INSERT on recordings_master.{device,instructor,recording,session,speaker,speaker_info}
 
-UPDATE on recordings_master.session
+UPDATE on recordings_master.{session,speaker_info}
 
 
 Example MySQL syntax to do the whole setup:
@@ -24,6 +24,7 @@ grant select on recordings_master.device to 'default'@'localhost';
 grant select on recordings_master.instructor to 'default'@'localhost';
 grant select on recordings_master.session to 'default'@'localhost';
 grant select on recordings_master.speaker to 'default'@'localhost';
+grant select on recordings_master.speaker_info to 'default'@'localhost';
 grant select on recordings_master.token to 'default'@'localhost';
 
 grant insert on recordings_master.device to 'default'@'localhost';
@@ -31,7 +32,9 @@ grant insert on recordings_master.instructor to 'default'@'localhost';
 grant insert on recordings_master.recording to 'default'@'localhost';
 grant insert on recordings_master.session to 'default'@'localhost';
 grant insert on recordings_master.speaker to 'default'@'localhost';
+grant insert on recordings_master.speaker_info to 'default'@'localhost';
 
 grant update on recordings_master.session to 'default'@'localhost';
+grant update on recordings_master.speaker_info to 'default'@'localhost';
 
 
