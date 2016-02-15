@@ -32,9 +32,12 @@ class DbHandler:
             ],
             'speaker': [
                 'name',
-                's_keys',
-                's_values',
                 'deviceImei'
+            ],
+            'speaker_info': [
+                'speakerId',
+                's_key',
+                's_value'
             ]
         }
 
@@ -136,7 +139,9 @@ class DbHandler:
             queryStr = queryStr % tuple([table] + interleavedList)
 
             cur.execute(queryStr, queryTuple)
-            dataId = cur.fetchone()[0] # fetchone returns a tuple
+            # return highest id in case of multiple results (should be the newest entry)
+            dataIds = cur.fetchall()
+            dataId = max([i[0] for i in dataIds]) # fetchall() returns a list of tuples
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
@@ -152,6 +157,27 @@ class DbHandler:
             return dict(msg=msg, statusCode=500)
         else:
             return dict(msg='{"%sId":' % name + str(dataId) + '}', statusCode=200)
+
+    # inserts into both speaker and speaker_info
+    # speakerData is the {'name':name[, 'deviceImei':deviceImei]}
+    # speakerInfo are the extra info values to insert into
+    #   speaker_info table, e.g. speakerInfo: {'height':'154', etc.}
+    # assumes speaker doesn't exist in database.
+    def insertSpeakerData(self, speakerData, speakerInfo):
+        speakerId = None
+        res = self.insertGeneralData('speaker', speakerData, 'speaker')
+        if 'speakerId' in res['msg']:
+            speakerId = json.loads(res['msg'])['speakerId']
+        else:
+            return res
+        for k, v in speakerInfo.items():
+            self.insertGeneralData('speaker_info', {
+                                                        'speakerId':speakerId,
+                                                        's_key':k,
+                                                        's_value':v
+                                                    },
+                                    'speaker_info')
+        return res
 
     # instructorData = look at format in the client-server API
     def processInstructorData(self, instructorData):
@@ -227,7 +253,6 @@ class DbHandler:
 
     def processSpeakerData(self, speakerData):
         name, deviceImei = None, None
-        s_keys, s_values = '', ''
         try:
             if isinstance(speakerData, str):
                 speakerData = json.loads(speakerData)
@@ -242,22 +267,14 @@ class DbHandler:
             # we don't care if speaker has no ['imei']
             pass
 
-        # now, lets turn the dynamic keys/values from speaker data
-        #   into our comma seperated string to insert into the database.
-        # ignore name and deviceImei keys from dict and
-        #   change all commas in the data into semicolons. Sorry if this affects anyone ever.
-        # beware that s_keys, s_values will not have the items in the same order always
-        #   for example, might get s_keys='height,dob,sex' and then the next day s_keys='dob,height,sex'
-        keys = []
-        vals = []
+        # now, lets process the dynamic keys/values from speaker data
+        # ignore name and deviceImei keys from dict
+        speakerInfo = {}
         for k, v in speakerData.items():
             if k != 'name' and k != 'deviceImei':
-                keys.append(str(k).replace(',',';'))
-                vals.append(str(v).replace(',',';'))
-        s_keys = ','.join(keys)
-        s_values = ','.join(vals)
+                speakerInfo[str(k)] = str(v)
         # recreate our speakerData object ready to store in db
-        newSpeakerData = {'name':name, 's_keys':s_keys, 's_values':s_values}
+        newSpeakerData = {'name':name}
 
         if deviceImei is not None and deviceImei != '':
             newSpeakerData['deviceImei'] = deviceImei
@@ -268,10 +285,10 @@ class DbHandler:
                 cur.execute('SELECT id FROM speaker WHERE \
                          name=%s AND deviceImei=%s',
                         (name, deviceImei))
-                speakerId = cur.fetchone()  # it's possible, but unlikely, there are more than 1 speaker, in which case just fetch anyone
+                speakerId = cur.fetchone()
                 if (speakerId is None):
                     # no speaker with this info in database, insert it
-                    return self.insertGeneralData('speaker', newSpeakerData, 'speaker')
+                    return self.insertSpeakerData(newSpeakerData, speakerInfo)
                 else:
                     # speaker already exists, return it
                     speakerId = speakerId[0] # fetchone returns tuple on success
@@ -282,7 +299,7 @@ class DbHandler:
                 return dict(msg=msg, statusCode=500)
 
         # no imei present, wouldn't be able to recognize the speaker
-        return self.insertGeneralData('speaker', newSpeakerData, 'speaker')
+        return self.insertSpeakerData(newSpeakerData, speakerInfo)
 
     # jsonData = look at format in the client-server API
     # recordings = an array of file objects representing the submitted recordings

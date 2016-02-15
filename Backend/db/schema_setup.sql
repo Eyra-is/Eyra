@@ -40,9 +40,17 @@ alter table instructor convert to character set utf8 collate utf8_general_ci;
 create table speaker (
     id int not null auto_increment primary key,
     name varchar(255) not null, -- just like a username
-    s_keys text not null, -- use key/value system to allow for flexible speaker info, comma seperated
-    s_values text not null,
     deviceImei varchar(255) not null default '' -- optional id of device speaker was made on
+);
+alter table speaker convert to character set utf8 collate utf8_general_ci;
+
+create table speaker_info (
+    id int not null auto_increment primary key,
+    speakerId int not null,
+    s_key varchar(255) not null, -- use key/value system to allow for flexible speaker info, comma seperated
+    s_value varchar(255) not null,
+    foreign key (speakerId) references speaker(id),
+    unique (speakerId, s_key)
 );
 alter table speaker convert to character set utf8 collate utf8_general_ci;
 
