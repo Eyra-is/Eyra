@@ -139,7 +139,9 @@ class DbHandler:
             queryStr = queryStr % tuple([table] + interleavedList)
 
             cur.execute(queryStr, queryTuple)
-            dataId = cur.fetchone()[0] # fetchone returns a tuple
+            # return highest id in case of multiple results (should be the newest entry)
+            dataIds = cur.fetchall()
+            dataId = max([i[0] for i in dataIds]) # fetchall() returns a list of tuples
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
