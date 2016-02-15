@@ -162,7 +162,6 @@ class DbHandler:
     # speakerData is the {'name':name[, 'deviceImei':deviceImei]}
     # speakerInfo are the extra info values to insert into
     #   speaker_info table, e.g. speakerInfo: {'height':'154', etc.}
-    # updates values if key already exists
     # assumes speaker doesn't exist in database.
     def insertSpeakerData(self, speakerData, speakerInfo):
         speakerId = None
@@ -172,31 +171,12 @@ class DbHandler:
         else:
             return res
         for k, v in speakerInfo.items():
-            try: 
-                cur = self.mysql.connection.cursor()
-
-                cur.execute('SELECT s_value FROM speaker_info WHERE speakerId=%s AND s_key=%s', 
-                             (speakerId, k))
-                value = cur.fetchone()
-                if (value is None):
-                    # no value with this key, insert it
-                    self.insertGeneralData('speaker_info', {
-                                                                'speakerId':speakerId,
-                                                                's_key':k,
-                                                                's_value':v
-                                                            },
-                                            'speaker_info')
-                else:
-                    # key already exists, update value
-                    value = value[0] # fetchone returns tuple on success
-                    cur.execute('UPDATE speaker_info \
-                                 SET s_value=%s \
-                                 WHERE speakerId=%s AND s_key=%s', 
-                                (v, speakerId, k))
-            except MySQLError as e:
-                msg = 'Database error.'
-                log(msg, e)
-                return dict(msg=msg, statusCode=500)
+            self.insertGeneralData('speaker_info', {
+                                                        'speakerId':speakerId,
+                                                        's_key':k,
+                                                        's_value':v
+                                                    },
+                                    'speaker_info')
         return res
 
     # instructorData = look at format in the client-server API
