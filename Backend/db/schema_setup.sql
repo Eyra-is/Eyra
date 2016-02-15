@@ -51,7 +51,6 @@ create table speaker_info (
     s_value varchar(255) not null,
     foreign key (speakerId) references speaker(id),
     unique (speakerId, s_key)
-
 );
 alter table speaker convert to character set utf8 collate utf8_general_ci;
 

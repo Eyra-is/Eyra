@@ -14,7 +14,6 @@ grant insert on recordings_master.speaker to 'default'@'localhost';
 grant insert on recordings_master.speaker_info to 'default'@'localhost';
 
 grant update on recordings_master.session to 'default'@'localhost';
-grant update on recordings_master.speaker_info to 'default'@'localhost';
 
 
 
