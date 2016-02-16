@@ -5,11 +5,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,9 +37,15 @@ public class MainActivity extends AppCompatActivity {
         // Enable Javascript
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        // Enable DOM storage, thanks Lewis, http://stackoverflow.com/a/29978620/5272567
+        webSettings.setDomStorageEnabled(true);
+        // Force links and redirects to open in the WebView instead of in a browser
+        mWebView.setWebViewClient(new EyraWebViewClient());
 
-        //mWebView.loadUrl(getString(R.string.website_url));
-        mWebView.loadUrl("http://beta.html5test.com/");
+        Log.v("DEBUG", getString(R.string.website_url));
+
+        mWebView.loadUrl(getString(R.string.website_url));
+        //mWebView.loadUrl("http://beta.html5test.com/");
     }
 
     @Override
