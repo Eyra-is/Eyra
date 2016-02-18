@@ -43,12 +43,14 @@ public class MainActivity extends AppCompatActivity {
         // Allow location
         mWebView.setWebChromeClient(new GeoWebChromeClient());
 
-        mWebView.addJavascriptInterface(new JSInterface(), "Android");
+        mWebView.addJavascriptInterface(new RecorderJSInterface(), "AndroidRecorder");
 
         mWebView.loadUrl(getString(R.string.website_url));
         //mWebView.loadUrl("http://beta.html5test.com/");
     }
 
+    // code from here: https://developer.chrome.com/multidevice/webview/gettingstarted
+    // license: http://creativecommons.org/licenses/by/3.0/
     @Override
     public void onBackPressed() {
         if(mWebView.canGoBack()) {
