@@ -135,7 +135,7 @@ done
 WDIR=$(readlink -f ${SDIR}/../Local )
 
 report_nnl "Preparing working directory ${WDIR} ... "
-mkdir -p ${WDIR} && cd ${WDIR} && suc || err
+mkdir -p ${WDIR} && cd ${WDIR} && suc || errr
 report_nnl "Preparing log directory ${WDIR}/Log for logging..." 
 mkdir -p Log && suc || err
 
@@ -148,8 +148,12 @@ for opt in "${available_opts_ext[@]}" "${available_opts_int[@]}"; do
   [[ ${CONF_OPTS["$opt"]+isthere} ]] && {
     report "Setting up directory $(readlink -f ${SDIR}/src/${opt} )"
     . ${SDIR}/setup_component.sh ${SDIR}/src/$opt && suc || err
+    
     [[ -f ${SDIR}/src/$opt/global.files ]] && \
       cat ${SDIR}/src/$opt/global.files >> $GFILES
+      
+    [[ -f ${SDIR}/src/$opt/global.mod.files ]] && \
+      cut -d " " -f 1 ${SDIR}/src/$opt/global.mod.files >> $GFILES
   }
 done
 
@@ -158,8 +162,9 @@ bash ${SDIR}/install_and_backup.sh $GFILES $WDIR/Root $WDIR/Bak
 for opt in "${available_opts_ext[@]}" "${available_opts_int[@]}"; do
   [[ ${CONF_OPTS["$opt"]+isthere} ]] && {
     report "Activating $(readlink -f ${SDIR}/src/${opt} ) ..."
-    [[ -f ${SDIR}/src/${opt}/post_install.sh ]] && \
+    [[ -f ${SDIR}/src/${opt}/post_install.sh ]] && {
       . ${SDIR}/src/${opt}/post_install.sh && suc || err
+    }
   }
 done
 

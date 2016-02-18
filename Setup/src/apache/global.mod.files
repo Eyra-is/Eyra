@@ -1,0 +1,1 @@
+/etc/hosts ( cat ${FILE}; echo "127.0.0.1 local.${HOST_NAME}" ) | uniq

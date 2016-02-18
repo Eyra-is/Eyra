@@ -1,0 +1,38 @@
+### CA Authority and SSL certificates
+
+# from http://datacenteroverlords.com/2012/03/01/creating-your-own-ssl-certificate-authority/
+
+# Create the Root Key
+openssl genrsa -out rootCA.key 2048
+# or password protected:
+#openssl genrsa -des3 -out rootCA.key 2048
+
+# The next step is to self-sign this certificate.
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 1024 -out rootCA.pem
+
+# Data entered:
+#Country Name (2 letter code) [AU]:IS
+#State or Province Name (full name) [Some-State]:.
+#Locality Name (eg, city) []:Reykjavik
+#Organization Name (eg, company) [Internet Widgits Pty Ltd]:Reykjavik University
+#Organizational Unit Name (eg, section) []:TVD
+#Common Name (e.g. server FQDN or YOUR name) []:Eyra Team
+#Email Address []:eyra@eyra.is
+
+# Install Root Certificate Into Workstations
+## ... can be done by accessing it in the browser, or through browser settings
+
+# Create A Certificate (Done Once Per Device)
+# 1. Create device's private key:
+openssl genrsa -out device.key 2048
+# 2. Generate the certificate signing request.
+# Common Name (eg, YOUR name) []: *.eyra.is
+openssl req -new -key device.key -out device.csr -subj "/C=IS/O=Reykjavik University/CN=*.eyra.is/CN=eyra.is"
+# 3. Sign the CSR, which requires the CA root key
+openssl x509 -req -in device.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out device.crt -days 500 -sha256
+
+# Copy all to the right places:
+# rootCA.pem -> Setup/apache/tmpl/etc_ssl_certs_rootCA.pem
+# device.crt -> Setup/apache/tmpl/etc_ssl_certs_datool.crt
+# device.key -> Setup/apache/tmpl/etc_ssl_private_datool.key
+

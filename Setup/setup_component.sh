@@ -38,6 +38,7 @@ cut -d "=" -f 1 ${SRCDIR}/default.conf | \
 echo "s|XXXUSERXXX|$USER|" >> ${SEDF}
 echo "s|XXXGROUPXXX|$USER|" >> ${SEDF}
 
+# Files to be installed globally
 [[ -e ${SRCDIR}/global.files ]] && \
 for f in $( cat ${SRCDIR}/global.files ); do 
   OUTF=Root${f}
@@ -45,6 +46,17 @@ for f in $( cat ${SRCDIR}/global.files ); do
   INF=${SRCDIR}/tmpl/${RSTR:1}
   parse_file $INF $OUTF $SEDF
 echo $INF $OUTF $SEDF
+done
+
+# Globally installed files to be modified
+[[ -e ${SRCDIR}/global.mod.files ]] && \
+cat ${SRCDIR}/global.mod.files | while read line; do 
+  F=( $line )
+  FILE="${F[0]}"
+  COMS="${F[@]:1}"
+  if [[ ! -z "$COMS" ]]; then
+    eval $COMS > Root${FILE}
+  fi
 done
 
 [[ -e ${SRCDIR}/local.files ]] && \
@@ -56,77 +68,3 @@ for f in $( cat ${SRCDIR}/local.files ); do
 done
 
 return 0
-
-
-
-
-
-# Placing scripts
-report "Placing control scripts in ${ODIR}/bin/ ..."
-mkdir -p ${ODIR}/bin/ && \
-cp ${SDIR}/bin/*.sh ${ODIR}/bin/ && suc || err
-
-# Preparing config files
-report "Setting up config files..."
-
-mkdir -p ${ODIR}/Root/
-rm -rf ${ODIR}/Root/*
-
-# install the files
-
-report 'Checking for dnsmasq and hostapd...'
-sudo which dnsmasq hostapd > /dev/null || \
-( sudo aptitude -q2 update && sudo aptitude -y install hostapd dnsmasq ) && suc || err
-
-report "Backing up old configuration files...";
-mkdir -p ${ODIR}/Bak/
-NBAK=$( ls -1d ${ODIR}/Bak/*/ | wc -l )
-report "Found $NBAK backup(s)."
-mkdir -p ${ODIR}/Bak/${NBAK} && cd ${ODIR}/Root && find . -type f | while read line; do
-  if [[ -e $line ]] ; then
-    mkdir -p ${ODIR}/Bak/${NBAK}/$( dirname $line )
-    cp /$line ${ODIR}/Bak/${NBAK}/$line ;
-    sudo cp ${ODIR}/Root/$line /$line
-  fi
-done && suc || err
-
-if [ $NBAK -ge 1 ]; then
-  if diff -r ${ODIR}/Bak/${NBAK} ${ODIR}/Bak/$(( ${NBAK} - 1 )) > /dev/null ; then
-    report "Last Config unchanged. Reverting backup..."
-    rm -r ${ODIR}/Bak/${NBAK} && suc || err
-  fi
-fi
-
-report  "Restarting Network..."
-sudo ${ODIR}/bin/restart_wifi_ap.sh && suc || err
-
-report "WiFi Status:"
-sudo iw $WIFI_DEV info
-
-# Setting up the frontend
-report "Setting up Frontend ..."
-${BDIR}/Frontend/da-webapp/set_me_up.sh && suc || err
-
-
-report "Setting Up Apache ..."
-for i in $(ls -1 /etc/apache2/sites-available/); do
-  sudo a2dissite ${i} 
-done && \
-sudo a2ensite datatool.conf && \
-sudo a2enmod ssl wsgi && \
-sudo service apache2 restart && suc || err
-
-report "All done"
-report "    SSID: $WIFI_SSID"
-report "    PASS: $WIFI_PASS"
-report "Have Fun!"
-echo
-
-# Setting up the backend
-report "Did not touch any MySQL stuff."
-report "Run: ${BDIR}/Backend/db/erase_and_rewind.sh to setup MySQL database"
-report_err "WARNING: All Databases will be dropped then..."
-
-
-
-
