@@ -1,52 +1,66 @@
 package is.eyra.eyra;
 
+import android.media.AudioFormat;
+import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Environment;
 import android.util.Log;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by matthiasp on 2/18/16.
  *
- * Code in part from http://developer.android.com/guide/topics/media/audio-capture.html
- * License: http://creativecommons.org/licenses/by/2.5/
  */
 public class Recorder {
 
-    private MediaRecorder mRecorder = null;
-    private static String mFileName = null;
+    private AudioRecord mAudioRecord = null;
+
+    private static final int AUDIOSOURCE = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+    private static final int SAMPLERATE = 44100;
+    private static final int CHANNELCONFIG = AudioFormat.CHANNEL_IN_MONO;
+    private static final int AUDIOFORMAT = AudioFormat.ENCODING_PCM_16BIT;
+    // might have to increase this buffer size if we get problems recording
+    private static final int BUFFERSIZE = AudioRecord.getMinBufferSize(SAMPLERATE, CHANNELCONFIG, AUDIOFORMAT);
 
     private static final String LOG_TAG = "RecorderLog";
 
+    private short[] audioBuffer = new short[BUFFERSIZE];
+    private int streamPosition = 0;
+    private ArrayList audioData = new ArrayList();
+
     public Recorder() {
-        mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
+        mAudioRecord = new AudioRecord(AUDIOSOURCE, SAMPLERATE, CHANNELCONFIG, AUDIOFORMAT, BUFFERSIZE);
     }
 
     public void startRecording() {
-        mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.ENCODING_PCM_16BIT);
-        mRecorder.setOutputFile(mFileName);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        //mRecorder.setAudioChannels(1);
-        //mRecorder.setAudioEncodingBitRate(128000);
-        //mRecorder.setAudioSamplingRate(44100);
+        mAudioRecord.startRecording();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (mAudioRecord.getRecordingState() ==
+                        AudioRecord.RECORDSTATE_RECORDING) {
+                    int result = mAudioRecord.read(audioBuffer, streamPosition, BUFFERSIZE);
+                    streamPosition += BUFFERSIZE;
+                    for (int i = 0; i < audioBuffer.length; i++) {
+                        audioData.add(audioBuffer[i]);
+                        if (audioBuffer[i] > 0) {
+                            Log.v(LOG_TAG, String.valueOf(audioBuffer[i]));
+                        }
+                    }
 
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
-        }
-
-        mRecorder.start();
+                    try{
+                        // sleep amount between AudioRecord.read()
+                        Thread.sleep(50);
+                    } catch(InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, "AudioRecorder Thread").start();
     }
 
     public void stopRecording() {
-        mRecorder.stop();
-        //mRecorder.reset();    // http://stackoverflow.com/a/11984387/5272567
-        mRecorder.release();
-        mRecorder = null;
+        mAudioRecord.stop();
+        Log.v(LOG_TAG, audioData.toString());
     }
 }
