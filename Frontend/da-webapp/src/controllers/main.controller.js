@@ -28,10 +28,18 @@ function MainController($location, $q, $rootScope, $scope, $window, androidRecor
 
   // because of a 8k filtering issue, detect if we are in an the Android webview app fix
   //   in which case use a different recorder from the web audio API
-  var ANDROID = Android;
-  console.log(Android);
+  var ANDROID;
+  try {
+    // AndroidRecorder is interface from WebView
+    ANDROID = AndroidRecorder;
+  } catch (e) {
+    // we are not in a webview here, pass
+  }
   if (ANDROID) {
+    $rootScope.isWebView = true;
     recService = androidRecordingService;
+  } else {
+    $rootScope.isWebView = false;
   }
 
   mainCtrl.start = start;

@@ -5,7 +5,8 @@ angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
 RecordingController.$inject = [ '$rootScope',
-                                '$scope',  
+                                '$scope', 
+                                'androidRecordingService',
                                 'dataService',
                                 'deliveryService',
                                 'localDbService',
@@ -16,9 +17,11 @@ RecordingController.$inject = [ '$rootScope',
                                 'utilityService',
                                 'volumeMeterService'];
 
-function RecordingController($rootScope, $scope, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService, volumeMeterService) {
+function RecordingController($rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService, volumeMeterService) {
   var recCtrl = this;
-  var recService = recordingService;
+  // fix for android audio filtering (8k) through browser recording, in case of webview (in our android app)
+  //   use the native recorder through the app
+  var recService = $rootScope.isWebView ? androidRecordingService : recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
   var util = utilityService;

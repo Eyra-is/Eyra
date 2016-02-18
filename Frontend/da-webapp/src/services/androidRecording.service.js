@@ -1,5 +1,8 @@
 (function () {
-// service to handle recording through the android WebView. 
+// service to handle recording through the android WebView.
+// called in exactly the same way as recording.service.js, must therefore export same functions. 
+
+// assumes interface from WebView, Android
 
 'use strict';
 
@@ -39,7 +42,7 @@ function androidRecordingService(logger, utilityService) {
 
     console.log('In android recorder.');
 
-    initCompleteCallback();
+    initCompleteCallback(true);
   }
 
   function getAudioContext() {
