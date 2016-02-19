@@ -1,7 +1,6 @@
 package is.eyra.eyra;
 
 import android.os.Environment;
-import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -41,6 +40,8 @@ public class RawToWav {
         try {
             // write WAV header
             // reference for wav header: recorder.js by matt diamond, https://github.com/mattdiamond/Recorderjs
+            // and http://stackoverflow.com/a/5810662/5272567 by
+            //   user663321, Evan Merz and Dan Vargo
             outFile.writeBytes("RIFF");
             outFile.write(intToBytes(36 + raw.length * 2, "LITTLE_ENDIAN"), 0, 4);
             outFile.writeBytes("WAVE");
@@ -58,7 +59,7 @@ public class RawToWav {
             // turn short array to byte array, compliments of Peter Lawrey, http://stackoverflow.com/a/5626003/5272567
             byte[] byteData = new byte[raw.length * 2];
             ByteBuffer.wrap(byteData).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(raw);
-            outFile.write(byteData, 0, raw.length * 2);
+            outFile.write(byteData, 0, byteData.length);
         } catch (Exception e) {
             e.printStackTrace();
         }
