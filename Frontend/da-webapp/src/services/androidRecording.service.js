@@ -73,7 +73,7 @@ function androidRecordingService(logger, utilityService) {
     logger.log('Android stopped recording.');
 
     if (valid) {
-      data = JSON.parse(data)[0];
+      data = JSON.parse(data);
       data = new Uint8Array(data);
       var blob = new Blob([data], { type: 'audio/wav' });
       // display recording on website
