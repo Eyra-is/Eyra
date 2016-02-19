@@ -40,8 +40,8 @@ public class RawToWav {
 
         try {
             // write WAV header
+            // reference for wav header: recorder.js by matt diamond, https://github.com/mattdiamond/Recorderjs
             outFile.writeBytes("RIFF");
-            //Log.v("RawToWav", String.valueOf(36 + raw.length * 2));
             outFile.write(intToBytes(36 + raw.length * 2, "LITTLE_ENDIAN"), 0, 4);
             outFile.writeBytes("WAVE");
             outFile.writeBytes("fmt ");
@@ -55,9 +55,10 @@ public class RawToWav {
             outFile.writeBytes("data");
             outFile.write(intToBytes(raw.length * 2, "LITTLE_ENDIAN"), 0, 4);
             // write WAV data
-            for (int i = 0; i < raw.length; i++) {
-                outFile.write(shortToBytes(raw[i], "LITTLE_ENDIAN"), 0, 2);
-            }
+            // turn short array to byte array, compliments of Peter Lawrey, http://stackoverflow.com/a/5626003/5272567
+            byte[] byteData = new byte[raw.length * 2];
+            ByteBuffer.wrap(byteData).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(raw);
+            outFile.write(byteData, 0, raw.length * 2);
         } catch (Exception e) {
             e.printStackTrace();
         }
