@@ -1,5 +1,6 @@
 package is.eyra.eyra;
 
+import android.content.Context;
 import android.webkit.JavascriptInterface;
 
 /**
