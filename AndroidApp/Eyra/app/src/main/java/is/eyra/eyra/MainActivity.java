@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView mWebView;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,12 +25,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-       FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                mWebView.reload();
             }
         });
 
@@ -41,11 +41,24 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setDomStorageEnabled(true);
         // Force links and redirects to open in the WebView instead of in a browser
         mWebView.setWebViewClient(new EyraWebViewClient());
+        // Allow location
+        mWebView.setWebChromeClient(new GeoWebChromeClient());
 
-        Log.v("DEBUG", getString(R.string.website_url));
+        mWebView.addJavascriptInterface(new RecorderJSInterface(), "AndroidRecorder");
 
         mWebView.loadUrl(getString(R.string.website_url));
         //mWebView.loadUrl("http://beta.html5test.com/");
+    }
+
+    // code from here: https://developer.chrome.com/multidevice/webview/gettingstarted
+    // license: http://creativecommons.org/licenses/by/3.0/
+    @Override
+    public void onBackPressed() {
+        if(mWebView.canGoBack()) {
+            mWebView.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
