@@ -3,6 +3,7 @@ package is.eyra.eyra;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,46 +25,37 @@ public class RawToWav {
         mNumChannels = numChannels;
     }
 
-    public DataOutputStream convert(short[] raw) {
-        DataOutputStream outFile = null;
-        try {
-            outFile = new DataOutputStream(
-                new FileOutputStream (
-                    new File(
-                        Environment.getExternalStorageDirectory().getAbsolutePath() + "/testBlob.wav"
-                    ), true
-                )
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public byte[] convert(short[] raw) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try {
             // write WAV header
             // reference for wav header: recorder.js by matt diamond, https://github.com/mattdiamond/Recorderjs
-            outFile.writeBytes("RIFF");
-            outFile.write(intToBytes(36 + raw.length * 2, "LITTLE_ENDIAN"), 0, 4);
-            outFile.writeBytes("WAVE");
-            outFile.writeBytes("fmt ");
-            outFile.write(intToBytes(16, "LITTLE_ENDIAN"), 0, 4);
-            outFile.write(shortToBytes((short) 1, "LITTLE_ENDIAN"), 0, 2);
-            outFile.write(shortToBytes((short) mNumChannels, "LITTLE_ENDIAN"), 0, 2);
-            outFile.write(intToBytes(mSampleRate, "LITTLE_ENDIAN"), 0, 4);
-            outFile.write(intToBytes(mSampleRate * mNumChannels * 2, "LITTLE_ENDIAN"), 0, 4);
-            outFile.write(shortToBytes((short) (mNumChannels * 2), "LITTLE_ENDIAN"), 0, 2);
-            outFile.write(shortToBytes((short) 16, "LITTLE_ENDIAN"), 0, 2);
-            outFile.writeBytes("data");
-            outFile.write(intToBytes(raw.length * 2, "LITTLE_ENDIAN"), 0, 4);
+            // and http://stackoverflow.com/a/5810662/5272567 by
+            //   user663321, Evan Merz and Dan Vargo
+            baos.write(new byte[]{'R', 'I', 'F', 'F'}, 0, 4);
+            baos.write(intToBytes(36 + raw.length * 2, "LITTLE_ENDIAN"), 0, 4);
+            baos.write(new byte[]{'W', 'A', 'V', 'E'}, 0, 4);
+            baos.write(new byte[]{'f', 'm', 't', ' '}, 0, 4);
+            baos.write(intToBytes(16, "LITTLE_ENDIAN"), 0, 4);
+            baos.write(shortToBytes((short) 1, "LITTLE_ENDIAN"), 0, 2);
+            baos.write(shortToBytes((short) mNumChannels, "LITTLE_ENDIAN"), 0, 2);
+            baos.write(intToBytes(mSampleRate, "LITTLE_ENDIAN"), 0, 4);
+            baos.write(intToBytes(mSampleRate * mNumChannels * 2, "LITTLE_ENDIAN"), 0, 4);
+            baos.write(shortToBytes((short) (mNumChannels * 2), "LITTLE_ENDIAN"), 0, 2);
+            baos.write(shortToBytes((short) 16, "LITTLE_ENDIAN"), 0, 2);
+            baos.write(new byte[]{'d', 'a', 't', 'a'}, 0, 4);
+            baos.write(intToBytes(raw.length * 2, "LITTLE_ENDIAN"), 0, 4);
             // write WAV data
             // turn short array to byte array, compliments of Peter Lawrey, http://stackoverflow.com/a/5626003/5272567
             byte[] byteData = new byte[raw.length * 2];
             ByteBuffer.wrap(byteData).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(raw);
-            outFile.write(byteData, 0, raw.length * 2);
+            baos.write(byteData, 0, byteData.length);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return outFile;
+        return baos.toByteArray();
     }
 
     private byte[] intToBytes(int a, String endian) {
