@@ -32,7 +32,12 @@ function androidRecordingService(logger, utilityService) {
 
   var audio_context;
   var input;
-
+  var recorder;
+  try {
+    recorder = AndroidRecorder; // set recorder to be the recorder JS interface with android app
+  } catch (e) {
+    return {};
+  }
   return recHandler;
 
   //////////
@@ -55,6 +60,7 @@ function androidRecordingService(logger, utilityService) {
 
   function record() {
     logger.log('Android recording...');
+    recorder.startRecording();
   }
 
   // setup callbacks for any controller which needs to use this service
@@ -63,7 +69,14 @@ function androidRecordingService(logger, utilityService) {
   }
 
   function stop(valid) {
+    recorder.stopRecording();
     logger.log('Android stopped recording.');
+
+    if (!valid) {
+      logger.log('Token skipped, no recording made.');
+      recorder.startRecording();
+    }
+
     recHandler.recordingCompleteCallback();
   } 
 }
