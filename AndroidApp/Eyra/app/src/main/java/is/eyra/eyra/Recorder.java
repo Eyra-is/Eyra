@@ -4,10 +4,15 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**
@@ -64,7 +69,18 @@ public class Recorder {
         for (int i = 0; i < data.length; i++) {
             data[i] = tempData[i].shortValue();
         }
-        DataOutputStream dos = rtw.convert(data);
+        ByteArrayOutputStream baos = rtw.convert(data);
+
+        try {
+            OutputStream outputStream = new FileOutputStream(
+                    new File(
+                            Environment.getExternalStorageDirectory().getAbsolutePath() + "/testBlob.wav"
+                    ), true
+            );
+            baos.writeTo(outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         readyForNextRecording();
     }
