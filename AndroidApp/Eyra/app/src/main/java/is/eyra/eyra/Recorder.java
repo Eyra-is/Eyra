@@ -57,7 +57,7 @@ public class Recorder {
         }, "AudioRecorder Thread").start();
     }
 
-    public void stopRecording() {
+    public byte[] stopRecording() {
         mAudioRecord.stop();
 
         // create wav
@@ -69,9 +69,11 @@ public class Recorder {
         for (int i = 0; i < data.length; i++) {
             data[i] = tempData[i].shortValue();
         }
-        ByteArrayOutputStream baos = rtw.convert(data);
+        byte[] wav = rtw.convert(data);
 
         try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(wav.length);
+            baos.write(wav, 0, wav.length);
             OutputStream outputStream = new FileOutputStream(
                     new File(
                             Environment.getExternalStorageDirectory().getAbsolutePath() + "/testBlob.wav"
@@ -83,6 +85,8 @@ public class Recorder {
         }
 
         readyForNextRecording();
+
+        return wav;
     }
 
     // handles resetting of variables that need resetting after each recording

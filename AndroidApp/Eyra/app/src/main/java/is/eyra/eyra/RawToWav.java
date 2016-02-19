@@ -1,6 +1,7 @@
 package is.eyra.eyra;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -24,7 +25,7 @@ public class RawToWav {
         mNumChannels = numChannels;
     }
 
-    public ByteArrayOutputStream convert(short[] raw) {
+    public byte[] convert(short[] raw) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try {
@@ -54,7 +55,7 @@ public class RawToWav {
             e.printStackTrace();
         }
 
-        return baos;
+        return baos.toByteArray();
     }
 
     private byte[] intToBytes(int a, String endian) {

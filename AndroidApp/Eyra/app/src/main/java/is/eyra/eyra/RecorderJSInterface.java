@@ -1,12 +1,15 @@
 package is.eyra.eyra;
 
-import android.content.Context;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
+import org.json.JSONArray;
+
+import java.util.Arrays;
 
 /**
  * Created by matthiasp on 2/18/16.
  *
- * The JS object
+ * The JS recorder object passed to our web app.
  */
 public class RecorderJSInterface {
 
@@ -18,12 +21,15 @@ public class RecorderJSInterface {
 
     @JavascriptInterface
     public void startRecording() {
+        Log.v("DEBUG", "START REC");
         recorder.startRecording();
     }
 
     @JavascriptInterface
-    public void stopRecording() {
-        recorder.stopRecording();
+    public String stopRecording() {
+        Log.v("DEBUG", "STOPPED REC");
+        byte[] wav = recorder.stopRecording();
+        return new JSONArray(Arrays.asList(wav)).toString();
     }
 
     @JavascriptInterface
