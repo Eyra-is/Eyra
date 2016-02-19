@@ -22,13 +22,13 @@ function androidRecordingService(logger, utilityService) {
   recHandler.setupCallbacks = setupCallbacks;
   recHandler.stop = stop;
 
+  // local variable definitions for service
+  var invalidTitle = util.getConstant('invalidTitle');
+
   // for some reason, putting this in an array, makes angular update this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),
                                     "url":'',
                                     "title":invalidTitle}];
-
-  // local variable definitions for service
-  var invalidTitle = util.getConstant('invalidTitle');
 
   var audio_context;
   var input;
@@ -36,7 +36,7 @@ function androidRecordingService(logger, utilityService) {
   try {
     recorder = AndroidRecorder; // set recorder to be the recorder JS interface with android app
   } catch (e) {
-    return {};
+    return {}; // this should never happen
   }
   return recHandler;
 
@@ -69,12 +69,19 @@ function androidRecordingService(logger, utilityService) {
   }
 
   function stop(valid) {
-    recorder.stopRecording();
+    var data = recorder.stopRecording();
     logger.log('Android stopped recording.');
 
-    if (!valid) {
+    if (valid) {
+      data = JSON.parse(data)[0];
+      data = new Uint8Array(data);
+      var blob = new Blob([data], { type: 'audio/wav' });
+      // display recording on website
+      recHandler.currentRecording[0] = {  "blob":blob,
+                                          "url":(window.URL || window.webkitURL).createObjectURL(blob),
+                                          "title":(new Date().toISOString() + '.wav')};
+    } else {
       logger.log('Token skipped, no recording made.');
-      recorder.startRecording();
     }
 
     recHandler.recordingCompleteCallback();
