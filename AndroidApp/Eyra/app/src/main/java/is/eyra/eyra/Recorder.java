@@ -71,19 +71,6 @@ public class Recorder {
         }
         byte[] wav = rtw.convert(data);
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(wav.length);
-            baos.write(wav, 0, wav.length);
-            OutputStream outputStream = new FileOutputStream(
-                    new File(
-                            Environment.getExternalStorageDirectory().getAbsolutePath() + "/testBlob.wav"
-                    ), true
-            );
-            baos.writeTo(outputStream);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         readyForNextRecording();
 
         return wav;
