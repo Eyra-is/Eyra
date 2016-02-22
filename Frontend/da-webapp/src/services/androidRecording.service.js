@@ -2,7 +2,7 @@
 // service to handle recording through the android WebView.
 // called in exactly the same way as recording.service.js, must therefore export same functions. 
 
-// assumes interface from WebView, Android
+// assumes interface from WebView, AndroidRecorder
 
 'use strict';
 
@@ -80,11 +80,11 @@ function androidRecordingService(logger, utilityService) {
       recHandler.currentRecording[0] = {  "blob":blob,
                                           "url":(window.URL || window.webkitURL).createObjectURL(blob),
                                           "title":(new Date().toISOString() + '.wav')};
+
+      recHandler.recordingCompleteCallback();
     } else {
       logger.log('Token skipped, no recording made.');
     }
-
-    recHandler.recordingCompleteCallback();
   } 
 }
 }());
