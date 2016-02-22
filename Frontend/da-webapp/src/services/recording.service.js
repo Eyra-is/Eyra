@@ -19,13 +19,13 @@ function recordingService($http, logger, utilityService) {
   recHandler.setupCallbacks = setupCallbacks;
   recHandler.stop = stop;
 
+  // local variable definitions for service
+  var invalidTitle = util.getConstant('invalidTitle');
+  
   // for some reason, putting this in an array, makes angular update this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),
                                     "url":'',
                                     "title":invalidTitle}];
-
-  // local variable definitions for service
-  var invalidTitle = util.getConstant('invalidTitle');
 
   var audio_context;
   var input;
