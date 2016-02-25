@@ -12,6 +12,7 @@ function recordingService($http, logger, utilityService) {
   var recHandler = {};
   var util = utilityService;
 
+  recHandler.createWavFromBlob = createWavFromBlob; // exported for android audio recorder
   recHandler.getAudioContext = getAudioContext;
   recHandler.getStreamSource = getStreamSource;
   recHandler.init = init;
@@ -97,37 +98,41 @@ function recordingService($http, logger, utilityService) {
 
   function createWav() {
     recorder && recorder.exportWAV(function(blob) {
-      var url = URL.createObjectURL(blob);
-      // workaround for mobile playback, where it didn't work on chrome/android.
-      // fetch blob at url using xhr, and use url generated from that blob.
-      // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
-      // thanks, gbrlg
-      $http.get(url, {'responseType':'blob'}).then(
-        function success(response) {
-          var reBlob = response.data;
-          if (reBlob) {
-            url = URL.createObjectURL(reBlob);
-          }
-          finishCreateWav();
-        },
-        function error(response) {
-          logger.error(response);
-          finishCreateWav();
-        }
-      );
-
-      // just added because of the async nature of $http
-      function finishCreateWav() {
-        recHandler.prevRecTitle = recHandler.currentRecording[0].title;
-        // display recording on website
-        recHandler.currentRecording[0] = {  "blob":blob,
-                                            "url":url,
-                                            "title":(new Date().toISOString() + '.wav')};
-
-        // notify main controller of completed recording
-        recHandler.recordingCompleteCallback();
-      }
+      createWavFromBlob(recHandler, blob); // calls the recording complete callback
     });
+  }
+
+  function createWavFromBlob(handler, blob) {
+    var url = (window.URL || window.webkitURL).createObjectURL(blob);
+    // workaround for mobile playback, where it didn't work on chrome/android.
+    // fetch blob at url using xhr, and use url generated from that blob.
+    // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
+    // thanks, gbrlg
+    $http.get(url, {'responseType':'blob'}).then(
+      function success(response) {
+        var reBlob = response.data;
+        if (reBlob) {
+          url = (window.URL || window.webkitURL).createObjectURL(reBlob);
+        }
+        finishCreateWav();
+      },
+      function error(response) {
+        logger.error(response);
+        finishCreateWav();
+      }
+    );
+
+    // just added because of the async nature of $http
+    function finishCreateWav() {
+      handler.prevRecTitle = handler.currentRecording[0].title;
+      // display recording on website
+      handler.currentRecording[0] = { "blob":blob,
+                                      "url":url,
+                                      "title":(new Date().toISOString() + '.wav')};
+
+      // notify main controller of completed recording
+      handler.recordingCompleteCallback();
+    }
   }
 
   function startUserMedia(stream) {
