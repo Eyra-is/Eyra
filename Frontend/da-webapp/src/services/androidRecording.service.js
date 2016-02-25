@@ -9,10 +9,11 @@
 angular.module('daApp')
   .factory('androidRecordingService', androidRecordingService);
 
-androidRecordingService.$inject = ['logger', 'utilityService'];
+androidRecordingService.$inject = ['logger', 'recordingService', 'utilityService'];
 
-function androidRecordingService(logger, utilityService) {
+function androidRecordingService(logger, recordingService, utilityService) {
   var recHandler = {};
+  var recService = recordingService;
   var util = utilityService;
 
   recHandler.getAudioContext = getAudioContext;
@@ -77,13 +78,13 @@ function androidRecordingService(logger, utilityService) {
       data = new Uint8Array(data);
       var blob = new Blob([data], { type: 'audio/wav' });
       // display recording on website
-      recHandler.currentRecording[0] = {  "blob":blob,
-                                          "url":(window.URL || window.webkitURL).createObjectURL(blob),
-                                          "title":(new Date().toISOString() + '.wav')};
-
-      recHandler.recordingCompleteCallback();
+      recService.createWavFromBlob(recHandler, blob);
     } else {
       logger.log('Token skipped, no recording made.');
+    }
+
+    function finishCreateWav() {
+
     }
   } 
 }
