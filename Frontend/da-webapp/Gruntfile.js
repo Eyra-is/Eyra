@@ -33,7 +33,8 @@ module.exports = function(grunt) {
                       // be careful, if these files (recorderjs/) are ever changed, 
                       // it might not reflect on client end if he has this cached. 
                       // This is not cache-broken. 
-                      depl+'recorderjs/dist/*' 
+                      depl+'recorderjs/dist/*' ,
+                      depl+'bower_components/bootstrap/dist/fonts/**'
                     ],
           literals: [
                       'index.html',
