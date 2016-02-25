@@ -46,6 +46,13 @@ public class MainActivity extends AppCompatActivity {
 
         mWebView.addJavascriptInterface(new RecorderJSInterface(), "AndroidRecorder");
 
+        // enable appcache
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setAppCachePath("/data/data/"+ getPackageName() +"/cache");
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAppCacheEnabled(true);
+        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
         mWebView.loadUrl(getString(R.string.website_url));
         //mWebView.loadUrl("http://beta.html5test.com/");
     }
