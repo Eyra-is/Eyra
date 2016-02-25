@@ -82,10 +82,6 @@ function androidRecordingService(logger, recordingService, utilityService) {
     } else {
       logger.log('Token skipped, no recording made.');
     }
-
-    function finishCreateWav() {
-
-    }
   } 
 }
 }());
