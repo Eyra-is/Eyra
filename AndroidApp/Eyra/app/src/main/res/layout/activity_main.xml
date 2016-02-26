@@ -24,12 +24,21 @@
 
     <include layout="@layout/content_main"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <!--<android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_popup_sync" />
+        android:src="@android:drawable/ic_popup_sync" />-->
+
+    <!--<android.support.design.widget.FloatingActionButton
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Force Crash!"
+        android:onClick="forceCrash"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />-->
+
 
 </android.support.design.widget.CoordinatorLayout>
