@@ -19,9 +19,11 @@ available_opts_int=("ap"
                     "backend-db"
                     "backend-204"
                     "frontend-app"
-                    )
+                   )
 available_opts_ext=("ext-kaldi"
-                    )
+                    "ext-phoneti"
+                    "ext-mitlm"
+                   )
 
 declare -A AV_OPTS_INT=(
 ['ap']='          WiFi Access Point'
@@ -35,6 +37,8 @@ declare -A AV_OPTS_INT=(
 
 declare -A AV_OPTS_EXT=(
 ['ext-kaldi']='   External: Kaldi and dependencies'
+['ext-phoneti']=' External: Phonetisaurus for G2P conversion'
+['ext-mitlm']='   External: MITLM'
 )
 
 usage () {
