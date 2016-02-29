@@ -46,6 +46,12 @@ function sessionService($q, dataService, localDbMiscService, logger) {
           'userAgent':navigator.userAgent,
           'imei':''
         };
+        // fix if speaker is created before device is registered, add speaker deviceImei here
+        if (data.deviceInfo && data.deviceInfo['imei'] && data.deviceInfo['imei'] !== '') {
+          if (data.speakerInfo) {
+            data.speakerInfo['deviceImei'] = data.deviceInfo['imei'];
+          }
+        }
         var tempSessionData = {                                                                  
                                 "type":'session', 
                                 "data":

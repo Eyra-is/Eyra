@@ -9,6 +9,7 @@ MainController.$inject = ['$location',
                           '$rootScope', 
                           '$scope', 
                           '$window',
+                          'androidRecordingService',
                           'locationService',
                           'logger',
                           'myLocalForageService', 
@@ -17,13 +18,29 @@ MainController.$inject = ['$location',
                           'tokenService', 
                           'utilityService'];
 
-function MainController($location, $q, $rootScope, $scope, $window, locationService, logger, myLocalForageService, recordingService, routeService, tokenService, utilityService) {
+function MainController($location, $q, $rootScope, $scope, $window, androidRecordingService, locationService, logger, myLocalForageService, recordingService, routeService, tokenService, utilityService) {
   var mainCtrl = this;
   var locService = locationService;
   var lfService = myLocalForageService;
   var recService = recordingService;
   var tokService = tokenService;
   var util = utilityService;
+
+  // because of a 8k filtering issue, detect if we are in an the Android webview app fix
+  //   in which case use a different recorder from the web audio API
+  var ANDROID;
+  try {
+    // AndroidRecorder is interface from WebView
+    ANDROID = AndroidRecorder;
+  } catch (e) {
+    // we are not in a webview here, pass
+  }
+  if (ANDROID) {
+    $rootScope.isWebView = true;
+    recService = androidRecordingService;
+  } else {
+    $rootScope.isWebView = false;
+  }
 
   mainCtrl.start = start;
 
