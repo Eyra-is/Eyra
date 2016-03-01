@@ -322,7 +322,7 @@ class DbHandler:
         # extract json data
         try:
             jsonDecoded = json.loads(jsonData)
-            log(jsonDecoded)
+            #log(jsonDecoded)
      
             if jsonDecoded['type'] == 'session':
                 jsonDecoded = jsonDecoded['data']
@@ -394,7 +394,7 @@ class DbHandler:
                 token = cur.fetchone()
                 if (token is None):
                     msg = 'No token with supplied id.'
-                    log(msg.replace('id.','id: %d.' % tokenId))
+                    #log(msg.replace('id.','id: %d.' % tokenId))
                     return dict(msg=msg, statusCode=400)
                 else:
                     token = token[0] # fetchone() returns tuple
