@@ -97,9 +97,9 @@ function MainController($location, $q, $rootScope, $scope, $window, androidRecor
 
   function getTokensIfNeeded() {
     tokenService.countAvailableTokens().then(function(numTokens){
-      if (numTokens < 50) {
+      if (numTokens < util.getConstant('tokenThreshold')) {
         logger.log('Getting tokens..');
-        tokenService.getTokens(200).then(function(tokens){
+        tokenService.getTokens(util.getConstant('tokenGetCount')).then(function(tokens){
           tokensPromise.resolve(true);
           logger.log('Got tokens.');
         },

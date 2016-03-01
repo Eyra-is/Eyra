@@ -18,7 +18,9 @@ function utilityService(logger) {
   var CONSTANTS = { 
     // sentinel value for invalid recordings
     'invalidTitle' : 'no_data.wav',
-    'defaultSpeakerName' : 'speaker'
+    'defaultSpeakerName' : 'speaker',
+    'tokenThreshold' : 400,
+    'tokenGetCount' : 1500
   };
 
   return utilityHandler;
