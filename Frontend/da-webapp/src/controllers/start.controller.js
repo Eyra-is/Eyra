@@ -24,8 +24,8 @@ function StartController($location, $rootScope, $scope, dataService, localDbMisc
   function submit() {
     // validate inputs here if needed
     if (startCtrl.speakerName === '') {
-      logger.log('No speaker name set, using default.');
-      startCtrl.speakerName = util.getConstant('defaultSpeakerName');
+      $scope.msg = 'You have to type a username.';
+      return;
     }
     if (startCtrl.comments === '') {
       startCtrl.comments = 'No comments.';
