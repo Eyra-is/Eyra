@@ -388,16 +388,23 @@ class DbHandler:
                 os.mkdir(RECORDINGS_ROOT)
 
             for rec in recordings:
-                # grab token to save as extra metadata later
+                # grab token to save as extra metadata later, and id to insert into table recording
                 tokenId = jsonDecoded['recordingsInfo'][rec.filename]['tokenId']
-                cur.execute('SELECT inputToken FROM token WHERE id=%s', (tokenId,))
-                token = cur.fetchone()
-                if (token is None):
-                    msg = 'No token with supplied id.'
-                    #log(msg.replace('id.','id: %d.' % tokenId))
-                    return dict(msg=msg, statusCode=400)
+                # use token sent as text if available to write to metadata file (in case database is wrong)
+                #   to be salvaged later if needed.
+                token = None
+                if 'tokenText' in jsonDecoded['recordingsInfo'][rec.filename]:
+                    token = jsonDecoded['recordingsInfo'][rec.filename]['tokenText']
                 else:
-                    token = token[0] # fetchone() returns tuple
+                    # otherwise, grab it from the database
+                    cur.execute('SELECT inputToken FROM token WHERE id=%s', (tokenId,))
+                    token = cur.fetchone()
+                    if (token is None):
+                        msg = 'No token with supplied id.'
+                        log(msg.replace('id.','id: %d.' % tokenId))
+                        return dict(msg=msg, statusCode=400)
+                    else:
+                        token = token[0] # fetchone() returns tuple
 
                 # save recordings to recordings/sessionId/filename
                 sessionPath = os.path.join(RECORDINGS_ROOT, 'session_'+str(sessionId))

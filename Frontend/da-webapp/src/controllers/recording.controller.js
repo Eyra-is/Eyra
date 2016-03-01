@@ -114,7 +114,7 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
     var oldCurRec = recCtrl.curRec[0];
 
     // get the data for the session to be sent to the server or saved locally on failure
-    sessionService.assembleSessionData(oldCurRec, currentToken['id']).then(
+    sessionService.assembleSessionData(oldCurRec, currentToken).then(
       function success(sessionData) {
         send(sessionData, oldCurRec)
         .then(

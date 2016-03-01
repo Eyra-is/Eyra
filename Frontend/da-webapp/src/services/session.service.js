@@ -25,9 +25,10 @@ function sessionService($q, dataService, localDbMiscService, logger) {
   //////////
 
   // put together session json data needed for client server API comms
-  // need the recording object as it is in recordingService and the id of the respective token
+  // need the recording object as it is in recordingService and the respective token
   // this is called by the recording controller on a single rec/token send.
-  function assembleSessionData(rec, tokenId) {
+  // token is on format: { 'id':id, 'token':token }
+  function assembleSessionData(rec, token) {
     var sessionData = $q.defer();
     // start by getting the info that might take local db access (async)
     // i.e. speakerInfo, instructorId and deviceInfo
@@ -67,7 +68,7 @@ function sessionService($q, dataService, localDbMiscService, logger) {
                                 }
                               };
         tempSessionData['data']['recordingsInfo']
-                    [rec.title] = { 'tokenId' : tokenId };
+                    [rec.title] = { 'tokenId' : token['id'], 'tokenText' : token['token'] };
 
         sessionData.resolve(tempSessionData);
       },
