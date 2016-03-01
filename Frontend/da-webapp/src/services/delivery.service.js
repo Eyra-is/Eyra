@@ -63,9 +63,9 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
   // send session from localdb to server
   // lastSession, is the session failed to send from last sendLocalSession, null otherwise
   // recursive function, calls itself as long as there are sessions in localdb
-  // aborts after 5 failed sends.
+  // aborts after 2 failed sends.
   function sendLocalSession(lastSession) {
-    if (failedSessionSends > 4) {
+    if (failedSessionSends > 1) {
       logger.log('Failed sending session too many times. Aborting sync...');
       failedSessionSends = 0;
       // we failed at sending session, save it to the database again.
