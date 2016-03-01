@@ -45,7 +45,7 @@ def submit_general(method):
     if method is not None and validMethod:
         data = None
         if request.method == 'POST':
-            log('Data: ' + str(request.form) + '\n')
+            #log('Data: ' + str(request.form) + '\n')
 
             if 'json' in request.form:
                 data = request.form['json']
@@ -67,11 +67,11 @@ def submit_session():
     recordings = []
     if request.method == 'GET':
         msg = 'GET success baby'
-        log(msg)
+        #log(msg)
         return msg, 200
     if request.method == 'POST':
-        log('Form: ' + str(request.form) + '\nFiles: ' + str(request.files) + '\n')
-        log('Headers: ' + str(request.headers))
+        #log('Form: ' + str(request.form) + '\nFiles: ' + str(request.files) + '\n')
+        #log('Headers: ' + str(request.headers))
 
         if 'json' in request.form:
             sessionData = request.form['json']
@@ -85,9 +85,9 @@ def submit_session():
             key = 'rec'+str(i)
             if key in request.files:
                 recordings.append(request.files[key])
-                log('Got file: ' + str(request.files[key]))
+                #log('Got file: ' + str(request.files[key]))
             else:
-                log('No more recordings.')
+                #log('No more recordings.')
                 break
             i += 1
 
@@ -108,7 +108,7 @@ def submit_gettokens(numTokens):
         tokens = dbHandler.getTokens(numTokens)
         if len(tokens) > 0:
             response += json.dumps(tokens)
-            log('Got tokens from db: ' + response)
+            #log('Got tokens from db: ' + response)
             return response, 200
         else:
             msg = 'Failed getting tokens from database.'
@@ -139,7 +139,7 @@ def submit_gettokens_all():
 def qc_report(sessionId):
     if request.method == 'GET':
         # might be appropriate to have a qc handler here or something
-        log('sessionId received: ' + str(sessionId))
+        #log('sessionId received: ' + str(sessionId))
         return 'Qc says hello.', 200
 
 

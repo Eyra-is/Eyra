@@ -465,6 +465,7 @@ class DbHandler:
         for pair in tokens:
             jsonTokens.append({"id":pair[0], "token":pair[1]})
 
+        random.shuffle(jsonTokens) # the select seemed to alphabetize the tokens
         return jsonTokens
         
     # gets *ALL* tokens from the database and returns them in a nice json format.
