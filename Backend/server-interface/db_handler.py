@@ -41,28 +41,30 @@ class DbHandler:
             ]
         }
 
-    # inserts data into appropriate table
-    #
-    # name is i.e. 'instructor' and is a representation of the data, for errors and general identification
-    # data is a json object whose keys will be used as table column names and those values
-    #   will be inserted into table
-    # returns the id of the newly inserted row or errors in the format
-    #   dict(msg=id or msg, statusCode=htmlStatusCode)
-    #
-    # Example:
-    #    name='device'
-    #    data = {'imei':245, 'userAgent':'Mozilla'}
-    #    table = 'device'
-    #
-    #    In which case, this function will 
-    #    insert into device (imei, userAgent) 
-    #                values ('245','Mozilla')
-    #    and return said rows newly generated id.
-    #
-    # WARNING: appends the keys of data straight into a python string using %
-    #          so at least this should be sanitized. Sanitized by a whitelist of
-    #          allowed keys in self.allowedColumnNames
     def insertGeneralData(self, name, data, table):
+        """
+        inserts data into appropriate table
+
+        name is i.e. 'instructor' and is a representation of the data, for errors and general identification
+        data is a json object whose keys will be used as table column names and those values
+        will be inserted into table
+        returns the id of the newly inserted row or errors in the format
+        dict(msg=id or msg, statusCode=htmlStatusCode)
+
+        Example:
+        name='device'
+        data = {'imei':245, 'userAgent':'Mozilla'}
+        table = 'device'
+
+        In which case, this function will 
+        insert into device (imei, userAgent) 
+                values ('245','Mozilla')
+        and return said rows newly generated id.
+
+        WARNING: appends the keys of data straight into a python string using %
+          so at least this should be sanitized. Sanitized by a whitelist of
+          allowed keys in self.allowedColumnNames
+        """
         keys = []
         vals = []
         dataId = None
@@ -158,12 +160,14 @@ class DbHandler:
         else:
             return dict(msg='{"%sId":' % name + str(dataId) + '}', statusCode=200)
 
-    # inserts into both speaker and speaker_info
-    # speakerData is the {'name':name[, 'deviceImei':deviceImei]}
-    # speakerInfo are the extra info values to insert into
-    #   speaker_info table, e.g. speakerInfo: {'height':'154', etc.}
-    # assumes speaker doesn't exist in database.
     def insertSpeakerData(self, speakerData, speakerInfo):
+        """
+        inserts into both speaker and speaker_info
+        speakerData is the {'name':name[, 'deviceImei':deviceImei]}
+        speakerInfo are the extra info values to insert into
+          speaker_info table, e.g. speakerInfo: {'height':'154', etc.}
+        assumes speaker doesn't exist in database.
+        """
         speakerId = None
         res = self.insertGeneralData('speaker', speakerData, 'speaker')
         if 'speakerId' in res['msg']:
@@ -179,8 +183,10 @@ class DbHandler:
                                     'speaker_info')
         return res
 
-    # instructorData = look at format in the client-server API
     def processInstructorData(self, instructorData):
+        """
+        instructorData = look at format in the client-server API
+        """
         try:
             if isinstance(instructorData, str):
                 instructorData = json.loads(instructorData)
@@ -301,10 +307,12 @@ class DbHandler:
         # no imei present, wouldn't be able to recognize the speaker
         return self.insertSpeakerData(newSpeakerData, speakerInfo)
 
-    # jsonData = look at format in the client-server API
-    # recordings = an array of file objects representing the submitted recordings
-    # returns a dict (msg=msg, statusCode=200,400,..)
     def processSessionData(self, jsonData, recordings):
+        """
+        jsonData = look at format in the client-server API
+        recordings = an array of file objects representing the submitted recordings
+        returns a dict (msg=msg, statusCode=200,400,..)
+        """
         RECORDINGS_ROOT = 'recordings' # root path to recordings
         jsonDecoded = None
         sessionId = None
@@ -444,11 +452,13 @@ class DbHandler:
 
         return dict(msg='{"sessionId":' + str(sessionId) + '}', statusCode=200)
 
-    # gets numTokens tokens randomly selected from the database and returns them in a nice json format.
-    # look at format in the client-server API
-    # or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
-    # returns [] on failure
     def getTokens(self, numTokens):
+        """
+        gets numTokens tokens randomly selected from the database and returns them in a nice json format.
+        look at format in the client-server API
+        or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
+        returns [] on failure
+        """
         tokens = []
         try:
             cur = self.mysql.connection.cursor()
@@ -475,11 +485,13 @@ class DbHandler:
         random.shuffle(jsonTokens) # the select seemed to alphabetize the tokens
         return jsonTokens
         
-    # gets *ALL* tokens from the database and returns them in a nice json format.
-    # look at format in the client-server API
-    # or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
-    # returns [] on failure
     def getTokensAll(self):
+        """
+        gets *ALL* tokens from the database and returns them in a nice json format.
+        look at format in the client-server API
+        or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
+        returns [] on failure
+        """
         tokens = []
         try:
             cur = self.mysql.connection.cursor()

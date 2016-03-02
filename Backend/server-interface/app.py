@@ -21,14 +21,16 @@ cors = CORS(app,    resources=r'/*',
 
 # SUBMISSION ROUTES
 
-# supports everything in the client-server API
-# right now, /submit/general/{device,instuctor}
-#
-# requires sender to be authenticated with JWT, see auth_handler.py 
-# remove @authHandler.login_required() if you don't want that
 @app.route('/submit/general/<method>', methods=['POST'])
 @authHandler.login_required()
 def submit_general(method):
+    """
+    supports everything in the client-server API
+    right now, /submit/general/{device,instuctor}
+    
+    requires sender to be authenticated with JWT, see auth_handler.py 
+    remove @authHandler.login_required() if you don't want that
+    """
     validMethod = False
     processingFunction = None
     if method=='device':
