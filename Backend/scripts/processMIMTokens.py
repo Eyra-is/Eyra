@@ -5,8 +5,10 @@ import re
 def process(sortedSentDir, lowerWCBound, upperWCBound, dest):
     with open(dest, 'w', encoding='utf8') as f:
         for i in range(int(lowerWCBound), int(upperWCBound)+1):
-            with open(os.path.join(sortedSentDir, str(i), 'sentences.words'), 'r', encoding='utf8') as tmp:
-                f.write(extractSentences(tmp.read().splitlines()))
+            pathToWords = os.path.join(sortedSentDir, str(i), 'sentences.words')
+            if (os.path.exists(pathToWords)):
+                with open(pathToWords, 'r', encoding='utf8') as tmp:
+                    f.write(extractSentences(tmp.read().splitlines()))
 
 def extractSentences(data):
     """
