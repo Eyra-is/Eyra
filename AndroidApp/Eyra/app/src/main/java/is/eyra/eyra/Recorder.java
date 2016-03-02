@@ -36,11 +36,8 @@ public class Recorder {
     private short[] audioBuffer = new short[BUFFERSIZE];
     private ArrayList audioData = new ArrayList();
 
-    public Recorder() {
-        mAudioRecord = new AudioRecord(AUDIOSOURCE, SAMPLERATE, CHANNELCONFIG, AUDIOFORMAT, BUFFERSIZE * 2);
-    }
-
     public void startRecording() {
+        mAudioRecord = new AudioRecord(AUDIOSOURCE, SAMPLERATE, CHANNELCONFIG, AUDIOFORMAT, BUFFERSIZE * 2);
         mAudioRecord.startRecording();
         new Thread(new Runnable() {
             @Override
