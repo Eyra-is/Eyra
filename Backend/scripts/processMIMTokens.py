@@ -16,6 +16,10 @@ def extractSentences(data):
     Extracts them by returning token1\ntoken2\ntoken3 etc.. with one sentence each line.
     """
     out = ''
+    # remove initial sentence tag
+    data = [' '.join(y.split(' ')[1:]) for y in data]
+    data = filter(filterOutNumbers, data)
+    #data = list(data)
     for line in data:
         words = line.split(' ')
         words = filter(filterOutPuncuation, words)
@@ -26,10 +30,14 @@ def extractSentences(data):
 
 
 def filterOutPuncuation(x):
-    if re.match('^[\w\s]+$', x, re.UNICODE) is not None\
-       and '_' not in x:
+    if re.match(r'^[\w\s]+$', x, re.UNICODE) is not None:
         return True
     return False
+
+def filterOutNumbers(x):
+    if re.search(r'\d', x, re.UNICODE) is not None:
+        return False
+    return True
 
 def run():
     if len(sys.argv) < 5:
