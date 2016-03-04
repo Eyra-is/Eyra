@@ -48,7 +48,7 @@ class QcHandler(object):
         with open(self.top_words_path, 'rt') as dw:
             self.top_words = [l.strip() for l in dw]
 
-        self.kaldi_root = '../../Local/opt/kaldi'
+        self.kaldi_root = '../../Local/opt/kaldi-trunk'
 
     def getReport(self, session_id, recordings: list):
         """Return a quality report for the batch of recordings listed in `recordings`
