@@ -2,6 +2,11 @@ import sys
 import os
 import re
 
+wordsToRemove = [
+    'hv',
+    'hæstv'
+]
+
 def process(sortedSentDir, lowerWCBound, upperWCBound, dest):
     with open(dest, 'w', encoding='utf8') as f:
         for i in range(int(lowerWCBound), int(upperWCBound)+1):
@@ -19,12 +24,12 @@ def extractSentences(data):
     # remove initial sentence tag
     data = [' '.join(y.split(' ')[1:]) for y in data]
     data = filter(filterOutNumbers, data)
-    #data = list(data)
     for line in data:
         words = line.split(' ')
         words = filter(filterOutPuncuation, words)
+        words = filter(lambda x: x not in wordsToRemove, words)
         words = list(words)
-        if len(words) >= 1:
+        if len(words) >= 1 and not containsCapsAbbrev(words):
             out += ' '.join(words) + '\n'
     return out
 
@@ -38,6 +43,20 @@ def filterOutNumbers(x):
     if re.search(r'\d', x, re.UNICODE) is not None:
         return False
     return True
+
+def containsCapsAbbrev(x):
+    '''
+    Test if list x contains e.g. OECD, DNA, RNA which are abbreviations but
+    not filtered out with punctuation.
+    '''
+    for word in x:
+        upperCase = 0
+        for c in word:
+            if c.isupper():
+                upperCase += 1
+        if upperCase >= 2:
+            return True
+    return False
 
 def run():
     if len(sys.argv) < 5:
