@@ -152,14 +152,15 @@ def qc_report(sessionId):
     """
     if request.method == 'GET':
         # count should probably be a parameter in the REST api
-        recordings = dbHandler.getRecordingsInfo(count=5)
-        if not recordings == 0:
+        recordings = dbHandler.getRecordingsInfo(sessionId, count=5)
+        log(recordings)
+        if len(recordings) > 0:
             qcReport = qcHandler.getReport(sessionId, recordings)
             return json.dumps(qcReport), 200
         else:
             msg = 'No recordings belonging to sessionId = {}'.format(sessionId)
             log(msg)
-            return msg, 500
+            return msg, 404
     return 'Unexpected error.', 500
 
 if __name__ == '__main__':

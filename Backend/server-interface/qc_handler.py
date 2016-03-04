@@ -3,6 +3,8 @@ from io import StringIO, BytesIO
 import tempfile
 import pipes
 
+from util import log
+
 class QcHandler(object):
     """QcHandler
     ============
@@ -50,6 +52,9 @@ class QcHandler(object):
 
         self.kaldi_root = '../../Local/opt/kaldi-trunk'
 
+        self.sample_freq = 16000
+        self.downsample = True
+
     def getReport(self, session_id, recordings: list) -> dict:
         """Return a quality report for the batch of recordings listed in `recordings`
 
@@ -78,8 +83,9 @@ class QcHandler(object):
         # MFCCs are needed at 2 stages of the pipeline so we have to dump on disk
         mfcc_pipe = pipes.Template()
         compute_mfcc_cmd = ('{kaldi_root}/src/featbin/compute-mfcc-feats ' +
-                           '--sample-frequency=16000 --use-energy=false ' +
-                            'scp:- ark:- ').format(kaldi_root=self.kaldi_root)
+                           '--sample-frequency={sample_freq} --use-energy=false ' +
+                            'scp:- ark:- ').format(kaldi_root=self.kaldi_root,
+                                                   sample_freq=self.sample_freq)
         mfcc_pipe.append(compute_mfcc_cmd, '--')
 
         # TODO: try to eliminate the use of tempfiles
@@ -89,8 +95,14 @@ class QcHandler(object):
         with open(tokens_path, 'wt') as tokens_f, \
              mfcc_pipe.open(mfcc_feats_path, 'w') as mfcc_feats_tmp:
             for r in recordings:
-                print('{} {}'.format(r['recId'], r['recPath']),
-                      file=mfcc_feats_tmp)
+                if self.downsample:
+                    print('{rec_id} sox {rec_path} -r{sample_freq} -t wav - |'.format(rec_id=r['recId'],
+                                                                                      rec_path=r['recPath'],
+                                                                                      sample_freq=self.sample_freq),
+                          file=mfcc_feats_tmp)
+                else:
+                    print('{} {}'.format(r['recId'], r['recPath']),
+                          file=mfcc_feats_tmp)
                 token_ids = ' '.join(self.sym_id_map.get(tok, self.oov_id) for
                                      tok in r['token'].split())
                 print('{} {}'.format(r['recId'], token_ids),
@@ -153,7 +165,7 @@ class QcHandler(object):
         safer_pipeline.copy(tokens_path, edits_path)
 
         with open(edits_path, 'rt') as edits_f:
-            edits = dict((rec_id, int(n_edits)) for rec_id, n_edits
+            edits = dict((int(rec_id), int(n_edits)) for rec_id, n_edits
                          in (line.strip().split() for line in edits_f))
 
         # We should return something like this
@@ -178,7 +190,11 @@ class QcHandler(object):
             stats = {"accuracy": accuracy}
             prec.append({"recordingId": r['recId'], "stats": stats})
 
-        avg_accuracy = cum_accuracy / len(qc_report['perRecordingStats'])
-        qc_report['totalStats']['accuracy'] = avg_accuracy
+        try:
+            avg_accuracy = cum_accuracy / len(qc_report['perRecordingStats'])
+        except ZeroDivisionError:
+            avg_accuracy = 0.0
+        else:
+            qc_report['totalStats']['accuracy'] = avg_accuracy
 
         return qc_report

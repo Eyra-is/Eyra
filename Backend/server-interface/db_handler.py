@@ -509,8 +509,8 @@ class DbHandler:
         try:
             cur = self.mysql.connection.cursor()
             cur.execute('SELECT recording.id, recording.rel_path, token.inputToken FROM recording '
-                        + 'WHERE recording.sessionId=%s '
                         + 'JOIN token ON recording.tokenId=token.id '
+                        + 'WHERE recording.sessionId=%s '
                         + 'ORDER BY recording.id DESC ', (sessionId,))
 
             if count is not None:
@@ -520,7 +520,8 @@ class DbHandler:
         except MySQLError as e:
             msg = 'Error getting info for session recordings'
             log(msg, e)
-            return dict(msg=msg, statusCode=500) # hmm, does this do anything?
+            raise
+            # return dict(msg=msg, statusCode=500) # hmm, does this do anything?
         else:
             return [dict(recId=recId, recPath=recPath, token=token)
                     for recId, recPath, token in rows]
