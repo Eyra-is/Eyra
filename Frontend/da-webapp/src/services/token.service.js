@@ -18,6 +18,7 @@ function tokenService($q, deliveryService, logger, myLocalForageService, utility
   var lfService = myLocalForageService;
   var util = utilityService;
 
+  tokenHandler.clearTokens = clearTokens;
   tokenHandler.countAvailableTokens = countAvailableTokens;
   tokenHandler.getTokens = getTokens;
   tokenHandler.nextToken = nextToken;
@@ -25,6 +26,29 @@ function tokenService($q, deliveryService, logger, myLocalForageService, utility
   return tokenHandler;
 
   //////////
+
+  // dev function, delete all non-read tokens from local forage database.
+  function clearTokens() {
+    return lfService.getItem('minFreeTokenIdx').then(
+      function success(idx){
+        var promises = [];
+        if (idx){
+          for (var i = 0; i <= idx; i++) {
+            promises.push(
+              lfService.removeItem('tokens/'+i)
+                .then(angular.noop, util.stdErrCallback)
+            );
+          }
+        }
+        promises.push(
+          lfService.setItem('minFreeTokenIdx', 0)
+            .then(angular.noop, util.stdErrCallback)
+        );
+        return $q.all(promises);
+      },
+      util.stdErrCallback
+    );
+  }
 
   // returns promise, number of tokens in local db, 0 if no tokens
   function countAvailableTokens() {
