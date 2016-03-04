@@ -4,6 +4,7 @@ import json
 
 from db_handler import DbHandler
 from auth_handler import AuthHandler
+from qc_handler import QcHandler
 
 from util import log
 
@@ -11,6 +12,7 @@ app = Flask(__name__)
 
 dbHandler = DbHandler(app)
 authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
+qcHandler = QcHandler(app)
 
 # allow pretty much everything, this will be removed in production! since we will serve
 #   the backend and frontend on the same origin/domain
@@ -137,11 +139,28 @@ def submit_gettokens_all():
 
 @app.route('/qc/report/session/<int:sessionId>', methods=['GET'])
 def qc_report(sessionId):
-    if request.method == 'GET':
-        # might be appropriate to have a qc handler here or something
-        #log('sessionId received: ' + str(sessionId))
-        return 'Qc says hello.', 200
+    """Get a QC report
 
+    Returned JSON definition:
+
+        {"sessionId": ...,
+            "requestId": ...,
+            "totalStats": {"accuracy": [0.0;1.0]"},
+            "perRecordingStats": [{"recordingId": ...,
+                                   "stats": {"accuracy": [0.0;1.0]},
+                                    }]}
+    """
+    if request.method == 'GET':
+        # count should probably be a parameter in the REST api
+        recordings = dbHandler.getRecordingsInfo(count=5)
+        if not recordings == 0:
+            qcReport = qcHandler.getReport(sessionId, recordings)
+            return json.dumps(qcReport), 200
+        else:
+            msg = 'No recordings belonging to sessionId = {}'.format(sessionId)
+            log(msg)
+            return msg, 500
+    return 'Unexpected error.', 500
 
 if __name__ == '__main__':
     #import ssl
