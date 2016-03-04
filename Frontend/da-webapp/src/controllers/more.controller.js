@@ -70,9 +70,11 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
 
   // dev function, clear all tokens
   function clearTokens() {
+    $scope.msg = 'Clearing tokens...';
     tokenService.clearTokens().then(
       function success(res) {
         alert('All tokens gone!');
+        $scope.msg = 'Tokens deleted.';
       },
       util.stdErrCallback
     );
