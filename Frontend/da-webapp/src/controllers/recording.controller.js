@@ -4,20 +4,22 @@
 angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
-RecordingController.$inject = [ '$rootScope',
+RecordingController.$inject = [ '$location',
+                                '$rootScope',
                                 '$scope', 
                                 'androidRecordingService',
                                 'dataService',
                                 'deliveryService',
                                 'localDbService',
                                 'logger',
+                                'qcService',
                                 'recordingService',
                                 'sessionService',
                                 'tokenService',
                                 'utilityService',
                                 'volumeMeterService'];
 
-function RecordingController($rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService, volumeMeterService) {
+function RecordingController($location, $rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, qcService, recordingService, sessionService, tokenService, utilityService, volumeMeterService) {
   var recCtrl = this;
   // fix for android audio filtering (8k) through browser recording, in case of webview (in our android app)
   //   use the native recorder through the app
@@ -121,35 +123,11 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
-            logger.log(response); // DEBUG
-
-            var oldSessionId = dataService.get('sessionId');
-            var sessionId;
-
-            // if no error, save sessionId to RAM to be used to identify session
-            //   in later requests (e.g. QC reports)
-            try {
-              sessionId = response.data.sessionId;
-              if (sessionId) {
-                dataService.set('sessionId', sessionId); // set it in ram
-              } else {
-                $scope.msg = 'Something went wrong.';
-              }
-            } catch (e) {
-              logger.error(e);
+            var results = qcService.notifySend();
+            if (results) {
+              $location.path('/report');
             }
-
-            // query for QC report with last used session (should be same probably)
-            //   and if non-existant, use the one we got now, and if non-existant don't move.
-            var sessionIdToUse = oldSessionId || sessionId;
-            if (sessionIdToUse) {
-              delService.queryQC(sessionIdToUse)
-              .then(function (response){
-                logger.log(response);
-              },
-              util.stdErrCallback)
-            }
-          }, 
+          },
           function error(response) {
             // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
             var rec = oldCurRec;

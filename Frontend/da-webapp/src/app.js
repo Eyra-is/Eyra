@@ -106,6 +106,16 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
           }
         }
       }).
+      when('/report', {
+        templateUrl: 'views/report.html',
+        controller: 'ReportController',
+        controllerAs: 'reportCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
+      }).
       when('/set-instructor', {
         templateUrl: 'views/set-instructor.html',
         controller: 'SetInstructorController',

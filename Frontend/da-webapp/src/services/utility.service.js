@@ -20,7 +20,8 @@ function utilityService(logger) {
     'invalidTitle' : 'no_data.wav',
     'defaultSpeakerName' : 'speaker',
     'tokenThreshold' : 400,
-    'tokenGetCount' : 1500
+    'tokenGetCount' : 1500,
+    'QCFrequency' : 5 // per sessions sent
   };
 
   return utilityHandler;
