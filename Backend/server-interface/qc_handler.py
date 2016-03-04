@@ -74,9 +74,9 @@ class QcHandler(object):
         max_active = 750
         lattice_beam = 8.0
         acoustic_scale = 0.1
-        #: in: <wav-rspecifier>, out:<feats-wspecifier>
+
         mfcc_pipe = pipes.Template()
-        compute_mfcc_cmd = ('{kaldi_root}/src/featbin/compute-mfcc-feats --sample-frequency=16000 --use-energy=false ark:- ark:- '
+        compute_mfcc_cmd = ('{kaldi_root}/src/featbin/compute-mfcc-feats --sample-frequency=16000 --use-energy=false scp:- ark:- '
                             .format(kaldi_root=self.kaldi_root))
         mfcc_pipe.append(compute_mfcc_cmd, '--')
 
@@ -94,12 +94,11 @@ class QcHandler(object):
 
         compute_cmvn_cmd = ('{kaldi_root}/src/featbin/compute-cmvn-stats "ark:{mfcc_feats_path}" "ark:-"'
                             .format(mfcc_feats_path=mfcc_feats_path,
-                                                 kaldi_root=self.kaldi_root))
-        feats_cmd = ('{kaldi_root}/src/featbin/apply-cmvn "ark:{compute_cmvn_cmd} |" '
-                     + '"ark:{mfcc_feats_path}" '
-                     + '"ark:| add-deltas ark:- ark:-" ').format(compute_cmvn_cmd=compute_cmvn_cmd,
-                                                                 mfcc_feats_path=mfcc_feats_path,
-                                                                 kaldi_root=self.kaldi_root)
+                                    kaldi_root=self.kaldi_root))
+        feats_cmd = ('{kaldi_root}/src/featbin/apply-cmvn "ark:{compute_cmvn_cmd} |" "ark:{mfcc_feats_path}" "ark:| {kaldi_root}/src/featbin/add-deltas ark:- ark:-" '
+                     .format(compute_cmvn_cmd=compute_cmvn_cmd,
+                             mfcc_feats_path=mfcc_feats_path,
+                             kaldi_root=self.kaldi_root))
 
         safer_pipeline = pipes.Template()
         safer_pipeline.append('./make_utterance_fsts.pl {top_words}'
@@ -108,7 +107,7 @@ class QcHandler(object):
             '{kaldi_root}/src/bin/compile-train-graphs-fsts {scale_opts} --read-disambig-syms={disambig_ids} {tree} {acoustic_model} {l_disambig_fst} ark:- ark:-'
             .format(scale_opts='', disambig_ids=self.disambig_ids_path,
                     tree=self.decision_tree_path, acoustic_model=self.acoustic_model_path,
-                    l_disambig_fst=self.l_disambig_fst_path),
+                    l_disambig_fst=self.l_disambig_fst_path, kaldi_root=self.kaldi_root),
             '--')
 
         gmm_latgen_faster = ('{kaldi_root}/src/gmmbin/gmm-latgen-faster'
@@ -121,7 +120,7 @@ class QcHandler(object):
                                         '--word-symbol-table=%s' % self.sym_id_path,
                                         self.acoustic_model_path,
                                         'ark:-',
-                                        '"ark:{%s} |"' % feats_cmd.replace('"', r'\"'),
+                                        '"ark:%s |"' % feats_cmd.replace('"', r'\"'),
                                         'ark:-']), '--')
         safer_pipeline.append('{kaldi_root}/src/latbin/lattice-oracle ark:- "ark:{ref_tokens}" ark:/dev/null "ark,t:-"'
                               .format(kaldi_root=self.kaldi_root, ref_tokens=tokens_path), '--')
@@ -129,10 +128,10 @@ class QcHandler(object):
         safer_pipeline.copy(tokens_path, edits_path)
 
         with open(edits_path, 'rt') as edits_f:
-            edits = dict(line.strip().split() for line in edits_f)
-        print(edits)
+            edits = dict((rec_id, int(n_edits)) for rec_id, n_edits in (line.strip().split() for line in edits_f))
+
         def count(token):
-            len(token.split())
+            return len(token.split())
         qc_report = dict() # {recId: {'accuracy}}
 
         for r in recordings:
