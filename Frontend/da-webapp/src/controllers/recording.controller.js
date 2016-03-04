@@ -179,17 +179,6 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
     logger.log('Sending recs...');
 
     // and send it to remote server
-    // test CORS is working
-    delService.testServerGet()
-    .then(
-      function success(response) {
-        logger.log(response);
-      }, 
-      function error(response) {
-        logger.log(response);
-      }
-    );
-
     // plump out the recording!
     return delService.submitRecordings(sessionData, [oldCurRec]);
   }
