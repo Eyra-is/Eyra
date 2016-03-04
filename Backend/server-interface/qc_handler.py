@@ -136,6 +136,6 @@ class QcHandler(object):
 
         for r in recordings:
             wer = edits[r['recId']] / count(r['token'])
-            qc_report[r['recId']] = {'accuracy': 1 - wer}
+            qc_report[r['recId']] = {'accuracy': 0.0 if 1 - wer < 0 else 1 - wer}
 
         return qc_report
