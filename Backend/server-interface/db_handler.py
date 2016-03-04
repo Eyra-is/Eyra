@@ -496,3 +496,31 @@ class DbHandler:
             jsonTokens.append({"id":pair[0], "token":pair[1]})
 
         return jsonTokens
+
+    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str}]':
+        """Fetches info for the recordings of the session `sessionId`
+
+        Parameters:
+          sessionId    Only consider recordings from this session
+          count        If set only return info for count newest recordings
+                       otherwise fetch info for all recordings from session
+
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT recording.id, recording.rel_path, token.inputToken FROM recording '
+                        + 'WHERE recording.sessionId=%s '
+                        + 'JOIN token ON recording.tokenId=token.id '
+                        + 'ORDER BY recording.id DESC ', (sessionId,))
+
+            if count is not None:
+                rows = cur.fetchmany(size=count)
+            else:
+                rows = cur.fetchall()
+        except MySQLError as e:
+            msg = 'Error getting info for session recordings'
+            log(msg, e)
+            return dict(msg=msg, statusCode=500) # hmm, does this do anything?
+        else:
+            return [dict(recId=recId, recPath=recPath, token=token)
+                    for recId, recPath, token in rows]
