@@ -29,35 +29,40 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     totalNotifies++;
     modSendCounter++;
 
-    if (modSendCounter >= (util.getConstant('QCFrequency' || 5))
-       && totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
+    if (modSendCounter >= (util.getConstant('QCFrequency' || 5))){
+       //&& totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
       modSendCounter = 0;
 
-      
-      return delService.queryQC(sessionId)
+      // THIS IS QUICKFIX VERSION OF CODE NEEDS TO BE CHANGED BACK
+      delService.queryQC(sessionId)
       .then(function (response){
-        console.log(response);
-        var report = response.data;
-
-        var tokenAnnouncement = totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
-        if (tokenAnnouncement) {
-          report.tokenCount = totalNotifies;
-        }
-
-        dataService.set('QCReport', report);
-        // message to send back to recording.controller.js notifying that we wish
-        //   results to be displayed.
-        var displayResults = tokenAnnouncement
-                             || report.totalStats.accuracy < util.getConstant('QCAccThreshold');
-        if (displayResults) {
-          return $q.when(true);
-        } else {
-          return $q.reject(false);
-        }
+        //console.log(response);
       },
       util.stdErrCallback);
     }
-    return $q.when(true); //debug
+
+    var report;//response.data || {};
+
+    var tokenAnnouncement = totalNotifies > 0
+                            && totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
+    if (tokenAnnouncement) {
+      //report.tokenCount = totalNotifies;
+      // special, only display this message for now. QC isnt working exactly, have to record straight away.
+      report = 'Congratulations on '+totalNotifies+' tokens read!';
+      dataService.set('QCReport', report);
+    }
+
+    // message to send back to recording.controller.js notifying that we wish
+    //   results to be displayed.
+    var displayResults = tokenAnnouncement;
+                         //|| report.totalStats.accuracy < util.getConstant('QCAccThreshold');
+    if (displayResults) {
+      return $q.when(true);
+    } else {
+      return $q.reject(false);
+    }
+
+    return $q.reject(false);
   }
 }
 }());
