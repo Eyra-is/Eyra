@@ -45,10 +45,23 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
 
     var tokenAnnouncement = totalNotifies > 0
                             && totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
+    var totalTokens = 260;
     if (tokenAnnouncement) {
       //report.tokenCount = totalNotifies;
       // special, only display this message for now. QC isnt working exactly, have to record straight away.
-      report = 'Congratulations on '+totalNotifies+' tokens read!';
+      report = 'Nice, '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens read, keep going.';
+      if (totalNotifies >= 100) {
+        report = 'Sweet, '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens.';
+      }
+      if (totalNotifies >= 200) {
+        report = Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens? Wow.'
+      }
+      if (totalNotifies >= 300) {
+        report = 'Awesome, '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens. Just awesome';
+      }
+      if (totalNotifies >= 400) {
+        report = 'You are a god: '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens.';
+      }
       dataService.set('QCReport', report);
     }
 
