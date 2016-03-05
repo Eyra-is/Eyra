@@ -182,7 +182,7 @@ class QcHandler(object):
 
         cum_accuracy = 0.0
         for r in recordings:
-            wer = edits[r['recId']] / len(r['token'].split())
+            wer = edits[int(r['recId'])] / len(r['token'].split())
             accuracy = 0.0 if 1 - wer < 0 else 1 - wer
             cum_accuracy += accuracy
 

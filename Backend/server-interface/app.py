@@ -155,7 +155,7 @@ def qc_report(sessionId):
     if request.method == 'GET':
         # count should probably be a parameter in the REST api
         recordings = dbHandler.getRecordingsInfo(sessionId, count=5)
-        log(recordings)
+        #log(recordings)
         if len(recordings) > 0:
             qcReport = qcHandler.getReport(sessionId, recordings)
             return json.dumps(qcReport), 200
