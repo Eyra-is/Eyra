@@ -4,7 +4,7 @@
 angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
-RecordingController.$inject = [ '$location',
+RecordingController.$inject = [ '$uibModal',
                                 '$rootScope',
                                 '$scope', 
                                 'androidRecordingService',
@@ -17,9 +17,10 @@ RecordingController.$inject = [ '$location',
                                 'sessionService',
                                 'tokenService',
                                 'utilityService',
-                                'volumeMeterService'];
+                                'volumeMeterService',
+                                'CACHEBROKEN_REPORT'];
 
-function RecordingController($location, $rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, qcService, recordingService, sessionService, tokenService, utilityService, volumeMeterService) {
+function RecordingController($uibModal, $rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, qcService, recordingService, sessionService, tokenService, utilityService, volumeMeterService, CACHEBROKEN_REPORT) {
   var recCtrl = this;
   // fix for android audio filtering (8k) through browser recording, in case of webview (in our android app)
   //   use the native recorder through the app
@@ -144,7 +145,11 @@ function RecordingController($location, $rootScope, $scope, androidRecordingServ
             if (sessionIdToUse) {
               qcService.notifySend(sessionIdToUse).then(
                 function success(data){
-                  $location.path('/report');
+                  $uibModal.open({
+                    templateUrl: CACHEBROKEN_REPORT,
+                    controller: 'ReportController',
+                    controllerAs: 'reportCtrl',
+                  }); 
                 },
                 angular.noop);
             }

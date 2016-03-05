@@ -36,6 +36,7 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       
       return delService.queryQC(sessionId)
       .then(function (response){
+        console.log(response);
         var report = response.data;
 
         var tokenAnnouncement = totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
@@ -56,7 +57,7 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       },
       util.stdErrCallback);
     }
-    return $q.reject(false);
+    return $q.when(true); //debug
   }
 }
 }());
