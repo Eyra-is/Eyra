@@ -21,7 +21,10 @@ function utilityService(logger) {
     'defaultSpeakerName' : 'speaker',
     'tokenThreshold' : 400,
     'tokenGetCount' : 1500,
-    'QCFrequency' : 5 // per sessions sent
+    'QCFrequency' : 5, // per sessions sent
+    'QCInitRecThreshold' : 10, // recording count before QC can report, adjustment period for speaker
+    'TokenAnnouncementFreq' : 50,
+    'QCAccThreshold' : 0.2
   };
 
   return utilityHandler;

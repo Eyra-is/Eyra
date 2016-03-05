@@ -6,14 +6,17 @@
 angular.module('daApp')
   .factory('qcService', qcService);
 
-qcService.$inject = ['dataService', 'logger', 'utilityService'];
+qcService.$inject = ['$q', 'dataService', 'deliveryService', 'logger', 'utilityService'];
 
-function qcService(dataService, logger, utilityService) {
+function qcService($q, dataService, deliveryService, logger, utilityService) {
   var qcHandler = {};
+  var delService = deliveryService;
   var util = utilityService;
 
   qcHandler.notifySend = notifySend;
 
+  // counter for the total times recording.controller.js has notified us of a send
+  var totalNotifies = 0;
   // counter to use for QC, counts how many recordings have been sent,
   //   since last reset of counter.
   var modSendCounter = 0;
@@ -22,44 +25,38 @@ function qcService(dataService, logger, utilityService) {
 
   //////////
 
-  function notifySend() {
+  function notifySend(sessionId) {
+    totalNotifies++;
     modSendCounter++;
 
-    if (modSendCounter >= (util.getConstant('QCFrequency') || 5)) {
+    if (modSendCounter >= (util.getConstant('QCFrequency' || 5))
+       && totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
       modSendCounter = 0;
 
-      var oldSessionId = dataService.get('sessionId');
-      var sessionId;
+      
+      return delService.queryQC(sessionId)
+      .then(function (response){
+        var report = response.data;
 
-      // if no error, save sessionId to RAM to be used to identify session
-      //   in later requests (e.g. QC reports)
-      try {
-        sessionId = response.data.sessionId;
-        if (sessionId) {
-          dataService.set('sessionId', sessionId); // set it in ram
-        } else {
-          $scope.msg = 'Something went wrong.';
+        var tokenAnnouncement = totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
+        if (tokenAnnouncement) {
+          report.tokenCount = totalNotifies;
         }
-      } catch (e) {
-        logger.error(e);
-      }
 
-      // query for QC report with last used session (should be same probably)
-      //   and if non-existant, use the one we got now, and if non-existant don't move.
-      var sessionIdToUse = oldSessionId || sessionId;
-      if (sessionIdToUse) {
-        delService.queryQC(sessionIdToUse)
-        .then(function (response){
-          logger.log(response);
-        },
-        util.stdErrCallback)
-      }
+        dataService.set('QCReport', report);
+        // message to send back to recording.controller.js notifying that we wish
+        //   results to be displayed.
+        var displayResults = tokenAnnouncement
+                             || report.totalStats.accuracy < util.getConstant('QCAccThreshold');
+        if (displayResults) {
+          return $q.when(true);
+        } else {
+          return $q.reject(false);
+        }
+      },
+      util.stdErrCallback);
     }
-
-    var displayResults = true;
-    if (displayResults) {
-      return true;
-    }
+    return $q.reject(false);
   }
 }
 }());

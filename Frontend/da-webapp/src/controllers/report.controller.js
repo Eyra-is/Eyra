@@ -4,14 +4,15 @@
 angular.module('daApp')
 .controller('ReportController', ReportController);
 
-ReportController.$inject = ['$location', '$rootScope', '$scope', 'qcService'];
+ReportController.$inject = ['$location', '$rootScope', '$scope', 'dataService'];
 
-function ReportController($location, $rootScope, $scope, qcService) {
+function ReportController($location, $rootScope, $scope, dataService) {
   var reportCtrl = this;
   
   reportCtrl.submit = submit;
 
   $scope.msg = '';
+  $scope.QCReport = dataService.get('QCReport');
 
   $rootScope.isLoaded = true;
 

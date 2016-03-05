@@ -123,9 +123,30 @@ function RecordingController($location, $rootScope, $scope, androidRecordingServ
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
-            var results = qcService.notifySend();
-            if (results) {
-              $location.path('/report');
+            var oldSessionId = dataService.get('sessionId');
+            var sessionId;
+            // if no error, save sessionId to RAM to be used to identify session
+            //   in later requests (e.g. QC reports)
+            try {
+              sessionId = response.data.sessionId;
+              if (sessionId) {
+                dataService.set('sessionId', sessionId); // set it in ram
+              } else {
+                $scope.msg = 'Something went wrong.';
+              }
+            } catch (e) {
+              logger.error(e);
+            }
+
+            // notify QC with last used session (should be same probably)
+            //   and if non-existant, use the one we got now, and if non-existant don't move.
+            var sessionIdToUse = oldSessionId || sessionId;
+            if (sessionIdToUse) {
+              qcService.notifySend(sessionIdToUse).then(
+                function success(data){
+                  $location.path('/report');
+                },
+                angular.noop);
             }
           },
           function error(response) {
