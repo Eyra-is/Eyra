@@ -18,6 +18,7 @@ available_opts_int=("ap"
                     "backend-wsgi"
                     "backend-db"
                     "backend-204"
+                    "backend-qc"
                     "frontend-app"
                    )
 available_opts_ext=("ext-kaldi"
@@ -32,6 +33,7 @@ declare -A AV_OPTS_INT=(
 ['backend-wsgi']='WSGI for Apache'
 ['backend-db']='  Backend: Database Related'
 ['backend-204']=' Backend: Spoofing Android Online Check'
+['backend-qc']='  Backend: Quality Control related'
 ['frontend-app']='Frontend: Web App'
 )
 
