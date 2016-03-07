@@ -475,7 +475,7 @@ class DbHandler:
         except MySQLError as e:
             msg = 'Error getting tokens from database.'
             log(msg, e)
-            return dict(msg=msg, statusCode=500)
+            return []
 
         jsonTokens = []
         # parse our tuple object from the cursor.execute into our desired json object
@@ -500,7 +500,7 @@ class DbHandler:
         except MySQLError as e:
             msg = 'Error getting tokens from database.'
             log(msg, e)
-            return dict(msg=msg, statusCode=500)
+            return []
 
         jsonTokens = []
         # parse our tuple object from the cursor.execute into our desired json object
