@@ -44,6 +44,10 @@ body {
   margin: 0 auto;
   width: inherit;
   height: inherit;
+  ul {
+    padding-left: 0;
+    margin-left: 0;
+  }
 }
 .feedbackDisplay {
   font-size: 1.1em;

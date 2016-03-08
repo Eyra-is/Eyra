@@ -48,13 +48,9 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   }
 
   function handleQCReport(response) {
-    console.log(response);
-
     var report = response.data || {};
     var tokenAnnouncement = handleTokenAnnouncements(report);
     var displayReport = prettify(report);
-
-    console.log(displayReport);
 
     dataService.set('QCReport', displayReport);
 
