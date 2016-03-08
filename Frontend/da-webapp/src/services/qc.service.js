@@ -36,8 +36,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       modSendCounter = 1;
     }
 
-    if (modSendCounter >= (util.getConstant('QCFrequency' || 5))){
-       //&& totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
+    if (modSendCounter >= (util.getConstant('QCFrequency' || 5))
+       && totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
       modSendCounter = 0;
 
       return delService.queryQC(sessionId)
