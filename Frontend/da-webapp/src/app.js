@@ -11,9 +11,10 @@ var BACKENDOPTS = {
                   };
 var BACKENDURL = BACKENDOPTS[BACKENDTYPE];
 
-angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
+angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.bootstrap'])
 
 .constant('BACKENDURL', BACKENDURL)
+.constant('CACHEBROKEN_REPORT', 'views/report.html')
 
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
 .config([

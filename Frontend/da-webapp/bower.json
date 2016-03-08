@@ -11,6 +11,7 @@
     "angular-mocks": "~1.4.0",
     "angular-localforage": "~1.2.3",
     "satellizer": "~0.13.4",
-    "bootstrap": "~3.3.6"
+    "bootstrap": "~3.3.6",
+    "angular-bootstrap": "^1.2.2"
   }
 }

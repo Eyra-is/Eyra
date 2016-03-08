@@ -209,6 +209,7 @@ module.exports = function(grunt) {
 
                   depl+'bower_components/angular/angular.js',
                   depl+'bower_components/angular-route/angular-route.js',
+                  depl+'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
 
                   depl+'bower_components/localforage/dist/localforage.js',
                   depl+'bower_components/angular-localforage/dist/angular-localForage.js',

@@ -4,20 +4,23 @@
 angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
-RecordingController.$inject = [ '$rootScope',
+RecordingController.$inject = [ '$uibModal',
+                                '$rootScope',
                                 '$scope', 
                                 'androidRecordingService',
                                 'dataService',
                                 'deliveryService',
                                 'localDbService',
                                 'logger',
+                                'qcService',
                                 'recordingService',
                                 'sessionService',
                                 'tokenService',
                                 'utilityService',
-                                'volumeMeterService'];
+                                'volumeMeterService',
+                                'CACHEBROKEN_REPORT'];
 
-function RecordingController($rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, recordingService, sessionService, tokenService, utilityService, volumeMeterService) {
+function RecordingController($uibModal, $rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, qcService, recordingService, sessionService, tokenService, utilityService, volumeMeterService, CACHEBROKEN_REPORT) {
   var recCtrl = this;
   // fix for android audio filtering (8k) through browser recording, in case of webview (in our android app)
   //   use the native recorder through the app
@@ -53,6 +56,10 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
   sessionService.setStartTime(new Date().toISOString());
   var invalidTitle = util.getConstant('invalidTitle');
 
+  // if this is true, on next stop click (when user is not in a recording)
+  //   show QC report.
+  var displayReport = false;
+
   activate();
 
   //////////
@@ -71,6 +78,15 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
     } else if (actionType === 'stop') {
       stop(true);
     }
+  }
+
+  function displayQCReport() {
+    $uibModal.open({
+      // defined in app.js to simpliy gruntfile replace of rest of the views.
+      templateUrl: CACHEBROKEN_REPORT, // e.g. 'views/report.2016-03-02-15-42.html'
+      controller: 'ReportController',
+      controllerAs: 'reportCtrl',
+    }); 
   }
 
   function toggleActionBtn() {
@@ -121,11 +137,8 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
-            logger.log(response); // DEBUG
-
             var oldSessionId = dataService.get('sessionId');
             var sessionId;
-
             // if no error, save sessionId to RAM to be used to identify session
             //   in later requests (e.g. QC reports)
             try {
@@ -139,17 +152,24 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
               logger.error(e);
             }
 
-            // query for QC report with last used session (should be same probably)
+            // notify QC with last used session (should be same probably)
             //   and if non-existant, use the one we got now, and if non-existant don't move.
             var sessionIdToUse = oldSessionId || sessionId;
             if (sessionIdToUse) {
-              delService.queryQC(sessionIdToUse)
-              .then(function (response){
-                logger.log(response);
-              },
-              util.stdErrCallback)
+              qcService.notifySend(sessionIdToUse).then(
+                function success(data){
+                  // so long as the user is not in a recording
+                  //   display QC report straight away
+                  // otherwise, queue it for next stop click.
+                  if (actionType === 'record') {
+                    displayQCReport();
+                  } else {
+                    displayReport = true;
+                  }
+                },
+                angular.noop);
             }
-          }, 
+          },
           function error(response) {
             // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
             var rec = oldCurRec;
@@ -198,6 +218,11 @@ function RecordingController($rootScope, $scope, androidRecordingService, dataSe
     recCtrl.actionBtnDisabled = true;
     recCtrl.skipBtnDisabled = true;
     
+    if (displayReport) {
+      displayQCReport();
+      displayReport = false;
+    }
+
     recService.stop(valid);
 
     // whenever stopped is pressed from gui, it should mean a valid token read.
