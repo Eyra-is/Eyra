@@ -4,13 +4,16 @@
 angular.module('daApp')
 .controller('ReportController', ReportController);
 
-ReportController.$inject = ['$location', '$rootScope', '$scope', 'dataService'];
+ReportController.$inject = ['$location', '$rootScope', '$sce', '$scope', 'dataService'];
 
-function ReportController($location, $rootScope, $scope, dataService) {
+function ReportController($location, $rootScope, $sce, $scope, dataService) {
   var reportCtrl = this;
 
   $scope.msg = '';
-  $scope.QCReport = dataService.get('QCReport') || 'Nothing to report.';
+  // https://docs.angularjs.org/api/ngSanitize/service/$sanitize
+  $scope.QCReport = function() {
+    return $sce.trustAsHtml(dataService.get('QCReport') || '<p>Nothing to report.</p>');
+  }
 
   $rootScope.isLoaded = true;
 

@@ -37,6 +37,14 @@ body {
   @extend .default-view;
   text-align: center;
 }
+/* modal popup with QC reports */
+.report-view {
+  @extend .default-view;
+  text-align: center;
+  margin: 0 auto;
+  width: inherit;
+  height: inherit;
+}
 .feedbackDisplay {
   font-size: 1.1em;
 }

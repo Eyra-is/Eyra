@@ -25,57 +25,95 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
 
   //////////
 
-  function notifySend(sessionId) {
+  function notifySend(sessionId, tokenCount) {
     totalNotifies++;
     modSendCounter++;
+
+    // if totalNotifies is higher than the token count, it probably means
+    //   a new user is recording starting at 0 tokens read.
+    if (totalNotifies > tokenCount) {
+      totalNotifies = 1;
+      modSendCounter = 1;
+    }
 
     if (modSendCounter >= (util.getConstant('QCFrequency' || 5))){
        //&& totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
       modSendCounter = 0;
 
-      // THIS IS QUICKFIX VERSION OF CODE NEEDS TO BE CHANGED BACK
-      delService.queryQC(sessionId)
-      .then(function (response){
-        //console.log(response);
-      },
-      util.stdErrCallback);
+      return delService.queryQC(sessionId)
+      .then(handleQCReport, util.stdErrCallback);
+    } else {
+      return $q.reject(false);
     }
+  }
 
-    var report;//response.data || {};
+  function handleQCReport(response) {
+    console.log(response);
 
-    var tokenAnnouncement = totalNotifies > 0
-                            && totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
-    var totalTokens = 260;
-    if (tokenAnnouncement) {
-      //report.tokenCount = totalNotifies;
-      // special, only display this message for now. QC isnt working exactly, have to record straight away.
-      report = 'Nice, '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens read, keep going.';
-      if (totalNotifies >= 100) {
-        report = 'Sweet, '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens.';
-      }
-      if (totalNotifies >= 200) {
-        report = Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens? Wow.'
-      }
-      if (totalNotifies >= 300) {
-        report = 'Awesome, '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens. Just awesome';
-      }
-      if (totalNotifies >= 400) {
-        report = 'You are a god: '+Math.round(totalNotifies/totalTokens*100 * 100) / 100+'% of the tokens.';
-      }
-      dataService.set('QCReport', report);
-    }
+    var report = response.data || {};
+    var tokenAnnouncement = handleTokenAnnouncements(report);
+    var displayReport = prettify(report);
+
+    console.log(displayReport);
+
+    dataService.set('QCReport', displayReport);
 
     // message to send back to recording.controller.js notifying that we wish
     //   results to be displayed.
-    var displayResults = tokenAnnouncement;
-                         //|| report.totalStats.accuracy < util.getConstant('QCAccThreshold');
+    var displayResults = tokenAnnouncement
+                         || report.totalStats.accuracy < util.getConstant('QCAccThreshold');
     if (displayResults) {
       return $q.when(true);
     } else {
       return $q.reject(false);
     }
+  }
 
-    return $q.reject(false);
+  // like for example, display, good job! on each 50 tokens read.
+  // adds key tokenCount and tokenCountMsg to report.
+  function handleTokenAnnouncements(report) {
+    var tokenAnnouncement = totalNotifies > 0
+                            && totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
+    var totalTokens = util.getConstant('TokenCountGoal') || 260;
+    if (tokenAnnouncement) {
+      report.tokenCount = totalNotifies;
+      // some gamifying messages to pump up the speakers
+      report.tokenCountMsg = 'Nice, '+util.percentage(totalNotifies, totalTokens, 2)+'% of the tokens read, keep going.';
+      if (totalNotifies >= 100) {
+        report.tokenCountMsg = 'Sweet, '+util.percentage(totalNotifies, totalTokens, 2)+'% of the tokens.';
+      }
+      if (totalNotifies >= 200) {
+        report.tokenCountMsg = util.percentage(totalNotifies, totalTokens, 2)+'% of the tokens? Wow.'
+      }
+      if (totalNotifies >= 300) {
+        report.tokenCountMsg = 'Awesome, '+util.percentage(totalNotifies, totalTokens, 2)+'% of the tokens. Just awesome';
+      }
+      if (totalNotifies >= 400) {
+        report.tokenCountMsg = 'You are a god: '+util.percentage(totalNotifies, totalTokens, 2)+'% of the tokens.';
+      }
+    }
+    return tokenAnnouncement;
+  }
+
+  // parses the JSON object report into some prettified report to display in HTML
+  function prettify(report) {
+    var out = '';
+    if (report.tokenCountMsg) {
+      out += '<p class="message">'+report.tokenCountMsg+'</p>\n';
+    }
+    if (report.totalStats) {
+      out += '<p class="message">Average accuracy: '+util.percentage(report.totalStats.accuracy, 1, 3)+'%</p>';
+    }
+    if (report.perRecordingStats) {
+      out += '<h3>More stats</h3>';
+      out += '<ul>';
+      for (var i = 0; i < report.perRecordingStats.length; i++) {
+        var acc = report.perRecordingStats[i].stats.accuracy;
+        out += '    <li>Rec. '+i+', accuracy: '+util.percentage(acc, 1, 3)+'%</li>';
+      }
+      out += '</ul>';
+    }
+    return out;
   }
 }
 }());

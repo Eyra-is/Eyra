@@ -56,6 +56,10 @@ function RecordingController($uibModal, $rootScope, $scope, androidRecordingServ
   sessionService.setStartTime(new Date().toISOString());
   var invalidTitle = util.getConstant('invalidTitle');
 
+  // if this is true, on next stop click (when user is not in a recording)
+  //   show QC report.
+  var displayReport = false;
+
   activate();
 
   //////////
@@ -74,6 +78,15 @@ function RecordingController($uibModal, $rootScope, $scope, androidRecordingServ
     } else if (actionType === 'stop') {
       stop(true);
     }
+  }
+
+  function displayQCReport() {
+    $uibModal.open({
+      // defined in app.js to simpliy gruntfile replace of rest of the views.
+      templateUrl: CACHEBROKEN_REPORT, // e.g. 'views/report.2016-03-02-15-42.html'
+      controller: 'ReportController',
+      controllerAs: 'reportCtrl',
+    }); 
   }
 
   function toggleActionBtn() {
@@ -145,11 +158,14 @@ function RecordingController($uibModal, $rootScope, $scope, androidRecordingServ
             if (sessionIdToUse) {
               qcService.notifySend(sessionIdToUse).then(
                 function success(data){
-                  $uibModal.open({
-                    templateUrl: CACHEBROKEN_REPORT,
-                    controller: 'ReportController',
-                    controllerAs: 'reportCtrl',
-                  }); 
+                  // so long as the user is not in a recording
+                  //   display QC report straight away
+                  // otherwise, queue it for next stop click.
+                  if (actionType === 'record') {
+                    displayQCReport();
+                  } else {
+                    displayReport = true;
+                  }
                 },
                 angular.noop);
             }
@@ -202,6 +218,11 @@ function RecordingController($uibModal, $rootScope, $scope, androidRecordingServ
     recCtrl.actionBtnDisabled = true;
     recCtrl.skipBtnDisabled = true;
     
+    if (displayReport) {
+      displayQCReport();
+      displayReport = false;
+    }
+
     recService.stop(valid);
 
     // whenever stopped is pressed from gui, it should mean a valid token read.
