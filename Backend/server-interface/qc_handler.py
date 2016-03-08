@@ -2,10 +2,25 @@ import json
 from io import StringIO, BytesIO
 import tempfile # mkfifo...
 import pipes
-import sh
 import importlib
 
+import sh
+import redis
+
+#: Relative imports
 from util import log
+from app import app
+
+
+class QcError(Exception):
+    """QcError
+    ==========
+
+    Trouble in paradise. Raised if QC experienced a critical error.
+
+    """
+    pass
+
 
 class _QcHandler(object):
     """QcHandler
@@ -216,6 +231,91 @@ class DummyHandler(object):
 
     def getReport(self, session_id):
         return {"sessionId": session_id, "status": "inactive"}
+
+
+#####################
+#: AsyncCleanHandler
+
+from tasks import qc_clean_process
+
+class AsyncCleanHandler(object):
+    """AsyncCleanHandler -- Asynchronous QC handler based on ...
+    ====================
+    # TODO: reference properly
+
+    Async handler using Celery workers for computation and Redis for
+    temporary data.
+
+    A few important app.config options:
+
+      ASYNC_CLEAN_HANDLER_MODEL_PATH    path to the trained "model"
+      ASYNC_CLEAN_HANDLER_BATCH_SIZE    max number of recordings to analyse
+                                        per task
+
+    """
+    def __init__(self, app, model_path='./qcdata', batch_size=5):
+        """Initialise an AsyncCleanHandler
+
+        """
+        self.model_path = app.config.get('ASYNC_CLEAN_HANDLER_MODEL_PATH', None)
+        if self.model_path is None:
+            self.model_path = model_path
+        self._load_model(model_path)
+
+    def _load_model(self, model_path):
+        # TODO: define "model format"; Just a zip file with the necessary files?
+        #: Mapping from symbols to integer ids
+        self.sym_id_path = os.path.join(model_path, 'words.syms')
+        with open(self.sym_id_path, 'rt') as sf:
+            self.sym_id_map = dict(line.strip().split() for line in sf)
+
+        #: Mapping from integer ids to symbols
+        self.id_sym_map = dict((val, key) for key, val in self.sym_id_map.items())
+
+        #: Phonetic context decision tree
+        self.decision_tree_path = os.path.join(model_path, 'tri1.tree')
+
+        #: Acoustic model
+        self.acoustic_model_path = os.path.join(model_path, 'tri1.acoustic_mdl')
+        with open(self.acoustic_model_path, 'rb') as af:
+            self.acoustic_model = af.read()
+
+        #: Integer ID for the out of vocabulary symbol (OOV)
+        self.oov_sym = '<UNK>'
+        self.oov_id = self.sym_id_map[self.oov_sym]
+
+        #: Lexicon FST with disambiguation symbols, keep it in memory
+        self.l_disambig_fst_path = os.path.join(model_path, 'L_disambig.fst')
+        with open(self.l_disambig_fst_path, 'rb') as lf:
+            self.l_disambig_fst = lf.read()
+
+        #: List of integer IDs of the disambiguation symbols
+        self.disambig_ids_path = os.path.join(model_path, 'disambig.int')
+        with open(self.disambig_ids_path, 'rt') as df:
+            self.disambig_ids = df.read().split()
+
+        #: Popular words. Fillers?
+        self.top_words_path = os.path.join(model_path, 'top_words.int')
+        with open(self.top_words_path, 'rt') as dw:
+            self.top_words = [l.strip() for l in dw]
+
+        self.kaldi_root = '../../Local/opt/kaldi-trunk'
+
+        self.sample_freq = 16000
+        self.downsample = True
+
+    def getReport(self, session_id: int) -> dict:
+        """Returns a QC report
+
+        If session with ``session_id`` exists:
+          If in datastore: Read from datastore and return
+          Otherwise: Return started message and start the task if not started
+
+        Otherwise: Return raise/signal an error
+
+        """
+
+        raise NotImplementedError
 
 
 class QcHandler(object):
