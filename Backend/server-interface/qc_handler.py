@@ -1,11 +1,13 @@
 import json
 from io import StringIO, BytesIO
-import tempfile
+import tempfile # mkfifo...
 import pipes
+import sh
+import importlib
 
 from util import log
 
-class QcHandler(object):
+class _QcHandler(object):
     """QcHandler
     ============
 
@@ -198,3 +200,102 @@ class QcHandler(object):
             qc_report['totalStats']['accuracy'] = avg_accuracy
 
         return qc_report
+
+class DummyHandler(object):
+    """DummyHandler - Do no quality control
+    ===============
+
+    A call to DummyHandler.getReport always returns:
+
+        {'sessionId': ..., 'status': 'inactive'}
+
+    """
+    def __init__(self, app):
+        """Initialise a DummyHandler for QC handling"""
+        self.app = app
+
+    def getReport(self, session_id):
+        return {"sessionId": session_id, "status": "inactive"}
+
+
+class QcHandler(object):
+    """QcHandler
+    ============
+
+    Proxy class for handling quality control reporting.
+
+    Its only public method is :meth:`getReport`. See its docstring for
+    details.
+
+    Use the handler class in app.config['QC_HANDLER_CLASS'] if it
+    exists, otherwise ``processing_cls`` is used (which defaults to
+    ``.qc_handler.DummyHandler``)
+
+    Usage:
+
+    >>> qc = QcHandler(app)
+    >>> qc.getReport(1)
+    {'sessionId': 1, 'status': 'started'}
+    ... wait ...
+    >>> qc.getReport(1)
+    {"sessionId": 1,
+     "status": "processing",
+     "totalStats": {"accuracy": [0.0;1.0]"},
+     "perRecordingStats": [{"recordingId": ...,
+                            "stats": {"accuracy": [0.0;1.0]}}]}
+
+    """
+
+    def __init__(self, app, processing_cls=DummyHandler):
+        """Initialise a QC handler
+
+        app.config['QC_HANDLER_CLASS'] should be a fqn of a QC
+        handling class, i.e. a class that implements the getReport
+        method. If it's not set ``processing_cls`` is used instead.
+
+        """
+        handler_name = app.config.get('QC_HANDLER_CLASS', None)
+        if handler_name is not None:
+            try:
+                importlib.import_module(handler_name)
+                self.handler = handler(app)
+            except ImportError as exc:
+                log("Unable to import QC handler from config: QC_HANDLER_CLASS='{}'"
+                    .format(handler_name), e=exc)
+                raise
+        else:
+            self.handler = processing_cls(app)
+
+    def getReport(self, session_id) -> dict:
+        """Return a quality report for the session ``session_id``, if
+        available otherwise we start a background task to process
+        currently available recordings.
+
+        Parameters:
+
+          session_id   ...
+          recordings   [{"recId": ..., "token": str, "recPath": str}]
+
+        Returned dict if the QC report is not available, but is being
+        processed:
+
+            {"sessionId": ...,
+             "status": "started"}
+
+        Returned dict definition if no QC module is active:
+
+            {"sessionId": ...,
+             "status": "inactive"}
+
+        Returned dict definition:
+
+            {"sessionId": ...,
+             "status": "processing",
+             "totalStats": {"accuracy": [0.0;1.0]"},
+             "perRecordingStats": [{"recordingId": ...,
+                                    "stats": {"accuracy": [0.0;1.0]},
+                                    ... TBD ...}]
+            }
+
+        """
+        return handler.getReport(session_id)

@@ -143,26 +143,33 @@ def submit_gettokens_all():
 def qc_report(sessionId):
     """Get a QC report
 
+    Returned JSON if the QC report is not available, but is being
+    processed:
+
+        {"sessionId": ...,
+         "status": "started"}
+
+    Returned JSON definition if no QC module is active:
+
+        {"sessionId": ...,
+         "status": "inactive"}
+
     Returned JSON definition:
 
         {"sessionId": ...,
-            "requestId": ...,
-            "totalStats": {"accuracy": [0.0;1.0]"},
-            "perRecordingStats": [{"recordingId": ...,
-                                   "stats": {"accuracy": [0.0;1.0]},
-                                    }]}
+         "status": "processing",
+         "totalStats": {"accuracy": [0.0;1.0]"},
+         "perRecordingStats": [{"recordingId": ...,
+                                "stats": {"accuracy": [0.0;1.0]},
+                                ... TBD ...}]
+        }
+
     """
     if request.method == 'GET':
-        # count should probably be a parameter in the REST api
-        recordings = dbHandler.getRecordingsInfo(sessionId, count=5)
-        #log(recordings)
-        if len(recordings) > 0:
-            qcReport = qcHandler.getReport(sessionId, recordings)
-            return json.dumps(qcReport), 200
-        else:
-            msg = 'No recordings belonging to sessionId = {}'.format(sessionId)
-            log(msg)
-            return msg, 404
+        # TODO: handle non-existent session ids -> 404
+        qcReport = qcHandler.getReport(sessionId, recordings)
+        return json.dumps(qcReport), 200
+
     return 'Unexpected error.', 500
 
 if __name__ == '__main__':
