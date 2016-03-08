@@ -14,7 +14,7 @@ for i in $(ls -1 /etc/apache2/sites-available/); do
   sudo a2dissite ${i} 
 done && \
 sudo a2ensite datatool.conf && \
-sudo a2dismod mpm_prefork && \
+sudo a2dismod mpm_prefork mpm_event && \
 sudo a2enmod ssl wsgi mpm_worker && \
 sudo service apache2 restart && suc || err
 
