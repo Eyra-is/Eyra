@@ -222,17 +222,21 @@ class DbHandler:
     def processDeviceData(self, deviceData):
         # we have to make sure not to insert device with same IMEI
         #   as is already in the database if so. Otherwise, we create new device
-        deviceImei = None
+        deviceImei, deviceId, userAgent = None, None, None
         try:
             if isinstance(deviceData, str):
                 deviceData = json.loads(deviceData)
-            deviceImei = deviceData['imei']
-        except (TypeError, ValueError) as e:
+            userAgent = deviceData['userAgent']
+        except (TypeError, ValueError, KeyError) as e:
             msg = 'Device data not on correct format, aborting.'
             log(msg, e)
             return dict(msg=msg, statusCode=400)
+
+        try:
+            deviceImei = deviceData['imei']
+            deviceId = deviceData['id']
         except (KeyError) as e:
-            # we don't care if device has no ['imei']
+            # we don't care if device has no ['imei'] or ['id']
             pass
 
         if deviceImei is not None and deviceImei != '':
@@ -241,24 +245,49 @@ class DbHandler:
 
                 # firstly, check if this device already exists, if so, update end time, otherwise add device
                 cur.execute('SELECT id FROM device WHERE imei=%s', (deviceImei,)) # have to pass in a tuple, with only one parameter
-                deviceId = cur.fetchone()
-                if (deviceId is None):
+                dbDeviceId = cur.fetchone()
+                if (dbDeviceId is None):
                     # no device with this imei in database, insert it
                     return self.insertGeneralData('device', deviceData, 'device')
                 else:
                     # device already exists, return it
-                    deviceId = deviceId[0] # fetchone returns tuple on success
-                    return dict(msg='{"deviceId":' + str(deviceId) + '}', statusCode=200)
+                    dbDeviceId = dbDeviceId[0] # fetchone returns tuple on success
+                    return dict(msg='{"deviceId":' + str(dbDeviceId) + '}', statusCode=200)
             except MySQLError as e:
                 msg = 'Database error.'
                 log(msg, e)
                 return dict(msg=msg, statusCode=500)
 
-        # no imei present, wouldn't be able to recognize the device
+        # no imei present, won't be able to identify speaker unless he has his id
+        if deviceId is not None and deviceId != '':
+            # check if a device with this id has the same userAgent as our devicedata
+            try: 
+                cur = self.mysql.connection.cursor()
+
+                cur.execute('SELECT userAgent FROM device WHERE \
+                             id=%s', (deviceId,))
+                dbUserAgent = cur.fetchone()
+                if dbUserAgent is None:
+                    # no device with this info in database, insert it
+                    return self.insertDeviceData(newDeviceData, deviceInfo)
+                else:
+                    # device already exists, check if names match
+                    if dbUserAgent == userAgent:
+                        return dict(msg='{"deviceId":' + str(deviceId) + '}', statusCode=200)
+                    else:
+                        msg = 'userAgents don\'t match for supplied id. Creating new device.'
+                        log(msg)
+                        return self.insertDeviceData(newDeviceData, deviceInfo)
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+
+        # no id and no imei, must be new device and first transmission
         return self.insertGeneralData('device', deviceData, 'device')
 
     def processSpeakerData(self, speakerData):
-        name, deviceImei = None, None
+        name, deviceImei, speakerId = None, None, None
         try:
             if isinstance(speakerData, str):
                 speakerData = json.loads(speakerData)
@@ -269,8 +298,10 @@ class DbHandler:
             return dict(msg=msg, statusCode=400)
         try:
             deviceImei = speakerData['deviceImei']
+            speakerId = speakerData['id']
         except (KeyError) as e:
             # we don't care if speaker has no ['imei']
+            # or if he doesn't have an id
             pass
 
         # now, lets process the dynamic keys/values from speaker data
@@ -282,29 +313,55 @@ class DbHandler:
         # recreate our speakerData object ready to store in db
         newSpeakerData = {'name':name}
 
+        # if the speaker has imei info, use that to identify him
         if deviceImei is not None and deviceImei != '':
             newSpeakerData['deviceImei'] = deviceImei
             try: 
                 cur = self.mysql.connection.cursor()
 
-                # firstly, check if this speaker already exists, if so, update end time, otherwise add speaker
+                # firstly, check if this speaker already exists, if so, return speakerId, otherwise add speaker
                 cur.execute('SELECT id FROM speaker WHERE \
                          name=%s AND deviceImei=%s',
                         (name, deviceImei))
-                speakerId = cur.fetchone()
-                if (speakerId is None):
+                dbSpeakerId = cur.fetchone()
+                if (dbSpeakerId is None):
                     # no speaker with this info in database, insert it
                     return self.insertSpeakerData(newSpeakerData, speakerInfo)
                 else:
                     # speaker already exists, return it
-                    speakerId = speakerId[0] # fetchone returns tuple on success
-                    return dict(msg='{"speakerId":' + str(speakerId) + '}', statusCode=200)
+                    dbSpeakerId = dbSpeakerId[0] # fetchone returns tuple on success
+                    return dict(msg='{"speakerId":' + str(dbSpeakerId) + '}', statusCode=200)
             except MySQLError as e:
                 msg = 'Database error.'
                 log(msg, e)
                 return dict(msg=msg, statusCode=500)
 
-        # no imei present, wouldn't be able to recognize the speaker
+        # no imei present, won't be able to identify speaker unless he has his id
+        if speakerId is not None and speakerId != '':
+            # check if a speaker with this id has the same name as our speakerdata
+            try: 
+                cur = self.mysql.connection.cursor()
+
+                cur.execute('SELECT name FROM speaker WHERE \
+                             id=%s', (speakerId,))
+                dbName = cur.fetchone()
+                if dbName is None:
+                    # no speaker with this info in database, insert it
+                    return self.insertSpeakerData(newSpeakerData, speakerInfo)
+                else:
+                    # speaker already exists, check if names match
+                    if dbName == name:
+                        return dict(msg='{"speakerId":' + str(speakerId) + '}', statusCode=200)
+                    else:
+                        msg = 'Names don\'t match for supplied id. Creating new speaker.'
+                        log(msg)
+                        return self.insertSpeakerData(newSpeakerData, speakerInfo)
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+
+        # no id and no imei, must be new speaker and first transmission
         return self.insertSpeakerData(newSpeakerData, speakerInfo)
 
     def processSessionData(self, jsonData, recordings):
