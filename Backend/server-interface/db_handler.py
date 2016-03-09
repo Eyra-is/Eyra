@@ -450,7 +450,8 @@ class DbHandler:
             log(msg, e)
             return dict(msg=msg, statusCode=400)
 
-        return dict(msg='{"sessionId":' + str(sessionId) + '}', statusCode=200)
+        return dict(msg=json.dumps(dict(sessionId=sessionId, deviceId=deviceId, speakerId=speakerId)), 
+                    statusCode=200)
 
     def getTokens(self, numTokens):
         """
