@@ -234,9 +234,9 @@ class DbHandler:
 
         try:
             deviceImei = deviceData['imei']
-            deviceId = deviceData['id']
+            deviceId = deviceData['deviceId']
         except (KeyError) as e:
-            # we don't care if device has no ['imei'] or ['id']
+            # we don't care if device has no ['imei'] or ['deviceId']
             pass
 
         if deviceImei is not None and deviceImei != '':
@@ -258,7 +258,7 @@ class DbHandler:
                 log(msg, e)
                 return dict(msg=msg, statusCode=500)
 
-        # no imei present, won't be able to identify speaker unless he has his id
+        # no imei present, won't be able to identify device unless he has his id
         if deviceId is not None and deviceId != '':
             # check if a device with this id has the same userAgent as our devicedata
             try: 
@@ -298,17 +298,17 @@ class DbHandler:
             return dict(msg=msg, statusCode=400)
         try:
             deviceImei = speakerData['deviceImei']
-            speakerId = speakerData['id']
+            speakerId = speakerData['speakerId']
         except (KeyError) as e:
             # we don't care if speaker has no ['imei']
             # or if he doesn't have an id
             pass
 
         # now, lets process the dynamic keys/values from speaker data
-        # ignore name and deviceImei keys from dict
+        # ignore name, speakerId and deviceImei keys from dict
         speakerInfo = {}
         for k, v in speakerData.items():
-            if k != 'name' and k != 'deviceImei':
+            if k != 'name' and k != 'deviceImei' and k != 'speakerId':
                 speakerInfo[str(k)] = str(v)
         # recreate our speakerData object ready to store in db
         newSpeakerData = {'name':name}
