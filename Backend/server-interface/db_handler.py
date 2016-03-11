@@ -235,6 +235,7 @@ class DbHandler:
         try:
             deviceImei = deviceData['imei']
             deviceId = deviceData['deviceId']
+            del deviceData['deviceId'] # delete it, we don't want to insert it into database
         except (KeyError) as e:
             # we don't care if device has no ['imei'] or ['deviceId']
             pass
@@ -269,7 +270,7 @@ class DbHandler:
                 dbUserAgent = cur.fetchone()
                 if dbUserAgent is None:
                     # no device with this info in database, insert it
-                    return self.insertDeviceData(newDeviceData, deviceInfo)
+                    return self.insertDeviceData(deviceData, deviceInfo)
                 else:
                     # device already exists, check if names match
                     if dbUserAgent == userAgent:
@@ -277,7 +278,7 @@ class DbHandler:
                     else:
                         msg = 'userAgents don\'t match for supplied id. Creating new device.'
                         log(msg)
-                        return self.insertDeviceData(newDeviceData, deviceInfo)
+                        return self.insertDeviceData(deviceData, deviceInfo)
             except MySQLError as e:
                 msg = 'Database error.'
                 log(msg, e)
