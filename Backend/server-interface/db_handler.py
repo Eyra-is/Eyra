@@ -270,15 +270,16 @@ class DbHandler:
                 dbUserAgent = cur.fetchone()
                 if dbUserAgent is None:
                     # no device with this info in database, insert it
-                    return self.insertDeviceData(deviceData, deviceInfo)
+                    return self.insertGeneralData('device', deviceData, 'device')
                 else:
                     # device already exists, check if names match
+                    dbUserAgent = dbUserAgent[0]
                     if dbUserAgent == userAgent:
                         return dict(msg='{"deviceId":' + str(deviceId) + '}', statusCode=200)
                     else:
                         msg = 'userAgents don\'t match for supplied id. Creating new device.'
                         log(msg)
-                        return self.insertDeviceData(deviceData, deviceInfo)
+                        return self.insertGeneralData('device', deviceData, 'device')
             except MySQLError as e:
                 msg = 'Database error.'
                 log(msg, e)
