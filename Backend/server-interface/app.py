@@ -1,5 +1,4 @@
 from flask import Flask, request, Response
-from flask.ext.cors import CORS
 import json
 
 from db_handler import DbHandler
@@ -13,13 +12,6 @@ app = Flask(__name__)
 dbHandler = DbHandler(app)
 authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
 qcHandler = QcHandler(app)
-
-# allow pretty much everything, this will be removed in production! since we will serve
-#   the backend and frontend on the same origin/domain
-cors = CORS(app,    resources=r'/*', 
-                    allow_headers='*', 
-                    origins='*',
-                    methods='GET, POST, OPTIONS')
 
 # SUBMISSION ROUTES
 
