@@ -3,14 +3,14 @@ from io import StringIO, BytesIO
 import tempfile # mkfifo...
 import pipes
 import importlib
+import os
 
 import sh
 import redis
 
 #: Relative imports
 from util import log
-from app import app
-
+from celery_handler import CeleryHandler
 
 class QcError(Exception):
     """QcError
@@ -236,7 +236,7 @@ class DummyHandler(object):
 #####################
 #: AsyncCleanHandler
 
-from tasks import qc_clean_process
+#from tasks import qc_clean_process
 
 class AsyncCleanHandler(object):
     """AsyncCleanHandler -- Asynchronous QC handler based on ...
@@ -261,6 +261,10 @@ class AsyncCleanHandler(object):
         if self.model_path is None:
             self.model_path = model_path
         self._load_model(model_path)
+        # TODO: use these variables as configs
+        self.redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+        self.celeryHandler = CeleryHandler(app)
 
     def _load_model(self, model_path):
         # TODO: define "model format"; Just a zip file with the necessary files?
@@ -315,7 +319,14 @@ class AsyncCleanHandler(object):
 
         """
 
-        raise NotImplementedError
+        # TODO: check if session exists
+        report = self.redis.get('report/{}'.format(session_id))
+        if report is not None:
+            return report\
+                    .decode("utf-8") # redis.get returns bytes, so we decode into string
+        else:
+            self.celeryHandler.qcProcessSession(session_id, 0)
+            return dict(sessionId=session_id, status='started')
 
 
 class QcHandler(object):
@@ -398,4 +409,4 @@ class QcHandler(object):
             }
 
         """
-        return handler.getReport(session_id)
+        return self.handler.getReport(session_id)

@@ -4,7 +4,7 @@ import json
 
 from db_handler import DbHandler
 from auth_handler import AuthHandler
-from qc_handler import QcHandler
+from qc_handler import QcHandler, AsyncCleanHandler
 
 from util import log
 
@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 dbHandler = DbHandler(app)
 authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
-qcHandler = QcHandler(app)
+qcHandler = QcHandler(app, processing_cls=AsyncCleanHandler)
 
 # allow pretty much everything, this will be removed in production! since we will serve
 #   the backend and frontend on the same origin/domain
@@ -167,14 +167,10 @@ def qc_report(sessionId):
     """
     if request.method == 'GET':
         # TODO: handle non-existent session ids -> 404
-        qcReport = qcHandler.getReport(sessionId, recordings)
+        qcReport = qcHandler.getReport(sessionId)
         return json.dumps(qcReport), 200
 
     return 'Unexpected error.', 500
 
 if __name__ == '__main__':
-    #import ssl
-    #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    #context.load_cert_chain('yourserver.crt', 'yourserver.key')
-    #app.run(debug=True, ssl_context='adhoc')
     app.run(debug=True)
