@@ -4,13 +4,15 @@
 angular.module('daApp')
 .controller('RecordingController', RecordingController);
 
-RecordingController.$inject = [ '$uibModal',
+RecordingController.$inject = [ '$q',
+                                '$uibModal',
                                 '$rootScope',
                                 '$scope', 
                                 'androidRecordingService',
                                 'dataService',
                                 'deliveryService',
                                 'localDbService',
+                                'localDbMiscService',
                                 'logger',
                                 'qcService',
                                 'recordingService',
@@ -20,13 +22,14 @@ RecordingController.$inject = [ '$uibModal',
                                 'volumeMeterService',
                                 'CACHEBROKEN_REPORT'];
 
-function RecordingController($uibModal, $rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, logger, qcService, recordingService, sessionService, tokenService, utilityService, volumeMeterService, CACHEBROKEN_REPORT) {
+function RecordingController($q, $uibModal, $rootScope, $scope, androidRecordingService, dataService, deliveryService, localDbService, localDbMiscService, logger, qcService, recordingService, sessionService, tokenService, utilityService, volumeMeterService, CACHEBROKEN_REPORT) {
   var recCtrl = this;
   // fix for android audio filtering (8k) through browser recording, in case of webview (in our android app)
   //   use the native recorder through the app
   var recService = $rootScope.isWebView ? androidRecordingService : recordingService;
   var delService = deliveryService;
   var dbService = localDbService;
+  var miscDbService = localDbMiscService;
   var util = utilityService;
   var volService = volumeMeterService;
 
@@ -137,6 +140,19 @@ function RecordingController($uibModal, $rootScope, $scope, androidRecordingServ
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
+            // we may have gotten a deviceId and speakerId from server, in which case
+            //   we handle that by setting it in RAM and local database, if it is different
+            //   from the id's there.
+            // response e.g.: { 'sessionId' : int, 'speakerId': int, 'deviceId' : int }
+
+            var speakerId = response.data.speakerId;
+            var deviceId = response.data.deviceId;
+            if (deviceId) updateDevice(deviceId); 
+            if (speakerId) updateSpeakerInfo(speakerId);
+
+            //setDevice(response);
+            //updateSpeakerInfo(response);
+
             var oldSessionId = dataService.get('sessionId');
             var sessionId;
             // if no error, save sessionId to RAM to be used to identify session
@@ -228,6 +244,74 @@ function RecordingController($uibModal, $rootScope, $scope, androidRecordingServ
     // whenever stopped is pressed from gui, it should mean a valid token read.
     if (valid) {
       $scope.tokensRead++;
+    }
+  }
+
+  // updates device or speakerInfo by checking for an id, and adding
+  //   it. Both in RAM and local database.
+  // id is the id supplied from the backend
+  // updateDevice() and updateSpeakerInfo() aren't DRY unfortunately
+  //   due to the need for speakerName in the latter case (could be fixed)
+  function updateDevice(id) {
+    var device = dataService.get('device');
+    if (device) {
+      // either device.deviceId is undefined, in which case we add it
+      // or it is different from our id, in which case we update it
+      // otherwise, we assume we don't need to change anything
+      if (device.deviceId !== id) {
+        device.deviceId = id;
+        dataService.set('device', device); // this line might be redundant
+        miscDbService.setDevice(device)
+          .then(angular.noop, util.stdErrCallback);
+      }
+    } else {
+      // no device in ram, check in local db
+      miscDbService.getDevice().then(
+        function success(device) {
+          if (device) {
+            device.deviceId = id;
+          } else {
+            device = {
+              'userAgent' : navigator.userAgent,
+              'deviceId' : id
+            };
+          }
+          dataService.set('device', device);
+          miscDbService.setDevice(device)
+            .then(angular.noop, util.stdErrCallback);
+        },
+        util.stdErrCallback
+      );
+    }
+  }
+  function updateSpeakerInfo(id) {
+    var speakerName = dataService.get('speakerName'); // this is the only thing we are guaranteed is in RAM
+    var speakerInfo = dataService.get('speakerInfo');
+    if (speakerInfo) {
+      // either speakerInfo.speakerId is undefined, in which case we add it
+      // or it is different from our id, in which case we update it
+      // otherwise, we assume we don't need to change anything
+      if (speakerInfo.speakerId !== id) {
+        speakerInfo.speakerId = id;
+        dataService.set('speakerInfo', speakerInfo); // this line might be redundant
+        miscDbService.setSpeaker(speakerName, speakerInfo)
+          .then(angular.noop, util.stdErrCallback);
+      }
+    } else {
+      // no speakerInfo in ram, check in local db
+      miscDbService.getSpeaker(speakerName).then(
+        function success(speakerInfo) {
+          if (speakerInfo) {
+            speakerInfo.speakerId = id;
+            dataService.set('speakerInfo', speakerInfo);
+            miscDbService.setSpeaker(speakerName, speakerInfo)
+              .then(angular.noop, util.stdErrCallback);
+          } else {
+            logger.error('Speaker not in database, ' + speakerName + ', should not happen.');
+          }
+        },
+        util.stdErrCallback
+      );
     }
   }
 }

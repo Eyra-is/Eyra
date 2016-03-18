@@ -234,10 +234,14 @@ class DbHandler:
 
         try:
             deviceImei = deviceData['imei']
+        except (KeyError) as e:
+            # we don't care if device has no ['imei']
+            pass
+        try:
             deviceId = deviceData['deviceId']
             del deviceData['deviceId'] # delete it, we don't want to insert it into database
         except (KeyError) as e:
-            # we don't care if device has no ['imei'] or ['deviceId']
+            # we don't care if device has no ['deviceId']
             pass
 
         if deviceImei is not None and deviceImei != '':
@@ -300,9 +304,12 @@ class DbHandler:
             return dict(msg=msg, statusCode=400)
         try:
             deviceImei = speakerData['deviceImei']
-            speakerId = speakerData['speakerId']
         except (KeyError) as e:
             # we don't care if speaker has no ['imei']
+            pass
+        try:
+            speakerId = speakerData['speakerId']
+        except (KeyError) as e:
             # or if he doesn't have an id
             pass
 
@@ -352,6 +359,7 @@ class DbHandler:
                     return self.insertSpeakerData(newSpeakerData, speakerInfo)
                 else:
                     # speaker already exists, check if names match
+                    dbName = dbName[0] # fetchone() returns a tuple
                     if dbName == name:
                         return dict(msg='{"speakerId":' + str(speakerId) + '}', statusCode=200)
                     else:

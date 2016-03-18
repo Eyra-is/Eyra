@@ -134,7 +134,7 @@ function sessionService($q, dataService, localDbMiscService, logger) {
     // the infoPromises will be changed after the function calls
     getGeneralInfo('speakerInfo', speakerInfoPromise, dbService.getSpeaker, speakerName);
     getGeneralInfo('instructorId', instructorIdPromise, dbService.getInstructorId, undefined);
-    getGeneralInfo('deviceInfo', deviceInfoPromise, dbService.getDevice, undefined);
+    getGeneralInfo('device', deviceInfoPromise, dbService.getDevice, undefined);
 
     return $q.all(dataPromises);
   }
