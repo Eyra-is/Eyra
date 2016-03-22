@@ -2,7 +2,7 @@ import redis
 
 #: Relative imports
 from util import log
-from . import config # get our dict with qc module names -> qc module functions
+from . import config # get our dict with qc module names & qc module functions
 from . import celery_config
 
 class QcError(Exception):
@@ -57,8 +57,8 @@ class QcHandler(object):
         the instance of the celery class created in app from celery_handler.py
 
         """
-        self.modules = {moduleName : module(app) \
-                            for moduleName, module in config.activeModules.items()}
+        self.modules = {module['name'] : module['processFn'] \
+                            for k, module in config.activeModules.items()}
 
         # TODO: use these variables as configs
         self.redis = redis.StrictRedis(
@@ -105,13 +105,16 @@ class QcHandler(object):
         """
         # TODO: check if session exists
 
-        # individually call get report on each module and grab each ones'
-        #   report from the redis datastore
+        # attempt to grab report for each module from redis datastore.
+        #   if report does not exist, add a task for that session to the celery queue
         reports = {}
-        for name, module in self.modules.items():
-            report = module.getReport(session_id)
+        for name, processFn in self.modules.items():
+            report = self.redis.get('report/{}/{}'.format(name, session_id))
             if report is not None:
-                reports[name] = report
+                reports[name] = report.decode("utf-8") # redis.get returns bytes, so we decode into string
+            else:
+                # start the async processing
+                processFn.delay(name, session_id, 0, 5)
 
         if len(reports) > 0:
             return dict(sessionId=session_id, status='processing', modules=reports)

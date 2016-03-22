@@ -5,7 +5,6 @@ import json
 from db_handler import DbHandler
 from auth_handler import AuthHandler
 from qc.qc_handler import QcHandler
-#from qc.celery_handler import CeleryHandler
 
 from util import log
 
@@ -13,26 +12,7 @@ app = Flask(__name__)
 
 dbHandler = DbHandler(app)
 authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
-
-from qc.celery_handler import add, qcProcessSession
-
-#celeryHandler = CeleryHandler(app)
-# important that this is set up before calling QcHandler
-# this is pretty ugly though, it's not a config variable.
-#   just needed a way to use this variable in all the handlers.
-app.config['CELERY_QC_PROCESS_FN'] = qcProcessSession
-app.config['CELERY_ADD'] = add
 qcHandler = QcHandler(app)
-# need the actual celery function/class to start the celery worker from cli
-# now we can call it as app.celery
-#celery = celeryHandler.getCelery()
-
-# allow pretty much everything, this will be removed in production! since we will serve
-#   the backend and frontend on the same origin/domain
-# cors = CORS(app,    resources=r'/*', 
-#                     allow_headers='*', 
-#                     origins='*',
-#                     methods='GET, POST, OPTIONS')
 
 # SUBMISSION ROUTES
 
