@@ -3,6 +3,7 @@ import redis
 #: Relative imports
 from util import log
 from . import config # get our dict with qc module names -> qc module functions
+from . import celery_config
 
 class QcError(Exception):
     """QcError
@@ -60,7 +61,10 @@ class QcHandler(object):
                             for moduleName, module in config.activeModules.items()}
 
         # TODO: use these variables as configs
-        self.redis = redis.StrictRedis(host='localhost', port=6379, db=1)
+        self.redis = redis.StrictRedis(
+            host=celery_config.const['host'], 
+            port=celery_config.const['port'], 
+            db=celery_config.const['backend_db'])
 
     def getReport(self, session_id) -> dict:
         """Return a quality report for the session ``session_id``, if
