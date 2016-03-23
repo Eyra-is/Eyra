@@ -51,6 +51,7 @@ def process():
             content,
             flags=re.DOTALL)
 
+        # write our new FILENAME to a temp file, which will then replace the original
         with open(FILENAME+'.temp', 'w', encoding='utf8') as g:
             g.write(content)
 

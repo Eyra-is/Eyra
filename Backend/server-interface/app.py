@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 dbHandler = DbHandler(app)
 authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
-qcHandler = QcHandler(app)
+qcHandler = QcHandler(app, dbHandler)
 
 # SUBMISSION ROUTES
 

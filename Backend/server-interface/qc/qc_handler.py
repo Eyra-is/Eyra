@@ -47,7 +47,7 @@ class QcHandler(object):
 
     """
 
-    def __init__(self, app):
+    def __init__(self, app, dbHandler):
         """Initialise a QC handler
 
         config.activeModules should be a dict containing names : function pointers
@@ -60,11 +60,33 @@ class QcHandler(object):
         self.modules = {module['name'] : module['processFn'] \
                             for k, module in config.activeModules.items()}
 
-        # TODO: use these variables as configs
+        self.dbHandler = dbHandler # grab database handler from app to handle MySQL database operations
+
         self.redis = redis.StrictRedis(
             host=celery_config.const['host'], 
             port=celery_config.const['port'], 
             db=celery_config.const['backend_db'])
+
+    def _updateRecordingsList(self, session_id) -> None:
+        """
+        Update the list of recordings for this session(_id) in 
+        the redis datastore. Query the MySQL database and write
+        out the recordings there (for this session) to the redis datastore.
+
+        Redis key format: session/session_id/recordings
+        Redis value format (same as from dbHandler.getRecordingsInfo return value):
+            [{"recId": ..., "token": str, "recPath": str}, ..]
+        Where the recPaths are directly from the MySQL database (relative paths to
+        server-interface/)
+
+        Example:
+            'session/2/recordings' -> 
+                [{"recId":2, "token":'hello', "recPath":'recordings/session_2/user_2016-03-09T15:42:29.005Z.wav'},
+                {"recId":2, "token":'hello', "recPath":'recordings/session_2/user_2016-03-09T15:42:29.005Z.wav'}]
+        """
+        recs = self.dbHandler.getRecordingsInfo(session_id)
+        if len(recs) > 0:
+            self.redis.set('session/{}/recordings'.format(session_id), recs)
 
     def getReport(self, session_id) -> dict:
         """Return a quality report for the session ``session_id``, if
@@ -104,6 +126,9 @@ class QcHandler(object):
 
         """
         # TODO: check if session exists
+
+        # always update the sessionlist on getReport call, there might be new recordings
+        self._updateRecordingsList(session_id)
 
         # attempt to grab report for each module from redis datastore.
         #   if report does not exist, add a task for that session to the celery queue

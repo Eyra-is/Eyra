@@ -13,7 +13,7 @@
 #   mod=dict(name='UniqueNameModule', task='UniqueNameTask', processFn=qcProcSessionUniqueNameModule)
 #
 # For example, I have a module TestModule, which is in TestModule.py
-# Then I add 'TestModule=dict(name='TestModule', task='TestTask', processFn=qcProcSessionTestModule)
+# Then I add 'TestModule=dict(name='TestModule', task='TestTask', processFn=qcProcSessionTestModule)'
 #   and the script will handle adding: from .celery_handler import qcProcSessionTestModule
 #   and adding @celery.task(base=TestTask) in celery_handler.py
 
@@ -24,11 +24,11 @@
 try:
     # you need to manually add imports here
     from .celery_handler import qcProcSessionTestModule
-    from .celery_handler import qcProcSessionDummyModule
+    #from .celery_handler import qcProcSessionDummyModule
 except SystemError:
     # and here
     qcProcSessionTestModule = None
-    qcProcSessionDummyModule = None
+    #qcProcSessionDummyModule = None
 
 activeModules = dict(
     TestModule=dict(
@@ -45,7 +45,10 @@ activeModules = dict(
 
 # default to no processing
 if len(activeModules) == 0:
-    from .celery_handler import qcProcSessionDummyModule
+    try:
+        from .celery_handler import qcProcSessionDummyModule
+    except SystemError:
+        qcProcSessionDummyModule = None
     activeModules = dict(
         DummyModule=dict(name='DummyModule', task='DummyTask', processFn=qcProcSessionDummyModule)
     )
