@@ -47,7 +47,7 @@ class TestTask(Task):
         Return False or raise an exception if something is wrong (and
         this should not be called again.)
         """
-        print('In processing batch, {}'.format(indices))
+        print('In processing batch, indices: {}'.format(indices))
         time.sleep(4)
         self.redis.set('report/{}/{}'.format(name, session_id), 
                         {'report':'A TEST REPORT, indices: {}'.format(indices)})

@@ -1,6 +1,7 @@
 import redis
 import datetime
 import time
+import json
 
 #: Relative imports
 from celery import Celery
@@ -86,10 +87,6 @@ def isSessionOver(sessionId) -> bool:
 #     if isSessionOver(sessionId):
 #         return
 
-#     recsInfo = _redis.get('session/{}/recordings'.format(sessionId))
-#     if recsInfo is not None:
-#         recsInfo = json.loads(recsInfo.decode('utf-8'))
-
 #     curTime = datetime.datetime.now()
 #     if prevTime is not None:
 #         diff = (curTime - prevTime).microseconds
@@ -139,7 +136,7 @@ def qcProcSessionTestModule(name, sessionId, prevTime=None, slistIdx=0, batchSiz
         return
 
     recsInfo = _redis.get('session/{}/recordings'.format(sessionId))
-    if recsInfo is not None:
+    if recsInfo:
         recsInfo = json.loads(recsInfo.decode('utf-8'))
 
     curTime = datetime.datetime.now()

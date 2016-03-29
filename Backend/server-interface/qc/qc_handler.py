@@ -128,7 +128,9 @@ class QcHandler(object):
             }
 
         """
-        # TODO: check if session exists
+        # check if session exists
+        if not self.dbHandler.sessionExists(session_id):
+            return None
 
         # always update the sessionlist on getReport call, there might be new recordings
         self._updateRecordingsList(session_id)
@@ -142,11 +144,11 @@ class QcHandler(object):
         reports = {}
         for name, processFn in self.modules.items():
             report = self.redis.get('report/{}/{}'.format(name, session_id))
-            if report is not None:
+            if report:
                 reports[name] = report.decode("utf-8") # redis.get returns bytes, so we decode into string
             else:
                 # start the async processing
-                processFn.delay(name, session_id, None, 0, 5)
+                processFn.delay(name, session_id, None, 0, celery_config.const['batch_size'])
 
         if len(reports) > 0:
             return dict(sessionId=session_id, status='processing', modules=reports)

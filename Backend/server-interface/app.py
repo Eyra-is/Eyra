@@ -159,9 +159,11 @@ def qc_report(sessionId):
 
     """
     if request.method == 'GET':
-        # TODO: handle non-existent session ids -> 404
         qcReport = qcHandler.getReport(sessionId)
-        return json.dumps(qcReport), 200
+        if qcReport:
+            return json.dumps(qcReport), 200
+        else:
+            return 'Session doesn\'t exist', 404
 
     return 'Unexpected error.', 500
 

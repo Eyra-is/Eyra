@@ -533,7 +533,22 @@ class DbHandler:
             msg = 'Error getting info for session recordings'
             log(msg, e)
             raise
-            # return dict(msg=msg, statusCode=500) # hmm, does this do anything?
         else:
-            return [dict(recId=recId, recPath=recPath, token=token)
-                    for recId, recPath, token in rows]
+            return json.dumps([dict(recId=recId, recPath=recPath, token=token)
+                                for recId, recPath, token in rows])
+
+    def sessionExists(self, sessionId) -> bool:
+        """
+        Checks to see if session with sessionId exists (is in database).
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT * FROM session WHERE id=%s', (sessionId,))
+            if cur.fetchone():
+                return True
+        except MySQLError as e:
+            msg = 'Error checking for session existence.'
+            log(msg, e)
+            raise
+        else:
+            return False
