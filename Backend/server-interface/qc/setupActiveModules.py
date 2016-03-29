@@ -32,7 +32,7 @@ def process():
         processTemplate = processTemplate[0]
         # remove commenting
         processTemplate = logReSubn(re.subn(r'\n# ', '\n', processTemplate),
-                            'Removing # from template.', '# removed.', '')
+                            'Removing # from template.', '# removed (expecting > 1).', '')
 
         processTasks = '' # the entire code of all the tasks to be placed between
                           # @@CELERYQCPROCESSTASKS markers
@@ -41,12 +41,12 @@ def process():
             processingFn = logReSubn(
                 re.subn(TEMPLATENAME, module['name'], processTemplate),
                 'Replacing %s.' % module['name'],
-                '%s replaced.' % module['name'],
+                '%s replaced. (expecting 5)' % module['name'],
                 'Error, couldn\'t find %s in code.' % module['name'])
             processingFn = logReSubn(
                 re.subn(TEMPLATETASK, module['task'], processingFn),
                 'Replacing %s.' % module['task'],
-                '%s replaced.' % module['task'],
+                '%s replaced. (expecting 1)' % module['task'],
                 'Error, couldn\'t find %s in code.' % module['task'])
             processTasks += processingFn + '\n\n'
 
@@ -58,7 +58,7 @@ def process():
                 content,
                 flags=re.DOTALL),
             'Replacing # @@...TASKIMPORTS',
-            '# @@...TASKIMPORTS replaced.',
+            '# @@...TASKIMPORTS replaced. (expecting 1)',
             'Error, no # @@...TASKIMPORTS found, should be 1.')
         content = logReSubn(
             re.subn(r'# @@CELERYQCPROCESSTASKS(.*)# @@/CELERYQCPROCESSTASKS', 
@@ -66,7 +66,7 @@ def process():
                 content,
                 flags=re.DOTALL),
             'Replacing # @@...PROCESSTASKS',
-            '# @@...PROCESSTASKS replaced.',
+            '# @@...PROCESSTASKS replaced. (expecting 1)',
             'Error, no # @@...PROCESSTASKS found, should be 1.')
 
         print('Updating file %s.' % FILENAME)

@@ -585,13 +585,15 @@ class DbHandler:
           count        If set only return info for count newest recordings
                        otherwise fetch info for all recordings from session
 
+        The returned list contains the newest recordings last, i.e. recordings are
+        in ascending order with regard to id.
         """
         try:
             cur = self.mysql.connection.cursor()
             cur.execute('SELECT recording.id, recording.rel_path, token.inputToken FROM recording '
                         + 'JOIN token ON recording.tokenId=token.id '
                         + 'WHERE recording.sessionId=%s '
-                        + 'ORDER BY recording.id DESC ', (sessionId,))
+                        + 'ORDER BY recording.id ASC ', (sessionId,))
 
             if count is not None:
                 rows = cur.fetchmany(size=count)
