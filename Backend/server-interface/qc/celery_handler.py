@@ -135,10 +135,20 @@ def qcProcSessionTestModule(name, sessionId, prevTime=None, slistIdx=0, batchSiz
     if isSessionOver(sessionId):
         return
 
+    # make sure not to go out of bounds on the recsInfo list
     recsInfo = _redis.get('session/{}/recordings'.format(sessionId))
     if recsInfo:
         recsInfo = json.loads(recsInfo.decode('utf-8'))
+    # indices of next batch of recordings to process (argument to processBatch)
+    indices = []
+    for i in range(slistIdx, slistIdx+batchSize):
+        # only add indices if they are within bounds of recsInfo
+        if i < len(recsInfo):
+            indices.append(i)
+    # new index in list for next task in this task chain
+    newSListIdx = slistIdx+len(indices)
 
+    # stall if this task executes too rapidly
     curTime = datetime.datetime.now()
     if prevTime is not None:
         diff = (curTime - prevTime).microseconds
@@ -148,10 +158,11 @@ def qcProcSessionTestModule(name, sessionId, prevTime=None, slistIdx=0, batchSiz
             #   on the queue.
             time.sleep(celery_config.const['task_delay'])
 
-    result = qcProcSessionTestModule.processBatch(name, sessionId, list(range(slistIdx, slistIdx+batchSize)))
+    result = qcProcSessionTestModule.processBatch(name, sessionId, indices)
     if result:
-       qcProcSessionTestModule.apply_async(
-           args=[name, sessionId, curTime, slistIdx+batchSize, batchSize])
+        # continue the task chain
+        qcProcSessionTestModule.apply_async(
+           args=[name, sessionId, curTime, newSListIdx, batchSize])
 
 
 # @@/CELERYQCPROCESSTASKS
