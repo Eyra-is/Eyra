@@ -30,27 +30,46 @@ def process():
             print("Error, didn't find match for # @@CELERYQCPROCESSTEMPLATE")
             return
         processTemplate = processTemplate[0]
-        processTemplate = re.sub(r'\n# ', '\n', processTemplate) # remove commenting
+        # remove commenting
+        processTemplate = logReSubn(re.subn(r'\n# ', '\n', processTemplate),
+                            'Removing # from template.', '# removed.', '')
 
         processTasks = '' # the entire code of all the tasks to be placed between
                           # @@CELERYQCPROCESSTASKS markers
         baseTaskImports = '' # same as processTasks for @@CELERYQCBASETASKIMPORTS
         for k, module in config.activeModules.items():
-            processingFn = re.sub(TEMPLATENAME, module['name'], processTemplate)
-            processingFn = re.sub(TEMPLATETASK, module['task'], processingFn)
+            processingFn = logReSubn(
+                re.subn(TEMPLATENAME, module['name'], processTemplate),
+                'Replacing %s.' % module['name'],
+                '%s replaced.' % module['name'],
+                'Error, couldn\'t find %s in code.' % module['name'])
+            processingFn = logReSubn(
+                re.subn(TEMPLATETASK, module['task'], processingFn),
+                'Replacing %s.' % module['task'],
+                '%s replaced.' % module['task'],
+                'Error, couldn\'t find %s in code.' % module['task'])
             processTasks += processingFn + '\n\n'
 
             baseTaskImports += 'from .modules.%s import %s' % (module['name'], module['task']) + '\n'
      
-        content = re.sub(r'# @@CELERYQCBASETASKIMPORTS(.*)# @@/CELERYQCBASETASKIMPORTS', 
-            '# @@CELERYQCBASETASKIMPORTS\n%s# @@/CELERYQCBASETASKIMPORTS' % baseTaskImports,
-            content,
-            flags=re.DOTALL)
-        content = re.sub(r'# @@CELERYQCPROCESSTASKS(.*)# @@/CELERYQCPROCESSTASKS', 
-            '# @@CELERYQCPROCESSTASKS%s# @@/CELERYQCPROCESSTASKS' % processTasks,
-            content,
-            flags=re.DOTALL)
+        content = logReSubn(
+            re.subn(r'# @@CELERYQCBASETASKIMPORTS(.*)# @@/CELERYQCBASETASKIMPORTS', 
+                '# @@CELERYQCBASETASKIMPORTS\n%s# @@/CELERYQCBASETASKIMPORTS' % baseTaskImports,
+                content,
+                flags=re.DOTALL),
+            'Replacing # @@...TASKIMPORTS',
+            '# @@...TASKIMPORTS replaced.',
+            'Error, no # @@...TASKIMPORTS found, should be 1.')
+        content = logReSubn(
+            re.subn(r'# @@CELERYQCPROCESSTASKS(.*)# @@/CELERYQCPROCESSTASKS', 
+                '# @@CELERYQCPROCESSTASKS%s# @@/CELERYQCPROCESSTASKS' % processTasks,
+                content,
+                flags=re.DOTALL),
+            'Replacing # @@...PROCESSTASKS',
+            '# @@...PROCESSTASKS replaced.',
+            'Error, no # @@...PROCESSTASKS found, should be 1.')
 
+        print('Updating file %s.' % FILENAME)
         # write our new FILENAME to a temp file, which will then replace the original
         with open(FILENAME+'.temp', 'w', encoding='utf8') as g:
             g.write(content)
@@ -58,6 +77,26 @@ def process():
         # now delete the .py file and rename our .temp into .py
         os.remove(FILENAME)
         os.rename(FILENAME+'.temp', FILENAME)
+        print('File modified.')
+
+def logReSubn(subnExpr, preComment, postComment, errorMsg='') -> str:
+    """
+    Takes in the result of a re.subn call, subnExpr, and
+    logs preComment to stdout, then logs postComment and specifies the
+    number of subs.
+    Prints errorMsg in case of 0 subs.
+
+    Returns the string from subnExpr with replacements made.
+    """
+    out = subnExpr[0]
+    subs = subnExpr[1]
+    print(preComment)
+    print(str(subs) + ' ' + postComment)
+    if (subs == 0 and errorMsg != ''):
+        print(errorMsg)
+    return out
+
+
 
 def run():
     if len(sys.argv) < 1:
