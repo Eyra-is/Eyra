@@ -26,7 +26,7 @@ class DummyTask(Task):
 
         return self._redis
 
-    def processBatch(self, name, session_id, indices):
+    def processBatch(self, name, session_id, indices) -> bool:
         """
         Dummy method, always sets same report in redis datastore, i.e.
             {"report" : "No report (dummy)."}

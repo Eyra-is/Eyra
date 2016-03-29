@@ -1,21 +1,6 @@
 # Generic config file for all QC.
-# QC runs all the modules specified in the activeModules dict.
-#   the keys in said dict should be a string representation
-#   of the module names, as found in type(module).__name__
-
-# IMPORTANT NOTICE
-# READ THIS
-# If any modules are added to activeModules, the setupActiveModules.sh script needs to be run
-#   to add them to the relevant places, which is celery_handler.py
-#   because celery_handler.py needs to use their BaseTask to create it's own
-#   processing task for each module.
-#   Format of adding modules to activeModules:
-#   mod=dict(name='UniqueNameModule', task='UniqueNameTask', processFn=qcProcSessionUniqueNameModule)
-#
-# For example, I have a module TestModule, which is in TestModule.py
-# Then I add 'TestModule=dict(name='TestModule', task='TestTask', processFn=qcProcSessionTestModule)'
-#   and the script will handle adding: from .celery_handler import qcProcSessionTestModule
-#   and adding @celery.task(base=TestTask) in celery_handler.py
+# QC runs all the modules specified in the activeModules dict. 
+#   More info in README.md in qc directory.
 
 # this try block is because when importing this file
 # in the setupActiveModules.py script, it did not work.

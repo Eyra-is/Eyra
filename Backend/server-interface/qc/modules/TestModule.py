@@ -1,4 +1,5 @@
 import redis
+import time
 
 # grab celery_config from dir above this one
 # thanks, Alex Martelli, http://stackoverflow.com/a/1054293/5272567
@@ -30,7 +31,7 @@ class TestTask(Task):
 
         return self._redis
 
-    def processBatch(self, name, session_id, indices):
+    def processBatch(self, name, session_id, indices) -> bool:
         """
         The main processing function of this module.
         This function is called to do processing on a batch
@@ -42,12 +43,12 @@ class TestTask(Task):
 
         This particular processing function, only sleeps for 4 seconds
           to imitate processing done in a real QC module.
+
+        Return False or raise an exception if something is wrong (and
+        this should not be called again.)
         """
-        print('in processing batch, {}'.format(indices))
-        import time
+        print('In processing batch, {}'.format(indices))
         time.sleep(4)
         self.redis.set('report/{}/{}'.format(name, session_id), 
-                        {'report':'A GLORIOUS REPORTíþ, {}'.format(indices)})
-        # if max(indices) > 15:
-        #     return False
+                        {'report':'A TEST REPORT, indices: {}'.format(indices)})
         return True
