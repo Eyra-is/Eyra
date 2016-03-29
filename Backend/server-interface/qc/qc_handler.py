@@ -1,4 +1,5 @@
 import redis
+import datetime
 
 #: Relative imports
 from util import log
@@ -84,14 +85,16 @@ class QcHandler(object):
                 [{"recId":2, "token":'hello', "recPath":'recordings/session_2/user_2016-03-09T15:42:29.005Z.wav'},
                 {"recId":2, "token":'hello', "recPath":'recordings/session_2/user_2016-03-09T15:42:29.005Z.wav'}]
         """
-        recs = self.dbHandler.getRecordingsInfo(session_id)
-        if len(recs) > 0:
-            self.redis.set('session/{}/recordings'.format(session_id), recs)
+        recsInfo = self.dbHandler.getRecordingsInfo(session_id)
+        if len(recsInfo) > 0:
+            self.redis.set('session/{}/recordings'.format(session_id), recsInfo)
 
     def getReport(self, session_id) -> dict:
         """Return a quality report for the session ``session_id``, if
         available otherwise we start a background task to process
         currently available recordings.
+        Keeps a timestamp at 'session/session_id/timestamp' in redis datastore
+          representing the last time we were queried for said session.
 
         Parameters:
 
@@ -130,6 +133,10 @@ class QcHandler(object):
         # always update the sessionlist on getReport call, there might be new recordings
         self._updateRecordingsList(session_id)
 
+        # set the timestamp, for the most recent query (this one) of this session
+        self.redis.set('session/{}/timestamp'.format(session_id),
+            datetime.datetime.now())
+
         # attempt to grab report for each module from redis datastore.
         #   if report does not exist, add a task for that session to the celery queue
         reports = {}
@@ -139,7 +146,7 @@ class QcHandler(object):
                 reports[name] = report.decode("utf-8") # redis.get returns bytes, so we decode into string
             else:
                 # start the async processing
-                processFn.delay(name, session_id, 0, 5)
+                processFn.delay(name, session_id, None, 0, 5)
 
         if len(reports) > 0:
             return dict(sessionId=session_id, status='processing', modules=reports)

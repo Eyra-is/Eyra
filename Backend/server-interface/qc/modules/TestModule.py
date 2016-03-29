@@ -34,7 +34,9 @@ class TestTask(Task):
         """
         The main processing function of this module.
         This function is called to do processing on a batch
-          of recordings from session with session_id, with indices.
+          of recordings from session with session_id, with indices
+          in the list of recordings for this session(_id) in
+          the redis datastore ('session/session_id/recordings').
         name is the name to use to write the report to redis datastore
           at 'report/name/session_id'
 
@@ -46,6 +48,6 @@ class TestTask(Task):
         time.sleep(4)
         self.redis.set('report/{}/{}'.format(name, session_id), 
                         {'report':'A GLORIOUS REPORTíþ, {}'.format(indices)})
-        if max(indices) > 20:
-            return False
+        # if max(indices) > 15:
+        #     return False
         return True
