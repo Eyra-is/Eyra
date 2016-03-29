@@ -1,5 +1,4 @@
 from flask import Flask, request, Response
-#from flask.ext.cors import CORS
 import json
 
 from db_handler import DbHandler

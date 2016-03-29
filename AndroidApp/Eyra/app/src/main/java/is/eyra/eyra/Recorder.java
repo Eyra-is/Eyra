@@ -60,6 +60,8 @@ public class Recorder {
         // create wav
         int numChannels = CHANNELCONFIG == AudioFormat.CHANNEL_IN_MONO ? 1 : 2;
         RawToWav rtw = new RawToWav(SAMPLERATE, numChannels);
+        // grab data from our audioData, convert it to short[]
+        // for our rtw.convert() function
         Short[] tempData = new Short[audioData.size()];
         tempData = (Short[]) audioData.toArray(tempData);
         short[] data = new short[tempData.length];
