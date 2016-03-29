@@ -40,12 +40,12 @@ def isSessionOver(sessionId) -> bool:
             _redis.get('session/{}/timestamp'.format(sessionId)).decode('utf-8'), 
             "%Y-%m-%d %H:%M:%S.%f")
     except AttributeError:
-        # TODO Log error
         # redis get is None
+        print('Error, timestamp not in redis datastore, sessionId: %s' % sessionId)
         raise
     except ValueError:
-        # TODO Log error
         # datetime parse failed
+        print('Error, timestamp not on correct format, sessionId: %s' % sessionId)
         raise
 
     if (datetime.datetime.now() - prevTime).seconds\
