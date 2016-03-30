@@ -3,7 +3,7 @@ import json
 
 from db_handler import DbHandler
 from auth_handler import AuthHandler
-from qc_handler import QcHandler
+from qc.qc_handler import QcHandler
 
 from util import log
 
@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 dbHandler = DbHandler(app)
 authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
-qcHandler = QcHandler(app)
+qcHandler = QcHandler(app, dbHandler)
 
 # SUBMISSION ROUTES
 
@@ -135,31 +135,41 @@ def submit_gettokens_all():
 def qc_report(sessionId):
     """Get a QC report
 
+    Returned JSON if the QC report is not available, but is being
+    processed:
+
+        {"sessionId": ...,
+         "status": "started",
+         "modules":{}}
+
+    Returned JSON definition if no QC module is active:
+
+        {"sessionId": ...,
+         "status": "inactive",
+         "modules":{}}
+
     Returned JSON definition:
 
         {"sessionId": ...,
-            "requestId": ...,
-            "totalStats": {"accuracy": [0.0;1.0]"},
-            "perRecordingStats": [{"recordingId": ...,
-                                   "stats": {"accuracy": [0.0;1.0]},
-                                    }]}
+         "status": "processing",
+         "modules"  {
+            "module1" :  {
+                            "totalStats": {"accuracy": [0.0;1.0]"},
+                            "perRecordingStats": [{"recordingId": ...,
+                                "stats": {"accuracy": [0.0;1.0]}}]}
+                          }, 
+                          ...
+                    }
+        }
     """
     if request.method == 'GET':
-        # count should probably be a parameter in the REST api
-        recordings = dbHandler.getRecordingsInfo(sessionId, count=5)
-        #log(recordings)
-        if len(recordings) > 0:
-            qcReport = qcHandler.getReport(sessionId, recordings)
+        qcReport = qcHandler.getReport(sessionId)
+        if qcReport:
             return json.dumps(qcReport), 200
         else:
-            msg = 'No recordings belonging to sessionId = {}'.format(sessionId)
-            log(msg)
-            return msg, 404
+            return 'Session doesn\'t exist', 404
+
     return 'Unexpected error.', 500
 
 if __name__ == '__main__':
-    #import ssl
-    #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    #context.load_cert_chain('yourserver.crt', 'yourserver.key')
-    #app.run(debug=True, ssl_context='adhoc')
     app.run(debug=True)
