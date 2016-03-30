@@ -139,23 +139,28 @@ def qc_report(sessionId):
     processed:
 
         {"sessionId": ...,
-         "status": "started"}
+         "status": "started",
+         "modules":{}}
 
     Returned JSON definition if no QC module is active:
 
         {"sessionId": ...,
-         "status": "inactive"}
+         "status": "inactive",
+         "modules":{}}
 
     Returned JSON definition:
 
         {"sessionId": ...,
          "status": "processing",
-         "totalStats": {"accuracy": [0.0;1.0]"},
-         "perRecordingStats": [{"recordingId": ...,
-                                "stats": {"accuracy": [0.0;1.0]},
-                                ... TBD ...}]
+         "modules"  {
+            "module1" :  {
+                            "totalStats": {"accuracy": [0.0;1.0]"},
+                            "perRecordingStats": [{"recordingId": ...,
+                                "stats": {"accuracy": [0.0;1.0]}}]}
+                          }, 
+                          ...
+                    }
         }
-
     """
     if request.method == 'GET':
         qcReport = qcHandler.getReport(sessionId)

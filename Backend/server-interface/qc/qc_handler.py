@@ -132,12 +132,17 @@ class QcHandler(object):
         if not self.dbHandler.sessionExists(session_id):
             return None
 
+        # no active QC
+        if len(self.modules) == 0:
+            return dict(sessionId=session_id, status='inactive', modules={})
+
         # always update the sessionlist on getReport call, there might be new recordings
         self._updateRecordingsList(session_id)
 
         # set the timestamp, for the most recent query (this one) of this session
         self.redis.set('session/{}/timestamp'.format(session_id),
             datetime.datetime.now())
+
 
         # attempt to grab report for each module from redis datastore.
         #   if report does not exist, add a task for that session to the celery queue
