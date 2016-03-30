@@ -53,6 +53,11 @@ function sessionService($q, dataService, localDbMiscService, logger) {
             data.speakerInfo['deviceImei'] = data.deviceInfo['imei'];
           }
         }
+        // special case for speakerInfo
+        if (data.speakerInfo.tokensRead){
+          //delete data.speakerInfo.tokensRead
+
+        }
         var tempSessionData = {                                                                  
                                 "type":'session', 
                                 "data":
