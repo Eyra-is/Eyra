@@ -8,16 +8,26 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <!-- uncomment this for quick development --
+    <!-- uncomment this for quick development -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="css/app.css"><---->
+    <link rel="stylesheet" href="css/app.css">
     <!--nk rel="stylesheet" href="css/@@app.css"><!-- uncomment this in release-->
 </head>
 <body>
+    <!-- BEGIN: Pre-Bootstrap Loading Screen. -->
+    <div ng-if="false">
+
+         <p class="loading_msg">
+            Starting Angular
+        </p>
+
+    </div>
+    <!-- END: Pre-Bootstrap Loading Screen. -->
     <div class="vertical-center" ng-show="!isLoaded">
         <span class="glyphicon glyphicon-hourglass loading-icon"></span>
-        <p class="loading-msg">Note: You have to allow microphone access for app to load.</p>
+        <p class="loading_msg">{{loading_msg}}</p>
+       <!--e: You have to allow microphone access for app to load.</p>-->
     </div>
     <div ng-show="isLoaded">
         <nav class="navbar navbar-inverse navbar-static-top">
@@ -42,7 +52,9 @@
             </div>
           </div>
         </nav>
-        <div ng-view class="view"><!-- possibly put loading here too --></div>
+        <div ng-view class="view"><!-- possibly put loading here too -->
+
+        </div>
     </div>
     
     <!-- this commit of recorderjs (before ES6 support) must be non-minified
