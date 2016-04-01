@@ -22,9 +22,9 @@ function utilityService(logger) {
     'tokenThreshold' : 40,
     'tokenGetCount' : 150,
     'QCAccThreshold' : 0.2,
-    'QCFrequency' : 5, // per sessions sent
-    'QCInitRecThreshold' : 10, // recording count before QC can report, adjustment period for speaker
-    'TokenAnnouncementFreq' : 50,
+    'QCFrequency' : 1, // per sessions sent
+    'QCInitRecThreshold' : 5, // recording count before QC can report, adjustment period for speaker
+    'TokenAnnouncementFreq' : 5,
     'TokenCountGoal' : 260
   };
 
