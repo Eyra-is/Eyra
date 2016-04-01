@@ -10,8 +10,8 @@ def genGraphs():
     Generate decoding graphs for each token for our Cleanup module.
     """
 
-    decoded_ark_path = 'decoded_graph.ark'
-    decoded_scp_path = 'decoded_graph.scp'
+    decoded_ark_path = 'decoded_graphs.ark'
+    decoded_scp_path = 'decoded_graphs.scp'
     tokens_path = 'token_test.txt'#'../../../db/src/mim_malr_tokens_plus_rare.txt'
 
     # init constants and open files
