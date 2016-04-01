@@ -194,6 +194,22 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     util.stdErrCallback);
   }
 
+  function speakerInfoCorrection(_sessionData) {
+    // function removes creates new speakerInfo object without tokensRead attribute
+
+    var oldSpeakerInfo = _sessionData.data.speakerInfo
+    var newSpeakerInfo = {
+                          sex: oldSpeakerInfo.sex,
+                          dob: oldSpeakerInfo.dob,
+                          height: oldSpeakerInfo.height,
+                          name: oldSpeakerInfo.name
+                          };
+    _sessionData.data.speakerInfo = newSpeakerInfo;
+
+    return _sessionData;
+
+  }
+
   // function passed to our recording service, notified when a recording has been finished
   function recordingCompleteCallback() {
     // attempt to send current recording
@@ -206,10 +222,14 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     // send token as new object so it is definitely not changed to the next token
     //   when accessed later in assembleSessionData
     sessionService.assembleSessionData(oldCurRec, {'id':currentToken.id, 'token':currentToken.token}).then(
-      function success(sessionData) {
+      function success(_sessionData) {
+
+        var sessionData = speakerInfoCorrection(_sessionData)
+
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
+
             // we may have gotten a deviceId and speakerId from server, in which case
             //   we handle that by setting it in RAM and local database, if it is different
             //   from the id's there.
