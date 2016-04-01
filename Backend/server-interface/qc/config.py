@@ -8,18 +8,24 @@
 # so in that case we can ignore the actual functions in the modules
 try:
     # you need to manually add imports here
-    from .celery_handler import qcProcSessionTestModule
+    from .celery_handler import qcProcSessionCleanupModule
+    #from .celery_handler import qcProcSessionTestModule
     #from .celery_handler import qcProcSessionDummyModule
 except SystemError:
     # and here
-    qcProcSessionTestModule = None
+    qcProcSessionCleanupModule = None
+    #qcProcSessionTestModule = None
     #qcProcSessionDummyModule = None
 
 activeModules = dict(
-    TestModule=dict(
-        name='TestModule', 
-        task='TestTask', 
-        processFn=qcProcSessionTestModule),
+    CleanupModule=dict(
+        name='CleanupModule', 
+        task='CleanupTask', 
+        processFn=qcProcSessionCleanupModule),
+    # TestModule=dict(
+    #     name='TestModule', 
+    #     task='TestTask', 
+    #     processFn=qcProcSessionTestModule),
     # DummyModule=dict(
     #     name='DummyModule', 
     #     task='DummyTask', 
