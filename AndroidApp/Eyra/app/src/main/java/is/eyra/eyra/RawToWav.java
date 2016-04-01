@@ -14,6 +14,10 @@ import java.nio.ByteOrder;
  * Created by matthiasp on 2/18/16.
  *
  * Class designed to convert audio data from AudioRecord to .wav files.
+ *
+ * Usage: RawToWav rtw = new RawToWav(samplerate, numchannels);
+ *        byte[] wavFile = rtw.convert(shortRawData);
+ *
  */
 public class RawToWav {
 

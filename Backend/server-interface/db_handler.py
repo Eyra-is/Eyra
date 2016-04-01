@@ -585,13 +585,15 @@ class DbHandler:
           count        If set only return info for count newest recordings
                        otherwise fetch info for all recordings from session
 
+        The returned list contains the newest recordings last, i.e. recordings are
+        in ascending order with regard to id.
         """
         try:
             cur = self.mysql.connection.cursor()
             cur.execute('SELECT recording.id, recording.rel_path, token.inputToken FROM recording '
                         + 'JOIN token ON recording.tokenId=token.id '
                         + 'WHERE recording.sessionId=%s '
-                        + 'ORDER BY recording.id DESC ', (sessionId,))
+                        + 'ORDER BY recording.id ASC ', (sessionId,))
 
             if count is not None:
                 rows = cur.fetchmany(size=count)
@@ -601,7 +603,22 @@ class DbHandler:
             msg = 'Error getting info for session recordings'
             log(msg, e)
             raise
-            # return dict(msg=msg, statusCode=500) # hmm, does this do anything?
         else:
-            return [dict(recId=recId, recPath=recPath, token=token)
-                    for recId, recPath, token in rows]
+            return json.dumps([dict(recId=recId, recPath=recPath, token=token)
+                                for recId, recPath, token in rows])
+
+    def sessionExists(self, sessionId) -> bool:
+        """
+        Checks to see if session with sessionId exists (is in database).
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT * FROM session WHERE id=%s', (sessionId,))
+            if cur.fetchone():
+                return True
+        except MySQLError as e:
+            msg = 'Error checking for session existence.'
+            log(msg, e)
+            raise
+        else:
+            return False

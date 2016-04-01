@@ -6,6 +6,31 @@ TODO: Write a project description
 
 TODO: Describe the installation process
 
+    # Project maintenance during development
+
+        * #### Routines after checkout from master/origin branch
+
+        When files are checked out from source some files will change:
+
+        These are: 
+
+        ../Frontend/da-webapp/app/index.html
+
+            --- What to do ----
+            index.html files in development and release are different. 
+            A backup of the index.html for use in dev environment is at /Frontend/da-webapp/extra_files/_dev_index.html. Rename this file as index.html at /Frontend/da-webapp/app/index.html and overwrite the index.html file
+
+        ../Frontend/Setup/src/frontend-app/default.conf
+
+            --- What to do ---
+            Change 'YYY_SITEROOT=Frontend/da-webapp/app' to YYY_SITEROOT=Frontend/da-webapp/src
+
+            --- What does it do ---
+            It changes the path of the index.html file from the one in the 'app' directory root to the on in the 'src' directory root
+
+
+        
+
 ## Usage
 
 Quick description of folder structure:
