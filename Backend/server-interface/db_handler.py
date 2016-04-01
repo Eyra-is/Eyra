@@ -578,7 +578,7 @@ class DbHandler:
 
         return jsonTokens
 
-    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str}]':
+    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str, "tokenId": ...}]':
         """Fetches info for the recordings of the session `sessionId`
 
         Parameters:
@@ -587,11 +587,11 @@ class DbHandler:
                        otherwise fetch info for all recordings from session
 
         The returned list contains the newest recordings last, i.e. recordings are
-        in ascending order with regard to id.
+        in ascending order with regard to recording id.
         """
         try:
             cur = self.mysql.connection.cursor()
-            cur.execute('SELECT recording.id, recording.rel_path, token.inputToken FROM recording '
+            cur.execute('SELECT recording.id, recording.rel_path, token.inputToken, token.id FROM recording '
                         + 'JOIN token ON recording.tokenId=token.id '
                         + 'WHERE recording.sessionId=%s '
                         + 'ORDER BY recording.id ASC ', (sessionId,))
@@ -605,8 +605,8 @@ class DbHandler:
             log(msg, e)
             raise
         else:
-            return json.dumps([dict(recId=recId, recPath=recPath, token=token)
-                                for recId, recPath, token in rows])
+            return json.dumps([dict(recId=recId, recPath=recPath, token=token, tokenId=id)
+                                for recId, recPath, token, id in rows])
 
     def sessionExists(self, sessionId) -> bool:
         """
