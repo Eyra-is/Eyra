@@ -5,9 +5,11 @@ import os
 # thanks, Alex Martelli, http://stackoverflow.com/a/1054293/5272567
 import sys
 import os.path
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+sys.path.append(newPath)
 import celery_config
+sys.path.remove(newPath)
+del newPath
 
 from celery import Task
 

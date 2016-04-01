@@ -3,6 +3,7 @@ import tempfile
 import pipes
 
 from CleanupModule import CleanupCommon
+from util import DbWork
 
 def genGraphs():
     """
@@ -32,13 +33,19 @@ def genGraphs():
     with open(tokens_path, 'r') as tokens_f, \
             open(tokens_w_key_path, 'wt') as tokens_with_id_f:
         # mysql starts counting at 1. These tok_keys should correspond to mysql id's
-        #   of tokens
+        #   of tokens (because this is crucial, since the cleanup module relies
+        #   on the ids, we make sure to verify this by querying the database for each token
+        #   see util.DbWork)
+        dbWork = DbWork()
         tok_key = 1 
-        for token in tokens_f:
+        for token in tokens_f.read().splitlines():
             token_ids = ' '.join(common.sym_id_map.get(tok, common.oov_id) for
                                  tok in token.split())
-            print('{} {}'.format(tok_key, token_ids),
-                  file=tokens_with_id_f)
+            if dbWork.verifyTokenId(tok_key, token):
+                print('{} {}'.format(tok_key, token_ids),
+                      file=tokens_with_id_f)
+            else:
+                raise ValueError('Token not verified, %s with id %d.' % (token, tok_key))
             tok_key += 1
 
     safer_pipeline = pipes.Template()

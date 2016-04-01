@@ -5,15 +5,16 @@ import os # for mkdir
 import random
 
 from util import log, filename
+from config import dbConst
 
 class DbHandler:
     def __init__(self, app):
         # MySQL configurations
-        app.config['MYSQL_HOST'] = 'localhost'
-        app.config['MYSQL_USER'] = 'default'
-        app.config['MYSQL_DB']   = 'recordings_master'
-        app.config['MYSQL_USE_UNICODE'] = True
-        app.config['MYSQL_CHARSET'] = 'utf8'
+        app.config['MYSQL_HOST'] = dbConst['host']
+        app.config['MYSQL_USER'] = dbConst['user']
+        app.config['MYSQL_DB']   = dbConst['db']
+        app.config['MYSQL_USE_UNICODE'] = dbConst['use_unicode']
+        app.config['MYSQL_CHARSET'] = dbConst['charset']
 
         self.mysql = MySQL(app)
 
@@ -622,3 +623,5 @@ class DbHandler:
             raise
         else:
             return False
+
+    
