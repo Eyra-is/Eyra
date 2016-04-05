@@ -50,5 +50,6 @@ class TestTask(Task):
         print('In processing batch, indices: {}'.format(indices))
         time.sleep(4)
         self.redis.set('report/{}/{}'.format(name, session_id), 
-                        {'report':'A TEST REPORT, indices: {}'.format(indices)})
+                        {"totalStats": {"accuracy":0},
+                         "report" : "A TEST REPORT, indices: {}".format(indices)})
         return True

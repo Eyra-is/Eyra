@@ -119,13 +119,19 @@ class QcHandler(object):
              "status": "processing",
              "modules"  {
                 "module1" :  {
-                                "totalStats": {"accuracy": [0.0;1.0]"},
-                                "perRecordingStats": [{"recordingId": ...,
-                                    "stats": {"accuracy": [0.0;1.0]}}]}
+                                "totalStats": {"accuracy": [0.0;1.0]"}
+                                [, "perRecordingStats": [
+                                        {"recordingId": ...,
+                                            "stats": {"accuracy": [0.0;1.0]}
+                                        },
+                                        ...]}
+                                ]
                               }, 
                               ...
                         }
             }
+
+        (see client-server API for should be same definition of return)
 
         """
         # check if session exists

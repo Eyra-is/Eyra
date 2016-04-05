@@ -29,9 +29,11 @@ class DummyTask(Task):
     def processBatch(self, name, session_id, indices) -> bool:
         """
         Dummy method, always sets same report in redis datastore, i.e.
-            {"report" : "No report (dummy)."}
+            {"totalStats": {"accuracy":0},
+             "report" : "No report (dummy)."}
             with key: report/name/session_id
         """
         self.redis.set('report/{}/{}'.format(name, session_id), 
-                        {"report" : "No report (dummy)."})
+                        {"totalStats": {"accuracy":0},
+                         "report" : "No report (dummy)."})
         return False

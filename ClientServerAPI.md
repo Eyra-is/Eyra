@@ -123,7 +123,36 @@ Current implementation:
 Current implementation:
 * json format of response:
 ```
-to be decided
+Returned dict if the QC report is not available, but is being
+processed:
+
+    {"sessionId": ...,
+     "status": "started",
+     "modules":{}}
+
+Returned dict definition if no QC module is active:
+
+    {"sessionId": ...,
+     "status": "inactive",
+     "modules":{}}
+
+Returned dict definition:
+
+    {"sessionId": ...,
+     "status": "processing",
+     "modules"  {
+        "module1" :  {
+                        "totalStats": {"accuracy": [0.0;1.0]"}
+                        [, "perRecordingStats": [
+                                {"recordingId": ...,
+                                    "stats": {"accuracy": [0.0;1.0]}
+                                },
+                                ...]}
+                        ]
+                      }, 
+                      ...
+                }
+    }
 ```
 * url:
 ```
