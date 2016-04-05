@@ -41,8 +41,8 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
 
   recCtrl.actionBtnDisabled = false;
   recCtrl.skipBtnDisabled = true;
-
-  $scope.tokensRead = 0; // simple counter
+  var speaker = dataService.get('speakerName');
+  $scope.tokensRead = tokensRead(speaker); // simple counter
 
   var actionType = 'record'; // current state
 
@@ -66,6 +66,76 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   activate();
 
   //////////
+
+  function asyncTokenRead(speaker, increment){
+
+    var ramSpeakerInfo = dataService.get('speakerInfo');
+    var tokensRead = 0;
+
+    miscDbService.getSpeaker(speaker).then(
+      function success(speakerInfo) {
+        //console.info(speakerInfo);
+        if (increment === 'return'){
+          tokensRead = ramSpeakerInfo['tokensRead'];
+          // updating speakerInfo in ram
+          dataService.set('speakerInfo', ramSpeakerInfo);
+        }
+
+        if (typeof(increment) === 'number') {
+          speakerInfo['tokensRead'] = increment;
+          // updating speakerInfo in ram
+          dataService.set('speakerInfo', speakerInfo);
+
+          miscDbService.setSpeaker(speaker, speakerInfo).then(
+          function success(speakerInfoUpdate) { 
+            //console.log('update speakerInfo.tokensRead in ldb')
+
+          },
+          function error(value){
+            $scope.msg = 'Could not update speakerInfo into ldb';
+            logger.error(value);
+          }
+          );
+
+        }
+
+        if (increment === 'return') {
+          return tokensRead;
+        }
+      },
+      function error(value){
+        $scope.msg = 'Could not read tokensRead counter from ldb';
+        logger.error(value);
+      }
+
+    );
+  }
+
+  function tokensRead(speaker) {
+
+    var tokensRead;
+    var ramSpeakerInfo = dataService.get('speakerInfo');
+
+    // get speaker info in ram and check on tokensRead
+    if (ramSpeakerInfo['tokensRead']) {
+
+      tokensRead = ramSpeakerInfo['tokensRead'];
+
+      //asyncTokensRead(speaker, false); // update tokensread i ldb
+
+    // speakerInfo['Tokensread is not in ram so it might be in ldb']  
+    } else { // 
+      //console.info('No tokensRead in ram - reading ldb')
+
+      tokensRead = asyncTokenRead(speaker, 'return')
+    };
+
+    if (tokensRead){
+        return tokensRead;
+    } else {
+        return 0;
+    };    
+  }
 
   function activate() {
     recService.setupCallbacks(recordingCompleteCallback);
@@ -124,6 +194,22 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     util.stdErrCallback);
   }
 
+  function speakerInfoCorrection(_sessionData) {
+    // function removes creates new speakerInfo object without tokensRead attribute
+
+    var oldSpeakerInfo = _sessionData.data.speakerInfo
+    var newSpeakerInfo = {
+                          sex: oldSpeakerInfo.sex,
+                          dob: oldSpeakerInfo.dob,
+                          height: oldSpeakerInfo.height,
+                          name: oldSpeakerInfo.name
+                          };
+    _sessionData.data.speakerInfo = newSpeakerInfo;
+
+    return _sessionData;
+
+  }
+
   // function passed to our recording service, notified when a recording has been finished
   function recordingCompleteCallback() {
     // attempt to send current recording
@@ -136,10 +222,14 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     // send token as new object so it is definitely not changed to the next token
     //   when accessed later in assembleSessionData
     sessionService.assembleSessionData(oldCurRec, {'id':currentToken.id, 'token':currentToken.token}).then(
-      function success(sessionData) {
+      function success(_sessionData) {
+
+        var sessionData = speakerInfoCorrection(_sessionData)
+
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
+
             // we may have gotten a deviceId and speakerId from server, in which case
             //   we handle that by setting it in RAM and local database, if it is different
             //   from the id's there.
@@ -243,7 +333,9 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
 
     // whenever stopped is pressed from gui, it should mean a valid token read.
     if (valid) {
-      $scope.tokensRead++;
+      $scope.tokensRead++; 
+      // updating tokenRead in ldb and ram
+      asyncTokenRead(speaker, $scope.tokensRead);
     }
   }
 

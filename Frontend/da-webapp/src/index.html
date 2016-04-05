@@ -1,5 +1,5 @@
-<!doctype html>
-
+-<!doctype html>
+-
 <html lang="en" ng-app="daApp" manifest="app.appcache"><!-- comment the appcache for quick development -->
 <head>
     <meta charset="utf-8">
@@ -15,9 +15,19 @@
     <link rel="stylesheet" href="css/@@app.css"><!-- uncomment this in release-->
 </head>
 <body>
+    <!-- BEGIN: Pre-Bootstrap Loading Screen. -->
+    <div ng-if="false">
+
+         <p class="loading_msg">
+            Starting Angular
+        </p>
+
+    </div>
+    <!-- END: Pre-Bootstrap Loading Screen. -->
     <div class="vertical-center" ng-show="!isLoaded">
         <span class="glyphicon glyphicon-hourglass loading-icon"></span>
-        <p class="loading-msg">Note: You have to allow microphone access for app to load.</p>
+        <p class="loading_msg">{{loading_msg}}</p>
+       <!--e: You have to allow microphone access for app to load.</p>-->
     </div>
     <div ng-show="isLoaded">
         <nav class="navbar navbar-inverse navbar-static-top">

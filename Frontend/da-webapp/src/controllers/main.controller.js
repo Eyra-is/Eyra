@@ -98,14 +98,17 @@ function MainController($location, $q, $rootScope, $scope, $window, androidRecor
   function getTokensIfNeeded() {
     tokenService.countAvailableTokens().then(function(numTokens){
       if (numTokens < util.getConstant('tokenThreshold')) {
+        $rootScope.loading_msg = 'Getting tokens  - Please wait';
         logger.log('Getting tokens..');
         tokenService.getTokens(util.getConstant('tokenGetCount')).then(function(tokens){
           tokensPromise.resolve(true);
           logger.log('Got tokens.');
+          $rootScope.loading_msg = 'Please wait';
         },
         function error(data){
           tokensPromise.reject(data);
           logger.log('Failed getting tokens.');
+          $rootScope.loading_msg = 'Failed to get tokens';
           logger.error(data);
         });
       } else {
