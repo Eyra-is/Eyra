@@ -1,9 +1,12 @@
 # utility functions for server-interface
-
-from datetime import datetime
 import sys
 import unicodedata
 import re
+import MySQLdb
+
+from datetime import datetime
+
+from config import dbConst # grab data needed to connect to database
 
 def log(msg, e=None):
     """
@@ -25,3 +28,37 @@ def filename(name):
     name = unicodedata.normalize('NFKC', name)
     name = re.sub('[-\s]+', '-', name, flags=re.U).strip()
     return name.replace('/', '\\')
+
+class DbWork():
+    """
+    Class for db opperations without an app instance.
+    """
+    def __init__(self):
+        self.db = MySQLdb.connect(**dbConst)
+
+    def verifyTokenId(self, tokenId, token):
+            """
+            Accepts a token id and token and verifies this id
+            is correct (comparing to the token in database and its id)
+
+            Parameters:
+
+                tokenId     id of token
+                token       token text
+            """
+            try:
+                cur = self.db.cursor()
+                cur.execute('SELECT inputToken FROM token WHERE id=%s', (tokenId,))
+                tokenFromDb = cur.fetchone()
+                if tokenFromDb:
+                    tokenFromDb = tokenFromDb[0] # fetchone returns tuple
+                    if tokenFromDb == token:
+                        return True
+                    return False
+                return False
+            except MySQLdb.Error as e:
+                msg = 'Error verifying token id, %d : %s' % (tokenId, token) 
+                log(msg, e)
+                raise
+            else:
+                return False

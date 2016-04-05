@@ -50,7 +50,8 @@ def process():
                 'Error, couldn\'t find %s in code.' % module['task'])
             processTasks += processingFn + '\n\n'
 
-            baseTaskImports += 'from .modules.%s import %s' % (module['name'], module['task']) + '\n'
+            baseTaskImports += 'from .modules.%s.%s import %s' \
+                               % (module['name'], module['name'], module['task']) + '\n'
      
         content = logReSubn(
             re.subn(r'# @@CELERYQCBASETASKIMPORTS(.*)# @@/CELERYQCBASETASKIMPORTS', 
