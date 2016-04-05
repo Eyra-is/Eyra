@@ -9,7 +9,7 @@ import sys
 import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
-from qc.modules.Cleanup.CleanupModule import CleanupCommon
+from qc.modules.CleanupModule.CleanupModule import CleanupCommon
 from util import DbWork
 sys.path.remove(newPath)
 del newPath
@@ -21,7 +21,7 @@ def genGraphs():
     Only needs to be run once (for each version of the tokens).
     """
 
-    cleanup_path = '../modules/Cleanup/'
+    cleanup_path = '../modules/CleanupModule/'
     os.makedirs(cleanup_path + 'local', exist_ok=True)
     # relative paths, need to prepend cleanup_path where appropriate
     decoded_ark_path = 'local/decoded_graphs.ark'
