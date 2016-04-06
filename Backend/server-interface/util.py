@@ -5,8 +5,17 @@ import re
 import MySQLdb
 
 from datetime import datetime
+from celery.utils.log import get_task_logger
 
 from config import dbConst # grab data needed to connect to database
+
+def errLog(x):
+    """
+    Logs x to celery INFO. Used as a callback in sh piping to manually print
+      otherwise swallowed error logs.
+    """
+    logger = get_task_logger(__name__)
+    logger.info(x)
 
 def log(msg, e=None):
     """

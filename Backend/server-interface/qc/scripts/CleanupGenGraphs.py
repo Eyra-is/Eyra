@@ -1,6 +1,5 @@
 import sh
 import tempfile
-import pipes
 import os
 import re
 
@@ -10,7 +9,7 @@ import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
 from qc.modules.CleanupModule.CleanupModule import CleanupCommon
-from util import DbWork
+from util import DbWork, errLog
 sys.path.remove(newPath)
 del newPath
 
@@ -31,8 +30,13 @@ def genGraphs():
     # init constants and open files
     common = CleanupCommon()
 
-    # TODO: make efficient
-    scale_opts = '--transition-scale=1.0 --self-loop-scale=0.1'
+    transition_scale = '--transition-scale=1.0'
+    self_loop_scale = '--self-loop-scale=0.1'
+
+    # create our commands for sh
+    make_utterance_fsts = sh.Command('./make_utterance_fsts.pl')
+    compile_train_graphs_fsts = sh.Command('{}/src/bin/compile-train-graphs-fsts'
+                                            .format(cleanup_path+common.kaldi_root))
 
     #: Mapping from symbols to integer ids
     sym_id_path = cleanup_path + common.sym_id_path
@@ -62,27 +66,29 @@ def genGraphs():
                 raise ValueError('Token not verified, %s with id %d.' % (token, tok_key))
             tok_key += 1
 
-    safer_pipeline = pipes.Template()
-    safer_pipeline.append('./make_utterance_fsts.pl {top_words}'
-                          .format(top_words=cleanup_path+common.top_words_path), '--')
-    safer_pipeline.append(('{kaldi_root}/src/bin/compile-train-graphs-fsts ' +
-                           '{scale_opts} ' +
-                           '--read-disambig-syms={disambig_ids} ' +
-                           '{tree} ' +
-                           '{acoustic_model} ' +
-                           '{l_disambig_fst} ' +
-                           'ark:- ark,scp:{ark_file},{scp_file}').format(scale_opts=scale_opts,
-                                                 disambig_ids=cleanup_path+common.disambig_ids_path,
-                                                 tree=cleanup_path+common.decision_tree_path,
-                                                 acoustic_model=cleanup_path+common.acoustic_model_path,
-                                                 l_disambig_fst=cleanup_path+common.l_disambig_fst_path,
-                                                 kaldi_root=cleanup_path+common.kaldi_root,
-                                                 ark_file=cleanup_path+decoded_ark_path,
-                                                 scp_file=cleanup_path+decoded_scp_path),
-                          '--')
-
-    # Run the tokens through the decoding pipeline
-    safer_pipeline.copy(tokens_w_key_path, '')
+    # create a pipe using sh, output of make_utterance_fsts piped into compile_train_graphs
+    # piping in contents of tokens_w_key_path and writing to decoded_{ark,scp}_path
+    compile_train_graphs_fsts( 
+        make_utterance_fsts(
+            sh.cat(
+                tokens_w_key_path,
+                _piped=True,
+                _err=errLog
+            ),
+            '{top_words}'.format(top_words=cleanup_path+common.top_words_path),
+            _piped=True,
+            _err=errLog
+        ),
+        transition_scale,
+        self_loop_scale,
+        '--read-disambig-syms={}'.format(cleanup_path+common.disambig_ids_path),
+        '{tree}'.format(tree=cleanup_path+common.decision_tree_path),
+        cleanup_path+common.acoustic_model_path,
+        cleanup_path+common.l_disambig_fst_path,
+        'ark:-',
+        'ark,scp:{ark_file},{scp_file}'.format( ark_file=cleanup_path+decoded_ark_path,
+                                                scp_file=cleanup_path+decoded_scp_path)
+    )
 
     # update the paths to the .ark file in .scp to be relative to the module root directory
     # i.e. Cleanup/
