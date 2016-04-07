@@ -105,15 +105,15 @@ def logReSubn(subnExpr, preComment, postComment, errorMsg='') -> str:
 
 
 def run():
-    if len(sys.argv) < 1:
+    if len(sys.argv) != 1:
         print( 
 "Usage:\
-   %s\n\n\
-   Only needed to call if activeModules in config.py is updated.\
-   Generates code needed for QC depending on active modules.\
-   Modifies files: celery_handler.py\
-   Places modified are marked with '\# @@CELERYMOD' at start and\
-   '# @@/CELERYMOD' at the end on their own lines." % sys.argv[0]
+   python3 %s\n\n\
+   Only needed to call if activeModules in config.py is updated.\n\
+   Generates code needed for QC depending on active modules.\n\
+   Modifies files: celery_handler.py\n\
+   Places modified are marked with '\# @@CELERYMOD' at start and\n\
+   '# @@/CELERYMOD' at the end on their own lines.\n" % sys.argv[0]
         )
         return
     else:

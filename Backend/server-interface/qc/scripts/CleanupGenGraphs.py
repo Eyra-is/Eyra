@@ -2,10 +2,9 @@ import sh
 import tempfile
 import os
 import re
+import sys
 
 # mv out of qc/script directory and do relative imports from there.
-import sys
-import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
 from qc.modules.CleanupModule.CleanupModule import CleanupCommon
@@ -99,4 +98,13 @@ def genGraphs():
            cleanup_path+decoded_scp_path)
 
 if __name__ == '__main__':
-    genGraphs()
+    if len(sys.argv) != 1:
+        print( 
+"Usage:\
+   python3 %s\n\n\
+   Generate decoding graphs for each token for our Cleanup module.\n\
+   Only needs to be run once (for each version of the tokens).\n\
+   Writes to qc/modules/CleanupModule/local directory.\n" % sys.argv[0]
+        )
+    else:
+        genGraphs()

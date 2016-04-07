@@ -10,7 +10,6 @@ from celery import Task
 # grab celery_config from 2 dirs above this one
 # thanks, Alex Martelli, http://stackoverflow.com/a/1054293/5272567
 import sys
-import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
 import celery_config
