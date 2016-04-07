@@ -42,3 +42,5 @@ To add your own QC module (lets call it New), you need to satisfy a couple of cr
   * NewTask needs to be able to connect to the redis datastore, to modify the report for this QC module for each session. (with key **report/NewModule/session_id** or as specified in `redis_layout.md`)
   * NewTask needs to define a method, processBatch which handles the processing that QC module needs to do. This method, takes as an argument a session id and indices for recordings of that session to process in this batch (this list is stored in redis datastore by QC handler), and the task chaining which Celery uses, expects this processing function to work only on a small batch of recordings at a time (e.g. 5), so as to not take too long and be able to write intermediary results to redis to display on the client app. processBatch might take additional arguments, as specified in `modules/TestModule/TestModule.py`.
 * Modify the `config.py` script, as specified in the **Selecting modules to use** section.
+* Notes:
+  * All files in modules/NewModule/local will be ignored by git as per .gitignore.

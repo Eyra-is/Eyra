@@ -3,6 +3,7 @@ import os
 import json
 import pipes
 import tempfile
+import sh
 
 from celery import Task
 
@@ -13,6 +14,12 @@ import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
 import celery_config
+sys.path.remove(newPath)
+del newPath
+# grab errLog from util from 3 dirs above this one
+newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, os.path.pardir))
+sys.path.append(newPath)
+from util import errLog
 sys.path.remove(newPath)
 del newPath
 
@@ -129,6 +136,8 @@ class CleanupTask(Task):
 
     @property
     def redis(self):
+        """ Connection to redis datastore.
+        """
         if self._redis is None:
             self._redis = redis.StrictRedis(
                 host=celery_config.const['host'], 
@@ -155,47 +164,48 @@ class CleanupTask(Task):
             this should not be called again.)
         """
 
+        if indices == []:
+            return True
+
         beam = 15.0
         max_active = 750
         lattice_beam = 8.0
         acoustic_scale = 0.1
-        
+
         oldDir = os.getcwd()
         try:
             # change to directory of this file (for using relative paths)
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+            # set up commands for sh
+            compute_mfcc_feats = sh.Command('{}/src/featbin/compute-mfcc-feats'
+                                            .format(self.common.kaldi_root))
+            gmm_latgen_faster = sh.Command('{}/src/gmmbin/gmm-latgen-faster'
+                                            .format(self.common.kaldi_root))
+            lattice_oracle = sh.Command('{}/src/latbin/lattice-oracle'
+                                        .format(self.common.kaldi_root))
+
             # grab the recordings list for this session
             recordings = json.loads(self.redis.get('session/{}/recordings'.format(session_id)).decode('utf8'))
 
-            # MFCCs are needed at 2 stages of the pipeline so we have to dump on disk
-            mfcc_pipe = pipes.Template()
-            compute_mfcc_cmd = ('{kaldi_root}/src/featbin/compute-mfcc-feats ' +
-                               '--sample-frequency={sample_freq} --use-energy=false ' +
-                                'scp:- ark:- ').format(kaldi_root=self.common.kaldi_root,
-                                                       sample_freq=self.common.sample_freq)
-            mfcc_pipe.append(compute_mfcc_cmd, '--')
-
-            # TODO: try to eliminate the use of tempfiles (e.g. mkfifo)
-
             # make a new temp .scp file which will signify a .scp file only for our tokens
             #   in these recordings
-            #_, tokens_graphs_scp_path = tempfile.mkstemp(prefix='qc')
-            tokens_graphs_scp_path = 'local/token_scp.scp'
-
+            _, tokens_graphs_scp_path = tempfile.mkstemp(prefix='qc')
+            # other tempfiles
+            _, mfcc_feats_scp_path = tempfile.mkstemp(prefix='qc')
             _, mfcc_feats_path = tempfile.mkstemp(prefix='qc')
             _, tokens_path = tempfile.mkstemp(prefix='qc')
             _, edits_path = tempfile.mkstemp(prefix='qc')
             with open(tokens_path, 'wt') as tokens_f, \
-                    mfcc_pipe.open(mfcc_feats_path, 'w') as mfcc_feats_tmp, \
+                    open(mfcc_feats_scp_path, 'w') as mfcc_feats_tmp, \
                     open(tokens_graphs_scp_path, 'w') as tokens_graphs_scp:
 
                 graphs_scp = [] # will contain list of lines in scp script referencing relevant decoded graphs
                 for r in recordings:
                     if self.common.downsample:
                         print('{token_id} sox {rec_path} -r{sample_freq} -t wav - |'.format(token_id=r['tokenId'],
-                                                                                          rec_path=self.rec_folder_path+r['recPath'],
-                                                                                          sample_freq=self.common.sample_freq),
+                                                                                            rec_path=self.rec_folder_path+r['recPath'],
+                                                                                            sample_freq=self.common.sample_freq),
                               file=mfcc_feats_tmp)
                     else:
                         print('{} {}'.format(r['tokenId'], r['recPath']),
@@ -213,6 +223,14 @@ class CleanupTask(Task):
                 for line in graphs_scp:
                     print(line, file=tokens_graphs_scp)
 
+            # MFCCs are needed at 2 stages of the pipeline so we have to dump on disk
+            compute_mfcc_feats(
+                '--sample-frequency={}'.format(self.common.sample_freq),
+                '--use-energy=false',
+                'scp:{}'.format(mfcc_feats_scp_path),
+                'ark:{}'.format(mfcc_feats_path)
+            )
+
             compute_cmvn_cmd = ('{kaldi_root}/src/featbin/compute-cmvn-stats ' +
                                 '"ark:{mfcc_feats_path}" ' +
                                 '"ark:-" ').format(mfcc_feats_path=mfcc_feats_path,
@@ -225,33 +243,35 @@ class CleanupTask(Task):
                                  mfcc_feats_path=mfcc_feats_path,
                                  kaldi_root=self.common.kaldi_root)
 
-            safer_pipeline = pipes.Template()
-            safer_pipeline.append(('{kaldi_root}/src/gmmbin/gmm-latgen-faster ' +
-                                   '--acoustic-scale={acoustic_scale} ' +
-                                   '--beam={beam} ' +
-                                   '--max-active={max_active} ' +
-                                   '--lattice-beam={lattice_beam} ' +
-                                   '--word-symbol-table={sym_id_path} ' +
-                                   '{acoustic_model} ' +
-                                   'scp:- ' +
-                                   '"ark:{feats} |" ' +
-                                   'ark:- ').format(kaldi_root=self.common.kaldi_root,
-                                                    acoustic_scale=acoustic_scale, beam=beam,
-                                                    max_active=max_active, lattice_beam=lattice_beam,
-                                                    sym_id_path=self.common.sym_id_path,
-                                                    acoustic_model=self.common.acoustic_model_path,
-                                                    feats=feats_cmd.replace('"', r'\"')),
-                                  '--')
-            safer_pipeline.append(('{kaldi_root}/src/latbin/lattice-oracle ' +
-                                   'ark:- ' +
-                                   '"ark:{ref_tokens}" ' +
-                                   'ark:/dev/null ' + # we don't need the actual hypothesis
-                                   ' "ark,t:-" '      # number of edits
-                                   )
-                                  .format(kaldi_root=self.common.kaldi_root, ref_tokens=tokens_path), '--')
-
-            # Run the tokens through the decoding/scoring pipeline
-            safer_pipeline.copy(tokens_graphs_scp_path, edits_path)
+            # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
+            # piping in contents of tokens_graphs_scp_path and writing to edits_path
+            # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
+            #   https://github.com/amoffat/sh/issues/309
+            lattice_oracle( 
+                gmm_latgen_faster(
+                    sh.cat(
+                        tokens_graphs_scp_path,
+                        _piped=True,
+                        _err=errLog
+                    ),
+                    '--acoustic-scale={}'.format(acoustic_scale),
+                    '--beam={}'.format(beam),
+                    '--max-active={}'.format(max_active),
+                    '--lattice-beam={}'.format(lattice_beam),
+                    '--word-symbol-table={}'.format(self.common.sym_id_path),
+                    '{}'.format(self.common.acoustic_model_path),
+                    'scp:-',
+                    'ark:{} |'.format(feats_cmd),
+                    'ark:-',
+                    _piped=True,
+                    _err=errLog
+                ),
+                'ark:-', 
+                'ark:{ref_tokens}'.format(ref_tokens=tokens_path), 
+                'ark:/dev/null', 
+                'ark,t:-',
+                _out=edits_path
+            )
 
             with open(edits_path, 'rt') as edits_f:
                 edits = dict((int(rec_id), int(n_edits)) for rec_id, n_edits
@@ -288,7 +308,6 @@ class CleanupTask(Task):
         else:
             qc_report['totalStats']['accuracy'] = avg_accuracy
 
-        print('In CLEANUP processing batch, indices: {}'.format(indices))
         self.redis.set('report/{}/{}'.format(name, session_id), 
                         qc_report)
 

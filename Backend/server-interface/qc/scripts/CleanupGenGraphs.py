@@ -25,7 +25,7 @@ def genGraphs():
     # relative paths, need to prepend cleanup_path where appropriate
     decoded_ark_path = 'local/decoded_graphs.ark'
     decoded_scp_path = 'local/decoded_graphs.scp'
-    tokens_path = cleanup_path + 'token_test.txt'#'../../../db/src/mim_malr_tokens_plus_rare.txt'
+    tokens_path = '../../../db/src/mim_malr_tokens_plus_rare.txt'
 
     # init constants and open files
     common = CleanupCommon()
