@@ -42,7 +42,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   recCtrl.actionBtnDisabled = false;
   recCtrl.skipBtnDisabled = true;
   var speaker = dataService.get('speakerName');
-  $scope.tokensRead = tokensRead(speaker); // simple counter
+  $scope.tokensRead = tokensRead(speaker); // fetch tokenRead for current speaker/user
 
   var actionType = 'record'; // current state
 
@@ -65,9 +65,12 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
 
   activate();
 
-  //////////
+  ////////// 
 
   function asyncTokenRead(speaker, increment){
+    // this functon handles getting and setting/incrementing of tokensRead in 
+    // ldb speakerInfo
+    // it also updates ram speakerInfo - syncs the ldb/ram speakerInfo
 
     var ramSpeakerInfo = dataService.get('speakerInfo');
     var tokensRead = 0;
@@ -82,6 +85,8 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
         }
 
         if (typeof(increment) === 'number') {
+          // the value of increment is taken from the $scope tokenRead
+          // the $scope tokenRead is incremented
           speakerInfo['tokensRead'] = increment;
           // updating speakerInfo in ram
           dataService.set('speakerInfo', speakerInfo);
@@ -112,20 +117,20 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   }
 
   function tokensRead(speaker) {
+    // input is speaker fetched from ram
 
     var tokensRead;
+    // get speakerInfo from ram
     var ramSpeakerInfo = dataService.get('speakerInfo');
 
-    // get speaker info in ram and check on tokensRead
+    // get speaker info in ram and check if info contains tokensRead
     if (ramSpeakerInfo['tokensRead']) {
 
       tokensRead = ramSpeakerInfo['tokensRead'];
-
-      //asyncTokensRead(speaker, false); // update tokensread i ldb
-
-    // speakerInfo['Tokensread is not in ram so it might be in ldb']  
-    } else { // 
-      //console.info('No tokensRead in ram - reading ldb')
+ 
+    } else { 
+    // if tokensRead is not in ram speakerInfo then it might be in ldb speakerInfo
+    // in any case it will be either fetched or initialized in ldb.
 
       tokensRead = asyncTokenRead(speaker, 'return')
     };
@@ -186,6 +191,13 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     recService.record();
 
     currentToken = {'id':0, 'token':'Waiting for new token...'};
+   // console.info('QCReportS')
+   /*
+    if (dataService.get('QCReport')) {
+      console.info(dataService.get('QCReport') + 'QC report');
+    }*/
+    
+
     // show token on record/newToken button hit
     tokenService.nextToken().then(function(token){
       recCtrl.displayToken = token['token'];
@@ -261,9 +273,12 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
             // notify QC with last used session (should be same probably)
             //   and if non-existant, use the one we got now, and if non-existant don't move.
             var sessionIdToUse = oldSessionId || sessionId;
+            //console.info(sessionId);
+            //console.info(oldSessionId);
             if (sessionIdToUse) {
-              qcService.notifySend(sessionIdToUse).then(
+              qcService.notifySend(sessionIdToUse, dataService.get('speakerInfo').tokensRead || 0).then(
                 function success(data){
+                  //console.info('calling qcService');
                   // so long as the user is not in a recording
                   //   display QC report straight away
                   // otherwise, queue it for next stop click.
@@ -277,6 +292,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
             }
           },
           function error(response) {
+            console.info('Submitting recording to server was unsuccessful, saving locally...');
             // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
             var rec = oldCurRec;
             var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];

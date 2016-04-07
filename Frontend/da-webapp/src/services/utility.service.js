@@ -19,14 +19,15 @@ function utilityService(logger) {
   var CONSTANTS = { 
     // sentinel value for invalid recordings
     'invalidTitle' : 'no_data.wav',
-    'tokenThreshold' : 400,
-    'tokenGetCount' : 1500,
+    'tokenThreshold' : 40,
+    'tokenGetCount' : 150,
     'QCAccThreshold' : 0.2,
-    'QCFrequency' : 5, // per sessions sent
-    'QCInitRecThreshold' : 10, // recording count before QC can report, adjustment period for speaker
-    'TokenAnnouncementFreq' : 50,
+    'QCFrequency' : 1, // per sessions sent
+    'QCInitRecThreshold' : 5, // recording count before QC can report, adjustment period for speaker
+    'TokenAnnouncementFreq' : 5,
     'TokenCountGoal' : 260
   };
+  
 
   return utilityHandler;
 
@@ -53,6 +54,7 @@ function utilityService(logger) {
 
   // part=3, whole=10, accuracy=2 would result in 33.33
   function percentage(part, whole, accuracy) {
+    
     return Math.round(part/whole*100 * Math.pow(10, accuracy)) / Math.pow(10, accuracy);
   }
 
