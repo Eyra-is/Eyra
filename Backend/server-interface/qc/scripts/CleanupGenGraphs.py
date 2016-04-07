@@ -9,7 +9,7 @@ import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
 from qc.modules.CleanupModule.CleanupModule import CleanupCommon
-from util import DbWork, errLog
+from util import DbWork, simpleLog
 sys.path.remove(newPath)
 del newPath
 
@@ -73,11 +73,11 @@ def genGraphs():
             sh.cat(
                 tokens_w_key_path,
                 _piped=True,
-                _err=errLog
+                _err=simpleLog
             ),
             '{top_words}'.format(top_words=cleanup_path+common.top_words_path),
             _piped=True,
-            _err=errLog
+            _err=simpleLog
         ),
         transition_scale,
         self_loop_scale,
@@ -87,7 +87,8 @@ def genGraphs():
         cleanup_path+common.l_disambig_fst_path,
         'ark:-',
         'ark,scp:{ark_file},{scp_file}'.format( ark_file=cleanup_path+decoded_ark_path,
-                                                scp_file=cleanup_path+decoded_scp_path)
+                                                scp_file=cleanup_path+decoded_scp_path),
+        _err=simpleLog
     )
 
     # update the paths to the .ark file in .scp to be relative to the module root directory

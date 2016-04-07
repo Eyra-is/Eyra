@@ -28,6 +28,14 @@ def log(msg, e=None):
     date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
     print(str(date) + ' ' + str(msg) + exceptionText, file=sys.stderr)
 
+def simpleLog(msg):
+    """
+    Used for logging where we only want first argument,
+      but a second one would be supplied. So we avoid the
+      optional argument to log()
+    """
+    log(msg)
+
 def filename(name):
     """
     return name as a valid filename on unix
