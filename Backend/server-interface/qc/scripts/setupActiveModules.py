@@ -2,9 +2,14 @@ import re
 import sys
 import os
 
+# mv one up from qc/script directory and do relative imports from there.
+newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+sys.path.append(newPath)
 import config # grab the names/tasks of the active modules
+sys.path.remove(newPath)
+del newPath
 
-FILENAME = 'celery_handler.py'
+FILENAME = '../celery_handler.py'
 TEMPLATENAME = 'TestModule'
 TEMPLATETASK = 'TestTask'
 
