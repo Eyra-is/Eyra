@@ -187,7 +187,7 @@ class CleanupTask(Task):
             # grab the recordings list for this session
             recordings = json.loads(self.redis.get('session/{}/recordings'.format(session_id)).decode('utf8'))
             # only use recordings[indices] as per our batch
-            recordings = [rec for i,rec in enumerate(recordings) if i in indices]
+            recordings = [recordings[i] for i in indices]
 
             # make a new temp .scp file which will signify a .scp file only for our tokens
             #   in these recordings
