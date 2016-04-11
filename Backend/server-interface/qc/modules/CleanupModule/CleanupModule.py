@@ -310,6 +310,6 @@ class CleanupTask(Task):
             qc_report['totalStats']['accuracy'] = avg_accuracy
 
         self.redis.set('report/{}/{}'.format(name, session_id), 
-                        qc_report)
+                        json.dumps(qc_report))
 
         return True

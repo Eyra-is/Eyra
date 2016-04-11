@@ -232,9 +232,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
             if (deviceId) updateDevice(deviceId); 
             if (speakerId) updateSpeakerInfo(speakerId);
 
-            //setDevice(response);
-            //updateSpeakerInfo(response);
-
             var oldSessionId = dataService.get('sessionId');
             var sessionId;
             // if no error, save sessionId to RAM to be used to identify session
