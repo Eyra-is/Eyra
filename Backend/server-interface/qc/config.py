@@ -9,15 +9,21 @@
 try:
     # you need to manually add imports here
     from .celery_handler import qcProcSessionCleanupModule
+    from .celery_handler import qcProcSessionMarosijoModule
     #from .celery_handler import qcProcSessionTestModule
     #from .celery_handler import qcProcSessionDummyModule
 except SystemError:
     # and here
     qcProcSessionCleanupModule = None
+    qcProcSessionMarosijoModule = None
     #qcProcSessionTestModule = None
     #qcProcSessionDummyModule = None
 
 activeModules = dict(
+    MarosijoModule=dict(
+        name='MarosijoModule',
+        task='MarosijoTask',
+        processFn=qcProcSessionMarosijoModule),
     CleanupModule=dict(
         name='CleanupModule', 
         task='CleanupTask', 
