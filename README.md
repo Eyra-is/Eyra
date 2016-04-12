@@ -37,7 +37,7 @@ Quick description of folder structure:
 * ##### AndroidApp  
   The entire Android app, java code and all. IDE used is Android Studio.
 * ##### Backend  
-  The Flask python code, which handles connections to the mysql database among other things. Also includes the schema for the database and sql code needed for setup. Recordings are saved in `server-interface/recordings/`. Number of useful scripts in `scripts/`.
+  The Flask python code, which handles connections to the mysql database among other things. Also includes the schema for the database and sql code needed for setup. Recordings are saved in `/data/eyra/recordings/` by default (this can be changed in `app.py` by changing `app.config['MAIN_RECORDINGS_PATH']`). Number of useful scripts in `scripts/`.
 * ##### Frockend (should be renamed)  
   Code to mock the frontend designed to test the QC (quality control).
 * ##### Frontend  

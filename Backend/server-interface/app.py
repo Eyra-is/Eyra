@@ -9,6 +9,9 @@ from util import log
 
 app = Flask(__name__)
 
+# TODO move to config file (along with configs in DbHandler and AuthHandler mayhaps)
+app.config['MAIN_RECORDINGS_PATH'] = '/data/eyra/recordings'
+
 dbHandler = DbHandler(app)
 authHandler = AuthHandler(app) # sets up /auth/login @app.route and @login_required()
 qcHandler = QcHandler(app, dbHandler)
