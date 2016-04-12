@@ -165,7 +165,7 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
 
     if (report.status === 'processing' && report.avgAcc !== NaN) {
       out += '<p class="message '+messageClassByAccuracy(report.avgAcc)+
-              '">Total average accuracy: '+util.percentage(report.avgAcc, 1, 3)+'</p>';
+              '">Total average accuracy: '+util.percentage(report.avgAcc, 1, 3)+'%</p>';
 
       var modules = report.modules;
       for (var mod in modules) {
