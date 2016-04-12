@@ -79,9 +79,12 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
       function success(speakerInfo) {
         //console.info(speakerInfo);
         if (increment === 'return'){
-          tokensRead = ramSpeakerInfo['tokensRead'];
-          // updating speakerInfo in ram
-          dataService.set('speakerInfo', ramSpeakerInfo);
+          if (speakerInfo && speakerInfo['tokensRead']) {
+            ramSpeakerInfo['tokensRead'] = speakerInfo['tokensRead'];
+            tokensRead = ramSpeakerInfo['tokensRead'];
+            // updating speakerInfo in ram
+            dataService.set('speakerInfo', ramSpeakerInfo);
+          }
         }
 
         if (typeof(increment) === 'number') {
@@ -98,7 +101,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
               logger.error(value);
             }
           );
-
         }
 
         if (increment === 'return') {
