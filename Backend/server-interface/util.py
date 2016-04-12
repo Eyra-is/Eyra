@@ -1,9 +1,21 @@
 # utility functions for server-interface
-
-from datetime import datetime
 import sys
 import unicodedata
 import re
+import MySQLdb
+
+from datetime import datetime
+from celery.utils.log import get_task_logger
+
+from config import dbConst # grab data needed to connect to database
+
+def errLog(x):
+    """
+    Logs x to celery INFO. Used as a callback in sh piping to manually print
+      otherwise swallowed error logs.
+    """
+    logger = get_task_logger(__name__)
+    logger.info(x)
 
 def log(msg, e=None):
     """
@@ -16,6 +28,14 @@ def log(msg, e=None):
     date = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
     print(str(date) + ' ' + str(msg) + exceptionText, file=sys.stderr)
 
+def simpleLog(msg):
+    """
+    Used for logging where we only want first argument,
+      but a second one would be supplied. So we avoid the
+      optional argument to log()
+    """
+    log(msg)
+
 def filename(name):
     """
     return name as a valid filename on unix
@@ -25,3 +45,37 @@ def filename(name):
     name = unicodedata.normalize('NFKC', name)
     name = re.sub('[-\s]+', '-', name, flags=re.U).strip()
     return name.replace('/', '\\')
+
+class DbWork():
+    """
+    Class for db opperations without an app instance.
+    """
+    def __init__(self):
+        self.db = MySQLdb.connect(**dbConst)
+
+    def verifyTokenId(self, tokenId, token):
+            """
+            Accepts a token id and token and verifies this id
+            is correct (comparing to the token in database and its id)
+
+            Parameters:
+
+                tokenId     id of token
+                token       token text
+            """
+            try:
+                cur = self.db.cursor()
+                cur.execute('SELECT inputToken FROM token WHERE id=%s', (tokenId,))
+                tokenFromDb = cur.fetchone()
+                if tokenFromDb:
+                    tokenFromDb = tokenFromDb[0] # fetchone returns tuple
+                    if tokenFromDb == token:
+                        return True
+                    return False
+                return False
+            except MySQLdb.Error as e:
+                msg = 'Error verifying token id, %d : %s' % (tokenId, token) 
+                log(msg, e)
+                raise
+            else:
+                return False

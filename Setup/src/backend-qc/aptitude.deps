@@ -1,1 +1,1 @@
-sox redis-server
+sox redis-server python3-numpy

@@ -53,11 +53,9 @@ function sessionService($q, dataService, localDbMiscService, logger) {
             data.speakerInfo['deviceImei'] = data.deviceInfo['imei'];
           }
         }
-        // special case for speakerInfo
-        if (data.speakerInfo.tokensRead){
-          //delete data.speakerInfo.tokensRead
+        // special case for speakerInfo, remove tokensRead attribute
+        data.speakerInfo = speakerInfoCorrection(data.speakerInfo);
 
-        }
         var tempSessionData = {                                                                  
                                 "type":'session', 
                                 "data":
@@ -83,6 +81,14 @@ function sessionService($q, dataService, localDbMiscService, logger) {
     );
 
     return sessionData.promise;
+  }
+
+  function speakerInfoCorrection(oldSpeakerInfo) {
+    // function creates new speakerInfo object without tokensRead attribute
+
+    var newSpeakerInfo = JSON.parse(JSON.stringify(oldSpeakerInfo)); // copy object
+    delete newSpeakerInfo.tokensRead;
+    return newSpeakerInfo;
   }
 
   // attempts first to get the info specified by key from dataService

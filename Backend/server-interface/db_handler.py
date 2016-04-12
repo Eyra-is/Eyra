@@ -5,15 +5,16 @@ import os # for mkdir
 import random
 
 from util import log, filename
+from config import dbConst
 
 class DbHandler:
     def __init__(self, app):
         # MySQL configurations
-        app.config['MYSQL_HOST'] = 'localhost'
-        app.config['MYSQL_USER'] = 'default'
-        app.config['MYSQL_DB']   = 'recordings_master'
-        app.config['MYSQL_USE_UNICODE'] = True
-        app.config['MYSQL_CHARSET'] = 'utf8'
+        app.config['MYSQL_HOST'] = dbConst['host']
+        app.config['MYSQL_USER'] = dbConst['user']
+        app.config['MYSQL_DB']   = dbConst['db']
+        app.config['MYSQL_USE_UNICODE'] = dbConst['use_unicode']
+        app.config['MYSQL_CHARSET'] = dbConst['charset']
 
         self.mysql = MySQL(app)
 
@@ -577,7 +578,7 @@ class DbHandler:
 
         return jsonTokens
 
-    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str}]':
+    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str, "tokenId": ...}]':
         """Fetches info for the recordings of the session `sessionId`
 
         Parameters:
@@ -586,11 +587,11 @@ class DbHandler:
                        otherwise fetch info for all recordings from session
 
         The returned list contains the newest recordings last, i.e. recordings are
-        in ascending order with regard to id.
+        in ascending order with regard to recording id.
         """
         try:
             cur = self.mysql.connection.cursor()
-            cur.execute('SELECT recording.id, recording.rel_path, token.inputToken FROM recording '
+            cur.execute('SELECT recording.id, recording.rel_path, token.inputToken, token.id FROM recording '
                         + 'JOIN token ON recording.tokenId=token.id '
                         + 'WHERE recording.sessionId=%s '
                         + 'ORDER BY recording.id ASC ', (sessionId,))
@@ -604,8 +605,8 @@ class DbHandler:
             log(msg, e)
             raise
         else:
-            return json.dumps([dict(recId=recId, recPath=recPath, token=token)
-                                for recId, recPath, token in rows])
+            return json.dumps([dict(recId=recId, recPath=recPath, token=token, tokenId=id)
+                                for recId, recPath, token, id in rows])
 
     def sessionExists(self, sessionId) -> bool:
         """
@@ -622,3 +623,5 @@ class DbHandler:
             raise
         else:
             return False
+
+    

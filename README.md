@@ -47,6 +47,8 @@ Quick description of folder structure:
 * ##### Setup  
   Setup of the app. Running `setup.sh` installs the webapp from scratch. Includes code for the apache server, the database setup and the frontend setup.
 
+Look at other README's located within the project (e.g. `Backend/server-interface/qc/README.md` and `Frontend/da-webapp/README.md`)
+
 ## Contributing
 
 1. Fork it!

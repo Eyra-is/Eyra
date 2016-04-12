@@ -1,5 +1,6 @@
 import redis
 import datetime
+import json
 
 #: Relative imports
 from util import log
@@ -119,13 +120,19 @@ class QcHandler(object):
              "status": "processing",
              "modules"  {
                 "module1" :  {
-                                "totalStats": {"accuracy": [0.0;1.0]"},
-                                "perRecordingStats": [{"recordingId": ...,
-                                    "stats": {"accuracy": [0.0;1.0]}}]}
+                                "totalStats": {"accuracy": [0.0;1.0]"}
+                                [, "perRecordingStats": [
+                                        {"recordingId": ...,
+                                            "stats": {"accuracy": [0.0;1.0]}
+                                        },
+                                        ...]}
+                                ]
                               }, 
                               ...
                         }
             }
+
+        (see client-server API for should be same definition of return)
 
         """
         # check if session exists
@@ -150,7 +157,7 @@ class QcHandler(object):
         for name, processFn in self.modules.items():
             report = self.redis.get('report/{}/{}'.format(name, session_id))
             if report:
-                reports[name] = report.decode("utf-8") # redis.get returns bytes, so we decode into string
+                reports[name] = json.loads(report.decode("utf-8")) # redis.get returns bytes, so we decode into string
             else:
                 # start the async processing
                 processFn.delay(name, session_id, None, 0, celery_config.const['batch_size'])

@@ -112,6 +112,9 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
   }
 
   function queryQC(sessionId) {
+    // function input is a sessionId
+    // a async http get call is sent to backend w a string as input
+    // the return value is a 
     return $http.get(BACKENDURL + '/qc/report/session/'+sessionId);
   }
 

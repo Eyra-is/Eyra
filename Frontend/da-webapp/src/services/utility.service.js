@@ -27,6 +27,7 @@ function utilityService(logger) {
     'TokenAnnouncementFreq' : 5,
     'TokenCountGoal' : 260
   };
+  
 
   return utilityHandler;
 
@@ -53,6 +54,7 @@ function utilityService(logger) {
 
   // part=3, whole=10, accuracy=2 would result in 33.33
   function percentage(part, whole, accuracy) {
+    
     return Math.round(part/whole*100 * Math.pow(10, accuracy)) / Math.pow(10, accuracy);
   }
 
