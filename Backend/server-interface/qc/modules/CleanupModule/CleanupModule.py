@@ -99,7 +99,7 @@ class CleanupTask(Task):
     # path to root folder of recordings/ folder (or the location of 
     #   the actual .wav recordings) so that rec_folder_path+rel_path
     #   is the correct path to the actual recordings from this files directory
-    rec_folder_path = '../../../' 
+    rec_folder_path = '/data/eyra/' 
 
     @property
     def common(self):
