@@ -18,6 +18,9 @@ class DbHandler:
 
         self.mysql = MySQL(app)
 
+        # path to saved recordings
+        self.recordings_path = app.config['MAIN_RECORDINGS_PATH']
+
         # needed to sanitize the dynamic sql creation in insertGeneralData
         # keep a list of allowed column names for insertions etc. depending on the table (device, isntructor, etc)
         self.allowedColumnNames = {
@@ -381,7 +384,6 @@ class DbHandler:
         recordings = an array of file objects representing the submitted recordings
         returns a dict (msg=msg, statusCode=200,400,..)
         """
-        RECORDINGS_ROOT = 'recordings' # root path to recordings
         jsonDecoded = None
         sessionId = None
 
@@ -460,8 +462,8 @@ class DbHandler:
             # now populate recordings table and save recordings+extra data to file/s
 
             # make sure path to recordings exists
-            if not os.path.exists(RECORDINGS_ROOT):
-                os.mkdir(RECORDINGS_ROOT)
+            if not os.path.exists(self.recordings_path):
+                os.makedirs(self.recordings_path)
 
             for rec in recordings:
                 # grab token to save as extra metadata later, and id to insert into table recording
@@ -483,7 +485,7 @@ class DbHandler:
                         token = token[0] # fetchone() returns tuple
 
                 # save recordings to recordings/sessionId/filename
-                sessionPath = os.path.join(RECORDINGS_ROOT, 'session_'+str(sessionId))
+                sessionPath = os.path.join(self.recordings_path, 'session_'+str(sessionId))
                 if not os.path.exists(sessionPath):
                     os.mkdir(sessionPath)
                 
