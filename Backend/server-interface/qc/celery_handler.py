@@ -131,7 +131,9 @@ def qcProcSessionCleanupModule(name, sessionId, prevTime=None, slistIdx=0, batch
     Performs qcProcSessionCleanupModule.processBatch which does the processing, 
     it must take exactly 3 arguments, the first being the name used for identification
     in the redis datastore (e.g. 'report/name/sessionId'), and
-    the second is sessionId, third is a list of indices of recordings to process. 
+    the second is sessionId, third is a list of indices of recordings to process 
+    (indices = [] means no new recordings, in this case processBatch will most likely
+    just return True). 
     processBatch is responsible for putting the results on the correct format in the
     report in the redis datastore. Obviously, processBatch needs to be a
     synchronous function. If processBatch returns False, stop this particular task chain.

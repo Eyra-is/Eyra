@@ -156,7 +156,9 @@ class CleanupTask(Task):
             session_id  id of session
             indices     indices in the list of recordings in the redis 
                         datastore ('session/session_id/recordings') to process
-                        in this batch.
+                        in this batch. 
+                        indices=[] indicates no processing should
+                        be done at this stage (return True, no new recordings to process)
 
         Return:
             False or raise an exception if something is wrong (and
