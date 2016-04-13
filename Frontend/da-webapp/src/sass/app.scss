@@ -189,6 +189,50 @@ ul {
   font-weight: bold;
   font-size: 1.25em;
 }
+@keyframes toRed {
+    
+    to {background-color: #DF0101;}    
+  }
+
+  @keyframes toOrange {
+    
+    to {background-color: #FF8000;}    
+  }
+
+  @keyframes toGreenish {
+    
+    to {background-color: #2EFE2E;}    
+  }
+
+  @keyframes toGreen {
+    
+    to {background-color: #0B610B;}    
+  }
+
+  ._red {  
+  background-color: #FA5882;
+  animation-name: toRed;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
+._orange {  
+  background-color: #FAAC58;
+  animation-name: toOrange;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
+._greenish {  
+  background-color: #81F781;
+  animation-name: toGreenish;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
+._green {  
+  background-color: #2EFE2E;
+  animation-name: toGreen;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
 .default-heading { 
   margin: 0 auto;
   padding: 0 0 3% 0;
