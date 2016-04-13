@@ -25,6 +25,6 @@
     "prestart": "npm install",
     "start": "http-server -a localhost -p 8000 -c-1",
     "preupdate-webdriver": "npm install",
-    "update-webdriver": "webdriver-manager update",
+    "update-webdriver": "webdriver-manager update"
   }
 }
