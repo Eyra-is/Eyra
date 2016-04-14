@@ -9,6 +9,7 @@ TODO: Write a project description
 Run `./Setup/setup.sh --all`
 
 If you want QC to work, you need to install Kaldi, this is done by running `./Setup/setup.sh --ext-kaldi`. This could take some time (hrs).
+In addition for the QC, you need to obtain (either by running e.g. `qc/scripts/{Cleanup,Marosijo}GenGraphs.py or getting it elsewhere) .scp and .ark files containing the decoded graphs. These are used by Marosijo and Cleanup module. Generating them takes a long time, and depends on the number/length of the token list.
 
 ### Internet installation (e.g. for crowdsourcing)
 
