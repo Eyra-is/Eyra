@@ -1,6 +1,6 @@
 #!/bin/bash -xeu
 
-KALDI_COMMIT="88d78ad28d86dde470bdef0cb982a5ef32e9571f"
+KALDI_COMMIT="ce708ea1679467b915d50c5439eeb41a249e2d32"
 
 NPROC=$( nproc || grep -c "^processor" /proc/cpuinfo )
 
