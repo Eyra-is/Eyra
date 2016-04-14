@@ -115,7 +115,8 @@ class MarosijoCommon:
         except KeyError:
             self.kaldiRoot = _DEFAULT_KALDI_ROOT
 
-    def _validateModel(self, modelPath, graphs=True):
+    @classmethod
+    def _validateModel(cls, modelPath, graphs=True):
         missingFiles = []
         if not os.path.isdir(modelPath):
             raise MarosijoError(
@@ -123,9 +124,11 @@ class MarosijoCommon:
                 .format(modelPath))
 
         if graphs:
-            requiredFiles = self._REQUIRED_FILES + self._REQUIRED_FILES_AFTER_COMPILE
+            requiredFiles = cls._REQUIRED_FILES + cls._REQUIRED_FILES_AFTER_COMPILE
+            extraMsg = 'Did you forget to run the graph generation script?'
         else:
-            requiredFiles = self._REQUIRED_FILES
+            requiredFiles = cls._REQUIRED_FILES
+            extraMsg = 'Did you forget the model preparation step?'
 
         for file_ in requiredFiles:
             fileExists = os.path.exists(os.path.join(modelPath, file_))
@@ -133,8 +136,9 @@ class MarosijoCommon:
                 missingFiles.append(file_)
 
         if missingFiles:
-            raise MarosijoError('Following model files are missing from "{}": {}'
-                                .format(modelPath, ', '.join(f_ for f_ in missingFiles)))
+            raise MarosijoError('Following model files are missing from "{}": {}.  {}'
+                                .format(modelPath, ', '.join(f_ for f_ in missingFiles),
+                                        extraMsg))
 
     def symToInt(self, token: str) -> str:
         return ' '.join(self.symbolTable.get(token_, str(self.oov)) for
