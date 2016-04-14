@@ -1,7 +1,7 @@
 from flask.ext.mysqldb import MySQL
 from MySQLdb import Error as MySQLError
 import json
-import os # for mkdir
+import os
 import random
 
 from util import log, filename
@@ -380,8 +380,14 @@ class DbHandler:
 
     def processSessionData(self, jsonData, recordings):
         """
-        jsonData = look at format in the client-server API
-        recordings = an array of file objects representing the submitted recordings
+        Processes session data sent from client, saves it to the appropriate tables
+        in the database, and saves the recordings to the filesystem at
+        '<app.config['MAIN_RECORDINGS_PATH']>/session_<sessionId>/recname'
+
+        parameters:
+            jsonData        look at format in the client-server API
+            recordings      an array of file objects representing the submitted recordings
+        
         returns a dict (msg=msg, statusCode=200,400,..)
         """
         jsonDecoded = None
@@ -484,7 +490,7 @@ class DbHandler:
                     else:
                         token = token[0] # fetchone() returns tuple
 
-                # save recordings to recordings/sessionId/filename
+                # save recordings to app.config['MAIN_RECORDINGS_PATH']/session_sessionId/filename
                 sessionPath = os.path.join(self.recordings_path, 'session_'+str(sessionId))
                 if not os.path.exists(sessionPath):
                     os.mkdir(sessionPath)
@@ -500,9 +506,9 @@ class DbHandler:
                     f.write(token)
 
                 # insert recording data into database
-                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, rel_path) \
+                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, filename) \
                              VALUES (%s, %s, %s, %s)', 
-                            (tokenId, speakerId, sessionId, wavePath))
+                            (tokenId, speakerId, sessionId, recName))
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
@@ -580,7 +586,7 @@ class DbHandler:
 
         return jsonTokens
 
-    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str, "tokenId": ...}]':
+    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str - absolute path, "tokenId": ...}]':
         """Fetches info for the recordings of the session `sessionId`
 
         Parameters:
@@ -593,7 +599,7 @@ class DbHandler:
         """
         try:
             cur = self.mysql.connection.cursor()
-            cur.execute('SELECT recording.id, recording.rel_path, token.inputToken, token.id FROM recording '
+            cur.execute('SELECT recording.id, recording.filename, token.inputToken, token.id FROM recording '
                         + 'JOIN token ON recording.tokenId=token.id '
                         + 'WHERE recording.sessionId=%s '
                         + 'ORDER BY recording.id ASC ', (sessionId,))
@@ -607,7 +613,10 @@ class DbHandler:
             log(msg, e)
             raise
         else:
-            return json.dumps([dict(recId=recId, recPath=recPath, token=token, tokenId=id)
+            return json.dumps([dict(recId=recId, 
+                                    recPath=os.path.join(self.recordings_path,'session_'+str(sessionId),recPath), 
+                                    token=token, 
+                                    tokenId=id)
                                 for recId, recPath, token, id in rows])
 
     def sessionExists(self, sessionId) -> bool:
