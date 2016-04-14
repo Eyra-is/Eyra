@@ -5,7 +5,7 @@ This QC uses Celery and a task chaining system to handle load and remain scalabl
 ## Firing up the QC
 
 The QC needs a worker running constantly. This is for Celery. You need to install Celery and redis-server, this should be in `Setup/src/backend-qc/*.deps`. Running `./Setup/setup.sh --backend-qc` should install those for you.
-Then, the worker is run automatically in the background, (see `Setup/src/backend-qc/post_install.sh`) logging to `Local/Log/celery.log`. (be careful, this file might get big real fast, but it's still just text logs, has to be tested)
+Then, the worker is run automatically in the background, (see `Setup/src/backend-qc/post_install.sh`) logging to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast). You need to manually kill the workers (tree-view in htop for example) with this setup, so just be careful.
 
 ## Selecting modules to use
 

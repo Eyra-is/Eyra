@@ -7,7 +7,14 @@
 
 report "Firing up Celery worker for QC.. log in Local/Log/celery.log"
 cd ../Backend/server-interface
-celery -A qc.celery_handler.celery worker --loglevel=info > ../../Local/Log/celery.log 2>&1 &
+# if we have more than 1 thread, set celery to use all except 1
+nproc=$(nproc)
+if [ $nproc -ne 1 ]; then
+    nproc=$[nproc - 1]
+else
+    report_err "Using QC with only 1 thread is BAD. Get more cores pls."
+fi
+celery -A qc.celery_handler.celery worker -c $nproc -D -f ../../Local/Log/celery.log --loglevel=info
 cd -
 
 return
