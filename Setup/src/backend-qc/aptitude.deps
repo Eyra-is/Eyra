@@ -1,1 +1,1 @@
-sox redis-server python3-numpy gnome-terminal
+sox redis-server python3-numpy

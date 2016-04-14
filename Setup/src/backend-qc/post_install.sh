@@ -5,9 +5,9 @@
   exit 1
 }
 
-report "Firing up Celery worker for QC.."
+report "Firing up Celery worker for QC.. log in Local/Log/celery.log"
 cd ../Backend/server-interface
-gnome-terminal -x sh -c "celery -A qc.celery_handler.celery worker --loglevel=info; bash"
+celery -A qc.celery_handler.celery worker --loglevel=info > ../../Local/Log/celery.log 2>&1 &
 cd -
 
 return
