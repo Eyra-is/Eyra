@@ -75,7 +75,7 @@ create table recording (
     tokenId int not null,
     speakerId int not null,
     sessionId int not null,
-    rel_path varchar(255) not null unique,
+    filename varchar(255) not null unique,
     foreign key (tokenId) references token(id),
     foreign key (speakerId) references speaker(id),
     foreign key (sessionId) references session(id)
