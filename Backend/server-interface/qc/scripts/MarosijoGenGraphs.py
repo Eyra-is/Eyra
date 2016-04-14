@@ -58,6 +58,9 @@ def genGraphs(tokensPath):
                 raise ValueError('Could not verify token, "{}" with id {}.'.format(token, tokenKey))
             tokenKey += 1
 
+    simpleLog('Compiling the decoding graphs (files {} and {}).  This will take a long time.'
+              .format(graphsArkPath, graphsScpPath))
+
     compileTrainGraphsFsts(
         makeUtteranceFsts(
             common.phoneLmPath,
@@ -80,7 +83,7 @@ def genGraphs(tokensPath):
     )
 
     # update the paths to the .ark file in .scp to be relative to the module root directory
-    sh.sed("-i", "s:{}/::g".format(modulePath), graphsScpPath)
+    # sh.sed("-i", "s:{}/::g".format(modulePath), graphsScpPath)
 
 if __name__ == '__main__':
     import argparse
