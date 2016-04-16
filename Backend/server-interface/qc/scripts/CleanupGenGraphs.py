@@ -56,7 +56,7 @@ def genGraphs():
         dbWork = DbWork()
         tok_key = 1 
         for token in tokens_f.read().splitlines():
-            token_ids = ' '.join(common.sym_id_map.get(tok, common.oov_id) for
+            token_ids = ' '.join(common.sym_id_map.get(tok.lower(), common.oov_id) for
                                  tok in token.split())
             if dbWork.verifyTokenId(tok_key, token):
                 print('{} {}'.format(tok_key, token_ids),
