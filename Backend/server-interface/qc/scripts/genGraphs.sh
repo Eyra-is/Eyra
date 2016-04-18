@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# https://www.petefreitag.com/item/689.cfm
-# thank you Pete Freitag
-
 display_usage() { 
     echo -e "Usage:\n$0 module token_file graphs_scp_file [--concurrency,-c CONCURRENCY=1]\
              \n\nCreates decoding graphs for Marosijo and Cleanup module. Using CONCURRENCY threads.\n\
