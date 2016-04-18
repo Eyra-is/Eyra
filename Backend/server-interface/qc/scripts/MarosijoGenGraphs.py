@@ -3,6 +3,7 @@ import tempfile
 import os
 import re
 import sys
+from multiprocessing import Process
 
 # mv out of qc/script directory and do relative imports from there.
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
@@ -12,22 +13,22 @@ from util import DbWork, simpleLog
 sys.path.remove(newPath)
 del newPath
 
-def genGraphs(tokensPath):
+def genGraphs(tokensPath, modulePath=None, graphsArkPath=None, graphsScpPath=None):
     """
     Generate decoding graphs for each token for our Marosijo module.
     
     Only needs to be run once (for each version of the tokens).
     """
-    modulePath = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                              os.path.pardir,
-                                              'modules', 'MarosijoModule'))
+    if modulePath is None:
+        modulePath = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                  os.path.pardir,
+                                                  'modules', 'MarosijoModule'))
     os.makedirs(os.path.join(modulePath, 'local'), exist_ok=True)
 
-    graphsArkPath = os.path.join(modulePath, 'local', 'graphs.ark')
-    graphsScpPath = os.path.join(modulePath, 'local', 'graphs.scp')
-    # tokensPath = os.path.abspath(os.path.join(os.path.pardir,
-    #                                           os.path.pardir, os.path.pardir, 'src',
-    #                                           'mim_malr_tokens_plus_rare.txt'))
+    if graphsArkPath is None:
+        graphsArkPath = os.path.join(modulePath, 'local', 'graphs.ark')
+    if graphsScpPath is None:
+        graphsScpPath = os.path.join(modulePath, 'local', 'graphs.scp')
 
     common = MarosijoCommon(os.path.join(modulePath, 'local'), graphs=False)
 
@@ -51,7 +52,7 @@ def genGraphs(tokensPath):
         tokenKey = 1
         for token in tokensF:
             token = token.rstrip('\n')
-            tokenInts = common.symToInt(token)
+            tokenInts = common.symToInt(token.lower())
             if dbWork.verifyTokenId(tokenKey, token):
                 tokensLines.append('{} {}'.format(tokenKey, tokenInts))
             else:
@@ -69,6 +70,7 @@ def genGraphs(tokensPath):
             _piped=True,
             _err=simpleLog
         ),
+        '--verbose=4',
         '--batch-size=1',
         '--transition-scale=1.0',
         '--self-loop-scale=0.1',
@@ -88,10 +90,17 @@ def genGraphs(tokensPath):
 if __name__ == '__main__':
     import argparse
 
+    modulePath = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                              os.path.pardir,
+                                              'modules', 'MarosijoModule'))
+
     parser = argparse.ArgumentParser(description="""
         Generate decoding graphs for each token for our Marosijo module.
         Only needs to be run once (for each version of the tokens).
         Writes to qc/modules/MarosijoModule/local directory.""")
+    parser.add_argument('--concurrency', '-c', type=int, default=1,
+                        help='How many processes to use')
     parser.add_argument('tokens_path', type=str, help='Path to token file')
     args = parser.parse_args()
-    genGraphs(args.tokens_path)
+
+    genGraphs(args.tokens_path, modulePath)

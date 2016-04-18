@@ -140,9 +140,12 @@ class MarosijoCommon:
                                 .format(modelPath, ', '.join(f_ for f_ in missingFiles),
                                         extraMsg))
 
-    def symToInt(self, token: str) -> str:
+    def symToInt(self, token: str, forceLowercase=True) -> str:
+        def lower(s, lower=True):
+            return s.lower() if lower else s
+
         return ' '.join(self.symbolTable.get(token_, str(self.oov)) for
-                        token_ in token.split())
+                        token_ in lower(token.split(), lower=forceLowercase))
 
     def intToSym(self, tokenInts: str, fromCol=0, toCol=None) -> str:
         return ' '.join(self.symbolTableToInt[token_] for token_ in
@@ -230,7 +233,8 @@ class _SimpleMarosijoTask(Task):
                                       .format(self.common.kaldiRoot))
         computeMfccFeats = computeMfccFeats.bake(
             '--sample-frequency={}'.format(self.common.sampleFreq),
-            '--use-energy=false')
+            '--use-energy=false',
+            '--snip-edges=false')
         gmmLatgenFaster = sh.Command('{}/src/gmmbin/gmm-latgen-faster'
                                      .format(self.common.kaldiRoot))
         latticeBestPath = sh.Command('{}/src/latbin/lattice-best-path'
@@ -302,16 +306,17 @@ class _SimpleMarosijoTask(Task):
             hypLines = latticeBestPath(
                 gmmLatgenFaster(
                     '--acoustic-scale=0.1',
-                    '--beam=15',
+                    '--beam=12',
                     '--max-active=1000',
-                    '--lattice-beam=8.0',
+                    '--lattice-beam=10.0',
+                    '--max-mem=50000000',
                     self.common.acousticModelPath,
                     'scp,p:{}'.format(tokensGraphsScpPath),  # fsts-rspecifier
                     'ark:{} |'.format(featsCmd),             # features-rspecifier
                     'ark:-',                                 # lattice-wspecifier
                     _err=errLog,
                     _piped=True),
-                '--acoustic-scale=0.1',
+                '--acoustic-scale=0.06',
                 '--word-symbol-table={}'.format(self.common.symbolTablePath),
                 'ark:-',
                 'ark,t:-',
