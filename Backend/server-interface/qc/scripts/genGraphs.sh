@@ -7,7 +7,7 @@ display_usage() {
     echo -e "Usage:\n$0 module token_file graphs_scp_file [--concurrency,-c CONCURRENCY=1]\
              \n\nCreates decoding graphs for Marosijo and Cleanup module. Using CONCURRENCY threads.\n\
              module is 'marosijo' for marosijo and 'cleanup' for cleanup
-             token_file is a path to a file with format 'tokId token'\n\
+             token_file is a path to a file with format 'tokId token' where tokId is the same id as in MySQL database for the token.\n\
              graphs_scp_file is a path to where the resulting .scp/.ark files are stored.\n" 
 } 
 if [[ ( $1 == "--help") ||  $1 == "-h" ]] 
