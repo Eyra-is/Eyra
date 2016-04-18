@@ -142,7 +142,7 @@ class MarosijoCommon:
 
     def symToInt(self, token: str, forceLowercase=True) -> str:
         def lower(s, lower=True):
-            return s.lower() if lower else lower
+            return s.lower() if lower else s
 
         return ' '.join(self.symbolTable.get(token_, str(self.oov)) for
                         token_ in lower(token.split(), lower=forceLowercase))
