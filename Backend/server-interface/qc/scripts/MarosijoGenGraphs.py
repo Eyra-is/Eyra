@@ -57,8 +57,8 @@ def genGraphs(tokensPath, modulePath=None, graphsArkPath=None, graphsScpPath=Non
         dbWork = DbWork()
         for line in tokensF:
             line = line.rstrip('\n')
-            tokenKey = line.split()[0]
-            token = ' '.join(line.split()[1:])
+            tokenKey = line.split(' ')[0]
+            token = ' '.join(line.split(' ')[1:]) # split(' ') needed because split() rstrips the space by default
             tokenInts = common.symToInt(token.lower())
             if dbWork.verifyTokenId(tokenKey, token):
                 tokensLines.append('{} {}'.format(tokenKey, tokenInts))

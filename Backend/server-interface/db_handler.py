@@ -45,6 +45,18 @@ class DbHandler:
             ]
         }
 
+        # generate list of currently valid tokens according to 'valid' column in table token.
+        #self.invalid_token_ids = self.getInvalidTokenIds() # messes up WSGI script for some fucking reason
+        self.invalid_token_ids = None
+
+    def getInvalidTokenIds(self):
+        """
+        Returns a list of tokenId's who are marked with valid=FALSE in database.
+        """
+        cur = self.mysql.connection.cursor()
+        cur.execute('SELECT id FROM token WHERE valid=FALSE')
+        return [row[0] for row in cur.fetchall()]
+
     def insertGeneralData(self, name, data, table):
         """
         inserts data into appropriate table
@@ -533,9 +545,14 @@ class DbHandler:
         """
         gets numTokens tokens randomly selected from the database and returns them in a nice json format.
         look at format in the client-server API
+        Does not return any tokens marked with valid:FALSE in db.
         or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
         returns [] on failure
         """
+        # start by getting the list of invalid tokens, and create it if we haven't already
+        if self.invalid_token_ids is None:
+            self.invalid_token_ids = self.getInvalidTokenIds()
+
         tokens = []
         try:
             cur = self.mysql.connection.cursor()
@@ -543,8 +560,12 @@ class DbHandler:
             # select numTokens random rows from the database
             cur.execute('SELECT COUNT(*) FROM token');
             numRows = cur.fetchone()[0]
+
+            total_token_ids = range(1, numRows+1)
+            valid_token_ids = [x for x in total_token_ids if x not in self.invalid_token_ids]
+
             # needs testing here to make sure 1 is lowest id, and numRows is highest id
-            randIds = [random.randint(1,int(numRows)) for i in range(int(numTokens))]
+            randIds = [random.choice(valid_token_ids) for i in range(int(numTokens))]
             randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
             cur.execute('SELECT id, inputToken FROM token WHERE id IN %s',
                         (randIds,)) # have to pass in a tuple, with only one parameter

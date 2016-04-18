@@ -65,8 +65,8 @@ def genGraphs(tokens_path, module_path=None, decoded_ark_path=None, decoded_scp_
         #   see util.DbWork)
         dbWork = DbWork()
         for line in tokens_f.read().splitlines():
-            tok_key = line.split()[0]
-            token = ' '.join(line.split()[1:])
+            tok_key = line.split(' ')[0]
+            token = ' '.join(line.split(' ')[1:]) # split(' ') needed because split() rstrips the space by default
             token_ids = ' '.join(common.sym_id_map.get(tok.lower(), common.oov_id) for
                                  tok in token.split())
             if dbWork.verifyTokenId(tok_key, token):
