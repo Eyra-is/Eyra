@@ -145,7 +145,7 @@ class MarosijoCommon:
             return s.lower() if lower else s
 
         return ' '.join(self.symbolTable.get(token_, str(self.oov)) for
-                        token_ in lower(token.split(), lower=forceLowercase))
+                        token_ in lower(token, lower=forceLowercase).split())
 
     def intToSym(self, tokenInts: str, fromCol=0, toCol=None) -> str:
         return ' '.join(self.symbolTableToInt[token_] for token_ in
