@@ -20,7 +20,7 @@ def genGraphs(tokensPath, modulePath=None, graphsArkPath=None, graphsScpPath=Non
     Only needs to be run once (for each version of the tokens).
 
     Parameters:
-        tokensPath      absolute path to the token list on format "tokId token"
+        tokensPath      path to the token list on format "tokId token"
         modulePath      absolute path to the module root (e.g. /.../qc/modules/MarosijoModule)
         graphsArkPath   absolute path to where .ark file should be saved
         graphsScpPath   absolute path to where .scp file should be saved  
@@ -109,4 +109,9 @@ if __name__ == '__main__':
     parser.add_argument('graphs_scp_path', type=str, nargs='?', help='Path to generated .scp file')
     args = parser.parse_args()
 
-    genGraphs(args.tokens_path, modulePath, args.graphs_ark_path, args.graphs_scp_path)
+    genGraphs(  args.tokens_path, 
+                modulePath, 
+                os.path.abspath(args.graphs_ark_path), 
+                os.path.abspath(args.graphs_scp_path)
+    )
+

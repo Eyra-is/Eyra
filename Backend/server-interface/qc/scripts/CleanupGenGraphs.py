@@ -19,7 +19,7 @@ def genGraphs(tokens_path, module_path=None, decoded_ark_path=None, decoded_scp_
     Only needs to be run once (for each version of the tokens).
 
     Parameters:
-        tokens_path         absolute path to the token list on format "tokId token"
+        tokens_path         path to the token list on format "tokId token"
         module_path         absolute path to the module root (e.g. /.../qc/modules/CleanupModule)
         decoded_ark_path    absolute path to where .ark file should be saved
         decoded_scp_path    absolute path to where .scp file should be saved   
@@ -73,7 +73,7 @@ def genGraphs(tokens_path, module_path=None, decoded_ark_path=None, decoded_scp_
                 print('{} {}'.format(tok_key, token_ids),
                       file=tokens_with_id_f)
             else:
-                raise ValueError('Token not verified, %s with id %d.' % (token, tok_key))
+                raise ValueError('Token not verified, %s with id %d.' % (token, int(tok_key)))
 
     # create a pipe using sh, output of make_utterance_fsts piped into compile_train_graphs
     # piping in contents of tokens_w_id_path and writing to decoded_{ark,scp}_path
@@ -116,5 +116,9 @@ if __name__ == '__main__':
     parser.add_argument('graphs_scp_path', type=str, nargs='?', help='Path to generated .scp file')
     args = parser.parse_args()
 
-    genGraphs(args.tokens_path, modulePath, args.graphs_ark_path, args.graphs_scp_path)
+    genGraphs(  args.tokens_path, 
+                modulePath, 
+                os.path.abspath(args.graphs_ark_path), 
+                os.path.abspath(args.graphs_scp_path)
+    )
 
