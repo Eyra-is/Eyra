@@ -140,9 +140,12 @@ class MarosijoCommon:
                                 .format(modelPath, ', '.join(f_ for f_ in missingFiles),
                                         extraMsg))
 
-    def symToInt(self, token: str) -> str:
+    def symToInt(self, token: str, forceLowercase=True) -> str:
+        def lower(s, lower=True):
+            return s.lower() if lower else lower
+
         return ' '.join(self.symbolTable.get(token_, str(self.oov)) for
-                        token_ in token.split())
+                        token_ in lower(token.split(), lower=forceLowercase))
 
     def intToSym(self, tokenInts: str, fromCol=0, toCol=None) -> str:
         return ' '.join(self.symbolTableToInt[token_] for token_ in
