@@ -64,7 +64,6 @@ create table session (
     end varchar(50) not null,
     comments text not null,
     foreign key (speakerId) references speaker(id),
-    foreign key (instructorId) references instructor(id),
     foreign key (deviceId) references device(id),
     unique (speakerId, instructorId, deviceId, location, start, end)
 );
@@ -76,7 +75,6 @@ create table recording (
     speakerId int not null,
     sessionId int not null,
     filename varchar(255) not null unique,
-    foreign key (tokenId) references token(id),
     foreign key (speakerId) references speaker(id),
     foreign key (sessionId) references session(id)
 );
