@@ -17,8 +17,7 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-sort -k2 -t $'\t' $1 > tmp1 && \
-sort -t $'\t' $2 > tmp2 && \
-join -1 2 -2 1 tmp1 tmp2 -t $'\t' | cut -f 2 | sort -n
-
-rm tmp1 tmp2
+total_tokens=$1
+good_tokens=$2
+join -v1 -t $'\t' -1 2 -2 1 <(sort -k2 -t $'\t' $total_tokens) <(sort $good_tokens) \
+  | cut -f2 | sort -n
