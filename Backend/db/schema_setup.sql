@@ -16,7 +16,8 @@ alter database recordings_master character set utf8 collate utf8_general_ci;
 
 create table token (
     id int not null auto_increment primary key,
-    inputToken text not null
+    inputToken text not null,
+    valid boolean not null default TRUE
 );
 alter table token convert to character set utf8 collate utf8_general_ci;
 
