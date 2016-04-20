@@ -60,7 +60,7 @@ class MarosijoCommon:
                        'sample_freq', 'phone_lm')
 
     #: Not required to exist when compiling graphs, obviously.
-    _REQUIRED_FILES_AFTER_COMPILE = ('graphs.scp')
+    _REQUIRED_FILES_AFTER_COMPILE = ('graphs.scp',)
 
     def __init__(self, modelPath=None, downsample=False, graphs=True):
         """
