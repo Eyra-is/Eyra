@@ -178,6 +178,23 @@ module.exports = function(grunt) {
             dest: depl
           }
         ]
+      },
+      info_page: {
+        options: {
+          patterns: [
+            {
+              match: 'VersionNo',
+              replacement: '<%= grunt.template.today("yyyy/mm/dd HH:MM") %>'
+            }
+          ]
+        },
+        files: [
+          { 
+            expand: true, cwd: depl,
+            src: ['views/info.'+cache_breaker+'.html'], 
+            dest: depl
+          }
+        ]
       }
     },
     sass: {
@@ -262,6 +279,7 @@ module.exports = function(grunt) {
                                   'copy:main', // copy everything not javascript from source to depl and rename with CACHEBREAKER
                                   'replace:script_name', // replace previous file.CACHEBREAKER.ext in index.CACHEBREAKER.html 
                                   'replace:views', // replace 'views/bla.CACHEBREAKER.html' to the new cachebreaker in the routes in app.js
+                                  'replace:info_page', // add version number to info page
                                   'ngAnnotate:app', // make sure angular scripts are ready for minification
                                   'replace:other', // replace all 'src="img/i.(jpg|png|gif)' imgs with cachebroken versions in the .html files
                                                    //   and other similar like json, has to be after ng:annotate
