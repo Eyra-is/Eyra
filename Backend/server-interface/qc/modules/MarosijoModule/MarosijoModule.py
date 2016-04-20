@@ -60,7 +60,7 @@ class MarosijoCommon:
                        'sample_freq', 'phone_lm')
 
     #: Not required to exist when compiling graphs, obviously.
-    _REQUIRED_FILES_AFTER_COMPILE = ('graphs.ark', 'graphs.scp')
+    _REQUIRED_FILES_AFTER_COMPILE = ('graphs.scp')
 
     def __init__(self, modelPath=None, downsample=False, graphs=True):
         """
@@ -93,7 +93,6 @@ class MarosijoCommon:
 
         if graphs:
             self.graphsScpPath = mkpath('graphs.scp')
-            self.graphsArkPath = mkpath('graphs.ark')
 
         with open(self.oovIntPath) as f_:
             self.oov = int(f_.read().strip())
