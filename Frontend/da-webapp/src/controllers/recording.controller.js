@@ -271,7 +271,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
             }
           },
           function error(response) {
-            console.info('Submitting recording to server was unsuccessful, saving locally...');
             // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
             var rec = oldCurRec;
             var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];

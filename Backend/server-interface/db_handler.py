@@ -1,7 +1,7 @@
 from flask.ext.mysqldb import MySQL
 from MySQLdb import Error as MySQLError
 import json
-import os # for mkdir
+import os
 import random
 
 from util import log, filename
@@ -44,6 +44,18 @@ class DbHandler:
                 's_value'
             ]
         }
+
+        # generate list of currently valid tokens according to 'valid' column in table token.
+        #self.invalid_token_ids = self.getInvalidTokenIds() # messes up WSGI script for some fucking reason
+        self.invalid_token_ids = None
+
+    def getInvalidTokenIds(self):
+        """
+        Returns a list of tokenId's who are marked with valid=FALSE in database.
+        """
+        cur = self.mysql.connection.cursor()
+        cur.execute('SELECT id FROM token WHERE valid=FALSE')
+        return [row[0] for row in cur.fetchall()]
 
     def insertGeneralData(self, name, data, table):
         """
@@ -380,8 +392,14 @@ class DbHandler:
 
     def processSessionData(self, jsonData, recordings):
         """
-        jsonData = look at format in the client-server API
-        recordings = an array of file objects representing the submitted recordings
+        Processes session data sent from client, saves it to the appropriate tables
+        in the database, and saves the recordings to the filesystem at
+        '<app.config['MAIN_RECORDINGS_PATH']>/session_<sessionId>/recname'
+
+        parameters:
+            jsonData        look at format in the client-server API
+            recordings      an array of file objects representing the submitted recordings
+        
         returns a dict (msg=msg, statusCode=200,400,..)
         """
         jsonDecoded = None
@@ -484,7 +502,7 @@ class DbHandler:
                     else:
                         token = token[0] # fetchone() returns tuple
 
-                # save recordings to recordings/sessionId/filename
+                # save recordings to app.config['MAIN_RECORDINGS_PATH']/session_sessionId/filename
                 sessionPath = os.path.join(self.recordings_path, 'session_'+str(sessionId))
                 if not os.path.exists(sessionPath):
                     os.mkdir(sessionPath)
@@ -500,9 +518,9 @@ class DbHandler:
                     f.write(token)
 
                 # insert recording data into database
-                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, rel_path) \
+                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, filename) \
                              VALUES (%s, %s, %s, %s)', 
-                            (tokenId, speakerId, sessionId, wavePath))
+                            (tokenId, speakerId, sessionId, recName))
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
@@ -527,9 +545,14 @@ class DbHandler:
         """
         gets numTokens tokens randomly selected from the database and returns them in a nice json format.
         look at format in the client-server API
+        Does not return any tokens marked with valid:FALSE in db.
         or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
         returns [] on failure
         """
+        # start by getting the list of invalid tokens, and create it if we haven't already
+        if self.invalid_token_ids is None:
+            self.invalid_token_ids = self.getInvalidTokenIds()
+
         tokens = []
         try:
             cur = self.mysql.connection.cursor()
@@ -537,8 +560,12 @@ class DbHandler:
             # select numTokens random rows from the database
             cur.execute('SELECT COUNT(*) FROM token');
             numRows = cur.fetchone()[0]
+
+            total_token_ids = range(1, numRows+1)
+            valid_token_ids = [x for x in total_token_ids if x not in self.invalid_token_ids]
+
             # needs testing here to make sure 1 is lowest id, and numRows is highest id
-            randIds = [random.randint(1,int(numRows)) for i in range(int(numTokens))]
+            randIds = [random.choice(valid_token_ids) for i in range(int(numTokens))]
             randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
             cur.execute('SELECT id, inputToken FROM token WHERE id IN %s',
                         (randIds,)) # have to pass in a tuple, with only one parameter
@@ -580,7 +607,7 @@ class DbHandler:
 
         return jsonTokens
 
-    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str, "tokenId": ...}]':
+    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str - absolute path, "tokenId": ...}]':
         """Fetches info for the recordings of the session `sessionId`
 
         Parameters:
@@ -593,7 +620,7 @@ class DbHandler:
         """
         try:
             cur = self.mysql.connection.cursor()
-            cur.execute('SELECT recording.id, recording.rel_path, token.inputToken, token.id FROM recording '
+            cur.execute('SELECT recording.id, recording.filename, token.inputToken, token.id FROM recording '
                         + 'JOIN token ON recording.tokenId=token.id '
                         + 'WHERE recording.sessionId=%s '
                         + 'ORDER BY recording.id ASC ', (sessionId,))
@@ -607,7 +634,10 @@ class DbHandler:
             log(msg, e)
             raise
         else:
-            return json.dumps([dict(recId=recId, recPath=recPath, token=token, tokenId=id)
+            return json.dumps([dict(recId=recId, 
+                                    recPath=os.path.join(self.recordings_path,'session_'+str(sessionId),recPath), 
+                                    token=token, 
+                                    tokenId=id)
                                 for recId, recPath, token, id in rows])
 
     def sessionExists(self, sessionId) -> bool:

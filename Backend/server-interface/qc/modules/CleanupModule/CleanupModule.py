@@ -4,6 +4,7 @@ import json
 import pipes
 import tempfile
 import sh
+import uuid
 
 from celery import Task
 
@@ -96,10 +97,6 @@ class CleanupTask(Task):
     _redis = None
 
     decoded_graphs_path = 'local/decoded_graphs.scp'
-    # path to root folder of recordings/ folder (or the location of 
-    #   the actual .wav recordings) so that rec_folder_path+rel_path
-    #   is the correct path to the actual recordings from this files directory
-    rec_folder_path = '/data/eyra/' 
 
     @property
     def common(self):
@@ -207,7 +204,7 @@ class CleanupTask(Task):
                 for r in recordings:
                     if self.common.downsample:
                         print('{token_id} sox {rec_path} -r{sample_freq} -t wav - |'.format(token_id=r['tokenId'],
-                                                                                            rec_path=self.rec_folder_path+r['recPath'],
+                                                                                            rec_path=r['recPath'],
                                                                                             sample_freq=self.common.sample_freq),
                               file=mfcc_feats_tmp)
                     else:
@@ -290,7 +287,7 @@ class CleanupTask(Task):
         #                        "stats": {"accuracy": [0.0;1.0]},
         #                         }]}
         qc_report = {"sessionId": session_id,
-                     "requestId": -1, # maybe just use a uuid?
+                     "requestId": str(uuid.uuid4()), # just use a uuid
                      "totalStats": {"accuracy": 0.0},
                      "perRecordingStats": []}
 
