@@ -21,6 +21,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   // counter to use for QC, counts how many recordings have been sent,
   //   since last reset of counter.
   var modSendCounter = 0;
+  // {"module1" : id, ...} 
+  var moduleRequestIds = {}
 
   return qcHandler;
 
@@ -79,6 +81,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   function handleQCReport(response) {
     var report = response.data;
 
+    var result = updateModuleRequestIds(report); // do we have any new reports?
+
     // calulate average accuracy of all QC modules
     var avgAcc = calcAvgAcc(report);
     report.avgAcc = avgAcc;
@@ -92,7 +96,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     // message to send back to recording.controller.js notifying that we wish
     //   results to be displayed.
     var displayResults = tokenAnnouncement
-                         || avgAcc < util.getConstant('QCAccThreshold');
+                         || (avgAcc < util.getConstant('QCAccThreshold')
+                         && result); // make sure only to display if we have anything new (or token announcement)
     if (displayResults) {
       return $q.when(true);
     } else {
@@ -192,6 +197,26 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     }
     
     return out;
+  }
+
+  function updateModuleRequestIds(report) {
+    /*
+      Updates this.moduleRequestIds, looks through the QC report
+      and looks at module1.requestId and updates it here.
+
+      :return: true if any requestId was updated
+               false otherwise
+    */
+    var changed = false;
+    for (var mod in report.modules) {
+      if (!report.modules.hasOwnProperty(mod)) continue;
+
+      if (moduleRequestIds[mod] !== report.modules[mod].requestId) {
+        moduleRequestIds[mod] = report.modules[mod].requestId;
+        changed = true;        
+      }
+    }
+    return changed;
   }
 }
 }());

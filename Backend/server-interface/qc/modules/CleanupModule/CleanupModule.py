@@ -4,6 +4,7 @@ import json
 import pipes
 import tempfile
 import sh
+import uuid
 
 from celery import Task
 
@@ -286,7 +287,7 @@ class CleanupTask(Task):
         #                        "stats": {"accuracy": [0.0;1.0]},
         #                         }]}
         qc_report = {"sessionId": session_id,
-                     "requestId": -1, # maybe just use a uuid?
+                     "requestId": str(uuid.uuid4()), # just use a uuid
                      "totalStats": {"accuracy": 0.0},
                      "perRecordingStats": []}
 
