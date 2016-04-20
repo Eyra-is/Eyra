@@ -28,15 +28,12 @@ cd kaldi-trunk && \
 cd tools/ && \
 sed -i -e "s:--enable-ngram-fsts CXX:--enable-ngram-fsts --enable-pdt --enable-lookahead-fsts --enable-const-fsts --enable-linear-fsts CXX:" \
        -e "s:# OPENFST_VERSION = 1.4.1:OPENFST_VERSION = 1.4.1:" Makefile && \
-make -j $NPROC all openblas
+make -j $NPROC all
 
 cd ../src/ && \
-./configure --mathlib=OPENBLAS --openblas-root=../tools/OpenBLAS/install --use-cuda=no && \
+./configure --mathlib=OPENBLAS --openblas-root=/usr --use-cuda=no && \
 make depend && \
 make -j $NPROC && \
-make ext && \
-make test && \
-make ext_test && \
 touch $CHECKFILE
 
 exit $?
