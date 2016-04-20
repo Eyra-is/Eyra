@@ -2,6 +2,7 @@ import os
 import json
 import tempfile
 import sys
+import uuid
 from functools import partial
 
 import redis
@@ -343,7 +344,7 @@ class _SimpleMarosijoTask(Task):
                      hypKey, hypTok in hyps.items()}
 
             qcReport = {"sessionId": session_id,
-                        "requestId": -1, # maybe just use a uuid?
+                        "requestId": str(uuid.uuid4()), # just use a uuid
                         "totalStats": {"accuracy": 0.0},
                         "perRecordingStats": []}
 
