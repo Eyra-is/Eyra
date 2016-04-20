@@ -14,7 +14,7 @@ if [ $nproc -ne 1 ]; then
 else
     report_err "Using QC with only 1 thread is BAD. Get more cores pls."
 fi
-celery -A qc.celery_handler.celery worker -c $nproc -D -f ../../Local/Log/celery.log --loglevel=info
+celery multi restart 1 -A qc.celery_handler.celery -c $nproc -D -f ../../Local/Log/celery.log --loglevel=info
 cd -
 
 return
