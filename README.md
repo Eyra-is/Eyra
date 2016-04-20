@@ -15,7 +15,7 @@ In addition for the QC, you need to obtain (either by running e.g. `qc/scripts/{
 
 Same as Laptop installation, except begin with `./Setup/setup.sh --all --no-ap`
 
-This should work on both Debian 8 Jessie and Ubuntu Server 14.04. The laptop setup uses a self-signed certificate, but the internet one should use a real certificate (this depends on which certificate used). We used [letsencrypt](https://letsencrypt.org/) for a free certificate. This has to be done manually.
+This should work on both Debian 8 Jessie and Ubuntu Server 14.04. The laptop setup uses a self-signed certificate (which needs to be manually put and installed on the phones), but the internet one should use a real certificate (this depends on which certificate used). We used [letsencrypt](https://letsencrypt.org/) for a free certificate. This has to be done manually.
     
 ## Usage
 
