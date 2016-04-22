@@ -46,7 +46,7 @@ function androidRecordingService(logger, recordingService, utilityService) {
   function init(initCompleteCallback) {
     recHandler.initCompleteCallback = initCompleteCallback;
 
-    console.log('In android recorder.');
+    logger.log('In android recorder.');
 
     initCompleteCallback(true);
   }
