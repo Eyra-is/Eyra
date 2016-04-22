@@ -28,9 +28,6 @@ public class MainActivity extends AppCompatActivity {
     // permission request codes for requestPermissions()
     private static final int LOCATION_REQUESTCODE = 100;
     private static final int RECORDING_REQUESTCODE = 101;
-    // set to true when we have done initialization which needs rec permission
-    // see this.initThingsNeedingRecPermission()
-    private boolean recInitCalled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
             requestOurPermissions();
         }
 
+        mWebView.addJavascriptInterface(new RecorderJSInterface(), "AndroidRecorder");
+
         // Enable Javascript
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -75,14 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         mWebView.loadUrl(getString(R.string.website_url));
         //mWebView.loadUrl("http://beta.html5test.com/");
-    }
-
-    private void initThingsNeedingRecPermission() {
-        // will be called on rec permission granted.
-        if (!recInitCalled) {
-            mWebView.addJavascriptInterface(new RecorderJSInterface(), "AndroidRecorder");
-            recInitCalled = true;
-        }
     }
 
     // code from here: https://developer.chrome.com/multidevice/webview/gettingstarted
@@ -132,8 +123,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (checkSelfPermission(recPermission) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{recPermission}, RECORDING_REQUESTCODE);
-        } else {
-            initThingsNeedingRecPermission();
         }
     }
 
@@ -164,9 +153,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 alert.show();
-            } else {
-                // houston we have permission
-                initThingsNeedingRecPermission();
             }
         }
     }
