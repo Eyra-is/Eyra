@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setAppCacheEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        mWebView.loadUrl(getString(R.string.website_url));
+        mWebView.loadUrl("https://jv.eyra.is/"); //(getString(R.string.website_url));
         //mWebView.loadUrl("http://beta.html5test.com/");
     }
 

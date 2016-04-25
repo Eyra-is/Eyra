@@ -1,11 +1,11 @@
 [
     {
-        "attribute" : "sex",
+        "attribute" : "gender",
         "type" : "select",
         "options" : ["Male", "Female", "Other"],
         "required" : true,
-        "label" : "Sex",
-        "description" : "Select your sex."
+        "label" : "Gender",
+        "description" : "Select your gender."
     },
     {
         "attribute" : "dob",
@@ -99,7 +99,7 @@
     {
         "attribute" : "height",
         "type" : "number",
-        "required" : true,
+        "required" : false,
         "label" : "Height (cm)",
         "description" : "Enter your height in centimeters."
     }
