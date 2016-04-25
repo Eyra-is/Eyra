@@ -1,8 +1,9 @@
 // modify speaker-info-format.json depending on what info about the speakers you need
 
 // allowed types: text, number, checkbox and select
-// the attribute is very important and is used as keys in js objects and id's in html markup for example,
-//   so not recommended to have any non-ascii letters in the attribute, although it should work.
+// the attribute is very important and is used as keys in js objects, column names in mysql database and 
+//   id's in html markup for example, so not recommended to have any non-ascii letters in the attribute, 
+//   although it should work.
 // for select, you need an options array with strings of the options you want.
 // label is optional but recommended.
 // required, description are optional.
