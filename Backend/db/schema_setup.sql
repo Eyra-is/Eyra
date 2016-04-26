@@ -16,7 +16,8 @@ alter database recordings_master character set utf8 collate utf8_general_ci;
 
 create table token (
     id int not null auto_increment primary key,
-    inputToken text not null
+    inputToken text not null,
+    valid boolean not null default TRUE
 );
 alter table token convert to character set utf8 collate utf8_general_ci;
 
@@ -64,7 +65,6 @@ create table session (
     end varchar(50) not null,
     comments text not null,
     foreign key (speakerId) references speaker(id),
-    foreign key (instructorId) references instructor(id),
     foreign key (deviceId) references device(id),
     unique (speakerId, instructorId, deviceId, location, start, end)
 );
@@ -75,8 +75,7 @@ create table recording (
     tokenId int not null,
     speakerId int not null,
     sessionId int not null,
-    rel_path varchar(255) not null unique,
-    foreign key (tokenId) references token(id),
+    filename varchar(255) not null unique,
     foreign key (speakerId) references speaker(id),
     foreign key (sessionId) references session(id)
 );

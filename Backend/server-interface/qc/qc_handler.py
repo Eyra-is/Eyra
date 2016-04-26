@@ -1,5 +1,6 @@
 import redis
 import datetime
+import json
 
 #: Relative imports
 from util import log
@@ -142,6 +143,16 @@ class QcHandler(object):
         if len(self.modules) == 0:
             return dict(sessionId=session_id, status='inactive', modules={})
 
+        # see if there is a returning user to this session, in which case, start
+        # counting at the index after the last made recording
+        # (slistIdx is not used here unless there isn't a report)
+        recsInfo = self.redis.get('session/{}/recordings'.format(session_id))
+        if recsInfo:
+            recsInfo = json.loads(recsInfo.decode('utf-8'))
+            slistIdx = len(recsInfo)
+        else:
+            slistIdx = 0
+
         # always update the sessionlist on getReport call, there might be new recordings
         self._updateRecordingsList(session_id)
 
@@ -149,17 +160,16 @@ class QcHandler(object):
         self.redis.set('session/{}/timestamp'.format(session_id),
             datetime.datetime.now())
 
-
         # attempt to grab report for each module from redis datastore.
         #   if report does not exist, add a task for that session to the celery queue
         reports = {}
         for name, processFn in self.modules.items():
             report = self.redis.get('report/{}/{}'.format(name, session_id))
             if report:
-                reports[name] = report.decode("utf-8") # redis.get returns bytes, so we decode into string
+                reports[name] = json.loads(report.decode("utf-8")) # redis.get returns bytes, so we decode into string
             else:
                 # start the async processing
-                processFn.delay(name, session_id, None, 0, celery_config.const['batch_size'])
+                processFn.delay(name, session_id, None, slistIdx, celery_config.const['batch_size'])
 
         if len(reports) > 0:
             return dict(sessionId=session_id, status='processing', modules=reports)

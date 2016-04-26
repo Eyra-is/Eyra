@@ -40,6 +40,7 @@ class TestTask(Task):
           of recordings from session with session_id, with indices
           in the list of recordings for this session(_id) in
           the redis datastore ('session/session_id/recordings').
+          indices = [] indicates no recordings should be processed.
         name is the name to use to write the report to redis datastore
           at 'report/name/session_id'
 

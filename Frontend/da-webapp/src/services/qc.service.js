@@ -21,6 +21,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   // counter to use for QC, counts how many recordings have been sent,
   //   since last reset of counter.
   var modSendCounter = 0;
+  // {"module1" : id, ...} 
+  var moduleRequestIds = {}
 
   return qcHandler;
 
@@ -54,48 +56,48 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     }
   }
 
+  function calcAvgAcc(report) {
+    /*
+      Calculates weighted (right now equally) accuracy of all the modules
+      from the QC report.
+
+      parameters:
+        report  the QC report as described in client server api.
+      return: 
+        a in [0.0 .. 1.0]
+    */
+    var acc = 0;
+    var cnt = 0;
+    for (var mod in report.modules) {
+      if (!report.modules.hasOwnProperty(mod)) continue;
+
+      var module = report.modules[mod];
+      acc += module.totalStats.accuracy;
+      cnt++;
+    }
+    return acc/cnt;
+  }
+
   function handleQCReport(response) {
-    var report;
-    var data;
-    // response input is a json file
-    if(response.data.status !== 'processing'){
+    var report = response.data;
 
-      data = {
-        sessionId: response.data.sessionId,
-        status: response.data.status,
-        modules: {
-          module1: {
-            totalStats: {accuracy: Math.random().toFixed(1)}
-          },
-                            
-          module2: {
-            totalStats: {accuracy: Math.random().toFixed(1)}
-          }
-        }
-      };
+    var result = updateModuleRequestIds(report); // do we have any new reports?
 
-    }
-
-    if (data) {
-      report = data;
-
-    } else {
-      report = response.data || {};
-      console.log('FAIL');
-    }
+    // calulate average accuracy of all QC modules
+    var avgAcc = calcAvgAcc(report);
+    report.avgAcc = avgAcc;
 
     var tokenAnnouncement = handleTokenAnnouncements(report);
-    console.log(tokenAnnouncement);
+
     // displayReport is in HTML
     var displayReport = prettify(report);
-
     dataService.set('QCReport', displayReport);
 
     // message to send back to recording.controller.js notifying that we wish
     //   results to be displayed.
-
     var displayResults = tokenAnnouncement
-                         || report.modules.module1.totalStats.accuracy < util.getConstant('QCAccThreshold');
+                         || (avgAcc < util.getConstant('QCAccThreshold')
+                         && result); // make sure only to display if we have anything new (or token announcement)
     if (displayResults) {
       return $q.when(true);
     } else {
@@ -107,7 +109,6 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   // adds key tokenCount and tokenCountMsg to report.
   function handleTokenAnnouncements(report) {
     var tokensRead = dataService.get('speakerInfo').tokensRead;
-    var tokenAnnouncement;
     
     // for tokenAnnouncement to be true modulus of tokenAnnouncement 
     // and TokenAnnouncementFrequency need to be 0
@@ -118,12 +119,12 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     if (tokenAnnouncement) {
       var _totalNotifies;
       if (tokensRead){
-        _totalNotifies = tokensRead
+        _totalNotifies = tokensRead;
       } else {
-        _totalNotifies = totalNotifies
+        _totalNotifies = totalNotifies;
       }
 
-      report.tokenCount =  tokensRead; //totalNotifies;
+      report.tokenCount =  tokensRead;
       // some gamifying messages to pump up the speakers
       report.tokenCountMsg = 'Nice, '+util.percentage(_totalNotifies, totalTokens, 2)+'% of the tokens read, keep going.';
       if (totalNotifies >= 100 && totalNotifies < 200) {
@@ -158,7 +159,6 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
 
   // parses the JSON object report into some prettified report to display in HTML
   function prettify(report) {
-    
     var out = '';
     if (report.tokenCountMsg) {
       out += '<p class="message">'+report.tokenCountMsg+'</p>\n';
@@ -168,22 +168,55 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       out += '<p class="message">'+report.tokensLeftToReadMsg+'</p>\n';
     }
 
-    var accuracy = report.modules.module1.totalStats.accuracy;
-    if (accuracy) {
-      var message = messageClassByAccuracy(accuracy);
-      
-      out += '<p class="message '+message+'">Average accuracy: '+util.percentage(accuracy, 1, 3)+'%</p>';
-    }
-    if (report.perRecordingStats) {
-      out += '<h3>More stats</h3>';
-      out += '<ul>';
-      for (var i = 0; i < report.perRecordingStats.length; i++) {
-        var acc = report.perRecordingStats[i].stats.accuracy;
-        out += '    <li>Rec. '+i+', accuracy: '+util.percentage(acc, 1, 3)+'%</li>';
+    if (report.status === 'processing' && report.avgAcc !== NaN) {
+      out += '<p class="message '+messageClassByAccuracy(report.avgAcc)+
+              '">Total average accuracy: '+util.percentage(report.avgAcc, 1, 3)+'%</p>';
+
+      var modules = report.modules;
+      for (var mod in modules) {
+        if (!modules.hasOwnProperty(mod)) continue;
+
+        var module = modules[mod];
+        var accuracy = module.totalStats.accuracy;
+        out += '<h3>'+mod+'</h3>';
+        if (accuracy) {
+          var message = messageClassByAccuracy(accuracy);
+          
+          out += '<p class="'+message+'">Average accuracy: '+util.percentage(accuracy, 1, 3)+'%</p>';
+        }
+        if (module.perRecordingStats) {
+          out += '<h3>More stats</h3>';
+          out += '<ul>';
+          for (var i = 0; i < module.perRecordingStats.length; i++) {
+            var acc = module.perRecordingStats[i].stats.accuracy;
+            out += '    <li>Rec. '+i+', accuracy: '+util.percentage(acc, 1, 3)+'%</li>';
+          }
+          out += '</ul>';
+        }
       }
-      out += '</ul>';
     }
+    
     return out;
+  }
+
+  function updateModuleRequestIds(report) {
+    /*
+      Updates this.moduleRequestIds, looks through the QC report
+      and looks at module1.requestId and updates it here.
+
+      :return: true if any requestId was updated
+               false otherwise
+    */
+    var changed = false;
+    for (var mod in report.modules) {
+      if (!report.modules.hasOwnProperty(mod)) continue;
+
+      if (moduleRequestIds[mod] !== report.modules[mod].requestId) {
+        moduleRequestIds[mod] = report.modules[mod].requestId;
+        changed = true;        
+      }
+    }
+    return changed;
   }
 }
 }());

@@ -32,8 +32,8 @@ suc () {
 }
 
 err () {
-  report_err "failure!"
-  echo 
+  report_err "failure!" >&2
+  echo >&2
   return 1
 }
 

@@ -13,8 +13,7 @@ fi
 SDIR=$( dirname $( readlink -f $0 ) )
 cd "$SDIR"
 
-RECORDINGSPATH="../server-interface"
-RECORDINGSROOT="/recordings"
+RECORDINGSPATH="/data/eyra/recordings"
 BACKUPPATH="../backup"
 BACKUPROOT="/$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
@@ -28,4 +27,4 @@ mkdir "$BACKUPPATH$BACKUPROOT"
 mysqldump recordings_master -u root > "$BACKUPPATH$BACKUPROOT"/backup.sql
 
 # back up the recordings and other files
-cp -r "$RECORDINGSPATH$RECORDINGSROOT" "$BACKUPPATH$BACKUPROOT" 
+cp -r "$RECORDINGSPATH" "$BACKUPPATH$BACKUPROOT" 

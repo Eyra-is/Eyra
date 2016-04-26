@@ -48,7 +48,7 @@ usage () {
   echo "@0 [options] [config-file [...] ]"
   echo "config-file: Contain variable definitions. See /src/<xxx>/default.conf for defaults"
   echo "Options: (default: none)"
-  echo "  --all           enable all options (excluding external)"
+  echo "  --all           enable all options (excluding external) *WARNING, deletes entire MySQL database*"
   echo "  --all-ext       enable all external options"
   echo "  --no-<xxx>      disable option <xxx>"
   echo "    ------------------------------"

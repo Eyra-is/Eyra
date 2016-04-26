@@ -79,9 +79,12 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
       function success(speakerInfo) {
         //console.info(speakerInfo);
         if (increment === 'return'){
-          tokensRead = ramSpeakerInfo['tokensRead'];
-          // updating speakerInfo in ram
-          dataService.set('speakerInfo', ramSpeakerInfo);
+          if (speakerInfo && speakerInfo['tokensRead']) {
+            ramSpeakerInfo['tokensRead'] = speakerInfo['tokensRead'];
+            tokensRead = ramSpeakerInfo['tokensRead'];
+            // updating speakerInfo in ram
+            dataService.set('speakerInfo', ramSpeakerInfo);
+          }
         }
 
         if (typeof(increment) === 'number') {
@@ -92,16 +95,12 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
           dataService.set('speakerInfo', speakerInfo);
 
           miscDbService.setSpeaker(speaker, speakerInfo).then(
-          function success(speakerInfoUpdate) { 
-            //console.log('update speakerInfo.tokensRead in ldb')
-
-          },
-          function error(value){
-            $scope.msg = 'Could not update speakerInfo into ldb';
-            logger.error(value);
-          }
+            angular.noop,
+            function error(value){
+              $scope.msg = 'Could not update speakerInfo into ldb';
+              logger.error(value);
+            }
           );
-
         }
 
         if (increment === 'return') {
@@ -206,21 +205,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     util.stdErrCallback);
   }
 
-  function speakerInfoCorrection(_sessionData) {
-    // function removes creates new speakerInfo object without tokensRead attribute
-
-    var oldSpeakerInfo = _sessionData.data.speakerInfo
-    var newSpeakerInfo = {
-                          sex: oldSpeakerInfo.sex,
-                          dob: oldSpeakerInfo.dob,
-                          height: oldSpeakerInfo.height,
-                          name: oldSpeakerInfo.name
-                          };
-    _sessionData.data.speakerInfo = newSpeakerInfo;
-
-    return _sessionData;
-
-  }
+  
 
   // function passed to our recording service, notified when a recording has been finished
   function recordingCompleteCallback() {
@@ -234,10 +219,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     // send token as new object so it is definitely not changed to the next token
     //   when accessed later in assembleSessionData
     sessionService.assembleSessionData(oldCurRec, {'id':currentToken.id, 'token':currentToken.token}).then(
-      function success(_sessionData) {
-
-        var sessionData = speakerInfoCorrection(_sessionData)
-
+      function success(sessionData) {
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
@@ -251,9 +233,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
             var deviceId = response.data.deviceId;
             if (deviceId) updateDevice(deviceId); 
             if (speakerId) updateSpeakerInfo(speakerId);
-
-            //setDevice(response);
-            //updateSpeakerInfo(response);
 
             var oldSessionId = dataService.get('sessionId');
             var sessionId;
@@ -292,7 +271,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
             }
           },
           function error(response) {
-            console.info('Submitting recording to server was unsuccessful, saving locally...');
             // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)
             var rec = oldCurRec;
             var tokenId = sessionData['data']['recordingsInfo'][rec.title]['tokenId'];

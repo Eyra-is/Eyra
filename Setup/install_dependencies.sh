@@ -15,8 +15,8 @@
 
 [[ -e  ${1}/aptitude.deps ]] && [[ ! -z  "$( cat ${1}/aptitude.deps )" ]] && {
   report "Installing dependencies (aptitude) " && \
-  sudo aptitude -q2 update && \
-  sudo aptitude -y install $(cat ${1}/aptitude.deps) && 
+  sudo apt-get -q2 update && \
+  sudo apt-get -y install $(cat ${1}/aptitude.deps) && 
   suc || err
 }
 

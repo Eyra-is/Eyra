@@ -4,6 +4,7 @@ import json
 import pipes
 import tempfile
 import sh
+import uuid
 
 from celery import Task
 
@@ -96,10 +97,6 @@ class CleanupTask(Task):
     _redis = None
 
     decoded_graphs_path = 'local/decoded_graphs.scp'
-    # path to root folder of recordings/ folder (or the location of 
-    #   the actual .wav recordings) so that rec_folder_path+rel_path
-    #   is the correct path to the actual recordings from this files directory
-    rec_folder_path = '../../../' 
 
     @property
     def common(self):
@@ -156,7 +153,9 @@ class CleanupTask(Task):
             session_id  id of session
             indices     indices in the list of recordings in the redis 
                         datastore ('session/session_id/recordings') to process
-                        in this batch.
+                        in this batch. 
+                        indices=[] indicates no processing should
+                        be done at this stage (return True, no new recordings to process)
 
         Return:
             False or raise an exception if something is wrong (and
@@ -186,6 +185,8 @@ class CleanupTask(Task):
 
             # grab the recordings list for this session
             recordings = json.loads(self.redis.get('session/{}/recordings'.format(session_id)).decode('utf8'))
+            # only use recordings[indices] as per our batch
+            recordings = [recordings[i] for i in indices]
 
             # make a new temp .scp file which will signify a .scp file only for our tokens
             #   in these recordings
@@ -203,7 +204,7 @@ class CleanupTask(Task):
                 for r in recordings:
                     if self.common.downsample:
                         print('{token_id} sox {rec_path} -r{sample_freq} -t wav - |'.format(token_id=r['tokenId'],
-                                                                                            rec_path=self.rec_folder_path+r['recPath'],
+                                                                                            rec_path=r['recPath'],
                                                                                             sample_freq=self.common.sample_freq),
                               file=mfcc_feats_tmp)
                     else:
@@ -286,7 +287,7 @@ class CleanupTask(Task):
         #                        "stats": {"accuracy": [0.0;1.0]},
         #                         }]}
         qc_report = {"sessionId": session_id,
-                     "requestId": -1, # maybe just use a uuid?
+                     "requestId": str(uuid.uuid4()), # just use a uuid
                      "totalStats": {"accuracy": 0.0},
                      "perRecordingStats": []}
 
@@ -308,6 +309,6 @@ class CleanupTask(Task):
             qc_report['totalStats']['accuracy'] = avg_accuracy
 
         self.redis.set('report/{}/{}'.format(name, session_id), 
-                        qc_report)
+                        json.dumps(qc_report))
 
         return True
