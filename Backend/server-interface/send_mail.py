@@ -63,12 +63,13 @@ def recsByDate(conn):
     for ts in timestamps:
         byDate[ts.date()] = byDate.get(ts.date(), 0) + 1
 
-    return [(ts.strftime('%Y-%m-%d'), count) for ts, count in byDate.items()]
+    return sorted([(ts.strftime('%Y-%m-%d'), count) for ts, count in byDate.items()],
+                  key=lambda x: x[0])
 
 def recsByGender(conn):
     cur = conn.cursor()
     cur.execute('SELECT i.s_value, COUNT(*) FROM recording AS r, speaker_info AS i '
-                'WHERE i.speakerId = r.speakerId AND i.s_key = "sex" '
+                'WHERE i.speakerId = r.speakerId AND (i.s_key = "sex" OR i.s_key = "gender") '
                 'GROUP BY i.s_value')
     return [(gender, count) for gender, count in cur.fetchall()]
 
