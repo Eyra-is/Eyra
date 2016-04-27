@@ -98,7 +98,7 @@ function MainController($location, $q, $rootScope, $scope, $window, androidRecor
   function getTokensIfNeeded() {
     tokenService.countAvailableTokens().then(function(numTokens){
       if (numTokens < util.getConstant('tokenThreshold')) {
-        $rootScope.loading_msg = 'Getting tokens  - Please wait';
+        $rootScope.loading_msg = 'Getting prompts  - Please wait';
         logger.log('Getting tokens..');
         tokenService.getTokens(util.getConstant('tokenGetCount')).then(function(tokens){
           tokensPromise.resolve(true);
