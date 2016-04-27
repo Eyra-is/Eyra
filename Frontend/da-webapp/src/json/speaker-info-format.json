@@ -11,8 +11,6 @@
         "attribute" : "dob",
         "type" : "select",
         "options" : [   
-                        "2000",
-                        "1999",
                         "1998",
                         "1997",
                         "1996",
@@ -93,7 +91,7 @@
                         "1921"
                     ],
         "required" : true,
-        "label" : "Date of birth",
+        "label" : "Year of birth",
         "description" : "Select the year you were born in."
     },
     {
