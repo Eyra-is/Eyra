@@ -20,14 +20,16 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.crashlytics.android.Crashlytics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
 
     private WebView mWebView;
     // permission request codes for requestPermissions()
-    private static final int LOCATION_REQUESTCODE = 100;
-    private static final int RECORDING_REQUESTCODE = 101;
+    private static final int APPSTART_REQUESTCODE = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,43 +119,66 @@ public class MainActivity extends AppCompatActivity {
          */
         String locPermission = Manifest.permission.ACCESS_FINE_LOCATION;
         String recPermission = Manifest.permission.RECORD_AUDIO;
+        List<String> permissions = new ArrayList<String>();
         if (checkSelfPermission(locPermission) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{locPermission}, LOCATION_REQUESTCODE);
+            permissions.add(locPermission);
         }
-
         if (checkSelfPermission(recPermission) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{recPermission}, RECORDING_REQUESTCODE);
+            permissions.add(recPermission);
+        }
+        if (permissions.size() > 0) {
+            requestPermissions(permissions.toArray(new String[permissions.size()]), APPSTART_REQUESTCODE);
         }
     }
 
     @Override
     public void onRequestPermissionsResult (int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == LOCATION_REQUESTCODE) {
-            // do nothing. Location permission is not mandatory.
-            Log.v("DEBUG", "Location granted? " + (grantResults[0] == PackageManager.PERMISSION_GRANTED));
-        }
-
-        if (requestCode == RECORDING_REQUESTCODE) {
-            // make sure we have recording permissions, otherwise app is unusable.
-            Log.v("DEBUG", "Recording granted? " + (grantResults[0] == PackageManager.PERMISSION_GRANTED));
-
-            boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-            if (!granted) {
-                final Activity main = this;
-
-                // thanks Ye Lin Aung @
-                // http://stackoverflow.com/questions/18371883/how-to-create-modal-dialog-box-in-android
-                AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Recording permission needed!");
-                alert.setMessage("You have to allow recording for this app to work. App will exit.");
-                alert.setCancelable(false);
-                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        main.finish(); // "exit" application. Minimizes it, but it should request permissions on start again.
-                    }
-                });
-                alert.show();
+        if (requestCode == APPSTART_REQUESTCODE) {
+            if (permissions.length < 1 || permissions.length > 2) {
+                throw new IllegalArgumentException("Somethings is wrong, permissions asked should have 1 or 2 elements, has: " + permissions.length + " elements.");
             }
+
+            int locIndex = -1;
+            int recIndex = -1;
+            // find which index in grantResults belongs to location and or recordings
+            for (int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    locIndex = i;
+                }
+                if (permissions[i].equals(Manifest.permission.RECORD_AUDIO)) {
+                    recIndex = i;
+                }
+            }
+
+            // handle location
+            if (locIndex != -1) {
+                // do nothing special with location. Location permission is not mandatory.
+                Log.v("DEBUG", "Location granted? " + (grantResults[locIndex] == PackageManager.PERMISSION_GRANTED));
+            }
+
+            // handle recording
+            if (recIndex != -1) {
+                // make sure we have recording permissions, otherwise app is unusable.
+                boolean granted = grantResults[recIndex] == PackageManager.PERMISSION_GRANTED;
+                Log.v("DEBUG", "Recording granted? " + granted);
+                if (!granted) {
+                    final Activity main = this;
+
+                    // thanks Ye Lin Aung @
+                    // http://stackoverflow.com/questions/18371883/how-to-create-modal-dialog-box-in-android
+                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                    alert.setTitle("Recording permission needed!");
+                    alert.setMessage("You have to allow recording for this app to work. App will exit.");
+                    alert.setCancelable(false);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            main.finish(); // "exit" application. Minimizes it, but it should request permissions on start again.
+                        }
+                    });
+                    alert.show();
+                }
+            }
+
         }
     }
 
