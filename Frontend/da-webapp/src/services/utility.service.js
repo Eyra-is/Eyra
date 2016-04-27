@@ -20,12 +20,12 @@ function utilityService(logger) {
     // sentinel value for invalid recordings
     'invalidTitle' : 'no_data.wav',
     'tokenThreshold' : 40,
-    'tokenGetCount' : 150,
+    'tokenGetCount' : 520,
     'QCAccThreshold' : 0.2,
     'QCFrequency' : 5, // per sessions sent
     'QCInitRecThreshold' : 10, // recording count before QC can report, adjustment period for speaker
     'TokenAnnouncementFreq' : 50,
-    'TokenCountGoal' : 260
+    'TokenCountGoal' : 500
   };
   
 
