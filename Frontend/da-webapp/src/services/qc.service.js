@@ -136,9 +136,6 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       if (totalNotifies >= 300 && totalNotifies < 400) {
         report.tokenCountMsg = 'Awesome, '+util.percentage(t_otalNotifies, totalTokens, 2)+'% of the tokens. Just awesome';
       }
-      if (totalNotifies >= 400) {
-        report.tokenCountMsg = 'You are a god: '+util.percentage(_totalNotifies, totalTokens, 2)+'% of the tokens.';
-      }
 
       var tokensLeftToRead = totalTokens - tokensRead;
 
