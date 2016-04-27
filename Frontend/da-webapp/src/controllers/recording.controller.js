@@ -53,7 +53,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   $scope.actionText = RECTEXT;
   $scope.actionGlyph = RECGLYPH;
 
-  var currentToken = {'id':0, 'token':'No token yet. Hit \'Next\' for next token.'};
+  var currentToken = {'id':0, 'token':'No prompt yet. Hit \'Next\' for next prompt.'};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
