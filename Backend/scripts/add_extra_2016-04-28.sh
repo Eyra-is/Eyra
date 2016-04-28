@@ -17,6 +17,7 @@ tmp=$(mktemp -d)
 trap "rm -rf $tmp" EXIT
 
 cat <<EOF > $tmp/alter_update.sql
+SET collation_connection = 'utf8_general_ci';
 ALTER TABLE token ADD COLUMN promptLabel VARCHAR(2) NOT NULL DEFAULT '';
 UPDATE token SET promptLabel = '$CURRENT_LABEL';
 EOF
