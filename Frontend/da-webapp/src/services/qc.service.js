@@ -126,6 +126,7 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
 
       report.tokenCount =  tokensRead;
       // some gamifying messages to pump up the speakers
+      /*
       report.tokenCountMsg = 'Nice, '+util.percentage(_totalNotifies, totalTokens, 2)+'% of the tokens read, keep going.';
       if (totalNotifies >= 100 && totalNotifies < 200) {
         report.tokenCountMsg = 'Sweet, '+util.percentage(_totalNotifies, totalTokens, 2)+'% of the tokens.';
@@ -136,8 +137,9 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       if (totalNotifies >= 300 && totalNotifies < 400) {
         report.tokenCountMsg = 'Awesome, '+util.percentage(t_otalNotifies, totalTokens, 2)+'% of the tokens. Just awesome';
       }
-      if (totalNotifies >= 400) {
-        report.tokenCountMsg = 'You are a god: '+util.percentage(_totalNotifies, totalTokens, 2)+'% of the tokens.';
+      */
+      if (totalNotifies >= 500 ) {
+        report.tokenCountMsg = 'You have reached the set goal of 500 tokens. Thank you very much for your contribution.';
       }
 
       var tokensLeftToRead = totalTokens - tokensRead;
