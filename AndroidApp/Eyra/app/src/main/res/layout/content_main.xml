@@ -13,11 +13,6 @@
     tools:showIn="@layout/activity_main"
     tools:context="is.eyra.eyra.MainActivity">
 
-    <TextView
-        android:text="Hello World!"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
     <WebView
         android:id="@+id/activity_main_webview"
         android:layout_width="match_parent"

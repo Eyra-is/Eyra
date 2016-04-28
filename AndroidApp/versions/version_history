@@ -1,0 +1,5 @@
+v1.1
+	Add new permission code for Android 6. Should not interfere with other versions of Android.
+
+v1.2	
+	Attempted fix of Android 6 permission code.

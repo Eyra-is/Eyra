@@ -21,10 +21,10 @@ android {
 
     defaultConfig {
         applicationId "is.eyra.eyra"
-        minSdkVersion 17
+        minSdkVersion 16
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.3"
     }
     buildTypes {
         release {
