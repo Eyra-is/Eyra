@@ -468,7 +468,7 @@ class _SimpleMarosijoTask(Task):
             details = {hypKey: MarosijoAnalyzer(hypTok, refs[hypKey]).details() for
                        hypKey, hypTok in hyps.items()}
 
-            edits = {hypKey: details[hypKey].distance for
+            edits = {hypKey: details[hypKey]['distance'] for
                      hypKey, hypTok in hyps.items()}
 
             qcReport = {"sessionId": session_id,
