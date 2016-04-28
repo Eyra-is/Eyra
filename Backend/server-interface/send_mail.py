@@ -87,6 +87,44 @@ def recsByDevice(conn):
                 'GROUP BY deviceImei')
     return [(deviceImei or 'No IMEI', count) for deviceImei, count in cur.fetchall()]
 
+def recsByApkAndOs(conn):
+    cur = conn.cursor()
+    cur.execute('SELECT device.userAgent FROM recording, session, device '
+                'WHERE recording.speakerId = session.speakerId AND session.deviceId = device.id '
+                'GROUP BY recording.id ')
+    def parseApkVersion(userAgent):
+        m = re.search(r'App version: ([0-9\.]+) ', userAgent)
+        if m:
+            return m.group(0)
+        else:
+            return 'N/A'
+    def parseOsVersion(userAgent):
+        android = re.search(r'Android ([0-9\.]+)', userAgent)
+        osx = re.search(r'Mac OS X ([0-9_\.]+)', userAgent)
+        windows = re.search(r'Windows', userAgent)
+        linux = re.search( r'X11;.*;? Linux', userAgent)
+
+        if android:
+            return 'Android {}'.format(android.group(1))
+        elif osx:
+            return 'Mac OSX {}'.format(osx.group(1))
+        elif windows:
+            return 'Windows (any version)'
+        elif linux:
+            return 'Linux (X11)'
+        else:
+            return 'Unkown OS'
+
+    apkAndOsCounts = {}
+    for userAgent in cur.fetchall():
+        userAgent = userAgent[0]
+        apkVer = parseApkVersion(userAgent)
+        osGrp = parseOsVersion(userAgent)
+        apkAndOsCounts['{} on {}'.format(apkVer, osGrp)] = apkAndOsCounts.get(
+            '{} on {}'.format(apkVer, osGrp), 0) + 1
+
+    return apkAndOsCounts.items()
+
 def countTxt():
     "#: Deprecated"
     return len(glob('{}/session_*/*.txt'.format(EYRA_RECORDINGS_ROOT)))
@@ -144,6 +182,12 @@ RECORDINGS BY PHONE IMEI:
 {lines}
 """.format(lines='\n'.join('{:<4} {}'.format(count, imei)
                            for imei, count in recsByDevice(conn)))
+
+    body += """
+RECORDINGS BY APK AND OS:
+{lines}
+""".format(lines='\n'.join('{:<6} {}'.format(count, apkAndOs) for
+                           apkAndOs, count in recsByApkAndOs(conn)))
 
     part = MIMEText('text', "plain")
     part.set_payload(body)
