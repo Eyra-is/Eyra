@@ -17,28 +17,48 @@
 import sys
 
 def process(src, dest):
-    with open(src, 'r', encoding='utf8') as f:
-        text = f.read().splitlines()
-        with open(dest, 'w', encoding='utf8') as g:
-            g.write('insert into token (inputToken)\nvalues\n')
-            for i, t in enumerate(text):
-                if (i == len(text) - 1):
-                    g.write('(\''+t+'\');')
-                else:
-                    g.write('(\''+t+'\'),\n')
+    f = src
+    text = f.read().splitlines()
+    g = dest
+    g.write('insert into token (inputToken)\nvalues\n')
+    for i, t in enumerate(text):
+        if (i == len(text) - 1):
+            g.write('(\''+t+'\');')
+        else:
+            g.write('(\''+t+'\'),\n')
+
+def escape(s):
+    return s.replace("'", r"\'")
+
+def processLabels(src, dest):
+    lines = src.read().splitlines()
+    print('insert into token (inputToken, promptLabel)', file=dest)
+    print('values', file=dest)
+    for i, line in enumerate(lines):
+        label, prompt = line.split(maxsplit=1)
+        if (i == len(lines) - 1):
+            print("('{}', '{}');".format(escape(prompt), label), file=dest)
+        else:
+            print("('{}', '{}'),".format(escape(prompt), label), file=dest)
 
 def run():
-    if len(sys.argv) < 3:
-        print( 
-'Usage: python %s src dest\n\
-Description: Creates sql from src ready to be put into a token ' % sys.argv[0]
-+
-'table, src being tokens 1 on each line.\
-' 
-             )
-        return
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='Creates sql from src ready to be put into a token')
+    parser.add_argument('src', type=argparse.FileType('r'),
+                        help='Tokens/prompts, newline seperated')
+    parser.add_argument('dest', type=argparse.FileType('w'), default=sys.stdout,
+                        nargs='?',
+                        help='Destination SQL file')
+    parser.add_argument('--use-labels', action='store_true', default=False,
+                        help=('Use language labels. `src` must then contain'
+                              ' two tab seperated columns, language label and'
+                              ' the prompt'))
+    args = parser.parse_args()
+    if args.use_labels:
+        processLabels(args.src, args.dest)
     else:
-        process(sys.argv[1], sys.argv[2])
+        process(args.src, args.dest)
 
 if __name__ == '__main__':
     run()
