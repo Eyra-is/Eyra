@@ -54,7 +54,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   $scope.actionGlyph = RECGLYPH;
   $scope.hide_playback = true;
 
-  var currentToken = {'id':0, 'token':'No prompt yet. Hit \'Rec\' for next prompt.'};
+  var currentToken = {'id':0, 'token':'Hit \'Rec\' for prompt.'};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
