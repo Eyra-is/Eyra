@@ -28,6 +28,7 @@ import io.fabric.sdk.android.Fabric;
 public class MainActivity extends AppCompatActivity {
 
     private WebView mWebView;
+    private WebSettings mWebSettings;
     // permission request codes for requestPermissions()
     private static final int APPSTART_REQUESTCODE = 101;
 
@@ -49,33 +50,48 @@ public class MainActivity extends AppCompatActivity {
         });*/
 
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
+        mWebSettings = mWebView.getSettings();
 
         // so long as we are in Android Marshmallow, we need to do this at runtime.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestOurPermissions();
         }
 
+        addAppVersionToUserAgent();
+
         mWebView.addJavascriptInterface(new RecorderJSInterface(), "AndroidRecorder");
 
         // Enable Javascript
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
+        mWebSettings.setJavaScriptEnabled(true);
         // Enable DOM storage, thanks Lewis, http://stackoverflow.com/a/29978620/5272567
-        webSettings.setDomStorageEnabled(true);
+        mWebSettings.setDomStorageEnabled(true);
         // Force links and redirects to open in the WebView instead of in a browser
         mWebView.setWebViewClient(new EyraWebViewClient());
         // Allow location
         mWebView.setWebChromeClient(new GeoWebChromeClient());
 
         // enable appcache
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setAppCachePath("/data/data/" + getPackageName() + "/cache");
-        webSettings.setAllowFileAccess(true);
-        webSettings.setAppCacheEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        mWebSettings.setDomStorageEnabled(true);
+        mWebSettings.setAppCachePath("/data/data/" + getPackageName() + "/cache");
+        mWebSettings.setAllowFileAccess(true);
+        mWebSettings.setAppCacheEnabled(true);
+        mWebSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         mWebView.loadUrl(getString(R.string.website_url));
-        //mWebView.loadUrl("http://beta.html5test.com/");
+    }
+
+    private void addAppVersionToUserAgent() {
+        /* appends "App version: x.x " to the user agent string webview normally generates. */
+        String versionName = BuildConfig.VERSION_NAME;
+        if (versionName == null || versionName.equals("")) {
+            versionName = "0.0";
+        }
+        mWebSettings.setUserAgentString(
+                "App version: "+versionName+
+                " "+
+                mWebSettings.getUserAgentString());
+
+        Log.v("DEBUG", "User agent string changed to: " + mWebSettings.getUserAgentString());
     }
 
     // code from here: https://developer.chrome.com/multidevice/webview/gettingstarted

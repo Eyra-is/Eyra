@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId "is.eyra.eyra"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 23
         versionCode 4
         versionName "1.3"

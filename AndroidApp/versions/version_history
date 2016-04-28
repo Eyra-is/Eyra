@@ -3,3 +3,8 @@ v1.1
 
 v1.2	
 	Attempted fix of Android 6 permission code.
+
+v.1.3
+	Made menu bar smaller and removed Settings from there.
+	Added app-version to userAgent string from webview.
+	
