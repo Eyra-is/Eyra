@@ -47,7 +47,7 @@ class MarosijoAnalyzer(object):
 
         '''
         m, n = len(hyp)+1, len(ref)+1
-        d = np.zeros((m, n), dtype=int)
+        d = np.zeros((m, n))
         d[1:, 0] = range(1, m)
         d[0, 1:] = range(1, n)
 
@@ -60,7 +60,7 @@ class MarosijoAnalyzer(object):
                 sub_ += cost_sub if hyp[i-1] != ref[j-1] else 0
                 d[i, j] = min(del_, ins_, sub_)
 
-        return d[-1, -1], d
+        return int(d[-1, -1]), d
 
     @staticmethod
     def levenshteinDistance(a, b):
@@ -465,7 +465,7 @@ class _SimpleMarosijoTask(Task):
                     ((r['tokenId'], self.common.symToInt(r['token']))
                      for r in recordings)}
 
-            details = {hypKey: MarosijoAnalyzer(hypTok, refs[hypKey]).details() for
+            details = {hypKey: MarosijoAnalyzer(hypTok.split(), refs[hypKey].split()).details() for
                        hypKey, hypTok in hyps.items()}
 
             edits = {hypKey: details[hypKey]['distance'] for
@@ -479,7 +479,7 @@ class _SimpleMarosijoTask(Task):
             # TODO: use something other than WER (binary value perhaps)
             cumAccuracy = 0.0
             for r in recordings:
-                wer = edits[str(r['tokenId'])] / len(str(r['token']).split())
+                wer = edits[str(r['tokenId'])] / len(r['token'].split())
                 accuracy = 0.0 if 1 - wer < 0 else 1 - wer
                 cumAccuracy += accuracy
 
