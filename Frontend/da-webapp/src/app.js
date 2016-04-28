@@ -1,23 +1,3 @@
-// **************************************************************************************** //
-
-//                                         TODO                                             //
-
-// sanitize user input for speakerId, etc. (maybe no need, only stored in database)
-// Think about if we want to have a limit on how many sessions are sent in "sync"
-// Think about adding underscore for service private functions
-// Think about sending the token itself instead of the id (in case the id's get mixed up later in the db)
-
-// in production, the logger.error should NOT LOG ANYTHING and CHANGE some ERRORS to LOGS for prod.
-// remove all $q.defers (if possible) and use insead return values from .then callbacks
-//   to promise chain, see: http://www.codelord.net/2015/09/24/$q-dot-defer-youre-doing-it-wrong/
-// rename minFreeTokenIdx to highest used token idx
-// make speaker and No comments. not show in start menu on default ok click
-// remove alerts
-
-// add 'skip token' button in recording.controller.js and recording.html
-
-// ***************************************************************************************** //
-
 (function () {
 'use strict';
 
@@ -26,13 +6,15 @@ var BACKENDTYPE = 'default';
 var BACKENDOPTS = {
                     'default':'/backend',
                     'localhost':'//localhost:5000',
-                    'localtunnel':'//bakendi.localtunnel.me'
+                    'localtunnel':'//bakendi.localtunnel.me',
+                    'off':'/nonpostablelink'
                   };
 var BACKENDURL = BACKENDOPTS[BACKENDTYPE];
 
-angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
+angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.bootstrap'])
 
 .constant('BACKENDURL', BACKENDURL)
+.constant('CACHEBROKEN_REPORT', 'views/report.html')
 
 // make sure Angular doesn't prepend "unsafe:" to the blob: url
 .config([
@@ -64,6 +46,16 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer'])
   '$routeProvider',
   function($routeProvider) {
     $routeProvider.
+      when('/info', {
+        templateUrl: 'views/info.html',
+        controller: 'InfoController',
+        controllerAs: 'infoCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }
+      }).
       when('/login', {
         templateUrl: 'views/login.html',
         controller: 'LoginController',

@@ -1,0 +1,5 @@
+/etc/ssl/private/rootCA.key
+/etc/ssl/private/datool.key
+/etc/ssl/certs/datool.crt
+/etc/ssl/certs/rootCA.pem
+/etc/apache2/vhosts/root_ca.conf

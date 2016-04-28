@@ -1,15 +1,26 @@
 <div class="content vertical-center">
     <div class="recording-view">
         <p class="token">{{recCtrl.displayToken}}</p>
-        <div id="playback">
+        <div id="playback" ng-hide="hide_playback">
             <audio ng-src="{{recCtrl.curRec[0].url | trustUrl}}" controls></audio>
         </div>
-        <button class="btn btn-glyph-only btn-record" type="button" ng-disabled="recCtrl.recordBtnDisabled" ng-click="recCtrl.record()">
-            <span class="glyphicon glyphicon-record"></span>
-        </button>
-        <button class="btn btn-glyph-only btn-stop" type="button" ng-disabled="recCtrl.stopBtnDisabled" ng-click="recCtrl.stop()">
-            <span class="glyphicon glyphicon-stop"></span>
-        </button>
+        <!-- action = rec or stop -->
+        <div class="record-ctrl-wrapper">
+            <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="recCtrl.actionBtnDisabled" ng-click="recCtrl.action()">
+                <span class="glyphicon {{actionGlyph}}"></span>
+            </button>
+            <p>{{actionText}}</p>
+        </div>
+        <div class="record-ctrl-wrapper">
+            <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="recCtrl.skipBtnDisabled" ng-click="recCtrl.skip()">
+                <span class="glyphicon glyphicon-ban-circle"></span>
+            </button>
+            <p>Skip</p>
+        </div>
+        <div class="feedbackDisplay">
+            <p>Prompts read: {{tokensRead}}</p>
+            <canvas id="volume-meter" width="200" height="50"></canvas>
+        </div>
         <p class="message">{{msg}}</p>
     </div>
 </div>

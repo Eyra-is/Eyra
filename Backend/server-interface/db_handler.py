@@ -1,19 +1,25 @@
 from flask.ext.mysqldb import MySQL
 from MySQLdb import Error as MySQLError
 import json
-import os # for mkdir
+import os
 import random
 
-from util import log
+from util import log, filename
+from config import dbConst
 
 class DbHandler:
     def __init__(self, app):
         # MySQL configurations
-        app.config['MYSQL_HOST'] = 'localhost'
-        app.config['MYSQL_USER'] = 'default'
-        app.config['MYSQL_DB']   = 'recordings_master'
+        app.config['MYSQL_HOST'] = dbConst['host']
+        app.config['MYSQL_USER'] = dbConst['user']
+        app.config['MYSQL_DB']   = dbConst['db']
+        app.config['MYSQL_USE_UNICODE'] = dbConst['use_unicode']
+        app.config['MYSQL_CHARSET'] = dbConst['charset']
 
         self.mysql = MySQL(app)
+
+        # path to saved recordings
+        self.recordings_path = app.config['MAIN_RECORDINGS_PATH']
 
         # needed to sanitize the dynamic sql creation in insertGeneralData
         # keep a list of allowed column names for insertions etc. depending on the table (device, isntructor, etc)
@@ -30,35 +36,51 @@ class DbHandler:
             ],
             'speaker': [
                 'name',
-                'gender',
-                'height',
-                'dob',
                 'deviceImei'
+            ],
+            'speaker_info': [
+                'speakerId',
+                's_key',
+                's_value'
             ]
         }
 
-    # inserts data into appropriate table
-    #
-    # name is i.e. 'instructor' and is a representation of the data, for errors and general identification
-    # data is a json object whose keys will be used as table column names and those values
-    #   will be inserted into table
-    # returns the id of the newly inserted row or errors in the format
-    #   dict(msg=id or msg, statusCode=htmlStatusCode)
-    #
-    # Example:
-    #    name='device'
-    #    data = {'imei':245, 'userAgent':'Mozilla'}
-    #    table = 'device'
-    #
-    #    In which case, this function will 
-    #    insert into device (imei, userAgent) 
-    #                values ('245','Mozilla')
-    #    and return said rows newly generated id.
-    #
-    # WARNING: appends the keys of data straight into a python string using %
-    #          so at least this should be sanitized. Sanitized by a whitelist of
-    #          allowed keys in self.allowedColumnNames
+        # generate list of currently valid tokens according to 'valid' column in table token.
+        #self.invalid_token_ids = self.getInvalidTokenIds() # messes up WSGI script for some fucking reason
+        self.invalid_token_ids = None
+
+    def getInvalidTokenIds(self):
+        """
+        Returns a list of tokenId's who are marked with valid=FALSE in database.
+        """
+        cur = self.mysql.connection.cursor()
+        cur.execute('SELECT id FROM token WHERE valid=FALSE')
+        return [row[0] for row in cur.fetchall()]
+
     def insertGeneralData(self, name, data, table):
+        """
+        inserts data into appropriate table
+
+        name is i.e. 'instructor' and is a representation of the data, for errors and general identification
+        data is a json object whose keys will be used as table column names and those values
+        will be inserted into table
+        returns the id of the newly inserted row or errors in the format
+        dict(msg=id or msg, statusCode=htmlStatusCode)
+
+        Example:
+        name='device'
+        data = {'imei':245, 'userAgent':'Mozilla'}
+        table = 'device'
+
+        In which case, this function will 
+        insert into device (imei, userAgent) 
+                values ('245','Mozilla')
+        and return said rows newly generated id.
+
+        WARNING: appends the keys of data straight into a python string using %
+          so at least this should be sanitized. Sanitized by a whitelist of
+          allowed keys in self.allowedColumnNames
+        """
         keys = []
         vals = []
         dataId = None
@@ -135,7 +157,9 @@ class DbHandler:
             queryStr = queryStr % tuple([table] + interleavedList)
 
             cur.execute(queryStr, queryTuple)
-            dataId = cur.fetchone()[0] # fetchone returns a tuple
+            # return highest id in case of multiple results (should be the newest entry)
+            dataIds = cur.fetchall()
+            dataId = max([i[0] for i in dataIds]) # fetchall() returns a list of tuples
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
@@ -152,24 +176,88 @@ class DbHandler:
         else:
             return dict(msg='{"%sId":' % name + str(dataId) + '}', statusCode=200)
 
-    # instructorData = look at format in the client-server API
+    def insertSpeakerData(self, speakerData, speakerInfo):
+        """
+        inserts into both speaker and speaker_info
+        speakerData is the {'name':name[, 'deviceImei':deviceImei]}
+        speakerInfo are the extra info values to insert into
+          speaker_info table, e.g. speakerInfo: {'height':'154', etc.}
+        assumes speaker doesn't exist in database.
+        """
+        speakerId = None
+        res = self.insertGeneralData('speaker', speakerData, 'speaker')
+        if 'speakerId' in res['msg']:
+            speakerId = json.loads(res['msg'])['speakerId']
+        else:
+            return res
+        for k, v in speakerInfo.items():
+            self.insertGeneralData('speaker_info', {
+                                                        'speakerId':speakerId,
+                                                        's_key':k,
+                                                        's_value':v
+                                                    },
+                                    'speaker_info')
+        return res
+
     def processInstructorData(self, instructorData):
+        """
+        instructorData = look at format in the client-server API
+        """
+        try:
+            if isinstance(instructorData, str):
+                instructorData = json.loads(instructorData)
+        except (ValueError) as e:
+            msg = '%s data not on correct format, aborting.' % name
+            log(msg, e)
+            return dict(msg=msg, statusCode=400)
+
+        if 'id' in instructorData:
+            # instructor was submitted as an id, see if he exists in database
+            try: 
+                cur = self.mysql.connection.cursor()
+
+                cur.execute('SELECT id FROM instructor WHERE id=%s', (instructorData['id'],)) # have to pass in a tuple, with only one parameter
+                instructorId = cur.fetchone()
+                if (instructorId is None):
+                    # no instructor
+                    msg = 'No instructor with that id.'
+                    log(msg)
+                    return dict(msg=msg, statusCode=400)
+                else:
+                    # instructor already exists, return it
+                    instructorId = instructorId[0] # fetchone returns tuple on success
+                    return dict(msg='{"instructorId":' + str(instructorId) + '}', statusCode=200)
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+            return 'Unexpected error.', 500
+
         return self.insertGeneralData('instructor', instructorData, 'instructor')
 
     def processDeviceData(self, deviceData):
         # we have to make sure not to insert device with same IMEI
         #   as is already in the database if so. Otherwise, we create new device
-        deviceImei = None
+        deviceImei, deviceId, userAgent = None, None, None
         try:
             if isinstance(deviceData, str):
                 deviceData = json.loads(deviceData)
-            deviceImei = deviceData['imei']
-        except (TypeError, ValueError) as e:
+            userAgent = deviceData['userAgent']
+        except (TypeError, ValueError, KeyError) as e:
             msg = 'Device data not on correct format, aborting.'
             log(msg, e)
             return dict(msg=msg, statusCode=400)
+
+        try:
+            deviceImei = deviceData['imei']
         except (KeyError) as e:
             # we don't care if device has no ['imei']
+            pass
+        try:
+            deviceId = deviceData['deviceId']
+            del deviceData['deviceId'] # delete it, we don't want to insert it into database
+        except (KeyError) as e:
+            # we don't care if device has no ['deviceId']
             pass
 
         if deviceImei is not None and deviceImei != '':
@@ -178,80 +266,149 @@ class DbHandler:
 
                 # firstly, check if this device already exists, if so, update end time, otherwise add device
                 cur.execute('SELECT id FROM device WHERE imei=%s', (deviceImei,)) # have to pass in a tuple, with only one parameter
-                deviceId = cur.fetchone()
-                if (deviceId is None):
+                dbDeviceId = cur.fetchone()
+                if (dbDeviceId is None):
                     # no device with this imei in database, insert it
                     return self.insertGeneralData('device', deviceData, 'device')
                 else:
                     # device already exists, return it
-                    deviceId = deviceId[0] # fetchone returns tuple on success
-                    return dict(msg='{"deviceId":' + str(deviceId) + '}', statusCode=200)
+                    dbDeviceId = dbDeviceId[0] # fetchone returns tuple on success
+                    return dict(msg='{"deviceId":' + str(dbDeviceId) + '}', statusCode=200)
             except MySQLError as e:
                 msg = 'Database error.'
                 log(msg, e)
                 return dict(msg=msg, statusCode=500)
 
-        # no imei present, wouldn't be able to recognize the device
+        # no imei present, won't be able to identify device unless he has his id
+        if deviceId is not None and deviceId != '':
+            # check if a device with this id has the same userAgent as our devicedata
+            try: 
+                cur = self.mysql.connection.cursor()
+
+                cur.execute('SELECT userAgent FROM device WHERE \
+                             id=%s', (deviceId,))
+                dbUserAgent = cur.fetchone()
+                if dbUserAgent is None:
+                    # no device with this info in database, insert it
+                    return self.insertGeneralData('device', deviceData, 'device')
+                else:
+                    # device already exists, check if names match
+                    dbUserAgent = dbUserAgent[0]
+                    if dbUserAgent == userAgent:
+                        return dict(msg='{"deviceId":' + str(deviceId) + '}', statusCode=200)
+                    else:
+                        msg = 'userAgents don\'t match for supplied id. Creating new device.'
+                        log(msg)
+                        return self.insertGeneralData('device', deviceData, 'device')
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+
+        # no id and no imei, must be new device and first transmission
         return self.insertGeneralData('device', deviceData, 'device')
 
     def processSpeakerData(self, speakerData):
-        # we have to make sure not to insert device with same IMEI
-        #   as is already in the database if so. Otherwise, we create new device
-        name, gender, height, dob, deviceImei = None, None, None, None, None
+        name, deviceImei, speakerId = None, None, None
         try:
             if isinstance(speakerData, str):
                 speakerData = json.loads(speakerData)
             name = speakerData['name']
-            gender = speakerData['gender']
-            height = speakerData['height']
-            dob = speakerData['dob']
         except (KeyError, TypeError, ValueError) as e:
             msg = 'Speaker data not on correct format, aborting.'
             log(msg, e)
             return dict(msg=msg, statusCode=400)
-
         try:
             deviceImei = speakerData['deviceImei']
         except (KeyError) as e:
             # we don't care if speaker has no ['imei']
             pass
+        try:
+            speakerId = speakerData['speakerId']
+        except (KeyError) as e:
+            # or if he doesn't have an id
+            pass
 
+        # now, lets process the dynamic keys/values from speaker data
+        # ignore name, speakerId and deviceImei keys from dict
+        speakerInfo = {}
+        for k, v in speakerData.items():
+            if k != 'name' and k != 'deviceImei' and k != 'speakerId':
+                speakerInfo[str(k)] = str(v)
+        # recreate our speakerData object ready to store in db
+        newSpeakerData = {'name':name}
+
+        # if the speaker has imei info, use that to identify him
         if deviceImei is not None and deviceImei != '':
+            newSpeakerData['deviceImei'] = deviceImei
             try: 
                 cur = self.mysql.connection.cursor()
 
-                # firstly, check if this speaker already exists, if so, update end time, otherwise add speaker
+                # firstly, check if this speaker already exists, if so, return speakerId, otherwise add speaker
                 cur.execute('SELECT id FROM speaker WHERE \
-                         name=%s AND gender=%s AND height=%s AND dob=%s AND deviceImei=%s',
-                        (name, gender, height, dob, deviceImei))
-                speakerId = cur.fetchone()   # it's possible there are more than 1 speaker, in which case just fetch anyone, 
-                                                # it's the statistical data that matters anyway
-                if (speakerId is None):
+                         name=%s AND deviceImei=%s',
+                        (name, deviceImei))
+                dbSpeakerId = cur.fetchone()
+                if (dbSpeakerId is None):
                     # no speaker with this info in database, insert it
-                    return self.insertGeneralData('speaker', speakerData, 'speaker')
+                    return self.insertSpeakerData(newSpeakerData, speakerInfo)
                 else:
                     # speaker already exists, return it
-                    speakerId = speakerId[0] # fetchone returns tuple on success
-                    return dict(msg='{"speakerId":' + str(speakerId) + '}', statusCode=200)
+                    dbSpeakerId = dbSpeakerId[0] # fetchone returns tuple on success
+                    return dict(msg='{"speakerId":' + str(dbSpeakerId) + '}', statusCode=200)
             except MySQLError as e:
                 msg = 'Database error.'
                 log(msg, e)
                 return dict(msg=msg, statusCode=500)
 
-        # no imei present, wouldn't be able to recognize the speaker
-        return self.insertGeneralData('speaker', speakerData, 'speaker')
+        # no imei present, won't be able to identify speaker unless he has his id
+        if speakerId is not None and speakerId != '':
+            # check if a speaker with this id has the same name as our speakerdata
+            try: 
+                cur = self.mysql.connection.cursor()
 
-    # jsonData = look at format in the client-server API
-    # recordings = an array of file objects representing the submitted recordings
-    # returns a dict (msg=msg, statusCode=200,400,..)
+                cur.execute('SELECT name FROM speaker WHERE \
+                             id=%s', (speakerId,))
+                dbName = cur.fetchone()
+                if dbName is None:
+                    # no speaker with this info in database, insert it
+                    return self.insertSpeakerData(newSpeakerData, speakerInfo)
+                else:
+                    # speaker already exists, check if names match
+                    dbName = dbName[0] # fetchone() returns a tuple
+                    if dbName == name:
+                        return dict(msg='{"speakerId":' + str(speakerId) + '}', statusCode=200)
+                    else:
+                        msg = 'Names don\'t match for supplied id. Creating new speaker.'
+                        log(msg)
+                        return self.insertSpeakerData(newSpeakerData, speakerInfo)
+            except MySQLError as e:
+                msg = 'Database error.'
+                log(msg, e)
+                return dict(msg=msg, statusCode=500)
+
+        # no id and no imei, must be new speaker and first transmission
+        return self.insertSpeakerData(newSpeakerData, speakerInfo)
+
     def processSessionData(self, jsonData, recordings):
-        RECORDINGS_ROOT = 'recordings' # root path to recordings
+        """
+        Processes session data sent from client, saves it to the appropriate tables
+        in the database, and saves the recordings to the filesystem at
+        '<app.config['MAIN_RECORDINGS_PATH']>/session_<sessionId>/recname'
+
+        parameters:
+            jsonData        look at format in the client-server API
+            recordings      an array of file objects representing the submitted recordings
+        
+        returns a dict (msg=msg, statusCode=200,400,..)
+        """
         jsonDecoded = None
         sessionId = None
 
         # vars from jsonData
         speakerId, instructorId, deviceId, location, start, end, comments = \
             None, None, None, None, None, None, None
+        speakerName = None
 
         if type(recordings)!=list or len(recordings)==0:
             msg = 'No recordings received, aborting.'
@@ -261,16 +418,18 @@ class DbHandler:
         # extract json data
         try:
             jsonDecoded = json.loads(jsonData)
-            log(jsonDecoded)
+            #log(jsonDecoded)
      
             if jsonDecoded['type'] == 'session':
                 jsonDecoded = jsonDecoded['data']
+                # this inserts speaker into database
                 speakerId = json.loads(
                                 self.processSpeakerData(
                                     jsonDecoded['speakerInfo']
                                 )['msg']
                             )['speakerId']
                 instructorId = jsonDecoded['instructorId']
+                # this inserts device into database
                 deviceId =  json.loads(
                                 self.processDeviceData(
                                     jsonDecoded['deviceInfo']
@@ -280,6 +439,7 @@ class DbHandler:
                 start = jsonDecoded['start']
                 end = jsonDecoded['end']
                 comments = jsonDecoded['comments']
+                speakerName = jsonDecoded['speakerInfo']['name']
             else:
                 msg = 'Wrong type of data.'
                 log(msg)
@@ -317,26 +477,50 @@ class DbHandler:
                              WHERE id=%s', 
                             (end, sessionId))
         
-            # now populate recordings table
+            # now populate recordings table and save recordings+extra data to file/s
 
             # make sure path to recordings exists
-            if not os.path.exists(RECORDINGS_ROOT):
-                os.mkdir(RECORDINGS_ROOT)
+            if not os.path.exists(self.recordings_path):
+                os.makedirs(self.recordings_path)
 
             for rec in recordings:
-                # save recordings to recordings/sessionId/filename
-                sessionPath = os.path.join(RECORDINGS_ROOT, 'session_'+str(sessionId))
+                # grab token to save as extra metadata later, and id to insert into table recording
+                tokenId = jsonDecoded['recordingsInfo'][rec.filename]['tokenId']
+                # use token sent as text if available to write to metadata file (in case database is wrong)
+                #   to be salvaged later if needed.
+                token = None
+                if 'tokenText' in jsonDecoded['recordingsInfo'][rec.filename]:
+                    token = jsonDecoded['recordingsInfo'][rec.filename]['tokenText']
+                else:
+                    # otherwise, grab it from the database
+                    cur.execute('SELECT inputToken FROM token WHERE id=%s', (tokenId,))
+                    token = cur.fetchone()
+                    if (token is None):
+                        msg = 'No token with supplied id.'
+                        log(msg.replace('id.','id: %d.' % tokenId))
+                        return dict(msg=msg, statusCode=400)
+                    else:
+                        token = token[0] # fetchone() returns tuple
+
+                # save recordings to app.config['MAIN_RECORDINGS_PATH']/session_sessionId/filename
+                sessionPath = os.path.join(self.recordings_path, 'session_'+str(sessionId))
                 if not os.path.exists(sessionPath):
                     os.mkdir(sessionPath)
-                wavePath = os.path.join(sessionPath, rec.filename)
+                
+                recName = filename(speakerName) + '_' + filename(rec.filename)
+                wavePath = os.path.join(sessionPath, recName)
                 # rec is a werkzeug FileStorage object
                 rec.save(wavePath)
+                # save additional metadata to text file with same name as recording
+                # open with codecs to avoid encoding issues.
+                # right now, only save the token
+                with open(wavePath.replace('.wav','.txt'), mode='w', encoding='utf8') as f:
+                    f.write(token)
 
-                # insert into database
-                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, rel_path) \
+                # insert recording data into database
+                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, filename) \
                              VALUES (%s, %s, %s, %s)', 
-                            (jsonDecoded['recordingsInfo'][rec.filename]['tokenId'], speakerId, 
-                             sessionId, wavePath))
+                            (tokenId, speakerId, sessionId, recName))
 
             # only commit if we had no exceptions until this point
             self.mysql.connection.commit()
@@ -354,13 +538,21 @@ class DbHandler:
             log(msg, e)
             return dict(msg=msg, statusCode=400)
 
-        return dict(msg='Successful process of session data.', statusCode=200)
+        return dict(msg=json.dumps(dict(sessionId=sessionId, deviceId=deviceId, speakerId=speakerId)), 
+                    statusCode=200)
 
-    # gets numTokens tokens randomly selected from the database and returns them in a nice json format.
-    # look at format in the client-server API
-    # or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
-    # returns [] on failure
     def getTokens(self, numTokens):
+        """
+        gets numTokens tokens randomly selected from the database and returns them in a nice json format.
+        look at format in the client-server API
+        Does not return any tokens marked with valid:FALSE in db.
+        or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
+        returns [] on failure
+        """
+        # start by getting the list of invalid tokens, and create it if we haven't already
+        if self.invalid_token_ids is None:
+            self.invalid_token_ids = self.getInvalidTokenIds()
+
         tokens = []
         try:
             cur = self.mysql.connection.cursor()
@@ -368,8 +560,12 @@ class DbHandler:
             # select numTokens random rows from the database
             cur.execute('SELECT COUNT(*) FROM token');
             numRows = cur.fetchone()[0]
+
+            total_token_ids = range(1, numRows+1)
+            valid_token_ids = [x for x in total_token_ids if x not in self.invalid_token_ids]
+
             # needs testing here to make sure 1 is lowest id, and numRows is highest id
-            randIds = [random.randint(1,int(numRows)) for i in range(int(numTokens))]
+            randIds = [random.choice(valid_token_ids) for i in range(int(numTokens))]
             randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
             cur.execute('SELECT id, inputToken FROM token WHERE id IN %s',
                         (randIds,)) # have to pass in a tuple, with only one parameter
@@ -377,7 +573,32 @@ class DbHandler:
         except MySQLError as e:
             msg = 'Error getting tokens from database.'
             log(msg, e)
-            return dict(msg=msg, statusCode=500)
+            return []
+
+        jsonTokens = []
+        # parse our tuple object from the cursor.execute into our desired json object
+        for pair in tokens:
+            jsonTokens.append({"id":pair[0], "token":pair[1]})
+
+        random.shuffle(jsonTokens) # the select seemed to alphabetize the tokens
+        return jsonTokens
+        
+    def getTokensAll(self):
+        """
+        gets *ALL* tokens from the database and returns them in a nice json format.
+        look at format in the client-server API
+        or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
+        returns [] on failure
+        """
+        tokens = []
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT id, inputToken FROM token')
+            tokens = cur.fetchall()
+        except MySQLError as e:
+            msg = 'Error getting tokens from database.'
+            log(msg, e)
+            return []
 
         jsonTokens = []
         # parse our tuple object from the cursor.execute into our desired json object
@@ -385,3 +606,54 @@ class DbHandler:
             jsonTokens.append({"id":pair[0], "token":pair[1]})
 
         return jsonTokens
+
+    def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str - absolute path, "tokenId": ...}]':
+        """Fetches info for the recordings of the session `sessionId`
+
+        Parameters:
+          sessionId    Only consider recordings from this session
+          count        If set only return info for count newest recordings
+                       otherwise fetch info for all recordings from session
+
+        The returned list contains the newest recordings last, i.e. recordings are
+        in ascending order with regard to recording id.
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT recording.id, recording.filename, token.inputToken, token.id FROM recording '
+                        + 'JOIN token ON recording.tokenId=token.id '
+                        + 'WHERE recording.sessionId=%s '
+                        + 'ORDER BY recording.id ASC ', (sessionId,))
+
+            if count is not None:
+                rows = cur.fetchmany(size=count)
+            else:
+                rows = cur.fetchall()
+        except MySQLError as e:
+            msg = 'Error getting info for session recordings'
+            log(msg, e)
+            raise
+        else:
+            return json.dumps([dict(recId=recId, 
+                                    recPath=os.path.join(self.recordings_path,'session_'+str(sessionId),recPath), 
+                                    token=token, 
+                                    tokenId=id)
+                                for recId, recPath, token, id in rows])
+
+    def sessionExists(self, sessionId) -> bool:
+        """
+        Checks to see if session with sessionId exists (is in database).
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT * FROM session WHERE id=%s', (sessionId,))
+            if cur.fetchone():
+                return True
+        except MySQLError as e:
+            msg = 'Error checking for session existence.'
+            log(msg, e)
+            raise
+        else:
+            return False
+
+    

@@ -29,10 +29,12 @@ module.exports = function(grunt) {
                       depl+'css/**',
                       depl+'views/**',
                       depl+'img/**',
+                      depl+'json/**',
                       // be careful, if these files (recorderjs/) are ever changed, 
                       // it might not reflect on client end if he has this cached. 
                       // This is not cache-broken. 
-                      depl+'recorderjs/dist/*' 
+                      depl+'recorderjs/dist/*' ,
+                      depl+'bower_components/bootstrap/dist/fonts/**'
                     ],
           literals: [
                       'index.html',
@@ -51,8 +53,10 @@ module.exports = function(grunt) {
                     depl+'sass/**',
                     depl+'index.html',
                     depl+'img/**',
+                    depl+'json/**',
                     depl+'bower_components/**',
-                    depl+'recorderjs/**'
+                    depl+'recorderjs/**',
+                    depl+'volume_meter/**'
                   ],
       temp: [depl+'app.js']
     },
@@ -81,7 +85,15 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['app.js', 'index.html', 'sass/**', 'bower_components/**', 'recorderjs/**'],
+            src: ['json/speaker-info-format.json'],
+            dest: depl,
+            rename: function(dest, src) {
+              return dest + src.replace(/\.json$/, '.'+cache_breaker+'.json');
+            }
+          },
+          { expand: true, cwd: source,
+            src: ['app.js', 'index.html', 'sass/**', 'bower_components/**', 
+                  'recorderjs/**', 'volume_meter/volume-meter.js'],
             dest: depl
           }
         ]
@@ -145,19 +157,41 @@ module.exports = function(grunt) {
           }
         ]
       },
-      imgs: {
+      other: {
         options: {
           patterns: [
             {
               match: /src=\"img\/(.*)\.(jpg|png|gif)\"/g,
               replacement: 'src="img\/$1.'+cache_breaker+'.$2"'
+            },
+            {
+              match: /json\/speaker-info-format\.json/g,
+              replacement: 'json/speaker-info-format.'+cache_breaker+'.json'
             }
           ]
         },
         files: [
           { 
             expand: true, cwd: depl,
-            src: ['views/**/*.html', 'index.html'], 
+            src: ['views/**/*.html', 'index.html', 
+                  'min/old/'+source+'controllers/**/*.js'], 
+            dest: depl
+          }
+        ]
+      },
+      info_page: {
+        options: {
+          patterns: [
+            {
+              match: 'VersionNo',
+              replacement: '<%= grunt.template.today("yyyy/mm/dd HH:MM") %>'
+            }
+          ]
+        },
+        files: [
+          { 
+            expand: true, cwd: depl,
+            src: ['views/info.'+cache_breaker+'.html'], 
             dest: depl
           }
         ]
@@ -192,6 +226,7 @@ module.exports = function(grunt) {
 
                   depl+'bower_components/angular/angular.js',
                   depl+'bower_components/angular-route/angular-route.js',
+                  depl+'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
 
                   depl+'bower_components/localforage/dist/localforage.js',
                   depl+'bower_components/angular-localforage/dist/angular-localForage.js',
@@ -201,6 +236,8 @@ module.exports = function(grunt) {
                   //   this has to be non-minified.
                   //depl+'recorderjs/dist/recorderWorker.js',
                   //depl+'recorderjs/dist/recorder.js',
+
+                  depl+'volume_meter/volume-meter.js',
 
                   depl+'min/old/'+depl+'app.js', 
                   depl+'min/old/'+source+'services/**/*.js',
@@ -242,8 +279,10 @@ module.exports = function(grunt) {
                                   'copy:main', // copy everything not javascript from source to depl and rename with CACHEBREAKER
                                   'replace:script_name', // replace previous file.CACHEBREAKER.ext in index.CACHEBREAKER.html 
                                   'replace:views', // replace 'views/bla.CACHEBREAKER.html' to the new cachebreaker in the routes in app.js
-                                  'replace:imgs', // replace all 'src="img/i.(jpg|png|gif)' imgs with cachebroken versions in the .html files
+                                  'replace:info_page', // add version number to info page
                                   'ngAnnotate:app', // make sure angular scripts are ready for minification
+                                  'replace:other', // replace all 'src="img/i.(jpg|png|gif)' imgs with cachebroken versions in the .html files
+                                                   //   and other similar like json, has to be after ng:annotate
                                   'uglify:minify', // min javascript
                                   'clean:temp', // delete the temp app.js used by ngAnnotate
                                   'appcache:all'

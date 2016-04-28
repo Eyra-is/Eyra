@@ -4,7 +4,15 @@
 angular.module('daApp')
 .controller('MoreController', MoreController);
 
-MoreController.$inject = ['$location', '$rootScope', '$scope', 'authenticationService', 'deliveryService', 'localDbService', 'logger', 'tokenService', 'utilityService'];
+MoreController.$inject = ['$location', 
+                          '$rootScope', 
+                          '$scope', 
+                          'authenticationService', 
+                          'deliveryService', 
+                          'localDbService', 
+                          'logger', 
+                          'tokenService', 
+                          'utilityService'];
 
 function MoreController($location, $rootScope, $scope, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
   var moreCtrl = this;
@@ -15,6 +23,7 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
   
   moreCtrl.addSpeaker = addSpeaker;
   moreCtrl.clearLocalDb = clearLocalDb;
+  moreCtrl.clearTokens = clearTokens;
   moreCtrl.getTokens = getTokens;
   moreCtrl.registerDevice = registerDevice;
   moreCtrl.setInstructor = setInstructor;
@@ -58,11 +67,23 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
         }, util.stdErrCallback);
     }
   }
+
+  // dev function, clear all tokens
+  function clearTokens() {
+    $scope.msg = 'Clearing tokens...';
+    tokenService.clearTokens().then(
+      function success(res) {
+        alert('All tokens gone!');
+        $scope.msg = 'Tokens deleted.';
+      },
+      util.stdErrCallback
+    );
+  }
   
   function getTokens() {
     $scope.msg = 'Getting tokens...';
 
-    tokenService.getTokens(100).then(function(tokens){
+    tokenService.getTokens(1000).then(function(tokens){
       alert('Tokens acquired!');
       $scope.msg = 'Tokens acquired.';
     },

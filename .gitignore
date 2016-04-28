@@ -1,4 +1,7 @@
 # user added
 
-# ignore temp recordings
-/Backend/server-interface/recordings
+# ignore local files
+/Local
+
+# ignore default.conf file in Setup/src/frontend-app/
+/Setup/src/frontend-app/default.conf

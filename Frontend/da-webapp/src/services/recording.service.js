@@ -6,26 +6,30 @@
 angular.module('daApp')
   .factory('recordingService', recordingService);
 
-recordingService.$inject = ['logger', 'utilityService'];
+recordingService.$inject = ['$http', 'logger', 'utilityService'];
 
-function recordingService(logger, utilityService) {
+function recordingService($http, logger, utilityService) {
   var recHandler = {};
   var util = utilityService;
 
+  recHandler.createWavFromBlob = createWavFromBlob; // exported for android audio recorder
+  recHandler.getAudioContext = getAudioContext;
+  recHandler.getStreamSource = getStreamSource;
   recHandler.init = init;
   recHandler.record = record;
   recHandler.setupCallbacks = setupCallbacks;
   recHandler.stop = stop;
 
-  // for some reason, putting this in an array, makes angular updates this correctly
+  // local variable definitions for service
+  var invalidTitle = util.getConstant('invalidTitle');
+  
+  // for some reason, putting this in an array, makes angular update this correctly
   recHandler.currentRecording = [{  "blob":new Blob(),
                                     "url":'',
                                     "title":invalidTitle}];
 
-  // local variable definitions for service
-  var invalidTitle = util.getConstant('invalidTitle');
-
   var audio_context;
+  var input;
   var recorder;
 
   return recHandler;
@@ -58,23 +62,34 @@ function recordingService(logger, utilityService) {
     });
   }
 
+  function getAudioContext() {
+    return audio_context;
+  }
+
+  function getStreamSource() {
+    return input;
+  }
+
   function record() {
     logger.log('Recording...');
     recorder && recorder.record();
   }
 
   // setup callbacks for any controller which needs to use this service
-  function setupCallbacks(updateBindingsCallback, recordingCompleteCallback) {
-    recHandler.updateBindingsCallback = updateBindingsCallback;
+  function setupCallbacks(recordingCompleteCallback) {
     recHandler.recordingCompleteCallback = recordingCompleteCallback;
   }
 
-  function stop() {
+  function stop(valid) {
     recorder && recorder.stop();
     logger.log('Stopped recording.');
-    
-    // create WAV download link using audio data blob and display on website
-    createWav();
+
+    if (valid) {
+      // create WAV download link using audio data blob and display on website
+      createWav();
+    } else {
+      logger.log('Token skipped, no recording made.');
+    }
     
     recorder.clear();
   } 
@@ -83,24 +98,49 @@ function recordingService(logger, utilityService) {
 
   function createWav() {
     recorder && recorder.exportWAV(function(blob) {
-      var url = URL.createObjectURL(blob);
-
-      recHandler.prevRecTitle = recHandler.currentRecording[0].title;
-      // display recording on website
-      recHandler.currentRecording[0] = {  "blob":blob,
-                                          "url":url,
-                                          "title":(new Date().toISOString() + '.wav')};
-
-      // angular didn't update bindings on that recordings push, so we do it manually
-      // through this callback function from the controller
-      recHandler.updateBindingsCallback();
-      // notify main controller of completed recording
-      recHandler.recordingCompleteCallback();
+      createWavFromBlob(recHandler, blob); // calls the recording complete callback
     });
   }
 
+  function createWavFromBlob(handler, blob) {
+    var url = (window.URL || window.webkitURL).createObjectURL(blob);
+    // workaround for mobile playback, where it didn't work on chrome/android.
+    // fetch blob at url using xhr, and use url generated from that blob.
+    // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
+    // thanks, gbrlg
+    $http.get(url, {'responseType':'blob'}).then(
+      function success(response) {
+        var reBlob = response.data;
+        if (reBlob) {
+          url = (window.URL || window.webkitURL).createObjectURL(reBlob);
+        }
+        finishCreateWav();
+      },
+      function error(response) {
+        logger.error(response);
+        finishCreateWav();
+      }
+    );
+
+    // just added because of the async nature of $http
+    function finishCreateWav() {
+      handler.prevRecTitle = handler.currentRecording[0].title;
+      // display recording on website
+      handler.currentRecording[0] = { "blob":blob,
+                                      "url":url,
+                                      "title":(new Date().toISOString() + '.wav')};
+
+      // notify main controller of completed recording
+      handler.recordingCompleteCallback();
+    }
+  }
+
   function startUserMedia(stream) {
-    var input = audio_context.createMediaStreamSource(stream);
+    input = audio_context.createMediaStreamSource(stream);
+    // Fix for a firefox bug.
+    // save a reference to the media stream source.
+    // thanks, csch, http://stackoverflow.com/a/23486702/5272567
+    window.source = input;
     logger.log('Media stream created.');
     // Uncomment if you want the audio to feedback directly
     //input.connect(audio_context.destination);

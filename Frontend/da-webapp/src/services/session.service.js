@@ -9,9 +9,9 @@
 angular.module('daApp')
   .factory('sessionService', sessionService);
 
-sessionService.$inject = ['$q', 'dataService', 'localDbMiscService', 'logger'];
+sessionService.$inject = ['$q', '$rootScope', 'dataService', 'localDbMiscService', 'logger'];
 
-function sessionService($q, dataService, localDbMiscService, logger) {
+function sessionService($q, $rootScope, dataService, localDbMiscService, logger) {
   var sessionHandler = {};
   var dbService = localDbMiscService;
 
@@ -25,9 +25,10 @@ function sessionService($q, dataService, localDbMiscService, logger) {
   //////////
 
   // put together session json data needed for client server API comms
-  // need the recording object as it is in recordingService and the id of the respective token
+  // need the recording object as it is in recordingService and the respective token
   // this is called by the recording controller on a single rec/token send.
-  function assembleSessionData(rec, tokenId) {
+  // token is on format: { 'id':id, 'token':token }
+  function assembleSessionData(rec, token) {
     var sessionData = $q.defer();
     // start by getting the info that might take local db access (async)
     // i.e. speakerInfo, instructorId and deviceInfo
@@ -46,6 +47,18 @@ function sessionService($q, dataService, localDbMiscService, logger) {
           'userAgent':navigator.userAgent,
           'imei':''
         };
+        if (!data.deviceInfo && $rootScope.isWebView) {
+          deviceInfoFallback['imei'] = AndroidConstants.getImei();
+        }
+        // fix if speaker is created before device is registered, add speaker deviceImei here
+        if (data.deviceInfo && data.deviceInfo['imei'] && data.deviceInfo['imei'] !== '') {
+          if (data.speakerInfo) {
+            data.speakerInfo['deviceImei'] = data.deviceInfo['imei'];
+          }
+        }
+        // special case for speakerInfo, remove tokensRead attribute
+        data.speakerInfo = speakerInfoCorrection(data.speakerInfo);
+
         var tempSessionData = {                                                                  
                                 "type":'session', 
                                 "data":
@@ -61,7 +74,7 @@ function sessionService($q, dataService, localDbMiscService, logger) {
                                 }
                               };
         tempSessionData['data']['recordingsInfo']
-                    [rec.title] = { 'tokenId' : tokenId };
+                    [rec.title] = { 'tokenId' : token['id'], 'tokenText' : token['token'] };
 
         sessionData.resolve(tempSessionData);
       },
@@ -71,6 +84,14 @@ function sessionService($q, dataService, localDbMiscService, logger) {
     );
 
     return sessionData.promise;
+  }
+
+  function speakerInfoCorrection(oldSpeakerInfo) {
+    // function creates new speakerInfo object without tokensRead attribute
+
+    var newSpeakerInfo = JSON.parse(JSON.stringify(oldSpeakerInfo)); // copy object
+    delete newSpeakerInfo.tokensRead;
+    return newSpeakerInfo;
   }
 
   // attempts first to get the info specified by key from dataService
@@ -127,7 +148,7 @@ function sessionService($q, dataService, localDbMiscService, logger) {
     // the infoPromises will be changed after the function calls
     getGeneralInfo('speakerInfo', speakerInfoPromise, dbService.getSpeaker, speakerName);
     getGeneralInfo('instructorId', instructorIdPromise, dbService.getInstructorId, undefined);
-    getGeneralInfo('deviceInfo', deviceInfoPromise, dbService.getDevice, undefined);
+    getGeneralInfo('device', deviceInfoPromise, dbService.getDevice, undefined);
 
     return $q.all(dataPromises);
   }

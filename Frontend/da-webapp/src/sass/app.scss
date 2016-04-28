@@ -37,10 +37,31 @@ body {
   @extend .default-view;
   text-align: center;
 }
+/* modal popup with QC reports */
+.report-view {
+  @extend .default-view;
+  text-align: center;
+  margin: 0 auto;
+  width: inherit;
+  height: inherit;
+  ul {
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+.feedbackDisplay {
+  font-size: 1.1em;
+}
 /* form layout */
 .data-entry {
   @extend .default-view;
   font-size: 1.2em;
+  form {
+    padding-bottom: 3%;
+    button {
+      margin-top: 1em;
+    }
+  }
 }
 /* http://stackoverflow.com/a/24688640/5272567 */
 .checkbox input[type='checkbox'] {
@@ -52,11 +73,18 @@ body {
 .checkbox { 
   padding-left: 2%; 
 }
+.more-list {
+  padding-left: 0;
+  margin-left: 0;
+}
 
 /* token stylings */
 .token {
+  color: #2A30DE;
   font-weight: bold;
   font-size: 1.5em;
+  overflow-y: auto;
+  max-height: 200px;
 }
 
 /* button/glyph stylings */
@@ -65,7 +93,26 @@ body {
   width: 100%;
   font-size: 1.2em;
 }
-.btn-record, .btn-stop {
+.record-ctrl-wrapper {
+  display: inline-block;
+  width: $glyphSize;
+  button {
+    width: 100%;
+    float: left;
+    clear: both;
+  }
+  p {
+    float: left;
+    display: block;
+    width: $glyphSize;
+    text-align: center;
+    padding: 0.3em 0 0 0.2em;
+  }
+}
+.record-ctrl-wrapper + .record-ctrl-wrapper {
+  margin-left: 1em;
+}
+.btn-record-ctrl {
   width: $glyphSize;
   height: $glyphSize;
 }
@@ -78,6 +125,10 @@ body {
 }
 .glyphicon-stop {
   @extend .glyph-default;
+}
+.glyphicon-ban-circle {
+  @extend .glyph-default;
+  color: red;
 }
 /* make button invisible, to allow only glyphicon as button */
 /* http://stackoverflow.com/a/26917133/5272567 */
@@ -93,7 +144,7 @@ body {
   flex-basis: 20%;
   font-size: 3.5em;
 }
-.loading-msg {
+.loading_msg {
   padding: 1%;
   text-align: center;
   flex-basis: 5%;
@@ -114,6 +165,16 @@ body {
   display: block;
   padding-left: 0.2em; /* just a little bit to make it not stick together when it's expanded */
 }
+/* fix issue with content being blocked by navbar
+   when height of speaker info was x great.
+   http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
+*/
+.view .speaker-info-entry {
+  padding-top: 60px;
+}
+.speaker-info-entry {
+  margin: 0 auto;
+}
 
 /* misc stylings */
 #playback {
@@ -123,16 +184,60 @@ body {
 ul {
   list-style-type: none;
 }
-.default-heading { 
-  margin: 0 auto;
-  padding: 0 0 3% 0;
-  text-align: center;
-}
 .message {
   display: block;
   padding-top: 5%;
   font-weight: bold;
   font-size: 1.25em;
+}
+@keyframes toRed {
+    
+    to {background-color: #DF0101;}    
+  }
+
+  @keyframes toOrange {
+    
+    to {background-color: #FF8000;}    
+  }
+
+  @keyframes toGreenish {
+    
+    to {background-color: #2EFE2E;}    
+  }
+
+  @keyframes toGreen {
+    
+    to {background-color: #0B610B;}    
+  }
+
+  ._red {  
+  background-color: #FA5882;
+  animation-name: toRed;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
+._orange {  
+  background-color: #FAAC58;
+  animation-name: toOrange;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
+._greenish {  
+  background-color: #81F781;
+  animation-name: toGreenish;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
+._green {  
+  background-color: #2EFE2E;
+  animation-name: toGreen;
+  animation-duration: 1s;
+  animation-iteration-count:infinite;}
+
+.default-heading { 
+  margin: 0 auto;
+  padding: 0 0 3% 0;
+  text-align: center;
 }
 /* give parent of centered element this class */
 .vertical-center {
@@ -156,3 +261,11 @@ ul {
       padding: 0.1%;
     }
 }
+
+@media only screen 
+  and (max-device-height: 400px) {
+    .token {
+      max-height: 150px;
+    }
+}
+

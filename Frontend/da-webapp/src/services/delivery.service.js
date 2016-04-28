@@ -10,13 +10,14 @@ angular.module('daApp')
 deliveryService.$inject = [
                             '$http', 
                             '$q',
+                            '$rootScope',
                             'BACKENDURL', 
                             'logger', 
                             'localDbMiscService', 
                             'localDbService', 
                             'utilityService'];
 
-function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
+function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
   var dbMiscService = localDbMiscService;
@@ -26,6 +27,7 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
   reqHandler.sendLocalSessions = sendLocalSessions;
   // API
   reqHandler.getTokens = getTokens;
+  reqHandler.queryQC = queryQC;
   reqHandler.submitDevice = submitDevice;
   reqHandler.submitInstructor = submitInstructor;
   reqHandler.submitRecordings = submitRecordings;
@@ -62,9 +64,9 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
   // send session from localdb to server
   // lastSession, is the session failed to send from last sendLocalSession, null otherwise
   // recursive function, calls itself as long as there are sessions in localdb
-  // aborts after 5 failed sends.
+  // aborts after 2 failed sends.
   function sendLocalSession(lastSession) {
-    if (failedSessionSends > 4) {
+    if (failedSessionSends > 1) {
       logger.log('Failed sending session too many times. Aborting sync...');
       failedSessionSends = 0;
       // we failed at sending session, save it to the database again.
@@ -110,11 +112,22 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
       });
   }
 
+  function queryQC(sessionId) {
+    // function input is a sessionId
+    // a async http get call is sent to backend w a string as input
+    // the return value is a 
+    return $http.get(BACKENDURL + '/qc/report/session/'+sessionId);
+  }
+
   function submitDevice(device) {
     // make sure always to send the user agent string, even in case of some erraneous programming
     //   before this function call
     if (!device.userAgent) {
       device.userAgent = navigator.userAgent;
+    }
+    // same for imei if we are in webview
+    if (!device.imei && $rootScope.isWebView) {
+      device.imei = AndroidConstants.getImei();
     }
     return submitGeneralJson(device, '/submit/general/device');
   }
