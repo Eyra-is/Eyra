@@ -362,6 +362,9 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
               'deviceId' : id
             };
           }
+          if (!device.imei && $rootScope.isWebView) {
+            device['imei'] = AndroidConstants.getImei();
+          }
           dataService.set('device', device);
           miscDbService.setDevice(device)
             .then(angular.noop, util.stdErrCallback);
