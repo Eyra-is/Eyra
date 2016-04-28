@@ -1,0 +1,10 @@
+v1.1
+	Add new permission code for Android 6. Should not interfere with other versions of Android.
+
+v1.2	
+	Attempted fix of Android 6 permission code.
+
+v1.3
+	Made menu bar smaller and removed Settings from there.
+	Added app-version to userAgent string from webview.
+	Added automatic "imei" get through app. Uses ANDROID_ID instead (it's not imei, but it requires no special permissions). 

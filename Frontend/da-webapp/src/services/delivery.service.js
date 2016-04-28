@@ -10,13 +10,14 @@ angular.module('daApp')
 deliveryService.$inject = [
                             '$http', 
                             '$q',
+                            '$rootScope',
                             'BACKENDURL', 
                             'logger', 
                             'localDbMiscService', 
                             'localDbService', 
                             'utilityService'];
 
-function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
+function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
   var dbMiscService = localDbMiscService;
@@ -123,6 +124,10 @@ function deliveryService($http, $q, BACKENDURL, logger, localDbMiscService, loca
     //   before this function call
     if (!device.userAgent) {
       device.userAgent = navigator.userAgent;
+    }
+    // same for imei if we are in webview
+    if (!device.imei && $rootScope.isWebView) {
+      device.imei = AndroidConstants.getImei();
     }
     return submitGeneralJson(device, '/submit/general/device');
   }
