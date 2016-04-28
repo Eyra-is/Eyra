@@ -47,7 +47,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   var actionType = 'record'; // current state
 
   var RECTEXT = 'Rec'; // text under the buttons
-  var STOPTEXT = 'Stop rec';
+  var STOPTEXT = 'Stop';
   var RECGLYPH = 'glyphicon-record'; // bootstrap glyph class
   var STOPGLYPH = 'glyphicon-stop';
   $scope.actionText = RECTEXT;
