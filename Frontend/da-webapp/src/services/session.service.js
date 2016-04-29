@@ -9,9 +9,9 @@
 angular.module('daApp')
   .factory('sessionService', sessionService);
 
-sessionService.$inject = ['$q', 'dataService', 'localDbMiscService', 'logger'];
+sessionService.$inject = ['$q', '$rootScope', 'dataService', 'localDbMiscService', 'logger'];
 
-function sessionService($q, dataService, localDbMiscService, logger) {
+function sessionService($q, $rootScope, dataService, localDbMiscService, logger) {
   var sessionHandler = {};
   var dbService = localDbMiscService;
 
@@ -47,6 +47,9 @@ function sessionService($q, dataService, localDbMiscService, logger) {
           'userAgent':navigator.userAgent,
           'imei':''
         };
+        if (!data.deviceInfo && $rootScope.isWebView) {
+          deviceInfoFallback['imei'] = AndroidConstants.getImei();
+        }
         // fix if speaker is created before device is registered, add speaker deviceImei here
         if (data.deviceInfo && data.deviceInfo['imei'] && data.deviceInfo['imei'] !== '') {
           if (data.speakerInfo) {

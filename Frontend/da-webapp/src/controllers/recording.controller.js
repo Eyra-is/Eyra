@@ -46,14 +46,15 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
 
   var actionType = 'record'; // current state
 
-  var RECTEXT = 'Next'; // text under the buttons
+  var RECTEXT = 'Rec'; // text under the buttons
   var STOPTEXT = 'Stop';
   var RECGLYPH = 'glyphicon-record'; // bootstrap glyph class
   var STOPGLYPH = 'glyphicon-stop';
   $scope.actionText = RECTEXT;
   $scope.actionGlyph = RECGLYPH;
+  $scope.hide_playback = true;
 
-  var currentToken = {'id':0, 'token':'No token yet. Hit \'Next\' for next token.'};
+  var currentToken = {'id':0, 'token':'Hit \'Rec\' for prompt.'};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
@@ -171,8 +172,10 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
       actionType = 'stop';
       $scope.actionText = STOPTEXT;
       $scope.actionGlyph = STOPGLYPH;
+      $scope.hide_playback = true;
     } else if (actionType === 'stop') {
       actionType = 'record';
+      $scope.hide_playback = false;
       $scope.actionText = RECTEXT;
       $scope.actionGlyph = RECGLYPH;
     }
@@ -361,6 +364,9 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
               'userAgent' : navigator.userAgent,
               'deviceId' : id
             };
+          }
+          if (!device.imei && $rootScope.isWebView) {
+            device['imei'] = AndroidConstants.getImei();
           }
           dataService.set('device', device);
           miscDbService.setDevice(device)

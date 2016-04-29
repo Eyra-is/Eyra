@@ -1,7 +1,7 @@
 <div class="content vertical-center">
     <div class="recording-view">
         <p class="token">{{recCtrl.displayToken}}</p>
-        <div id="playback">
+        <div id="playback" ng-hide="hide_playback">
             <audio ng-src="{{recCtrl.curRec[0].url | trustUrl}}" controls></audio>
         </div>
         <!-- action = rec or stop -->
@@ -18,7 +18,7 @@
             <p>Skip</p>
         </div>
         <div class="feedbackDisplay">
-            <p>Tokens read: {{tokensRead}}</p>
+            <p>Prompts read: {{tokensRead}}</p>
             <canvas id="volume-meter" width="200" height="50"></canvas>
         </div>
         <p class="message">{{msg}}</p>
