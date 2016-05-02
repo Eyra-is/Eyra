@@ -7,6 +7,7 @@ angular.module('daApp')
 MoreController.$inject = ['$location', 
                           '$rootScope', 
                           '$scope', 
+                          'dataService',
                           'authenticationService', 
                           'deliveryService', 
                           'localDbService', 
@@ -14,7 +15,7 @@ MoreController.$inject = ['$location',
                           'tokenService', 
                           'utilityService'];
 
-function MoreController($location, $rootScope, $scope, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
+function MoreController($location, $rootScope, $scope, dataService, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
   var moreCtrl = this;
   var authService = authenticationService;
   var dbService = localDbService;
@@ -33,6 +34,9 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
   moreCtrl.logout = logout;
 
   $rootScope.isLoaded = true;
+  $scope.hide_recording = true;
+  $scope.hide_start = true;
+  $scope.hide_login_msg = true;
 
   
   //////////
@@ -96,7 +100,27 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
     $scope.msg = 'Syncing...';
 
     delService.sendLocalSessions(syncDoneCallback);
+
+    if (dataService.get('speakerName')) {
+      $scope.hide_recording = false;
+    } else {
+      $scope.hide_start = false;
+      $scope.login_msg = "You need to login - Press the \n \'Login to record\' button"
+      $scope.hide_login_msg = false;
+
+    }
   }
+/*
+  function backToRecording() {
+    if (dataService.get('speakerName')) {
+      console.info('back to rercording')
+      $location.path('/recording');
+    } else {
+      console.info('not enter username')
+      $location.path('/start');
+    }
+
+  } */
 
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
