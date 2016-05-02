@@ -8,3 +8,7 @@ v1.3
 	Made menu bar smaller and removed Settings from there.
 	Added app-version to userAgent string from webview.
 	Added automatic "imei" get through app. Uses ANDROID_ID instead (it's not imei, but it requires no special permissions). 
+	Added way to see which version of the app we are using (so long as it's done manually in Android studio), by looking at phone settings -> Apps -> Eyra X.X.
+
+v1.4
+	Fixed issue with Stop button taking very long to respond while still being enabled on lower processing power phones (now takes much less).
