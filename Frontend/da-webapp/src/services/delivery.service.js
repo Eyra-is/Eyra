@@ -84,7 +84,8 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscS
     dbService.countAvailableSessions().then(function(availSessions){
       if (availSessions > 0) {
         logger.log('Sending session as part of sync...');
-        dbService.pullSession().then(function(session){
+        // sort of added hack, now pullSession sends only syncRecCountPerSend || 5 recordings per "session" send.
+        dbService.pullSession(util.getConstant('syncRecCountPerSend') || 5).then(function(session){
           deliverSession(session); // recursively calls sendLocalSession
         },
         util.stdErrCallback);
