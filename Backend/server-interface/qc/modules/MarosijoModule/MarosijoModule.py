@@ -23,30 +23,175 @@ _DEFAULT_KALDI_ROOT = os.path.abspath(
     os.path.join(__file__, '../../../../../../Local/opt/kaldi-trunk'))
 
 
-def levenshteinDistance(a, b, cost_sub=1, cost_del=1, cost_ins=1) -> int:
-    '''
-    Returns the minimum edit distance (Levenshtein distance) between
-    sequences `a` and `b`.
+# Kudos to http://stackoverflow.com/users/95810/alex-martelli for
+# http://stackoverflow.com/a/3233356 which this is based on
+import collections
+def update(d, u):
+    """Recursively updates nested dicts. Lists are NOT updated, they are extended
+    with new list value. MUTATES `d`.
 
-    '''
-    m, n = len(a)+1, len(b)+1
-    d = np.zeros((m, n))
-    d[1:, 0] = range(1, m)
-    d[0, 1:] = range(1, n)
-
-    for j in range(1, n):
-        for i in range(1, m):
-            del_ = d[i-1, j] + cost_del
-            ins_ = d[i, j-1] + cost_ins
-            sub_ = d[i-1, j-1]
-            sub_ += cost_sub if a[i-1] != b[j-1] else 0
-            d[i, j] = min(del_, ins_, sub_)
-    return d[-1, -1]
+    """
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            r = update(d.get(k, {}), v)
+            d[k] = r
+        elif isinstance(v, list):
+            r = d.get(k, []).extend(v)
+        else:
+            d[k] = u[k]
+    return d
 
 
 class MarosijoError(Exception):
     pass
 
+
+class MarosijoAnalyzer(object):
+    """MarosijoAnalyzer
+    ===================
+
+    Does analysis of decoded output, given reference and hypothesis
+    string.
+
+    """
+    def __init__(self, hypothesis, reference):
+        self.reference = reference
+        self.hypothesis = hypothesis
+
+    @staticmethod
+    def _levenshteinDistance(hyp, ref, cost_sub=1, cost_del=1, cost_ins=1):
+        '''
+        Returns the minimum edit distance (Levenshtein distance) between
+        sequences `ref` and `hyp`, and the corresponding Levenshtein matrix.
+
+        '''
+        m, n = len(hyp)+1, len(ref)+1
+        d = np.zeros((m, n))
+        d[1:, 0] = range(1, m)
+        d[0, 1:] = range(1, n)
+
+        edits = []
+        for j in range(1, n):
+            for i in range(1, m):
+                del_ = d[i-1, j] + cost_del
+                ins_ = d[i, j-1] + cost_ins
+                sub_ = d[i-1, j-1]
+                sub_ += cost_sub if hyp[i-1] != ref[j-1] else 0
+                d[i, j] = min(del_, ins_, sub_)
+
+        return int(d[-1, -1]), d
+
+    @staticmethod
+    def levenshteinDistance(a, b):
+        d, _ = _levenshteinDistance(a, b)
+        return d
+
+    @staticmethod
+    def shortestPath(d):
+        """Returns the shortest sequence of edits in the levenshtein matrix `d`
+
+        """
+        SUBCORR, INS, DEL = 0, 1, 2
+        nDel, nIns, nSub, nCor = 0, 0, 0, 0
+        revEditSeq = []
+        i, j = np.shape(d)
+        i, j = i-1, j-1
+        # Special case for only empty inputs
+        if i == 0 and j != 0:
+            nDel = j
+            revEditSeq = ['D'] * nDel
+        elif i != 0 and j == 0:
+            nIns = i
+            revEditSeq = ['I'] * nIns
+        elif i != 0 and j != 0:
+            outOfBounds = False
+            while not outOfBounds:
+                del_ = d[i, j-1] if i >= 0 and j > 0 else np.inf
+                ins = d[i-1, j] if i > 0 and j >= 0 else np.inf
+                subOrCor = d[i-1, j-1] if i > 0 and j > 0 else np.inf
+                idxMin = np.argmin([subOrCor, ins, del_])
+                if idxMin == DEL:
+                    j -= 1
+                    nDel += 1
+                    revEditSeq.append('D')
+                elif idxMin == INS:
+                    i -= 1
+                    nIns += 1
+                    revEditSeq.append('I')
+                elif idxMin == SUBCORR:
+                    if d[i-1, j-1] != d[i, j]:
+                        nSub += 1
+                        revEditSeq.append('S')
+                    else:
+                        nCor += 1
+                        revEditSeq.append('C')
+                    i, j = i-1, j-1
+                if i == 0 and j == 0:
+                    outOfBounds = True
+        return revEditSeq[::-1], nCor, nSub, nIns, nDel
+
+    def _computeEdits(self):
+        self._distance, self.d = self._levenshteinDistance(self.hypothesis, self.reference)
+        self.seq, self.nC, self.nS, self.nI, self.nD = self.shortestPath(self.d)
+
+    def editSequence(self):
+        """Returns sequence of edits as an iterable
+
+        'C' for correct, 'S' for substitution, 'I' for insertion and
+        'D' for deletions.
+
+        """
+        if not hasattr(self, 'seq'):
+            self._computeEdits()
+        return self.seq
+
+    def edits(self):
+        """Returns dict with edit counts
+
+        """
+        if not hasattr(self, 'nC'):
+            self._computeEdits()
+        return {'correct': self.nC, 'sub': self.nS, 'ins': self.nI,
+                'del': self.nD, 'distance': self._distance}
+
+    def details(self):
+        """Returns dict with details of analysis
+
+        """
+        res = self.edits()
+        seq = self.editSequence()
+        details = {'empty': False, 'onlyInsOrSub': False,
+                   'enddel': 0, 'startdel': 0, 'extraInsertions': 0}
+        details.update(res)
+        details.update(ops=seq)
+
+        if not any([res['correct'], res['sub'], res['ins']]):
+            # 1. Only deletions (hyp empty)?
+            details['empty'] = True
+        elif (any([res['ins'], res['sub']]) and not
+              any([res['correct'], res['ins']])):
+            # 2. Only insertions/substitutions?
+            details['onlyInsOrSub'] = True
+        else:
+            # 2. Start/end deletions?
+            for op in seq[::-1]:
+                if op.upper() == 'D':
+                    details['enddel'] += 1
+                else: break
+            for op in seq:
+                if op.upper() == 'D':
+                    details['startdel'] += 1
+                else: break
+            if (len(self.reference) == res['correct'] and res['ins'] and
+                not any([res['sub'], res['del']])):
+                details['extraInsertions'] = res['ins']
+
+        return details
+
+    def distance(self):
+        if not hasattr(self, '_distance'):
+            self._computeEdits()
+        return self._distance
 
 class MarosijoCommon:
     """MarosijoCommon
@@ -339,7 +484,10 @@ class _SimpleMarosijoTask(Task):
                     ((r['tokenId'], self.common.symToInt(r['token']))
                      for r in recordings)}
 
-            edits = {hypKey: levenshteinDistance(hypTok, refs[hypKey]) for
+            details = {hypKey: MarosijoAnalyzer(hypTok.split(), refs[hypKey].split()).details() for
+                       hypKey, hypTok in hyps.items()}
+
+            edits = {hypKey: details[hypKey]['distance'] for
                      hypKey, hypTok in hyps.items()}
 
             qcReport = {"sessionId": session_id,
@@ -355,7 +503,8 @@ class _SimpleMarosijoTask(Task):
                 cumAccuracy += accuracy
 
                 prec = qcReport['perRecordingStats']
-                stats = {"accuracy": accuracy, "editDistance": edits[str(r['tokenId'])]}
+                stats = {"accuracy": accuracy}
+                stats.update(details[str(r['tokenId'])])
                 # FIXME: recordingId should be the actual recording ID... (does't really matter though)
                 prec.append({"recordingId": r['tokenId'], "stats": stats})
 
@@ -365,6 +514,13 @@ class _SimpleMarosijoTask(Task):
                 avgAccuracy = 0.0
             else:
                 qcReport['totalStats']['accuracy'] = avgAccuracy
+
+            # TODO: Do this more efficiently. Need to change how we store reports.
+            oldReport = json.loads(self.redis.get(
+                'report/{}/{}'.format(name, session_id)).decode('utf-8'))
+            newAvgAccuracy = (oldReport['totalStats']['accuracy'] + qcReport['totalStats']['accuracy']) / 2
+            qcReport = update(oldReport, qcReport)
+            qcReport['totalStats']['accuracy'] = newAvgAccuracy
 
             self.redis.set('report/{}/{}'.format(name, session_id),
                             json.dumps(qcReport))
