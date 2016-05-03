@@ -23,6 +23,27 @@ from util import errLog
 sys.path.remove(newPath)
 del newPath
 
+
+# Kudos to http://stackoverflow.com/users/95810/alex-martelli for
+# http://stackoverflow.com/a/3233356 which this is based on
+# TODO: move this function somewhere else... used by Marosijo and Cleanup
+import collections
+def update(d, u):
+    """Recursively updates nested dicts. Lists are NOT updated, they are extended
+    with new list value. MUTATES `d`.
+
+    """
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            r = update(d.get(k, {}), v)
+            d[k] = r
+        elif isinstance(v, list):
+            r = d.get(k, []).extend(v)
+        else:
+            d[k] = u[k]
+    return d
+
+
 class CleanupCommon():
     """
     Variables/files/data common to CleanupTask and CleanupGenGraphs.
@@ -307,6 +328,13 @@ class CleanupTask(Task):
             avg_accuracy = 0.0
         else:
             qc_report['totalStats']['accuracy'] = avg_accuracy
+
+        # TODO: Do this more efficiently. Need to change how we store reports.
+        old_report = json.loads(self.redis.get(
+            'report/{}/{}'.format(name, session_id)).decode('utf-8'))
+        newAvgAccuracy = (old_report['totalStats']['accuracy'] + qc_report['totalStats']['accuracy']) / 2
+        qc_report = update(old_report, qc_report)
+        qc_report['totalStats']['accuracy'] = newAvgAccuracy
 
         self.redis.set('report/{}/{}'.format(name, session_id), 
                         json.dumps(qc_report))
