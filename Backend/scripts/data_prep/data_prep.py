@@ -13,10 +13,15 @@ def genKaldiDatadir(recordings_path, kaldi_datadir_path):
     """See description, the de-script-ion of the script."""
     _db = MySQLdb.connect(**dbConst)
     SAMPLERATE = 16000
+    REC_COUNT_THRESHOLD = 50
 
     try:
         cur = _db.cursor()
-        cur.execute('SELECT * FROM recording')
+        cur.execute('SELECT recording.id, tokenId, recording.speakerId, sessionId, filename '
+                    'FROM ( SELECT speakerId, COUNT(speakerId) '
+                    '       AS rCnt FROM recording GROUP BY speakerId ) AS t1, '
+                    '     recording WHERE recording.speakerId = t1.speakerId AND t1.rCnt > %s',
+                    (REC_COUNT_THRESHOLD,))
         recordings = cur.fetchall()
     except MySQLdb.Error as e:
         msg = 'Error getting recordings' 
