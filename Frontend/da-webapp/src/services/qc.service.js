@@ -95,9 +95,10 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
 
     // message to send back to recording.controller.js notifying that we wish
     //   results to be displayed.
-    var displayResults = tokenAnnouncement
-                         || (avgAcc < util.getConstant('QCAccThreshold')
-                         && result); // make sure only to display if we have anything new (or token announcement)
+    var displayResults = tokenAnnouncement;
+                         // temporarily disable QC reporting on frontend.
+                         /*|| (avgAcc < util.getConstant('QCAccThreshold')
+                         && result); // make sure only to display if we have anything new (or token announcement)*/
     if (displayResults) {
       return $q.when(true);
     } else {
