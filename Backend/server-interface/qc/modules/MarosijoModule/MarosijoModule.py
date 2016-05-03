@@ -23,6 +23,25 @@ _DEFAULT_KALDI_ROOT = os.path.abspath(
     os.path.join(__file__, '../../../../../../Local/opt/kaldi-trunk'))
 
 
+# Kudos to http://stackoverflow.com/users/95810/alex-martelli for
+# http://stackoverflow.com/a/3233356 which this is based on
+import collections
+def update(d, u):
+    """Recursively updates nested dicts. Lists are NOT updated, they are extended
+    with new list value. MUTATES `d`.
+
+    """
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            r = update(d.get(k, {}), v)
+            d[k] = r
+        elif isinstance(v, list):
+            r = d.get(k, []).extend(v)
+        else:
+            d[k] = u[k]
+    return d
+
+
 class MarosijoError(Exception):
     pass
 
@@ -495,6 +514,13 @@ class _SimpleMarosijoTask(Task):
                 avgAccuracy = 0.0
             else:
                 qcReport['totalStats']['accuracy'] = avgAccuracy
+
+            # TODO: Do this more efficiently. Need to change how we store reports.
+            oldReport = json.loads(self.redis.get(
+                'report/{}/{}'.format(name, session_id)).decode('utf-8'))
+            newAvgAccuracy = (oldReport['totalStats']['accuracy'] + qcReport['totalStats']['accuracy']) / 2
+            qcReport = update(oldReport, qcReport)
+            qcReport['totalStats']['accuracy'] = newAvgAccuracy
 
             self.redis.set('report/{}/{}'.format(name, session_id),
                             json.dumps(qcReport))
