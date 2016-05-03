@@ -2,13 +2,14 @@
     <div class="default-view">
         <ul class="more-list">
 
-            <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.sync()">
+            <li><button id="sync_button" class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.sync()" ng-hide="hide_sync">
                 Sync
             </button></li>
 
         </ul>
 
         <p class="message">{{msg}}</p>
+        <p class="message" ng-hide="hide_wifi_msg">{{wifi_msg}} </p>
 
         <ul class="more-list" ng-hide="hide_recording">
 
