@@ -98,8 +98,10 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
+
     $scope.hide_sync = true;
-    
+
+
     $scope.msg = 'Syncing...';
 
     delService.sendLocalSessions(syncDoneCallback);
