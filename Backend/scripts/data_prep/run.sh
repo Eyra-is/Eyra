@@ -31,10 +31,13 @@ if [ $stage -le 0 ]; then
     steps/compute_cmvn_stats.sh \
         data/all exp/make_mfcc mfcc
 
-    echo "Splitting into a train and dev set"
-    utils/subset_data_dir_tr_cv.sh \
-        --cv-utt-percent 10        \
-        data/{all,train,dev}
+    utils/fix_data_dir.sh \
+        data/all
+
+    # echo "Splitting into a train and dev set"
+    # utils/subset_data_dir_tr_cv.sh \
+    #     --cv-utt-percent 10        \
+    #     data/{all,train,dev}
 fi
 
 if [ $stage -le 1 ]; then
