@@ -143,47 +143,58 @@ function localDbService($q, logger, myLocalForageService, utilityService) {
     return lfService.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1));
   }
 
-  // gets a single session data / recordings pair from local db and deletes it afterwards
+  // gets recCount recs/data from session pair from local db and deletes them.
   // returns { 'metadata' : sessionData, 'recordings' : [ {'blob':blob, 'title':title}, ...]}
   // There should be some session data before calling this function, that's what 'countAvailableSessionsData()' is for.
-  function pullSession() {
+  function pullSession(recCount) {
     logger.log('Getting session data...');
     var pulledSession = $q.defer();
     lfService.getItem(sessionIdxsPath).then(function(sessionIdxs){
-      // pull newest session (delete it afterwards)
-      lfService.pull(sessionIdxs[sessionIdxs.length - 1]).then(function(session){
+      // get newest session
+      var sessionIdxPath = sessionIdxs[sessionIdxs.length - 1];
+      lfService.getItem(sessionIdxPath).then(function(session){
         if (!session) {
           // must have been a leftover index, not pointing to a session, lets delete it
           popSessionIdxs(sessionIdxs)
             .then(angular.noop, failedPullCallback);
           return;
         }
-        // update our sessionIdxs in db
-        lfService.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1))
-        .then(function(sessionIdxs){
-          // now we just have to replace recordings[i].blobPath:blobPath with blob:blob
-          var recordings = session.recordings;
-          var blobPromises = []; // an array of blob promises
-          // get all blobs for this session from our local db
-          for (var i = 0; i < recordings.length; i++) {
-            blobPromises.push(lfService.getItem(recordings[i].blobPath));
+
+        if (session.recordings.length <= recCount) {
+          // we have less than recCount recs left to send, so send entire rest of session, and delete it.
+
+          // update our sessionIdxs in db
+          lfService.setItem(sessionIdxsPath, sessionIdxs.slice(0, sessionIdxs.length - 1))
+          .then(function(sessionIdxs){
+            // and async delete the session data (in case it doesn't work, it will just get overwritten)
+            lfService.removeItem(sessionIdxPath)
+              .then(angular.noop, util.stdErrCallback);
+            processCurrentSession(session);
+          }, failedPullCallback);
+        } else {
+          // we only want to send part of the session, do that.
+
+          // only use recCount recordings as our new recordings and send those, 
+          // make sure to delete them afterwards from local db as well
+          var recordings = [];
+          var recordingsInfo = {};
+          for (var i = 0; i < recCount; i++) {
+            if (session.recordings.length <= 0) 
+              break;
+            var rec = session.recordings.pop();
+            recordings.push(rec);
+            recordingsInfo[rec.title] = session.metadata.data.recordingsInfo[rec.title];
+            delete session.metadata.data.recordingsInfo[rec.title];
           }
-          // q.all waits on all blobs to resolve, or one to reject
-          $q.all(blobPromises).then(function(blobs){
-            for (var i = 0; i < blobs.length; i++) {
-              // delete blob from local db, don't fail on a failure here, 
-              // if a single blob doesn't get deleted, we don't care too much
-              // it will get overwritten later most likely.
-              lfService.removeItem(recordings[i].blobPath)
-                .then(angular.noop, util.stdErrCallback); 
-              delete recordings[i].blobPath;
-              recordings[i].blob = blobs[i];
-            }
-            // finally we have our updated session to return!
-            pulledSession.resolve(session);
+
+          // update our session in ldb with recCount recs removed, then attempt the "pull"
+          lfService.setItem(sessionIdxPath, session).then(function(remainingSession){
+            session.metadata.data.recordingsInfo = recordingsInfo;
+            session.recordings = recordings;
+            processCurrentSession(session);
           },
           failedPullCallback);
-        }, failedPullCallback);
+        }        
       }, failedPullCallback);
     }, failedPullCallback);
 
@@ -192,6 +203,32 @@ function localDbService($q, logger, myLocalForageService, utilityService) {
     // local callback, for errors in this function
     function failedPullCallback(response) {
       pulledSession.reject(response);
+    }
+
+    // sends session just like it is. Assumes session was modified if need be in previous code.
+    function processCurrentSession(session) {
+      // now we just have to replace recordings[i].blobPath:blobPath with blob:blob
+      var recordings = session.recordings;
+      var blobPromises = []; // an array of blob promises
+      // get all blobs for this session from our local db
+      for (var i = 0; i < recordings.length; i++) {
+        blobPromises.push(lfService.getItem(recordings[i].blobPath));
+      }
+      // q.all waits on all blobs to resolve, or one to reject
+      $q.all(blobPromises).then(function(blobs){
+        for (var i = 0; i < blobs.length; i++) {
+          // delete blob from local db, don't fail on a failure here, 
+          // if a single blob doesn't get deleted, we don't care too much
+          // it will get overwritten later most likely.
+          lfService.removeItem(recordings[i].blobPath)
+            .then(angular.noop, util.stdErrCallback); 
+          delete recordings[i].blobPath;
+          recordings[i].blob = blobs[i];
+        }
+        // finally we have our updated session to return!
+        pulledSession.resolve(session);
+      },
+      failedPullCallback);
     }
   }
 
