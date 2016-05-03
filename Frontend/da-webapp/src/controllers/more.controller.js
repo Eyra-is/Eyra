@@ -99,10 +99,7 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   // assumes internet connection
   function sync() {
     $scope.hide_sync = true;
-    if (!navigator.onLine){
-        console.info('online')
-        alert("Device is not online - please connect to internet");
-        }
+    
     $scope.msg = 'Syncing...';
 
     delService.sendLocalSessions(syncDoneCallback);
