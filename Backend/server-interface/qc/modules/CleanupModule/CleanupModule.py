@@ -330,13 +330,14 @@ class CleanupTask(Task):
             qc_report['totalStats']['accuracy'] = avg_accuracy
 
         # TODO: Do this more efficiently. Need to change how we store reports.
-        old_report = json.loads(self.redis.get(
-            'report/{}/{}'.format(name, session_id)).decode('utf-8'))
-        newAvgAccuracy = (old_report['totalStats']['accuracy'] + qc_report['totalStats']['accuracy']) / 2
-        qc_report = update(old_report, qc_report)
-        qc_report['totalStats']['accuracy'] = newAvgAccuracy
+        str_report = self.redis.get('report/{}/{}'.format(name, session_id))
+        if str_report:
+            old_report = json.loads(str_report.decode('utf-8'))
+            newAvgAccuracy = (old_report['totalStats']['accuracy'] + qc_report['totalStats']['accuracy']) / 2
+            qc_report = update(old_report, qc_report)
+            qc_report['totalStats']['accuracy'] = newAvgAccuracy
 
         self.redis.set('report/{}/{}'.format(name, session_id), 
-                        json.dumps(qc_report))
+                       json.dumps(qc_report))
 
         return True
