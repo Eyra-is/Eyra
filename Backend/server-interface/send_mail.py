@@ -75,10 +75,6 @@ def countRecordings(conn):
         'WHERE id NOT IN (%s)', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     return cur.fetchone()[0]
 
-def listIntoMysqlQuery(query, data):
-    return query % ','.join(['%s'] * len(data))
-
-
 def recsByUser(conn):
     cur = conn.cursor()
     cur.execute(listIntoMysqlQuery( 'SELECT speaker.name, COUNT(*) '
@@ -247,6 +243,9 @@ def filterOutUselessRecs(conn):
     invalidIds = tuple(invalidIds)
     filterCommon.setInvalidIds(invalidIds)
 
+def listIntoMysqlQuery(query, data):
+    return query % ','.join(['%s'] * len(data))
+
 def main():
     recipients = sys.argv[1:]
     host = hostname()
@@ -309,18 +308,16 @@ RECORDINGS BY APK AND OS:
     part.set_payload(body)
     msg.attach(part)
 
-    print(body)
+    session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
 
-    # session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    session.ehlo()
+    session.starttls()
+    session.ehlo
 
-    # session.ehlo()
-    # session.starttls()
-    # session.ehlo
+    session.login(SENDER, PASSWORD)
+    session.sendmail(SENDER, recipients, msg.as_string())
 
-    # session.login(SENDER, PASSWORD)
-    # session.sendmail(SENDER, recipients, msg.as_string())
-
-    # session.quit()
+    session.quit()
 
     sys.exit(0)
 
