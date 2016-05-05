@@ -231,7 +231,7 @@ def filterOutUselessRecs(conn):
     for ts, recIds in byDate.items():
         yearDiff = dateThreshold.year - ts.year
         monthDiff = dateThreshold.month - ts.month
-        if yearDiff < 0 or monthDiff < 0 or (dateThreshold - ts).days > 0:
+        if yearDiff > 0 or monthDiff > 0 or (dateThreshold - ts).days > 0:
             invalidIds.update(recIds)
 
     # remove ids belonging to the validSpkr
@@ -314,7 +314,7 @@ RECORDINGS BY APK AND OS:
     part = MIMEText('text', "plain")
     part.set_payload(body)
     msg.attach(part)
-    
+
     session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
 
     session.ehlo()
