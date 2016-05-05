@@ -269,7 +269,7 @@ def main():
     body = """
 SUMMARY:
 Recorded utterances: {recordings}
-Distinct "session" count: {sessions}
+Distinct session count: {sessions}
 """.format(recordings=countRecordings(conn), sessions=countSessions(conn))
 
     body += """
