@@ -199,7 +199,7 @@ def filterOutUselessRecs(conn):
     invalidIds = set()
     invalidRecCntThreshold = 10 # less than 10
     upperMatchThreshold = 200 # if invalidSpkrMatch is a match but recs over threshold, still display
-    dateThreshold = datetime.date(2016, 5, 3) # exclude recordings from 1. may and prior
+    dateThreshold = datetime.date(2016, 5, 2) # exclude recordings from 1. may and prior
 
     # by name and recCnt < threshold
     cur.execute('SELECT speaker.name, speaker.id, COUNT(*) '
@@ -229,7 +229,9 @@ def filterOutUselessRecs(conn):
         byDate[ts.date()].append(recId)
 
     for ts, recIds in byDate.items():
-        if (dateThreshold - ts).days > 0:
+        yearDiff = dateThreshold.year - ts.year
+        monthDiff = dateThreshold.month - ts.month
+        if yearDiff > 0 or monthDiff > 0 or (dateThreshold - ts).days > 0:
             invalidIds.update(recIds)
 
     # remove ids belonging to the validSpkr
