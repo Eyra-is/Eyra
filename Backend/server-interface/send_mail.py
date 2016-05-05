@@ -48,7 +48,8 @@ invalidSpkrExact = [
     'Demo2',
     'Demo10',
     'Demo123',
-    'Demo1234'
+    'Demo1234',
+    'derp'
 ]
 # exceptions
 validSpkr = [
@@ -59,20 +60,24 @@ def dbConn():
     return MySQLdb.connect(**dbConst)
 
 def countSessions(conn):
-    cur = conn.cursor()
-    cur.execute(listIntoMysqlQuery(
-        'SELECT COUNT(*) FROM '
-        '  (SELECT session.id FROM session, recording '
-        '  WHERE recording.sessionId = session.id '
-        '  AND recording.id NOT IN (%s) '
-        '  GROUP BY session.id) AS ses', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
-    return cur.fetchone()[0]
+    # do this instead, since session count really isn't robust, we really want this, how much we display per user after the filtering.
+    return len(recsByUser(conn))
+    # This code may not even work..
+    # cur = conn.cursor()
+    # cur.execute(listIntoMysqlQuery(
+    #     'SELECT COUNT(*) FROM '
+    #     '  (SELECT * FROM session, recording '
+    #     '  WHERE recording.sessionId = session.id '
+    #     '  AND recording.id NOT IN (%s) '
+    #     '  GROUP BY session.id) AS ses', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
+    # return cur.fetchone()[0]
 
 def countRecordings(conn):
     cur = conn.cursor()
     cur.execute(listIntoMysqlQuery(
-        'SELECT COUNT(*) FROM recording '
-        'WHERE id NOT IN (%s)', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
+        'SELECT COUNT(*) FROM '
+        '  (SELECT * FROM recording '
+        '   WHERE id NOT IN (%s)) AS recs', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     return cur.fetchone()[0]
 
 def recsByUser(conn):
@@ -194,7 +199,7 @@ def filterOutUselessRecs(conn):
     invalidIds = set()
     invalidRecCntThreshold = 10 # less than 10
     upperMatchThreshold = 200 # if invalidSpkrMatch is a match but recs over threshold, still display
-    dateThreshold = datetime.date(2016, 5, 1) # exclude recordings from 1. may and prior
+    dateThreshold = datetime.date(2016, 5, 3) # exclude recordings from 1. may and prior
 
     # by name and recCnt < threshold
     cur.execute('SELECT speaker.name, speaker.id, COUNT(*) '
@@ -224,7 +229,7 @@ def filterOutUselessRecs(conn):
         byDate[ts.date()].append(recId)
 
     for ts, recIds in byDate.items():
-        if (dateThreshold - ts).seconds > 0:
+        if (dateThreshold - ts).days > 0:
             invalidIds.update(recIds)
 
     # remove ids belonging to the validSpkr
@@ -262,7 +267,7 @@ def main():
     body = """
 SUMMARY:
 Recorded utterances: {recordings}
-Distinct session count: {sessions}
+Distinct "session" count: {sessions}
 """.format(recordings=countRecordings(conn), sessions=countSessions(conn))
 
     body += """
