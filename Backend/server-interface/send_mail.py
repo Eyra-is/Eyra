@@ -50,7 +50,8 @@ invalidSpkrExact = [
     'Demo123',
     'Demo1234',
     'derp',
-    'Test500'    
+    'Test500',
+    'maf-test-sim'
 ]
 # exceptions
 validSpkr = [
