@@ -401,6 +401,7 @@ class DbHandler:
             recordings      an array of file objects representing the submitted recordings
         
         returns a dict (msg=msg, statusCode=200,400,..)
+        msg on format: dict(deviceId=dId, speakerId=sId, sessionId=sesId, recsDelivered=numRecsInDb)
         """
         jsonDecoded = None
         sessionId = None
@@ -538,8 +539,58 @@ class DbHandler:
             log(msg, e)
             return dict(msg=msg, statusCode=400)
 
-        return dict(msg=json.dumps(dict(sessionId=sessionId, deviceId=deviceId, speakerId=speakerId)), 
+        # extra, add the number of tokens (recordings) we have actually received from this speaker
+        numRecs = self.getRecordingCount(speakerName, speakerId, deviceId)
+
+        return dict(msg=json.dumps(dict(sessionId=sessionId, deviceId=deviceId, speakerId=speakerId, recsDelivered=numRecs)), 
                     statusCode=200)
+
+    def getRecordingCount(self, speakerName, speakerId, deviceId):
+        """
+        Returns how many recordings this speaker has in our database.
+
+        parameters:
+            speakerName     name as it is in json we receive from frontend
+            speakerId       id of speaker as in database
+            deviceId        id of device as in database
+
+        returns:
+            recCnt          number of recordings from this speaker in database
+                            -1 on failure
+
+        Right now, takes the maximum of the recordings of speaker with supplied id
+        and the total sum of all speakers with 'speakerName' and a common 'deviceId'.
+        Meaning, if a speaker through a glitch has a couple versions of himself in the db
+        (with same device tho) we count that.
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+
+            #TODO combine into one query
+            cur.execute('SELECT count(*) FROM recording '
+                        'WHERE speakerId IN ( '
+                            'SELECT id FROM speaker WHERE name=%s) '
+                            'AND sessionId IN (SELECT id FROM session WHERE deviceId=%s)'
+                        ,(speakerName, deviceId))
+
+            cntByName = cur.fetchone()
+            if cntByName is None:
+                cntByName = 0
+            else:
+                cntByName = cntByName[0]
+            cur.execute('SELECT count(*) FROM recording WHERE speakerId=%s', (speakerId,))
+            cntById = cur.fetchone()
+            if cntById is None:
+                cntById = 0
+            else:
+                cntById = cntById[0]
+        except MySQLError as e:
+            msg = 'Error grabbing recording count for speaker with id={}'.format(speakerId)
+            log(msg, e)
+            return -1 # lets not fail, but return a sentinel value of -1
+
+        return max(int(cntByName), int(cntById))
+
 
     def getTokens(self, numTokens):
         """

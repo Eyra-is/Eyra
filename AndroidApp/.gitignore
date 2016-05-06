@@ -1,3 +1,6 @@
+# local debug files
+local
+
 # Eclipse
 .project
 .classpath
