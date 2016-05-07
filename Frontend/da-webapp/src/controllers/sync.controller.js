@@ -29,6 +29,7 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
   $scope.tokensRead = 0;
   $scope.recsDelivered = 0;
   $scope.recsSaved = 0;
+  $scope.tokensDownloaded = 0;
 
   activate();
   
@@ -70,6 +71,12 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
 
     // get tokens saved locally, changes $scope.recsSaved
     updateRecsSaved();
+
+    // get count of tokens downloaded (on phone in ldb)
+    tokenService.countAvailableTokens().then(function(count){
+      $scope.tokensDownloaded = count || $scope.tokensDownloaded;
+    },
+    util.stdErrCallback);
   }
 
   function updateRecsSaved() {
@@ -100,7 +107,7 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
     $scope.hide_sync = false;
     $scope.recsDelivered = dataService.get('recsDelivered') || $scope.recsDelivered || 0;
     updateRecsSaved();
-    
+
     if (!result){
       $scope.wifi_msg = 'Please connect device to wifi or ethernet.';
       $scope.hide_recording = true;

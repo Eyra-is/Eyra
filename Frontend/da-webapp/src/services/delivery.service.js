@@ -95,7 +95,7 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
         },
         util.stdErrCallback);
       } else {
-        alert('All synced up!');
+        //alert('All synced up!');
         failedSessionSends = 0;
         reqHandler.syncDoneCallback(true);
       }
