@@ -321,7 +321,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
 
     var tokensRead;
     // get speakerInfo from ram
-    var ramSpeakerInfo = dataService.get('speakerInfo');
+    var ramSpeakerInfo = dataService.get('speakerInfo') || {};
 
     // get speaker info in ram and check if info contains tokensRead
     if (ramSpeakerInfo['tokensRead']) {

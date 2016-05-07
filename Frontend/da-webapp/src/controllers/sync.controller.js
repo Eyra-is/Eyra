@@ -114,7 +114,8 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
       $scope.hide_wifi_msg = false;
     } else {
       // sync success
-      $scope.hide_recording = false;
+      if (dataService.get('speakerName'))
+        $scope.hide_recording = false; // show back button if user set
       $scope.hide_wifi_msg = true;
     }
   }

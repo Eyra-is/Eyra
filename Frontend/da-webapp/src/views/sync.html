@@ -1,28 +1,24 @@
 <div class="content vertical-center">
-    <div class="recording-view">
-        <ul class="more-list">
-            <li><button id="sync_button" class="btn btn-primary btn-list" type="button" ng-click="syncCtrl.sync()" ng-disabled="hide_sync">
-                Sync
-            </button></li>
-            <li><a ng-href="#/recording" class="btn btn-primary btn-list" type="button" ng-hide="hide_recording">
-                Back to recordings
-            </a></li>
-        </ul>
-        <div class="feedbackDisplay">
-            <p>Prompts read: {{tokensRead}} 
-                <span class="glyphicon glyphicon-book"></span>
-            </p>
-            <p>Prompts delivered: {{recsDelivered}} 
-                <span class="glyphicon glyphicon-upload"></span>
-            </p>
-            <p>Prompts read &amp; not delivered: {{recsSaved}} 
-                <span class="glyphicon glyphicon-refresh"></span>
-            </p>
-            <p>Prompts downloaded: {{tokensDownloaded}} 
-                <span class="glyphicon glyphicon-download-alt"></span>
-            </p>
-        </div>
+    <div class="default-view">
         <p class="message">{{msg}}</p>
         <p class="message" ng-hide="hide_wifi_msg">{{wifi_msg}} </p>
+        <ul class="more-list">
+            <li><button id="sync_button" class="btn btn-primary btn-list" type="button" ng-click="syncCtrl.sync()" ng-disabled="hide_sync">
+                Sync <span class="glyphicon glyphicon-refresh"></span>
+            </button></li>
+            <li><a ng-href="#/recording" class="btn btn-primary btn-list" type="button" ng-hide="hide_recording">
+                Back to recording <span class="glyphicon glyphicon-arrow-left"></span>
+            </a></li>
+        </ul>
+        <div class="feedbackDisplay syncFeedback">
+            <p>Prompts read:</p>
+            <p>{{tokensRead}} <span class="glyphicon glyphicon-book"></span></p>
+            <p>Prompts delivered:</p>
+            <p>{{recsDelivered}} <span class="glyphicon glyphicon-upload"></span></p>
+            <p>Prompts read &amp; not delivered:</p>
+            <p>{{recsSaved}} <span class="glyphicon glyphicon-refresh"></span></p>
+            <p>Prompts downloaded:</p>
+            <p>{{tokensDownloaded}} <span class="glyphicon glyphicon-download-alt"></span></p>
+        </div>
     </div>
 </div>
