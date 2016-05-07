@@ -34,11 +34,6 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   moreCtrl.logout = logout;
 
   $rootScope.isLoaded = true;
-  $scope.hide_recording = true;
-  $scope.hide_sync = false;
-  $scope.hide_start = true;
-  $scope.hide_login_msg = true;
-  $scope.hide_wifi_msg = true;
   
   //////////
 
@@ -98,44 +93,14 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-
-    $scope.hide_sync = true;
-
-
-    $scope.msg = 'Syncing...';
+    $scope.msg = 'Syncing - please wait';
 
     delService.sendLocalSessions(syncDoneCallback);
-
-    if (dataService.get('speakerName')) {
-      $scope.hide_recording = false;
-    } else {
-      $scope.hide_start = false;
-      $scope.login_msg = "You need to login - Press the \n \'Login to record\' button"
-      $scope.hide_login_msg = false;
-
-    }
   }
-/*
-  function backToRecording() {
-    if (dataService.get('speakerName')) {
-      console.info('back to rercording')
-      $location.path('/recording');
-    } else {
-      console.info('not enter username')
-      $location.path('/start');
-    }
-
-  } */
 
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
-    //$scope.hide_sync = false;
     $scope.msg = result ? 'Sync complete.' : 'Sync failed.';
-    if ($scope.msg === 'Sync failed.'){
-      $scope.hide_sync = false;
-      $scope.wifi_msg = 'Please connect device to wifi or ethernet'
-      $scope.hide_wifi_msg = false
-    }
   }
 
   function test() {

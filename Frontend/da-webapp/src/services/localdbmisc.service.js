@@ -1,5 +1,6 @@
 (function () {
 // handles local forage actions regarding instructor, speaker and device setting
+// along with other misc stuff
 
 // see Client-server API for format, but something like this:
 // stores speakers thusly: speakers/username = {'name':name, 'gender':gender, 'dob':dob, 'height':height [, 'deviceImei':imei]}
@@ -22,6 +23,7 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
   dbHandler.setDevice = setDevice;
   dbHandler.getInstructorId = getInstructorId;
   dbHandler.setInstructorId = setInstructorId;
+  dbHandler.getRecsSaved = getRecsSaved;
   dbHandler.getSpeaker = getSpeaker;
   dbHandler.setSpeaker = setSpeaker;
 
@@ -50,6 +52,41 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
     return lfService.setItem(instructorIdPath, instructorId);
   }
 
+  function getRecsSaved() {
+    /*
+      Looks through local database for saved recordings, returns count of those as a promise.
+
+      Consider doing this differently by incrementing saved sessions number 
+      each time dbService.saveSession is successful. (this is easier)
+    */
+    var cntPromise = $q.defer();
+    lfService.keys().then(
+      function success(lfKeys) {
+        if (lfKeys) {
+          var cnt = 0;
+          for (var i = 0; i < lfKeys.length; i++) {
+            // quick reject of keys shorter than possible
+            var curKey = lfKeys[i];
+            if (curKey.length < 26) {
+              // 26 is length of 'localDb/sessions/X/blobs/X'
+              continue;
+            }
+            if (curKey.match(new RegExp('localDb/sessions/.*/blobs/.*'))) {
+              cnt++;
+            }
+          }
+          cntPromise.resolve(cnt);
+        } else {
+          cntPromise.reject('Error grabbing keys from local db.');
+        }
+      },
+      function error(error) {
+        cntPromise.reject(error);
+      }
+    );
+    return cntPromise.promise;
+  }
+
   function getSpeaker(speakerName) {
     return lfService.getItem(speakersPrefix + speakerName);
   }
@@ -68,13 +105,13 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
           if (device && device['imei'] && device['imei'] !== '') {
             speakerInfo['deviceImei'] = device['imei'];
           }
-          $q.resolve(
+          res.resolve(
             lfService.setItem(speakersPrefix + speakerName, speakerInfo)
           );
         },
         function error(response) {
           // still resolve, just without device imei
-          $q.resolve(
+          res.resolve(
             lfService.setItem(speakersPrefix + speakerName, speakerInfo)
           );
           logger.error(response);

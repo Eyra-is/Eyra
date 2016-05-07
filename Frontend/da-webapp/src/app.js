@@ -142,8 +142,8 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
       }).
       when('/sync', {
         templateUrl: 'views/sync.html',
-        controller: 'MoreController',
-        controllerAs: 'moreCtrl',
+        controller: 'SyncController',
+        controllerAs: 'syncCtrl',
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();

@@ -12,12 +12,14 @@ deliveryService.$inject = [
                             '$q',
                             '$rootScope',
                             'BACKENDURL', 
+                            'dataService',
                             'logger', 
                             'localDbMiscService', 
                             'localDbService', 
+                            'sessionService',
                             'utilityService'];
 
-function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
+function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger, localDbMiscService, localDbService, sessionService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
   var dbMiscService = localDbMiscService;
@@ -47,6 +49,9 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscS
       function success(response) {
         logger.log('Sent session.');
         logger.log(response); // DEBUG
+
+        // update recsDelivered
+        dataService.set('recsDelivered', sessionService.handleSessionResponse(response));
 
         sendLocalSession(null); // send next session
       },
@@ -90,7 +95,7 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscS
         },
         util.stdErrCallback);
       } else {
-        alert('All synced up!');
+        //alert('All synced up!');
         failedSessionSends = 0;
         reqHandler.syncDoneCallback(true);
       }

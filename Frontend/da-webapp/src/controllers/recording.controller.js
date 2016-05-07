@@ -64,9 +64,33 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   //   show QC report.
   var displayReport = false;
 
+  $scope.recsDelivered = dataService.get('recsDelivered') || 0;
+
   activate();
 
   ////////// 
+
+  function activate() {
+    recService.setupCallbacks(recordingCompleteCallback);
+    var res = volService.init(recService.getAudioContext(), recService.getStreamSource());
+    if (!res) logger.log('Volume meter failed to initialize.');
+    // check if local db has recsDelivered info
+    miscDbService.getSpeaker(speaker).then(function(dbSpeaker){
+      if (dbSpeaker && dbSpeaker.recsDelivered) {
+        $scope.recsDelivered = dbSpeaker.recsDelivered;
+      }
+    }, util.stdErrCallback);
+    $rootScope.isLoaded = true; // is page loaded?  
+  }
+
+  // signifies the combined rec/stop button
+  function action() {
+    if (actionType === 'record') {
+      record();
+    } else if (actionType === 'stop') {
+      stop(true);
+    }
+  }
 
   function asyncTokenRead(speaker, increment){
     // this functon handles getting and setting/incrementing of tokensRead in 
@@ -114,48 +138,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
       }
 
     );
-  }
-
-  function tokensRead(speaker) {
-    // input is speaker fetched from ram
-
-    var tokensRead;
-    // get speakerInfo from ram
-    var ramSpeakerInfo = dataService.get('speakerInfo');
-
-    // get speaker info in ram and check if info contains tokensRead
-    if (ramSpeakerInfo['tokensRead']) {
-
-      tokensRead = ramSpeakerInfo['tokensRead'];
- 
-    } else { 
-    // if tokensRead is not in ram speakerInfo then it might be in ldb speakerInfo
-    // in any case it will be either fetched or initialized in ldb.
-
-      tokensRead = asyncTokenRead(speaker, 'return')
-    };
-
-    if (tokensRead){
-        return tokensRead;
-    } else {
-        return 0;
-    };    
-  }
-
-  function activate() {
-    recService.setupCallbacks(recordingCompleteCallback);
-    var res = volService.init(recService.getAudioContext(), recService.getStreamSource());
-    if (!res) logger.log('Volume meter failed to initialize.');
-    $rootScope.isLoaded = true; // is page loaded?  
-  }
-
-  // signifies the combined rec/stop button
-  function action() {
-    if (actionType === 'record') {
-      record();
-    } else if (actionType === 'stop') {
-      stop(true);
-    }
   }
 
   function displayQCReport() {
@@ -226,16 +208,9 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
+            // TODO CLEAN THIS UP, maybe put in a service
 
-            // we may have gotten a deviceId and speakerId from server, in which case
-            //   we handle that by setting it in RAM and local database, if it is different
-            //   from the id's there.
-            // response e.g.: { 'sessionId' : int, 'speakerId': int, 'deviceId' : int }
-
-            var speakerId = response.data.speakerId;
-            var deviceId = response.data.deviceId;
-            if (deviceId) updateDevice(deviceId); 
-            if (speakerId) updateSpeakerInfo(speakerId);
+            $scope.recsDelivered = sessionService.handleSessionResponse(response);
 
             var oldSessionId = dataService.get('sessionId');
             var sessionId;
@@ -283,6 +258,11 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
               dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
             } else {
               logger.error('Invalid token in submission.');
+
+              // no recording saved, do not count as token read
+              $scope.tokensRead--; 
+              // updating tokenRead in ldb and ram
+              asyncTokenRead(speaker, $scope.tokensRead);
             }
 
             logger.error(response);
@@ -336,75 +316,30 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     }
   }
 
-  // updates device or speakerInfo by checking for an id, and adding
-  //   it. Both in RAM and local database.
-  // id is the id supplied from the backend
-  // updateDevice() and updateSpeakerInfo() aren't DRY unfortunately
-  //   due to the need for speakerName in the latter case (could be fixed)
-  function updateDevice(id) {
-    var device = dataService.get('device');
-    if (device) {
-      // either device.deviceId is undefined, in which case we add it
-      // or it is different from our id, in which case we update it
-      // otherwise, we assume we don't need to change anything
-      if (device.deviceId !== id) {
-        device.deviceId = id;
-        dataService.set('device', device); // this line might be redundant
-        miscDbService.setDevice(device)
-          .then(angular.noop, util.stdErrCallback);
-      }
+  function tokensRead(speaker) {
+    // input is speaker fetched from ram
+
+    var tokensRead;
+    // get speakerInfo from ram
+    var ramSpeakerInfo = dataService.get('speakerInfo') || {};
+
+    // get speaker info in ram and check if info contains tokensRead
+    if (ramSpeakerInfo['tokensRead']) {
+
+      tokensRead = ramSpeakerInfo['tokensRead'];
+ 
+    } else { 
+    // if tokensRead is not in ram speakerInfo then it might be in ldb speakerInfo
+    // in any case it will be either fetched or initialized in ldb.
+
+      tokensRead = asyncTokenRead(speaker, 'return')
+    };
+
+    if (tokensRead){
+        return tokensRead;
     } else {
-      // no device in ram, check in local db
-      miscDbService.getDevice().then(
-        function success(device) {
-          if (device) {
-            device.deviceId = id;
-          } else {
-            device = {
-              'userAgent' : navigator.userAgent,
-              'deviceId' : id
-            };
-          }
-          if (!device.imei && $rootScope.isWebView) {
-            device['imei'] = AndroidConstants.getImei();
-          }
-          dataService.set('device', device);
-          miscDbService.setDevice(device)
-            .then(angular.noop, util.stdErrCallback);
-        },
-        util.stdErrCallback
-      );
-    }
-  }
-  function updateSpeakerInfo(id) {
-    var speakerName = dataService.get('speakerName'); // this is the only thing we are guaranteed is in RAM
-    var speakerInfo = dataService.get('speakerInfo');
-    if (speakerInfo) {
-      // either speakerInfo.speakerId is undefined, in which case we add it
-      // or it is different from our id, in which case we update it
-      // otherwise, we assume we don't need to change anything
-      if (speakerInfo.speakerId !== id) {
-        speakerInfo.speakerId = id;
-        dataService.set('speakerInfo', speakerInfo); // this line might be redundant
-        miscDbService.setSpeaker(speakerName, speakerInfo)
-          .then(angular.noop, util.stdErrCallback);
-      }
-    } else {
-      // no speakerInfo in ram, check in local db
-      miscDbService.getSpeaker(speakerName).then(
-        function success(speakerInfo) {
-          if (speakerInfo) {
-            speakerInfo.speakerId = id;
-            dataService.set('speakerInfo', speakerInfo);
-            miscDbService.setSpeaker(speakerName, speakerInfo)
-              .then(angular.noop, util.stdErrCallback);
-          } else {
-            logger.error('Speaker not in database, ' + speakerName + ', should not happen.');
-          }
-        },
-        util.stdErrCallback
-      );
-    }
+        return 0;
+    };    
   }
 }
 }());
