@@ -64,9 +64,33 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   //   show QC report.
   var displayReport = false;
 
+  $scope.recsDelivered = dataService.get('recsDelivered') || 0;
+
   activate();
 
   ////////// 
+
+  function activate() {
+    recService.setupCallbacks(recordingCompleteCallback);
+    var res = volService.init(recService.getAudioContext(), recService.getStreamSource());
+    if (!res) logger.log('Volume meter failed to initialize.');
+    // check if local db has recsDelivered info
+    miscDbService.getSpeaker(speaker).then(function(dbSpeaker){
+      if (dbSpeaker && dbSpeaker.recsDelivered) {
+        $scope.recsDelivered = dbSpeaker.recsDelivered;
+      }
+    }, util.stdErrCallback);
+    $rootScope.isLoaded = true; // is page loaded?  
+  }
+
+  // signifies the combined rec/stop button
+  function action() {
+    if (actionType === 'record') {
+      record();
+    } else if (actionType === 'stop') {
+      stop(true);
+    }
+  }
 
   function asyncTokenRead(speaker, increment){
     // this functon handles getting and setting/incrementing of tokensRead in 
@@ -114,48 +138,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
       }
 
     );
-  }
-
-  function tokensRead(speaker) {
-    // input is speaker fetched from ram
-
-    var tokensRead;
-    // get speakerInfo from ram
-    var ramSpeakerInfo = dataService.get('speakerInfo');
-
-    // get speaker info in ram and check if info contains tokensRead
-    if (ramSpeakerInfo['tokensRead']) {
-
-      tokensRead = ramSpeakerInfo['tokensRead'];
- 
-    } else { 
-    // if tokensRead is not in ram speakerInfo then it might be in ldb speakerInfo
-    // in any case it will be either fetched or initialized in ldb.
-
-      tokensRead = asyncTokenRead(speaker, 'return')
-    };
-
-    if (tokensRead){
-        return tokensRead;
-    } else {
-        return 0;
-    };    
-  }
-
-  function activate() {
-    recService.setupCallbacks(recordingCompleteCallback);
-    var res = volService.init(recService.getAudioContext(), recService.getStreamSource());
-    if (!res) logger.log('Volume meter failed to initialize.');
-    $rootScope.isLoaded = true; // is page loaded?  
-  }
-
-  // signifies the combined rec/stop button
-  function action() {
-    if (actionType === 'record') {
-      record();
-    } else if (actionType === 'stop') {
-      stop(true);
-    }
   }
 
   function displayQCReport() {
@@ -226,16 +208,33 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
         send(sessionData, oldCurRec)
         .then(
           function success(response) {
+            // TODO CLEAN THIS UP, maybe put in a service
 
             // we may have gotten a deviceId and speakerId from server, in which case
             //   we handle that by setting it in RAM and local database, if it is different
             //   from the id's there.
-            // response e.g.: { 'sessionId' : int, 'speakerId': int, 'deviceId' : int }
+            // response e.g.: { 'sessionId' : int, 'speakerId': int, 'deviceId' : int, 'recsDelivered' : int }
 
             var speakerId = response.data.speakerId;
             var deviceId = response.data.deviceId;
             if (deviceId) updateDevice(deviceId); 
             if (speakerId) updateSpeakerInfo(speakerId);
+
+            // update how many prompt recordings have actually arrived at server
+            var delivered = response.data.recsDelivered;
+            if (delivered) {
+              $scope.recsDelivered = Math.max(delivered, $scope.recsDelivered || 0);
+              dataService.set('recsDelivered', $scope.recsDelivered);
+              var sInfo = dataService.get('speakerInfo');
+              if (sInfo) {
+                sInfo.recsDelivered = $scope.recsDelivered;
+                dataService.set('speakerInfo', sInfo);
+                miscDbService.setSpeaker(speaker, sInfo)
+                  .then(angular.noop, util.stdErrCallback);
+              }
+              // TODO
+              // else get from ldb and update recsDelivered. speakerInfo should be set though, according to start.controller
+            }
 
             var oldSessionId = dataService.get('sessionId');
             var sessionId;
@@ -334,6 +333,32 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
       // updating tokenRead in ldb and ram
       asyncTokenRead(speaker, $scope.tokensRead);
     }
+  }
+
+  function tokensRead(speaker) {
+    // input is speaker fetched from ram
+
+    var tokensRead;
+    // get speakerInfo from ram
+    var ramSpeakerInfo = dataService.get('speakerInfo');
+
+    // get speaker info in ram and check if info contains tokensRead
+    if (ramSpeakerInfo['tokensRead']) {
+
+      tokensRead = ramSpeakerInfo['tokensRead'];
+ 
+    } else { 
+    // if tokensRead is not in ram speakerInfo then it might be in ldb speakerInfo
+    // in any case it will be either fetched or initialized in ldb.
+
+      tokensRead = asyncTokenRead(speaker, 'return')
+    };
+
+    if (tokensRead){
+        return tokensRead;
+    } else {
+        return 0;
+    };    
   }
 
   // updates device or speakerInfo by checking for an id, and adding

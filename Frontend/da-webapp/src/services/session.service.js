@@ -87,10 +87,11 @@ function sessionService($q, $rootScope, dataService, localDbMiscService, logger)
   }
 
   function speakerInfoCorrection(oldSpeakerInfo) {
-    // function creates new speakerInfo object without tokensRead attribute
+    // function creates new speakerInfo object without tokensRead and recsDelivered
 
     var newSpeakerInfo = JSON.parse(JSON.stringify(oldSpeakerInfo)); // copy object
     delete newSpeakerInfo.tokensRead;
+    delete newSpeakerInfo.recsDelivered;
     return newSpeakerInfo;
   }
 
