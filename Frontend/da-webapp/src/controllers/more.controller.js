@@ -34,11 +34,6 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   moreCtrl.logout = logout;
 
   $rootScope.isLoaded = true;
-  $scope.hide_recording = true;
-  $scope.hide_sync = false;
-  $scope.hide_start = true;
-  $scope.hide_login_msg = true;
-  $scope.hide_wifi_msg = true;
   
   //////////
 
@@ -98,8 +93,6 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-    $scope.hide_sync = true;
-
     $scope.msg = 'Syncing - please wait';
 
     delService.sendLocalSessions(syncDoneCallback);
@@ -108,13 +101,6 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
     $scope.msg = result ? 'Sync complete.' : 'Sync failed.';
-    $scope.hide_sync = false;
-    if (!result){
-      $scope.wifi_msg = 'Please connect device to wifi or ethernet.'
-      $scope.hide_wifi_msg = false
-    } else {
-      $scope.hide_wifi_msg = true
-    }
   }
 
   function test() {

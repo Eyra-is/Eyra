@@ -210,31 +210,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
           function success(response) {
             // TODO CLEAN THIS UP, maybe put in a service
 
-            // we may have gotten a deviceId and speakerId from server, in which case
-            //   we handle that by setting it in RAM and local database, if it is different
-            //   from the id's there.
-            // response e.g.: { 'sessionId' : int, 'speakerId': int, 'deviceId' : int, 'recsDelivered' : int }
-
-            var speakerId = response.data.speakerId;
-            var deviceId = response.data.deviceId;
-            if (deviceId) updateDevice(deviceId); 
-            if (speakerId) updateSpeakerInfo(speakerId);
-
-            // update how many prompt recordings have actually arrived at server
-            var delivered = response.data.recsDelivered;
-            if (delivered) {
-              $scope.recsDelivered = Math.max(delivered, $scope.recsDelivered || 0);
-              dataService.set('recsDelivered', $scope.recsDelivered);
-              var sInfo = dataService.get('speakerInfo');
-              if (sInfo) {
-                sInfo.recsDelivered = $scope.recsDelivered;
-                dataService.set('speakerInfo', sInfo);
-                miscDbService.setSpeaker(speaker, sInfo)
-                  .then(angular.noop, util.stdErrCallback);
-              }
-              // TODO
-              // else get from ldb and update recsDelivered. speakerInfo should be set though, according to start.controller
-            }
+            $scope.recsDelivered = sessionService.handleSessionResponse(response);
 
             var oldSessionId = dataService.get('sessionId');
             var sessionId;
@@ -282,6 +258,11 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
               dbService.saveRecording(sessionData, {'blob' : rec.blob, 'title' : rec.title });
             } else {
               logger.error('Invalid token in submission.');
+
+              // no recording saved, do not count as token read
+              $scope.tokensRead--; 
+              // updating tokenRead in ldb and ram
+              asyncTokenRead(speaker, $scope.tokensRead);
             }
 
             logger.error(response);
@@ -359,77 +340,6 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     } else {
         return 0;
     };    
-  }
-
-  // updates device or speakerInfo by checking for an id, and adding
-  //   it. Both in RAM and local database.
-  // id is the id supplied from the backend
-  // updateDevice() and updateSpeakerInfo() aren't DRY unfortunately
-  //   due to the need for speakerName in the latter case (could be fixed)
-  function updateDevice(id) {
-    var device = dataService.get('device');
-    if (device) {
-      // either device.deviceId is undefined, in which case we add it
-      // or it is different from our id, in which case we update it
-      // otherwise, we assume we don't need to change anything
-      if (device.deviceId !== id) {
-        device.deviceId = id;
-        dataService.set('device', device); // this line might be redundant
-        miscDbService.setDevice(device)
-          .then(angular.noop, util.stdErrCallback);
-      }
-    } else {
-      // no device in ram, check in local db
-      miscDbService.getDevice().then(
-        function success(device) {
-          if (device) {
-            device.deviceId = id;
-          } else {
-            device = {
-              'userAgent' : navigator.userAgent,
-              'deviceId' : id
-            };
-          }
-          if (!device.imei && $rootScope.isWebView) {
-            device['imei'] = AndroidConstants.getImei();
-          }
-          dataService.set('device', device);
-          miscDbService.setDevice(device)
-            .then(angular.noop, util.stdErrCallback);
-        },
-        util.stdErrCallback
-      );
-    }
-  }
-  function updateSpeakerInfo(id) {
-    var speakerName = dataService.get('speakerName'); // this is the only thing we are guaranteed is in RAM
-    var speakerInfo = dataService.get('speakerInfo');
-    if (speakerInfo) {
-      // either speakerInfo.speakerId is undefined, in which case we add it
-      // or it is different from our id, in which case we update it
-      // otherwise, we assume we don't need to change anything
-      if (speakerInfo.speakerId !== id) {
-        speakerInfo.speakerId = id;
-        dataService.set('speakerInfo', speakerInfo); // this line might be redundant
-        miscDbService.setSpeaker(speakerName, speakerInfo)
-          .then(angular.noop, util.stdErrCallback);
-      }
-    } else {
-      // no speakerInfo in ram, check in local db
-      miscDbService.getSpeaker(speakerName).then(
-        function success(speakerInfo) {
-          if (speakerInfo) {
-            speakerInfo.speakerId = id;
-            dataService.set('speakerInfo', speakerInfo);
-            miscDbService.setSpeaker(speakerName, speakerInfo)
-              .then(angular.noop, util.stdErrCallback);
-          } else {
-            logger.error('Speaker not in database, ' + speakerName + ', should not happen.');
-          }
-        },
-        util.stdErrCallback
-      );
-    }
   }
 }
 }());
