@@ -109,7 +109,7 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
     updateRecsSaved();
 
     if (!result){
-      $scope.wifi_msg = 'Please connect device to wifi or ethernet.';
+      $scope.wifi_msg = 'Please connect your device to the internet.';
       $scope.hide_recording = true;
       $scope.hide_wifi_msg = false;
     } else {
