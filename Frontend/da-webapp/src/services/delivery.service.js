@@ -51,7 +51,9 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
         logger.log(response); // DEBUG
 
         // update recsDelivered
-        dataService.set('recsDelivered', sessionService.handleSessionResponse(response));
+        var recsDelivered = sessionService.handleSessionResponse(response);
+        dataService.set('recsDelivered', recsDelivered);
+        reqHandler.syncProgressCallback(recsDelivered);
 
         sendLocalSession(null); // send next session
       },
@@ -104,8 +106,10 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   }
 
   // callback is function to call when all local sessions have been sent or failed to send
-  function sendLocalSessions(callback) {
-    reqHandler.syncDoneCallback = callback;
+  function sendLocalSessions(doneCallback, progressCallback) {
+    reqHandler.syncDoneCallback = doneCallback;
+    reqHandler.syncProgressCallback = progressCallback;
+
     sendLocalSession(null); // recursive
   }
 

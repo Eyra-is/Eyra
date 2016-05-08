@@ -59,12 +59,15 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
     // get recsDelivered
     var recsDelivered = dataService.get('recsDelivered');
     if (!recsDelivered) {
-      dbService.getSpeaker(dataService.get('speakerName')).then(function(speaker){
-        if (speaker) {
-          $scope.recsDelivered = speaker.recsDelivered || $scope.recsDelivered;
-        }
-      },
-      util.stdErrCallback);
+      var speaker = dataService.get('speakerName');
+      if (speaker) {
+        dbService.getSpeaker(speaker).then(function(speaker){
+          if (speaker) {
+            $scope.recsDelivered = speaker.recsDelivered || $scope.recsDelivered;
+          }
+        },
+        util.stdErrCallback);
+      }
     } else {
       $scope.recsDelivered = recsDelivered;
     }
@@ -82,10 +85,10 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
   function updateRecsSaved() {
     dbService.getRecsSaved().then(
       function success(count) {
-        $scope.recsSaved = count || 0;
+        $scope.recsSaved = count || $scope.recsSaved || 0;
       },
       function error(error) {
-        $scope.recsSaved = 0;
+        $scope.recsSaved = $scope.recsSaved || 0;
         logger.error(error);
       }
     );    
@@ -98,7 +101,7 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
 
     $scope.msg = 'Syncing - please wait';
 
-    delService.sendLocalSessions(syncDoneCallback);
+    delService.sendLocalSessions(syncDoneCallback, syncProgressCallback);
   }
 
   // result is true if sync completed successfully
@@ -118,6 +121,18 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
         $scope.hide_recording = false; // show back button if user set
       $scope.hide_wifi_msg = true;
     }
+  }
+
+  function syncProgressCallback(recsDelivered) {
+    /*
+      Called with updated number of recs actually delivered to server. (from delivery service)
+
+      Updates this count and does another check for how many were removed from the local database (sent).
+    */
+    if (recsDelivered) {
+      $scope.recsDelivered = Math.max($scope.recsDelivered, recsDelivered);      
+    }
+    updateRecsSaved();
   }
 }
 }());
