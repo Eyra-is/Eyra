@@ -264,7 +264,7 @@ function sessionService($q, $rootScope, dataService, localDbMiscService, logger,
             dbService.setSpeaker(speakerName, speakerInfo)
               .then(angular.noop, util.stdErrCallback);
           } else {
-            logger.error('Speaker not in database, ' + speakerName + ', should not happen.');
+            logger.error('Speaker not in database, ' + speakerName + '.');
           }
         },
         util.stdErrCallback

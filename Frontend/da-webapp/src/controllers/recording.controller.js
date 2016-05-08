@@ -64,7 +64,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
   //   show QC report.
   var displayReport = false;
 
-  $scope.recsDelivered = dataService.get('recsDelivered') || 0;
+  $scope.recsDelivered = 0;
 
   activate();
 
@@ -74,12 +74,17 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
     recService.setupCallbacks(recordingCompleteCallback);
     var res = volService.init(recService.getAudioContext(), recService.getStreamSource());
     if (!res) logger.log('Volume meter failed to initialize.');
-    // check if local db has recsDelivered info
-    miscDbService.getSpeaker(speaker).then(function(dbSpeaker){
-      if (dbSpeaker && dbSpeaker.recsDelivered) {
-        $scope.recsDelivered = dbSpeaker.recsDelivered;
-      }
-    }, util.stdErrCallback);
+
+    // get recsDelivered, first check RAM, then ldb
+    $scope.recsDelivered = dataService.get('recsDelivered') || 0;
+    if ($scope.recsDelivered === 0) {
+      miscDbService.getSpeaker(speaker).then(function(dbSpeaker){
+        if (dbSpeaker && dbSpeaker.recsDelivered) {
+          $scope.recsDelivered = dbSpeaker.recsDelivered;
+        }
+      }, util.stdErrCallback);
+    }
+    
     $rootScope.isLoaded = true; // is page loaded?  
   }
 
