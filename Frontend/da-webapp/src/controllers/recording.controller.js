@@ -232,15 +232,13 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
               logger.error(e);
             }
 
+            // temporarily disable QC
             // notify QC with last used session (should be same probably)
             //   and if non-existant, use the one we got now, and if non-existant don't move.
             var sessionIdToUse = oldSessionId || sessionId;
-            //console.info(sessionId);
-            //console.info(oldSessionId);
-            if (sessionIdToUse) {
+            // if (sessionIdToUse) {
               qcService.notifySend(sessionIdToUse, dataService.get('speakerInfo').tokensRead || 0).then(
                 function success(data){
-                  //console.info('calling qcService');
                   // so long as the user is not in a recording
                   //   display QC report straight away
                   // otherwise, queue it for next stop click.
@@ -251,7 +249,7 @@ function RecordingController($q, $uibModal, $rootScope, $scope, androidRecording
                   }
                 },
                 angular.noop);
-            }
+            //}
           },
           function error(response) {
             // on unsuccessful submit to server, save recordings locally, if they are valid (non-empty)

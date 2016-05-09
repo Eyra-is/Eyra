@@ -23,6 +23,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   var modSendCounter = 0;
   // {"module1" : id, ...} 
   var moduleRequestIds = {}
+  // disabled gratulations on completed desired tokens
+  var displayedGratulations = false;
 
   return qcHandler;
 
@@ -34,26 +36,37 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     // if tokenCount === 0 it is a new speaker
     totalNotifies++;
     modSendCounter++;
-    //console.info(totalNotifies + ' totalNotifies'); 
 
     // if totalNotifies is higher than the token count, it probably means
     //   a new user is recording starting at 0 tokens read.
     if (totalNotifies > tokenCount) {
       totalNotifies = 1;
       modSendCounter = 1;
+      displayedGratulations = false;
     }
 
+    // temporarily disable QC display
     if (modSendCounter >= (util.getConstant('QCFrequency' || 5))
        && totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
       modSendCounter = 0;
 
-      return delService.queryQC(sessionId)
-      .then(handleQCReport, util.stdErrCallback);
-
-    } else {
-      
+      if (sessionId) {
+        delService.queryQC(sessionId)
+        //.then(handleQCReport, util.stdErrCallback);
+        .then(angular.noop, util.stdErrCallback);
+      }
+    } /*else {
       return $q.reject(false);
-    }
+    }*/
+
+    // temporarily disable QC
+    return handleQCReport().then(function(data){
+      if (!displayedGratulations) {
+        return $q.reject(false);
+      } else {
+        return $q.resolve(true);
+      }
+    });
   }
 
   function calcAvgAcc(report) {
@@ -79,13 +92,16 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   }
 
   function handleQCReport(response) {
-    var report = response.data;
+    // temporarily disable QC
+    var report = {};//response.data || {};
 
-    var result = updateModuleRequestIds(report); // do we have any new reports?
+    // temporarily disable QC
+    //var result = updateModuleRequestIds(report); // do we have any new reports?
 
+    // temporarily disable QC
     // calulate average accuracy of all QC modules
-    var avgAcc = calcAvgAcc(report);
-    report.avgAcc = avgAcc;
+    /*var avgAcc = calcAvgAcc(report);
+    report.avgAcc = avgAcc;*/
 
     var tokenAnnouncement = handleTokenAnnouncements(report);
 
@@ -109,25 +125,32 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   // like for example, display, good job! on each 50 tokens read.
   // adds key tokenCount and tokenCountMsg to report.
   function handleTokenAnnouncements(report) {
-    var tokensRead = dataService.get('speakerInfo').tokensRead;
     
-    // for tokenAnnouncement to be true modulus of tokenAnnouncement 
-    // and TokenAnnouncementFrequency need to be 0
-    var tokenAnnouncement = totalNotifies > 0
-                            && totalNotifies % util.getConstant('TokenAnnouncementFreq') === 0;
+    // After 500 tokens read, display a special notification.
+    var _totalNotifies;
+    var tokensRead = dataService.get('speakerInfo').tokensRead;
+    if (tokensRead){
+      _totalNotifies = tokensRead;
+    } else {
+      _totalNotifies = totalNotifies;
+    }
 
-    var totalTokens = util.getConstant('TokenCountGoal') || 260;
+    var tokenCountGoal = util.getConstant('tokenCountGoal') || 500;
+    // lets keep a small margin (+3) in case some error was made and user skips the exact tokenCountGoal number
+    if (_totalNotifies >= tokenCountGoal && !(_totalNotifies > tokenCountGoal + 3) && !displayedGratulations) {
+      report.tokenCountMsg = 'You have reached the set goal of '+tokenCountGoal+' prompts. Thank you very much for your contribution.';
+      displayedGratulations = true;
+      return true;
+    }
+    return false;
+    /*var tokenAnnouncement = _totalNotifies > 0
+                            && totalNotifies % util.getConstant('tokenAnnouncementFreq') === 0;
+
+    var totalTokens = util.getConstant('tokenCountGoal') || 260;
     if (tokenAnnouncement) {
-      var _totalNotifies;
-      if (tokensRead){
-        _totalNotifies = tokensRead;
-      } else {
-        _totalNotifies = totalNotifies;
-      }
-
       report.tokenCount =  tokensRead;
       // some gamifying messages to pump up the speakers
-      /*
+      
       report.tokenCountMsg = 'Nice, '+util.percentage(_totalNotifies, totalTokens, 2)+'% of the tokens read, keep going.';
       if (totalNotifies >= 100 && totalNotifies < 200) {
         report.tokenCountMsg = 'Sweet, '+util.percentage(_totalNotifies, totalTokens, 2)+'% of the tokens.';
@@ -138,25 +161,21 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       if (totalNotifies >= 300 && totalNotifies < 400) {
         report.tokenCountMsg = 'Awesome, '+util.percentage(t_otalNotifies, totalTokens, 2)+'% of the tokens. Just awesome';
       }
-      */
-      if (totalNotifies >= 500 ) {
-        report.tokenCountMsg = 'You have reached the set goal of 500 tokens. Thank you very much for your contribution.';
-      }
-
+      
       var tokensLeftToRead = totalTokens - tokensRead;
 
       if (tokensLeftToRead > 0){
-        report.tokensLeftToReadMsg = 'You have ' + tokensLeftToRead + ' tokens of ' + totalTokens + ' left to read.'
+        report.tokensLeftToReadMsg = 'You have ' + tokensLeftToRead + ' tokens of ' + totalTokens + ' left to read.';
       }     
     }
-    return tokenAnnouncement;
+    return tokenAnnouncement;*/
   }
 
   function messageClassByAccuracy(accuracy){
-    if (accuracy <= 0.2){return '_red'}
-    if (accuracy > 0.2 && accuracy < 0.4) {return '_orange'}
-    if (accuracy >= 0.4 && accuracy < 0.6) {return '_greenish'} else{
-      return '_green'
+    if (accuracy <= 0.2) { return '_red'; }
+    if (accuracy > 0.2 && accuracy < 0.4) { return '_orange'; }
+    if (accuracy >= 0.4 && accuracy < 0.6) { return '_greenish'; } else {
+      return '_green';
     }
   }
 
