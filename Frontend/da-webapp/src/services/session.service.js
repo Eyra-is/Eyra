@@ -172,7 +172,7 @@ function sessionService($q, $rootScope, dataService, localDbMiscService, logger,
     var recsDelivered = dataService.get('recsDelivered') || 0;
     var delivered = response.data.recsDelivered;
     if (delivered) {
-      recsDelivered = Math.max(delivered, recsDelivered || 0);
+      recsDelivered = delivered;
       dataService.set('recsDelivered', recsDelivered);
       var sInfo = dataService.get('speakerInfo');
       if (sInfo) {
