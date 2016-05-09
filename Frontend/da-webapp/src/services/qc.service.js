@@ -42,6 +42,7 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     if (totalNotifies > tokenCount) {
       totalNotifies = 1;
       modSendCounter = 1;
+      displayedGratulations = false;
     }
 
     // temporarily disable QC display
@@ -135,7 +136,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
     }
 
     var tokenCountGoal = util.getConstant('tokenCountGoal');
-    if (_totalNotifies >= tokenCountGoal && !displayedGratulations) {
+    // lets keep a small margin (+3) in case some error was made and user skips the exact tokenCountGoal number
+    if (_totalNotifies >= tokenCountGoal && !(_totalNotifies > tokenCountGoal + 3) && !displayedGratulations) {
       report.tokenCountMsg = 'You have reached the set goal of '+tokenCountGoal+' prompts. Thank you very much for your contribution.';
       displayedGratulations = true;
       return true;
