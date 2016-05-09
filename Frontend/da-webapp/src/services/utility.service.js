@@ -25,7 +25,7 @@ function utilityService(logger) {
     'QCFrequency' : 5, // per sessions sent
     'QCInitRecThreshold' : 10, // recording count before QC can report, adjustment period for speaker
     'tokenAnnouncementFreq' : 500,
-    'tokenCountGoal' : 12,
+    'tokenCountGoal' : 500,
     'syncRecCountPerSend' : 5 // recs to send each transmission to server during a Sync operation
   };
   

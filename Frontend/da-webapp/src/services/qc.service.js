@@ -135,7 +135,7 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       _totalNotifies = totalNotifies;
     }
 
-    var tokenCountGoal = util.getConstant('tokenCountGoal');
+    var tokenCountGoal = util.getConstant('tokenCountGoal') || 500;
     // lets keep a small margin (+3) in case some error was made and user skips the exact tokenCountGoal number
     if (_totalNotifies >= tokenCountGoal && !(_totalNotifies > tokenCountGoal + 3) && !displayedGratulations) {
       report.tokenCountMsg = 'You have reached the set goal of '+tokenCountGoal+' prompts. Thank you very much for your contribution.';
