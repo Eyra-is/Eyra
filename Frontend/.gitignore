@@ -4,6 +4,9 @@
 # ignore .css created by sass
 /da-webapp/src/css/*
 
+/da-webapp/extra_files
+
+
 # bower installed packages
 bower_components
 
