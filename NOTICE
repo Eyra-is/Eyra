@@ -76,7 +76,8 @@ Copyright (c) 2011-2016 Twitter, Inc.
 
 This product includes software developed at
 Twitter, Inc. 
-
+details at:
+https://github.com/twbs/bootstrap/blob/master/LICENSE
 
 
    =========================================================================
@@ -105,6 +106,18 @@ This product includes software developed at
 Node.js contributors.
 The Node.js code is licenced under MIT with addititional licences. Full details at:
 https://github.com/nodejs/node/blob/master/LICENSE
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the MIT Licence                       ==
+   ==                                                                     ==
+   ==  in this case for the recorder.js-specific code.                    ==
+   =========================================================================
+
+recorder.js Code
+Copyright © 2013 Matt Diamond
+details at:
+https://github.com/mattdiamond/Recorderjs/blob/master/README.md
 
 
 
