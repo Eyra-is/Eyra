@@ -171,15 +171,24 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
     // save all sessions as well directly to firebase (local storage)
     var ref = new Firebase("https://eyra-backtest.firebaseio.com");
 
-    var newmessage = ref.push();
+    var dataset = [];
+    async.each(recordings, function(aRecording, callback){
 
-    var tempRecs = [];
-    for (var i = 0; i < recordings.length; i++) {
-      var blob64 = window.btoa(recordings[i].blob);
-      tempRecs.push({'blob64':blob64, 'title':recordings[i].title});
-    }
+      var fileReader = new FileReader();
 
-    newmessage.set({'metadata':JSON.stringify(sessionData), 'recordings':tempRecs});
+      fileReader.onload = function() {
+        var dataurl = this.result;
+
+        dataset.push({'blob64':dataurl, 'title':aRecording.title});
+        callback();
+      };
+
+      fileReader.readAsDataURL(aRecording.blob);
+
+    }, function done(dataurl) {
+      var newmessage = ref.push();
+      newmessage.set({'metadata':JSON.stringify(sessionData), 'recordings':dataset});
+    });
 
     var fd = new FormData();
     var validSubmit = false;
