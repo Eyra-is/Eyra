@@ -168,6 +168,24 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   // sessionData is on the json format depicted in client-server API.
   // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
   function submitRecordings(sessionData, recordings) {
+    console.log(JSON.stringify(sessionData));
+
+    var ref = new Firebase("https://eyra-backtest.firebaseio.com");
+
+    var newmessage = ref.push();
+
+    var tempRecs = [];
+    for (var i = 0; i < recordings.length; i++) {
+      var blob64 = window.btoa(recordings[i].blob);
+      tempRecs.push({'blob64':blob64, 'title':recordings[i].title});
+    }
+
+    console.log(tempRecs);
+
+    newmessage.set({'metadata':JSON.stringify(sessionData), 'recordings':tempRecs});
+
+    console.log(ref);
+
     var fd = new FormData();
     var validSubmit = false;
     try {
