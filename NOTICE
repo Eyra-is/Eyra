@@ -1,0 +1,149 @@
+
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the Eyra-specific code.                           ==
+   =========================================================================
+
+Eyra Code
+Copyright 2016 Reykjavik University
+
+This product includes software developed at
+Reykjavik University, Iceland (http://www.ru.is/)
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the Android-specific code.                        ==
+   =========================================================================
+
+Android Code
+Copyright 2005-2008 The Android Open Source Project
+
+This product includes software developed as part of
+The Android Open Source Project (http://source.android.com).
+
+
+   =========================================================================
+   ==  Example NOTICE file for use with the Apache License, Version 2.0,  ==
+   ==  in this case for the Apache httpd-2.0 distribution.                ==
+   =========================================================================
+
+   Apache HTTP Server
+   Copyright 1999-2006 The Apache Software Foundation
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+
+   Portions of this software were developed at the National Center
+   for Supercomputing Applications (NCSA) at the University of
+   Illinois at Urbana-Champaign.
+
+   This software contains code derived from the RSA Data Security
+   Inc. MD5 Message-Digest Algorithm, including various
+   modifications by Spyglass Inc., Carnegie Mellon University, and
+   Bell Communications Research, Inc (Bellcore).
+
+   Regular expression support is provided by the PCRE library package,
+   which is open source software, written by Philip Hazel, and copyright
+   by the University of Cambridge, England. The original software is
+   available from
+      ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the MIT Licence                       ==
+   ==                                                                     ==
+   ==  in this case for the Angular-specific code.                        ==
+   =========================================================================
+
+Angular Code
+Copyright (c) 2010-2016 Google, Inc.
+
+This product includes software developed at
+Google, Inc. http://angularjs.org
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the MIT Licence                       ==
+   ==                                                                     ==
+   ==  in this case for the Bootstrap-specific code.                        ==
+   =========================================================================
+
+Bootstrap Code
+Copyright (c) 2011-2016 Twitter, Inc.
+
+This product includes software developed at
+Twitter, Inc. 
+details at:
+https://github.com/twbs/bootstrap/blob/master/LICENSE
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the MIT Licence                       ==
+   ==                                                                     ==
+   ==  in this case for the JQuery-specific code.                        ==
+   =========================================================================
+
+JQuery Code
+Copyright jQuery Foundation and other contributors, https://jquery.org/
+
+This product includes software developed at
+jQuery Foundation and other contributors.
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the MIT Licence                       ==
+   ==                                                                     ==
+   ==  in this case for the Node.js-specific code.                        ==
+   =========================================================================
+
+Node.js Code
+Copyright Node.js contributors. All rights reserved.
+
+This product includes software developed at
+Node.js contributors.
+The Node.js code is licenced under MIT with addititional licences. Full details at:
+https://github.com/nodejs/node/blob/master/LICENSE
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the MIT Licence                       ==
+   ==                                                                     ==
+   ==  in this case for the recorder.js-specific code.                    ==
+   =========================================================================
+
+recorder.js Code
+Copyright © 2013 Matt Diamond
+details at:
+https://github.com/mattdiamond/Recorderjs/blob/master/README.md
+
+
+
+The MIT License (MIT)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+====
+
+All files located in the node_modules and external directories are
+externally maintained libraries used by this software which have their
+own licenses; we recommend you read them, as their terms may differ from
+the terms above.

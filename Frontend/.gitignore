@@ -3,11 +3,9 @@
 /da-webapp/app/*
 # ignore .css created by sass
 /da-webapp/src/css/*
-/da-webapp/src/index.html
-#/da-webapp/src/services/utility.service.js
 
-# ignore index.html in src
-/da-webapp/src/index.html
+/da-webapp/extra_files
+
 
 # bower installed packages
 bower_components

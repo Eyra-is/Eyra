@@ -79,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
         mWebSettings.setAppCacheEnabled(true);
         mWebSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mWebView.setWebContentsDebuggingEnabled(true);
+        }
+
         mWebView.loadUrl(getString(R.string.website_url));
     }
 

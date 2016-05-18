@@ -7,6 +7,7 @@ angular.module('daApp')
 MoreController.$inject = ['$location', 
                           '$rootScope', 
                           '$scope', 
+                          'dataService',
                           'authenticationService', 
                           'deliveryService', 
                           'localDbService', 
@@ -14,7 +15,7 @@ MoreController.$inject = ['$location',
                           'tokenService', 
                           'utilityService'];
 
-function MoreController($location, $rootScope, $scope, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
+function MoreController($location, $rootScope, $scope, dataService, authenticationService, deliveryService, localDbService, logger, tokenService, utilityService) {
   var moreCtrl = this;
   var authService = authenticationService;
   var dbService = localDbService;
@@ -33,7 +34,6 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
   moreCtrl.logout = logout;
 
   $rootScope.isLoaded = true;
-
   
   //////////
 
@@ -93,11 +93,7 @@ function MoreController($location, $rootScope, $scope, authenticationService, de
   // sends all available sessions from local db to server, one session at a time
   // assumes internet connection
   function sync() {
-
-    $scope.hide_sync = true;
-
-
-    $scope.msg = 'Syncing...';
+    $scope.msg = 'Syncing - please wait';
 
     delService.sendLocalSessions(syncDoneCallback);
   }

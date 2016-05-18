@@ -4,7 +4,7 @@
 //   still ongoing
 //
 // WARNING only implements the functions currently used in the app
-//         if any other functions are used, they need to be added here
+//         if any other functions are used, they need to be added here manually
 
 'use strict';
 
@@ -18,11 +18,12 @@ function myLocalForageService($localForage) {
 
   lfHandler.inProgress = inProgress;
 
-  lfHandler.setItem = setItem;
-  lfHandler.getItem = getItem;
-  lfHandler.removeItem = removeItem;
-  lfHandler.pull = pull;
   lfHandler.clear = clear;
+  lfHandler.getItem = getItem;
+  lfHandler.keys = keys;
+  lfHandler.pull = pull;
+  lfHandler.removeItem = removeItem;
+  lfHandler.setItem = setItem;
 
   // THE BOOLEAN
   // are there lf operations ongoing?
@@ -64,24 +65,28 @@ function myLocalForageService($localForage) {
 
   // LOCALFORAGE FUNCTIONS
 
-  function setItem(key, value) {
-    return generalWrapper($localForage.setItem, key, value);
+  function clear() {
+    return generalWrapper($localForage.clear);
   }
 
   function getItem(key) {
     return generalWrapper($localForage.getItem, key);
   }
 
-  function removeItem(key) {
-    return generalWrapper($localForage.removeItem, key);
+  function keys() {
+    return generalWrapper($localForage.keys);
   }
 
   function pull(key) {
     return generalWrapper($localForage.pull, key);
   }
 
-  function clear() {
-    return generalWrapper($localForage.clear);
+  function removeItem(key) {
+    return generalWrapper($localForage.removeItem, key);
+  }
+
+  function setItem(key, value) {
+    return generalWrapper($localForage.setItem, key, value);
   }
 }
 }());

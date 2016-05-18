@@ -2,6 +2,12 @@
 
 # ignore local files
 /Local
+npm-debug.log
 
 # ignore default.conf file in Setup/src/frontend-app/
 /Setup/src/frontend-app/default.conf
+<<<<<<< Updated upstream
+=======
+
+CLEANUP
+>>>>>>> Stashed changes

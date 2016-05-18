@@ -102,7 +102,7 @@ function tokenService($q, deliveryService, logger, myLocalForageService, utility
         if (value) {
           next.resolve(value);
         } else {
-          next.resolve({'id':0, 'token':'No more tokens. Refresh page for more.'});
+          next.resolve({'id':0, 'token':'No more tokens. Restart app with internet connection for more.'});
         }
 
         // update our minFreeIdx

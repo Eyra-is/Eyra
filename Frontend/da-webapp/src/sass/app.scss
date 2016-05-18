@@ -49,8 +49,41 @@ body {
     margin-left: 0;
   }
 }
+/* */
 .feedbackDisplay {
   font-size: 1.1em;
+  text-align: center;
+}
+.minorFeedbackDisplay {
+  font-size: 0.9em;
+  p {
+    width: 100%;
+  }
+}
+.syncFeedback {
+  /* text, e.g. prompts read */
+  p:nth-child(odd) {
+    text-align: left;
+    float: left;
+    width: 70%;
+  }
+  /* count and icon, e.g. 0 ^ */
+  p:nth-child(even) {
+    text-align: right;
+    float: right;
+    width: 30%;
+  }
+}
+.footer {
+  text-align: center;
+  position: fixed;
+  height: 1.8em;
+  bottom: 0;
+  width: 100%;
+  .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 /* form layout */
 .data-entry {
@@ -191,26 +224,22 @@ ul {
   font-size: 1.25em;
 }
 @keyframes toRed {
-    
-    to {background-color: #DF0101;}    
-  }
+  to {background-color: #DF0101;}    
+}
 
-  @keyframes toOrange {
-    
-    to {background-color: #FF8000;}    
-  }
+@keyframes toOrange {
+  to {background-color: #FF8000;}    
+}
 
-  @keyframes toGreenish {
-    
-    to {background-color: #2EFE2E;}    
-  }
+@keyframes toGreenish {
+  to {background-color: #2EFE2E;}    
+}
 
-  @keyframes toGreen {
-    
-    to {background-color: #0B610B;}    
-  }
+@keyframes toGreen {
+  to {background-color: #0B610B;}    
+}
 
-  ._red {  
+._red {  
   background-color: #FA5882;
   animation-name: toRed;
   animation-duration: 1s;

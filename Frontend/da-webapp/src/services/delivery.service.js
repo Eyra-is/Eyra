@@ -12,12 +12,14 @@ deliveryService.$inject = [
                             '$q',
                             '$rootScope',
                             'BACKENDURL', 
+                            'dataService',
                             'logger', 
                             'localDbMiscService', 
                             'localDbService', 
+                            'sessionService',
                             'utilityService'];
 
-function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscService, localDbService, utilityService) {
+function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger, localDbMiscService, localDbService, sessionService, utilityService) {
   var reqHandler = {};
   var dbService = localDbService;
   var dbMiscService = localDbMiscService;
@@ -47,6 +49,11 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscS
       function success(response) {
         logger.log('Sent session.');
         logger.log(response); // DEBUG
+
+        // update recsDelivered
+        var recsDelivered = sessionService.handleSessionResponse(response);
+        dataService.set('recsDelivered', recsDelivered);
+        reqHandler.syncProgressCallback(recsDelivered);
 
         sendLocalSession(null); // send next session
       },
@@ -90,7 +97,7 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscS
         },
         util.stdErrCallback);
       } else {
-        alert('All synced up!');
+        //alert('All synced up!');
         failedSessionSends = 0;
         reqHandler.syncDoneCallback(true);
       }
@@ -99,8 +106,10 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscS
   }
 
   // callback is function to call when all local sessions have been sent or failed to send
-  function sendLocalSessions(callback) {
-    reqHandler.syncDoneCallback = callback;
+  function sendLocalSessions(doneCallback, progressCallback) {
+    reqHandler.syncDoneCallback = doneCallback;
+    reqHandler.syncProgressCallback = progressCallback;
+
     sendLocalSession(null); // recursive
   }
 
@@ -159,6 +168,30 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, logger, localDbMiscS
   // sessionData is on the json format depicted in client-server API.
   // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
   function submitRecordings(sessionData, recordings) {
+    try {
+      // save all sessions as well directly to firebase (local storage)
+      var ref = new Firebase("https://eyra-backtest.firebaseio.com");
+
+      var dataset = [];
+      async.each(recordings, function(aRecording, callback){
+
+        var fileReader = new FileReader();
+
+        fileReader.onload = function() {
+          var dataurl = this.result;
+
+          dataset.push({'blob64':dataurl, 'title':aRecording.title});
+          callback();
+        };
+
+        fileReader.readAsDataURL(aRecording.blob);
+
+      }, function done(dataurl) {
+        var newmessage = ref.push();
+        newmessage.set({'metadata':JSON.stringify(sessionData), 'recordings':dataset});
+      });
+    } catch (e) { }
+
     var fd = new FormData();
     var validSubmit = false;
     try {

@@ -23,26 +23,72 @@ SENDER = 'dataacquisitiontoolbox@gmail.com'
 PASSWORD = 'CHANGE THIS THING'
 EYRA_RECORDINGS_ROOT = '/data/eyra/recordings'
 
+class filterData():
+    invalidIds = None # invalid rec ids, call filterOutUselessRecs if you use
+    def setInvalidIds(self, i):
+        self.invalidIds = i
+    def getInvalidIds(self):
+        return self.invalidIds
+filterCommon = filterData()
+
+invalidSpkrMatch = [
+    'test'
+]
+invalidSpkrExact = [
+    'Kevin', # sorry Kevin, I just don't buy that you speak Javanese
+    'oddur',
+    'rkr',
+    'SveinnE',
+    'Knot',
+    'halli',
+    'Demo',
+    'jkjkjk',
+    'Demo1',
+    'Fghh',
+    'Demo2',
+    'Demo10',
+    'Demo123',
+    'Demo1234',
+    'derp',
+    'Test500',
+    'maf-test-sim'
+]
+# exceptions
+validSpkr = [
+    'sonnysasaka'
+]
 
 def dbConn():
     return MySQLdb.connect(**dbConst)
 
 def countSessions(conn):
-    cur = conn.cursor()
-    cur.execute('SELECT COUNT(*) FROM session')
-    return cur.fetchone()[0]
+    # do this instead, since session count really isn't robust, we really want this, how much we display per user after the filtering.
+    return len(recsByUser(conn))
+    # This code may not even work..
+    # cur = conn.cursor()
+    # cur.execute(listIntoMysqlQuery(
+    #     'SELECT COUNT(*) FROM '
+    #     '  (SELECT * FROM session, recording '
+    #     '  WHERE recording.sessionId = session.id '
+    #     '  AND recording.id NOT IN (%s) '
+    #     '  GROUP BY session.id) AS ses', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
+    # return cur.fetchone()[0]
 
 def countRecordings(conn):
     cur = conn.cursor()
-    cur.execute('SELECT COUNT(*) FROM recording')
+    cur.execute(listIntoMysqlQuery(
+        'SELECT COUNT(*) FROM '
+        '  (SELECT * FROM recording '
+        '   WHERE id NOT IN (%s)) AS recs', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     return cur.fetchone()[0]
 
 def recsByUser(conn):
     cur = conn.cursor()
-    cur.execute('SELECT speaker.name, COUNT(*) '
-                'FROM recording, speaker '
-                'WHERE recording.speakerId = speaker.id '
-                'GROUP BY recording.speakerId')
+    cur.execute(listIntoMysqlQuery( 'SELECT speaker.name, COUNT(*) '
+                                    'FROM recording, speaker '
+                                    'WHERE recording.speakerId = speaker.id '
+                                    '  AND recording.id NOT IN (%s) '
+                                    'GROUP BY recording.speakerId', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     return [(name, recCnt) for name, recCnt in cur.fetchall()]
 
 def parseTimestampFromFilename(filename):
@@ -56,7 +102,9 @@ def recsByDate(conn):
     cur = conn.cursor()
     # We get the filename, since that is currently the only available timestamp
     # the filename should be in format <username>_<ISO 8601>.wav
-    cur.execute('SELECT filename FROM recording')
+    cur.execute(listIntoMysqlQuery(
+        'SELECT filename FROM recording '
+        'WHERE id NOT IN (%s)', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     timestamps = [parseTimestampFromFilename(row[0]) for row in cur.fetchall()]
 
     byDate = {}
@@ -68,30 +116,38 @@ def recsByDate(conn):
 
 def recsByGender(conn):
     cur = conn.cursor()
-    cur.execute('SELECT i.s_value, COUNT(*) FROM recording AS r, speaker_info AS i '
-                'WHERE i.speakerId = r.speakerId AND (i.s_key = "sex" OR i.s_key = "gender") '
-                'GROUP BY i.s_value')
+    cur.execute(listIntoMysqlQuery(
+        'SELECT i.s_value, COUNT(*) FROM recording AS r, speaker_info AS i '
+        'WHERE i.speakerId = r.speakerId AND (i.s_key = "sex" OR i.s_key = "gender") '
+        '  AND r.id NOT IN (%s) '
+        'GROUP BY i.s_value', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     return [(gender, count) for gender, count in cur.fetchall()]
 
 def recsByAge(conn):
     cur = conn.cursor()
-    cur.execute('SELECT i.s_value, COUNT(*) FROM recording AS r, speaker_info AS i '
-                'WHERE i.speakerId = r.speakerId AND i.s_key="dob" '
-                'GROUP BY i.s_value')
+    cur.execute(listIntoMysqlQuery(
+        'SELECT i.s_value, COUNT(*) FROM recording AS r, speaker_info AS i '
+        'WHERE i.speakerId = r.speakerId AND i.s_key="dob" '
+        '  AND r.id NOT IN (%s) '
+        'GROUP BY i.s_value', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     return [(year, count) for year, count in cur.fetchall()]
 
 def recsByDevice(conn):
     cur = conn.cursor()
-    cur.execute('SELECT deviceImei, COUNT(*) FROM recording, speaker '
-                'WHERE recording.speakerId = speaker.id '
-                'GROUP BY deviceImei')
+    cur.execute(listIntoMysqlQuery(
+        'SELECT deviceImei, COUNT(*) FROM recording, speaker '
+        'WHERE recording.speakerId = speaker.id '
+        '  AND recording.id NOT IN (%s) '
+        'GROUP BY deviceImei', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     return [(deviceImei or 'No IMEI', count) for deviceImei, count in cur.fetchall()]
 
 def recsByApkAndOs(conn):
     cur = conn.cursor()
-    cur.execute('SELECT device.userAgent FROM recording, session, device '
-                'WHERE recording.speakerId = session.speakerId AND session.deviceId = device.id '
-                'GROUP BY recording.id ')
+    cur.execute(listIntoMysqlQuery(
+        'SELECT device.userAgent FROM recording, session, device '
+        'WHERE recording.speakerId = session.speakerId AND session.deviceId = device.id '
+        '  AND recording.id NOT IN (%s) '
+        'GROUP BY recording.id ', filterCommon.getInvalidIds()), tuple(filterCommon.getInvalidIds()))
     def parseApkVersion(userAgent):
         m = re.search(r'App version: ([0-9\.]+) ', userAgent)
         if m:
@@ -132,12 +188,80 @@ def countTxt():
 def timestamp():
     return time.strftime('%Y-%m-%d %H:%M')
 
+def filterOutUselessRecs(conn):
+    """
+    Very rough, returns ids of recordings we don't want.
+
+    Filters out certain names, a low count of recordings and recordings before a certain date.
+
+    Author: matthias
+    """
+    cur = conn.cursor()
+
+    invalidIds = set()
+    invalidRecCntThreshold = 10 # less than 10
+    upperMatchThreshold = 200 # if invalidSpkrMatch is a match but recs over threshold, still display
+    dateThreshold = datetime.date(2016, 5, 2) # exclude recordings from 1. may and prior
+
+    # by name and recCnt < threshold
+    cur.execute('SELECT speaker.name, speaker.id, COUNT(*) '
+                'FROM recording, speaker '
+                'WHERE recording.speakerId = speaker.id '
+                'GROUP BY recording.speakerId')
+    for name, speakerId, recCnt in cur.fetchall():
+        for invalidMatch in invalidSpkrMatch:
+            if name in invalidSpkrExact or (invalidMatch in name.lower() and recCnt < upperMatchThreshold) or recCnt < invalidRecCntThreshold:
+                cur.execute('SELECT id '
+                            'FROM recording '
+                            'WHERE speakerId = %s' % speakerId)
+                for recordingId in cur.fetchall():
+                    invalidIds.add(recordingId[0])
+
+    # by date
+
+    # We get the filename, since that is currently the only available timestamp
+    # the filename should be in format <username>_<ISO 8601>.wav
+    cur.execute('SELECT filename, id FROM recording')
+    timestamps = [(parseTimestampFromFilename(filename), recId) for filename, recId in cur.fetchall()]
+
+    byDate = {}
+    for ts, recId in timestamps:
+        if ts.date() not in byDate:
+            byDate[ts.date()] = []
+        byDate[ts.date()].append(recId)
+
+    for ts, recIds in byDate.items():
+        yearDiff = dateThreshold.year - ts.year
+        monthDiff = dateThreshold.month - ts.month
+        if yearDiff > 0 or monthDiff > 0 or (dateThreshold - ts).days > 0:
+            invalidIds.update(recIds)
+
+    # remove ids belonging to the validSpkr
+    query = 'SELECT recording.id '\
+            'FROM recording, speaker '\
+            'WHERE recording.speakerId = speaker.id '\
+            '  AND speaker.name IN (%s)'
+    query = listIntoMysqlQuery(query, validSpkr)
+    cur.execute(query, tuple(validSpkr))
+    for recId in cur.fetchall():
+        try:
+            invalidIds.remove(recId[0])
+        except KeyError:
+            pass
+
+    invalidIds = tuple(invalidIds)
+    filterCommon.setInvalidIds(invalidIds)
+
+def listIntoMysqlQuery(query, data):
+    return query % ','.join(['%s'] * len(data))
+
 def main():
     recipients = sys.argv[1:]
     host = hostname()
 
     conn = dbConn()
 
+    filterOutUselessRecs(conn)
 
     msg = MIMEMultipart()
     msg['Subject'] = 'Eyra at {} has recorded {} utterances'.format(host, countRecordings(conn))
