@@ -1,9 +1,9 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
-  "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
-  "license": "MIT",
+  "name": "Eyra",
+  "description": "Speech recognition data gathering tools for under-resoudced languages.",
+  "version": "1.0.0",
+  "homepage": "https://github.com/Eyra-is/Eyra",
+  "license": "APACHE 2.0",
   "private": true,
   "dependencies": {
     "angular": "~1.4.0",
