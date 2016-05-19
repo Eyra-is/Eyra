@@ -1,9 +1,9 @@
 # Eyra TODOS
 
-[FE] - frontend  
-[BE] - backend  
+[FE] - Frontend  
+[BE] - Backend  
 [AA] - Android app  
-[O] - none of the above
+[O] - None of the above
 
 ## High priority
 
