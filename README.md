@@ -34,7 +34,7 @@ TODO: Write more detailed usage here.
     The Flask python code, which handles connections to the mysql database among other things. Also includes the schema for the database and sql code needed for setup. Recordings are saved in `/data/eyra/recordings/` by default (this can be changed in `app.py` by changing `app.config['MAIN_RECORDINGS_PATH']`, should be an absolute path). Number of useful scripts in `scripts/`.
 
 * ##### Frockend (should be renamed)  
-    Code to mock the frontend designed to test the QC (quality control).
+    Code to mock the frontend designed to test the QC (quality control). (not used)
 
 * ##### Frontend  
     The AngularJS code and all related. deploy application using `grunt deploy` in the `da-webapp/` folder. Work in `src/` is then compiled into `app/`.
@@ -94,4 +94,4 @@ TODO: Write credits
 
 ## License and Notice
 
-This software is Licenced under the Apache Version 2.0 licence as stated in LICENCE document. Some parts of the software are licenced under the MIT licence or other licences. These differences are noted in NOTICE document. LICENCE and NOTICE documents are found in the root of the data-aquisistion-toolboox project folder.
+This software is Licenced under the Apache Version 2.0 licence as stated in LICENCE document. Some parts of the software are licenced under the MIT licence or other open licences. These differences are noted in NOTICE document. LICENCE and NOTICE documents are found in the root of the data-aquisistion-toolbox project folder.

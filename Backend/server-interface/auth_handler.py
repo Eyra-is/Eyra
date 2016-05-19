@@ -17,8 +17,9 @@ class User(object):
 # allowed users.. right now passwords stored as plaintexts, but this is
 #   server side, so anyone with access to this could do a lot of damage anyway.
 users = [
+    # change this or add users as you see fit
     User(1, 'rooney@ru.is', 'suchPass'),
-]
+]   
 
 username_table = {u.username: u for u in users}
 userid_table = {u.id: u for u in users}
@@ -36,7 +37,7 @@ class AuthHandler:
     def __init__(self, app):
         # Flask-JWT configurations
 
-        # obviously this key needs to be changed for the github releases... (it's gonna be in the commit logs) 
+        # change this..
         app.config['SECRET_KEY'] = 'SUPER_SECRET_KEY_CHANGE_IN_PRODUCTION_SLASH_GITHUB_RELEASE'
 
         app.config['JWT_AUTH_USERNAME_KEY'] = 'email'
