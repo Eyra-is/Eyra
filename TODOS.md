@@ -41,7 +41,6 @@
 
 ## Low priority
 
-
 * **Fix audio playback issue. On some phones volume is extremely low through the android app. [FE]**
     * Here is an idea: Some phones simply have poor playback unrelated to any app. Letting the app fix things is a bit heavy handed. Might it not be better to attempt to fix these issues by other means first, such as:https://www.androidpit.com/improve-the-sound-and-volume-quality-on-android - Sveinn
     * What phones? Has it been established that this is not a phone issue. How was this issue established. Need a phone that works well and a phone that performs below standard. Does this issue affect recording, thus impairing data quality? Is user experience sufficiently impaired - is it affected? - Sveinn
@@ -65,6 +64,7 @@
 * **Rename minFreeTokenIdx to highest used token idx [FE]**
 * **Fix volume meter on back click. [FE]**
 * **Think about adding underscore for service private functions. [FE]**
+* **Simplify the Gruntfile.js to copy everything (not just specific parts) from src/. [FE]**
 * **Use jshint on all javascript [FE]**
 * **Create pull request on recorderjs about the mozilla bug (window.source) [FE]**
     * [http://stackoverflow.com/questions/22860468/html5-microphone-capture-stops-after-5-seconds-in-firefox](http://stackoverflow.com/questions/22860468/html5-microphone-capture-stops-after-5-seconds-in-firefox)
@@ -72,8 +72,16 @@
     * $rootScope.isLoaded = true  
        right now stays true after the first view you visit. Originally it was $scope.isLoaded and therefore worked as intended, to show the loading screen on long angular processing pages.
 * **Simplify message to users not clicking 'Done this before?' and being already in the database. [FE]**
+* **Improve documentation on the Frontend [FE]**
+    * Describe functions, layout of local db perhaps, etc.
 * **Get rid of auto-accept all https in android app [AA]**
     * In AndroidApp/Eyra/app/src/main/java/is/eyra/eyra/EyraWebViewClient.java 
+* **Add Android app to play store to simplify the process to the user [AA]**
+* **Graceful crash or warning in android app when phone is out of memory (see fabric crash reports) [AA]**
+    * Fatal Exception: java.lang.OutOfMemoryError  
+      java.util.ArrayList.add (ArrayList.java:118)  
+      is.eyra.eyra.Recorder$1.run (Recorder.java:50)  
+      java.lang.Thread.run (Thread.java:841)  
 * **Make server add timestamps to e.g. recordings [BE]**
     * Change databse schema for this.
 * **Generalize the 'if in database, return that id, otherwise insert' [BE]**
