@@ -31,6 +31,7 @@ class filterData():
         return self.invalidIds
 filterCommon = filterData()
 
+# any speaker with a string matching this one (regex) will be excluded from summary
 invalidSpkrMatch = [
     'test'
 ]
@@ -256,6 +257,9 @@ def listIntoMysqlQuery(query, data):
     return query % ','.join(['%s'] * len(data))
 
 def main():
+    """
+    Usage: python3 send_mail.py email1 email2 etc.
+    """
     recipients = sys.argv[1:]
     host = hostname()
 
