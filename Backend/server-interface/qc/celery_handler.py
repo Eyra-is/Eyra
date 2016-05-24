@@ -2,6 +2,7 @@ import redis
 import datetime
 import time
 import json
+import os
 
 #: Relative imports
 from celery import Celery
@@ -89,13 +90,16 @@ def isSessionOver(sessionId) -> bool:
 #     if isSessionOver(sessionId):
 #         # make sure to delete the report once the session is over (sparking a new task chain
 #         # if user returns to session)
+#         reportPath = 'report/{}/{}'.format(name, sessionId)
+#         report = _redis.get(reportPath).decode('utf-8')
 #         # We also dump the report onto disk (mainly for debugging)
-#         report = _redis.get('report/{}/{}'.format(name, sessionId)).decode('utf-8')
-#         with open('{}/session_{}'.format(celery_config.const['qc_report_dump_path'],
-#                                          sessionId), 'at') as rf:
+#         dumpPath = '{}/{}'.format(celery_config.const['qc_report_dump_path'],
+#                                   reportPath)
+#         os.makedirs(os.path.dirname(dumpPath), exist_ok=True)
+#         with open(dumpPath, 'at') as rf:
 #             print(report, file=rf)
 
-#         _redis.delete('report/{}/{}'.format(name, sessionId))
+#         _redis.delete(reportPath)
 #         return
 
 #     # make sure not to go out of bounds on the recsInfo list
@@ -162,13 +166,16 @@ def qcProcSessionMarosijoModule(name, sessionId, prevTime=None, slistIdx=0, batc
     if isSessionOver(sessionId):
         # make sure to delete the report once the session is over (sparking a new task chain
         # if user returns to session)
+        reportPath = 'report/{}/{}'.format(name, sessionId)
+        report = _redis.get(reportPath).decode('utf-8')
         # We also dump the report onto disk (mainly for debugging)
-        report = _redis.get('report/{}/{}'.format(name, sessionId)).decode('utf-8')
-        with open('{}/session_{}'.format(celery_config.const['qc_report_dump_path'],
-                                         sessionId), 'at') as rf:
+        dumpPath = '{}/{}'.format(celery_config.const['qc_report_dump_path'],
+                                  reportPath)
+        os.makedirs(os.path.dirname(dumpPath), exist_ok=True)
+        with open(dumpPath, 'at') as rf:
             print(report, file=rf)
 
-        _redis.delete('report/{}/{}'.format(name, sessionId))
+        _redis.delete(reportPath)
         return
 
     # make sure not to go out of bounds on the recsInfo list
@@ -233,13 +240,16 @@ def qcProcSessionCleanupModule(name, sessionId, prevTime=None, slistIdx=0, batch
     if isSessionOver(sessionId):
         # make sure to delete the report once the session is over (sparking a new task chain
         # if user returns to session)
+        reportPath = 'report/{}/{}'.format(name, sessionId)
+        report = _redis.get(reportPath).decode('utf-8')
         # We also dump the report onto disk (mainly for debugging)
-        report = _redis.get('report/{}/{}'.format(name, sessionId)).decode('utf-8')
-        with open('{}/session_{}'.format(celery_config.const['qc_report_dump_path'],
-                                         sessionId), 'at') as rf:
+        dumpPath = '{}/{}'.format(celery_config.const['qc_report_dump_path'],
+                                  reportPath)
+        os.makedirs(os.path.dirname(dumpPath), exist_ok=True)
+        with open(dumpPath, 'at') as rf:
             print(report, file=rf)
 
-        _redis.delete('report/{}/{}'.format(name, sessionId))
+        _redis.delete(reportPath)
         return
 
     # make sure not to go out of bounds on the recsInfo list
