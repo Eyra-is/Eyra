@@ -31,9 +31,9 @@ This list is not exhaustive.
     
     The setup is a typical auto-setup of a simple app. Here is a list of some of the components, by no means comprehensive  
     * `AndroidApp/Eyra/app/src/main/`  
-        * `AndroidManifest.xml`
+        * `AndroidManifest.xml`  
         * `java/is/eyra/eyra/*.java`  
-            The java code.
+            The java code.  
         * `res/values/strings.xml`  
             Contains some useful constants, including the current `website_url` used.
             
