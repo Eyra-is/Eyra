@@ -1,6 +1,6 @@
 {
-  "name": "Eyra",
-  "description": "Speech recognition data gathering tools for under-resoudced languages.",
+  "name": "eyra",
+  "description": "Speech recognition data gathering tools for under-resourced languages.",
   "version": "1.0.0",
   "homepage": "https://github.com/Eyra-is/Eyra",
   "license": "APACHE 2.0",
