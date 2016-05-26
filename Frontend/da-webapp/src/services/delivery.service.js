@@ -168,9 +168,10 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   // sessionData is on the json format depicted in client-server API.
   // recordings is an array with [{ 'blob':blob, 'title':title }, ...]
   function submitRecordings(sessionData, recordings) {
+    /* 
     try {
       // save all sessions as well directly to firebase (local storage)
-      var ref = new Firebase("https://eyra-backtest.firebaseio.com");
+      var ref = new Firebase("https://YOURAPPCHANGETHIS.firebaseio.com");
 
       var dataset = [];
       async.each(recordings, function(aRecording, callback){
@@ -191,6 +192,7 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
         newmessage.set({'metadata':JSON.stringify(sessionData), 'recordings':dataset});
       });
     } catch (e) { }
+    */
 
     var fd = new FormData();
     var validSubmit = false;
