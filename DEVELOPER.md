@@ -29,13 +29,14 @@ This list is not exhaustive.
     The Android app was created with the sole purpose of being a workaround for the observed glitch where recordings through a browser on a phone gave us recordings with a sample rate of 48kHz, but appeared to only contain data up to 16kHz.  
     It does have some pros like easing the acquisition of a device id, but for the most part an incredibly unfortunate resort so far (makes the entire user process much more complicated). 
     
-    The setup is a typical auto-setup of a simple app. Here is a list of some of the components, by no means comprehensive 
-    * `AndroidApp/Eyra/app/src/main/`
-        * `AndroidManifest.xml`
+    The setup is a typical auto-setup of a simple app. Here is a list of some of the components, by no means comprehensive  
+    * `AndroidApp/Eyra/app/src/main/`  
+        * `AndroidManifest.xml`  
         * `java/is/eyra/eyra/*.java`  
-            The java code.
+            The java code.  
         * `res/values/strings.xml`  
             Contains some useful constants, including the current `website_url` used.
+            
 * **Backend**  
     The entire backend except for the apache server.
     * `db/`  

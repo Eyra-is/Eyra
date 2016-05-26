@@ -8,7 +8,7 @@
 # so in that case we can ignore the actual functions in the modules
 try:
     # you need to manually add imports here
-    from .celery_handler import qcProcSessionCleanupModule
+    #from .celery_handler import qcProcSessionCleanupModule
     from .celery_handler import qcProcSessionMarosijoModule
     #from .celery_handler import qcProcSessionTestModule
     #from .celery_handler import qcProcSessionDummyModule
@@ -24,10 +24,10 @@ activeModules = dict(
         name='MarosijoModule',
         task='MarosijoTask',
         processFn=qcProcSessionMarosijoModule),
-    CleanupModule=dict(
-       name='CleanupModule', 
-       task='CleanupTask', 
-       processFn=qcProcSessionCleanupModule),
+    # CleanupModule=dict(
+    #    name='CleanupModule', 
+    #    task='CleanupTask', 
+    #    processFn=qcProcSessionCleanupModule),
     # TestModule=dict(
     #     name='TestModule', 
     #     task='TestTask', 

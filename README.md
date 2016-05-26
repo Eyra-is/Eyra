@@ -88,15 +88,18 @@ along with constant vigilance as project head by
 * Jón Guðnason
 
 Original developers at Reykjavik University:
-* Matthías Pétursson
-* Róbert Kjaran
-* Simon Klüpfel
-* Sveinn Ernstsson
+
+* Matthías Pétursson  
+* Róbert Kjaran  
+* Simon Klüpfel  
+* Sveinn Ernstsson  
 
 Many thanks to the people at Google:
-* Oddur Kjartansson
-* Linne Ha
-* Martin Jansche
+
+* Oddur Kjartansson  
+* Linne Ha  
+* Martin Jansche  
+* and more  
 
 
 ## License

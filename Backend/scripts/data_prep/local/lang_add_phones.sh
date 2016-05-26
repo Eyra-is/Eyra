@@ -51,7 +51,7 @@ perl -ane '@A=split(" ",$_); $w = shift @A; $p = shift @A; @A>0||die;
          print "$A[$n]_E\n"; } ' < $lexiconp > $tmp/lexiconp.pre_phones
 
 cat $lang/phones/nonsilence.txt \
-  | awk '{printf "!%s %.6f %s\n", gensub(/_[BEIS]/, "", $1), 1.00000, $1}' > $tmp/lexiconp.phones
+  | awk '{p=$1; gsub(/_[BEIS]/, "", p); printf "!%s %.6f %s\n", p, 1.00000, $1}' > $tmp/lexiconp.phones
 
 cat $tmp/lexiconp.pre_phones $tmp/lexiconp.phones > $dstlang/lexiconp.txt
 
@@ -112,3 +112,5 @@ utils/make_lexicon_fst.pl --pron-probs $dstlang/lexiconp_disambig.txt $sil_prob 
              --keep_isymbols=false --keep_osymbols=false |   \
   fstaddselfloops  "grep -e '#0' -e '#00' $dstlang/phones/disambig.txt | utils/sym2int.pl $dstlang/phones.txt |" $dstlang/phones/wdisambig.int | \
   fstarcsort --sort_type=olabel > $dstlang/L_disambig.fst
+
+awk 'END {printf "$LMLM %d", NR}' < $dstlang/words.txt >> $dstlang/words.txt
