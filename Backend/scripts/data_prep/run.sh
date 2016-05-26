@@ -34,6 +34,8 @@ if [ $stage -le 0 ]; then
     utils/fix_data_dir.sh \
         data/all
 
+    ln -s all data/train
+
     # echo "Splitting into a train and dev set"
     # utils/subset_data_dir_tr_cv.sh \
     #     --cv-utt-percent 10        \
