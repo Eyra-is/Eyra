@@ -131,7 +131,8 @@ This list is not exhaustive.
     
     
 * Until more sophisticated apache monitoring is implemented (hint hint TODO), monitoring apache in a local setup is possible by navigating to https://localhost/server-status during the gathering.
-        
+
+* If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in `index.html` and the code at the top of `services/delivery.service.js`->`submitRecordings`.        
 
 ## Quality Control (QC)
 

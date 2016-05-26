@@ -1,6 +1,6 @@
 <!doctype html>
 
-<html lang="en" ng-app="daApp" manifest="app.appcache"><!-- comment the appcache for quick development -->
+<html lang="en" ng-app="daApp" manifest="app.appcache">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,10 +9,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/@@app.css">
-    <script type="text/javascript" 
+    <!--<script type="text/javascript" 
     src="https://cdn.firebase.com/js/client/2.4.2/firebase.js"></script>
     <script type="text/javascript" 
-    src="https://cdnjs.cloudflare.com/ajax/libs/async/1.5.2/async.js"></script>
+    src="https://cdnjs.cloudflare.com/ajax/libs/async/1.5.2/async.js"></script>-->
 </head>
 <body>
     <!-- BEGIN: Pre-Bootstrap Loading Screen. -->
@@ -53,9 +53,7 @@
             </div>
           </div>
         </nav>
-        <div ng-view class="view"><!-- possibly put loading here too -->
-
-        </div>
+        <div ng-view class="view"><!-- possibly put loading here too --></div>
     </div>
     
     <!-- this commit of recorderjs (before ES6 support) must be non-minified
