@@ -6,7 +6,7 @@ Check out our site, [eyra.is](http://eyra.is/).
 
 ## Installation
 
-Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and **Ubuntu 14.04** to a lesser degree.
+Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and to a lesser degree, **Ubuntu 14.04**.
 
 The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in `AndroidApp`). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
     
@@ -104,6 +104,4 @@ Many thanks to the people at Google:
 
 ## License
 
-This software is licenced under the Apache Version 2.0 licence as stated in the LICENCE document. Some parts of the software are licenced under the MIT licence or other open licences. These differences are noted in NOTICE document. 
-
-
+This software is licenced under the Apache Version 2.0 licence as stated in the LICENCE document. Some parts of the software are licenced under the MIT licence or other open licences. These differences are noted in NOTICE document.
