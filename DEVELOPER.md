@@ -2,6 +2,8 @@
 
 This document describes the software in more detail, steps to take when using the software/making modifications, a description of how to use the quality control, and how the different components are linked together.
 
+A recommended read as well is the article published on this software, which can be found at `Docs/Petursson_et_al_2016.pdf`. It describes many design criteria along with how the software operates and more.
+
 ## Development
 
 ### Quick description of folder structure
@@ -11,6 +13,9 @@ This document describes the software in more detail, steps to take when using th
 
 * **Backend**  
     The Flask python code, which handles connections to the MySQL database among other things. Also includes the schema for the database, the entire quality control (QC) and sql code needed for setup. Recordings are saved in `/data/eyra/recordings/` by default (this can be changed in `app.py` by changing `app.config['MAIN_RECORDINGS_PATH']`, should be an absolute path). Number of useful scripts in `scripts/` and `qc/scripts/`.
+
+* **Docs**  
+    Some additional documentation to this guide and the README.md.
 
 * **Frontend**  
     The AngularJS code and all related. deploy application using `grunt deploy` in the `da-webapp/` folder (or `./Setup/setup.sh --frontend-app` from project root). Work in `src/` is then compiled into `app/`.
@@ -101,6 +106,7 @@ This list is not exhaustive.
 
 ### Some useful info
 * A very useful command to restart the Flask application (python backend) is `sudo service apache2 restart`.
+* Prompts and tokens are used interchangeably. Originally we called them tokens, but later decided to start calling them prompts.
 * Look at `ClientServerAPI.md` in the project root for the REST api which is used to transmit data between client and server. This document needs to be maintained if there are made modifications to the methods therein.
 
 * Logs are located in `Local/Log`. A typical use case would be to for example have a terminal open with a `tail -f {error.log,celery.log}` to watch the apache error log and the celery (QC) log respectively.

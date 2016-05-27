@@ -2,7 +2,7 @@
 
 Eyra provides tools for data gathering designed to be used to make speech corpora for under-resourced languages.  
 
-Check out our site, [eyra.is](http://eyra.is/).
+The team at Reykjavik University published an article on this software for the SLTU 2016 conference, which can be found online and in this repository at `Docs/Petursson_et_al_2016.pdf`.
 
 ## Installation
 
@@ -55,14 +55,17 @@ Setup a server (we use apache).
 ### Basic usage:
 
 In the GUI
+
 1. Hit begin  
 2. Type your username (anything)  
 3. Enter your info (gender, etc.)
 4. Hit Rec to start recording and display a prompt
-5. Hit Stop when you have read the prompt
+5. [optional] Hit Skip to skip this prompt and immediately start the next one
+6. Hit Stop when you have read the prompt
 
+See `Docs/UserGuideInstructions.pdf`. An example instructions on recording offline can be found at `Docs/DataUploadingInstructions.pdf`.
 
-TODO: Write more detailed usage / provide link to it.
+If you require your users to give consent for their recordings to be used, you can look at an example participant agreement used at RU at `Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf`. This is only an example, and you should have your lawyers look over your own agreement.
 
 
 ## Contributing
