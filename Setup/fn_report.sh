@@ -1,3 +1,6 @@
+# Copyright 2016 Simon Klüpfel 
+# Apache 2.0
+
 color() {
       printf '\033[%sm%s\033[m' "$@"
       # usage color "31;5" "string"

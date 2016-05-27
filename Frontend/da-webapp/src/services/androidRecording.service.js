@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // service to handle recording through the android WebView.
 // called in exactly the same way as recording.service.js, must therefore export same functions. 

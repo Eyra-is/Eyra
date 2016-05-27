@@ -1,3 +1,9 @@
+/*
+Copyright 2016 Matthias Petursson
+               Sveinn Ernstsson (asyncTokenRead, tokensRead)
+Apache 2.0
+*/
+
 (function () {
 'use strict';
 

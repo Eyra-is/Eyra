@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // handles local forage actions, saves recordings to local db
 

@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // simple wrapper for the angular-localForage library.
 // does nothing except keep a single boolean whether there are any indexed db operations

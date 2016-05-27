@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 // The meat in this Gruntfile is the renaming of files like bla.html -> bla.DATE.html
 //   for the appcache. Also generates the appcache files itself.
 // It's a bit daunting. Some explanations are in the 'deploy' task down below.

@@ -1,5 +1,6 @@
 #!/bin/bash -eu
 # Copyright:  2016  Robert Kjaran <robert@kjaran.com>
+# Apache 2.0
 #
 # Prepares a tarball with files necessary for the Marosijo QC module
 # in Eyra

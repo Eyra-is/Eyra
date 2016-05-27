@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
 
 # https://www.petefreitag.com/item/689.cfm
 # thank you Pete Freitag

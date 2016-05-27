@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 # Copyright:  2016  Robert Kjaran <robert@kjaran.com>
 #                   Matthias Petursson
+# Apache 2.0
 #
 # Prepares a tarball with files necessary for the Cleanup QC module
 # in Eyra

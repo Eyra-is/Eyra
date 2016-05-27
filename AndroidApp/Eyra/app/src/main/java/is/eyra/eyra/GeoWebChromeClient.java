@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 package is.eyra.eyra;
 
 import android.webkit.GeolocationPermissions;

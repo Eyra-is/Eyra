@@ -1,3 +1,7 @@
+# Copyright 2016 Matthias Petursson
+#                Robert Kjaran <robert@kjaran.com> (getRecordingsInfo)
+# Apache 2.0
+
 from flask.ext.mysqldb import MySQL
 from MySQLdb import Error as MySQLError
 import json

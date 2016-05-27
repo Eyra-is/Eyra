@@ -1,3 +1,5 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
 
 # Usage: python tokens_to_sql.py src dest 
 #

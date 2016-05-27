@@ -1,6 +1,5 @@
 # API from Client to Server
 
-
 1. submitRecordings
 ----------------
 

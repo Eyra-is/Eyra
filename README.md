@@ -2,11 +2,11 @@
 
 Eyra provides tools for data gathering designed to be used to make speech corpora for under-resourced languages.  
 
-Check out our site, [eyra.is](http://eyra.is/).
+The team at Reykjavik University published an article on this software for the SLTU 2016 conference, which can be found online and in this repository at `Docs/Petursson_et_al_2016.pdf`.
 
 ## Installation
 
-Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and **Ubuntu 14.04** to a lesser degree.
+Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and to a lesser degree, **Ubuntu 14.04**.
 
 The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in `AndroidApp`). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
     
@@ -55,14 +55,17 @@ Setup a server (we use apache).
 ### Basic usage:
 
 In the GUI
+
 1. Hit begin  
 2. Type your username (anything)  
 3. Enter your info (gender, etc.)
 4. Hit Rec to start recording and display a prompt
-5. Hit Stop when you have read the prompt
+5. [optional] Hit Skip to skip this prompt and immediately start the next one
+6. Hit Stop when you have read the prompt
 
+See `Docs/UserGuideInstructions.pdf`. An example instructions on recording offline can be found at `Docs/DataUploadingInstructions.pdf`.
 
-TODO: Write more detailed usage / provide link to it.
+If you require your users to give consent for their recordings to be used, you can look at an example participant agreement used at RU at `Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf`. This is only an example, and you should have your lawyers look over your own agreement.
 
 
 ## Contributing
@@ -104,6 +107,4 @@ Many thanks to the people at Google:
 
 ## License
 
-This software is licenced under the Apache Version 2.0 licence as stated in the LICENCE document. Some parts of the software are licenced under the MIT licence or other open licences. These differences are noted in NOTICE document. 
-
-
+This software is licenced under the Apache Version 2.0 licence as stated in the LICENCE document. Some parts of the software are licenced under the MIT licence or other open licences. These differences are noted in NOTICE document.

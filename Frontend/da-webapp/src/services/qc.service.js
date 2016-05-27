@@ -1,3 +1,9 @@
+/*
+Copyright 2016 Matthias Petursson
+               Sveinn Ernstsson (messageClassByAccuracy and more)
+Apache 2.0
+*/
+
 (function () {
 // service to handle all processing realted to the QC. Querying the server, processing the information for example.
 

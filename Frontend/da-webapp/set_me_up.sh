@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2016 Simon Klüpfel 
+# Apache 2.0
 
 SDIR=$( dirname $( readlink -f $0 ) )
 

@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+# Copyright 2016 Robert Kjaran <robert@kjaran.com>
+#                Matthias Petursson (filterOutUselessRecs)
+# Apache 2.0
+
 import os
 import re
 import datetime

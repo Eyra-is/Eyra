@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // send data from one pageview to the next by injecting this service on both sides, 
 // and using get/set with strings as keys.

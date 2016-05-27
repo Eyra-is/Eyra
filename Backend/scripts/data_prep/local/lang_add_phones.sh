@@ -1,7 +1,7 @@
 #!/bin/bash -eu
 #
 # Copyright 2016 Róbert Kjaran <robert@kjaran.com>
-#
+# Apache 2.0
 
 help_message="Usage: $0 <lexiconp> <src-lang> <dst-lang>
 

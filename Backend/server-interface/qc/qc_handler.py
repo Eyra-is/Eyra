@@ -1,3 +1,7 @@
+# Copyright 2016 Matthias Petursson
+#                Robert Kjaran <robert@kjaran.com>
+# Apache 2.0
+
 import redis
 import datetime
 import json
