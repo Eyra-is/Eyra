@@ -52,8 +52,9 @@ def qcDumpRecCountBySession(sessionId):
     """
     minimum = sys.maxsize
     for key, module in activeModules.items():
-        dumpPath = '{}/session_{}'.format(celery_config.const['qc_report_dump_path'],
-                                          sessionId)
+        dumpPath = '{}/report/{}/{}'.format(celery_config.const['qc_report_dump_path'],
+                                            module['name'],
+                                            sessionId)
         try:
             with open(dumpPath, 'r') as f:
                 reports = f.read().splitlines() # might be more than one, if a timeout occurred and recording was resumed
