@@ -49,7 +49,7 @@ Current implementation:
 * json format of response:
 ```
         {
-            "sessionId" : 5
+            "sessionId" : 5, "deviceId" : 6, "speakerId" : 2
         }
 ```
 * url:
