@@ -1,3 +1,6 @@
+# Copyright 2016 Robert Kjaran <robert@kjaran.com>
+# Apache 2.0
+
 import sh
 import tempfile
 import os

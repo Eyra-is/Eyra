@@ -1,4 +1,6 @@
 #!/bin/bash -eu
+# Copyright 2016 Simon Klüpfel 
+# Apache 2.0
 
 # Get the script directory
 SDIR=$( dirname $( readlink -f $0 ) ) 

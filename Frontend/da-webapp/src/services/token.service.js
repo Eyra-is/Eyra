@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // service to query and process tokens from server
 

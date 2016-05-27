@@ -1,3 +1,6 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+
 import redis
 
 # grab celery_config from dir above this one

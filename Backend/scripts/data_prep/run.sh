@@ -4,7 +4,7 @@
 #
 # 2015 Robert Kjaran
 # 2016 Robert Kjaran, Matthias Petursson
-#
+# Apache 2.0
 
 nj=8
 stage=-100

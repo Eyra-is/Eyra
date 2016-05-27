@@ -1,5 +1,7 @@
 #!/bin/bash
-# Copyright:  2016  Robert Kjaran <robert@kjaran.com>
+# Copyright 2016 Robert Kjaran <robert@kjaran.com>
+# Apache 2.0
+
 help_message="Usage: $0
 
 Update schema, label current tokens and add labeled tokens.

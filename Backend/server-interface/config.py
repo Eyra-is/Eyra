@@ -1,3 +1,6 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+
 # for use by other modules to connect to database
 # pretty messy I know.
 # TODO make less messy (e.g. not sporadic config files everywhere)

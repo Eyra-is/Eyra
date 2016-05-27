@@ -1,3 +1,5 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
 
 # Usage: python make_tokens_from_text.py src dest 
 #

@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 -- schema for recordings_master, a database to keep info about recorded audio.
 
 /* -------------------------------------------------------- *

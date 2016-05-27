@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // service for the volume meter, uses volume-meter.js. Code in part from
 //   https://github.com/cwilso/volume-meter

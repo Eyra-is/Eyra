@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
 
 set -x
 

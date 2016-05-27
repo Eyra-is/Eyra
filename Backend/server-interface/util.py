@@ -1,4 +1,8 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+#
 # utility functions for server-interface
+
 import sys
 import unicodedata
 import re
