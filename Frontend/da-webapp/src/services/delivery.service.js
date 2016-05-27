@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // handles http post and get requests to server
 // "implements" the Client-Server API and also handles sending recs from local db when syncing

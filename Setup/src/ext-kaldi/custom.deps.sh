@@ -1,4 +1,6 @@
 #!/bin/bash -xeu
+# Copyright 2016 Simon Klüpfel 
+# Apache 2.0
 
 KALDI_COMMIT="ce708ea1679467b915d50c5439eeb41a249e2d32"
 

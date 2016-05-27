@@ -1,7 +1,8 @@
 #!/bin/bash -eu
 #
 # Copyright 2016 Simon Klüpfel, Róbert Kjaran
-#
+# Apache 2.0
+
 extra_disambig_sym="#00"
 nonfincost=$(echo "-l(1/3)" | bc -l)
 epscost=$nonfincost

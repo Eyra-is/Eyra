@@ -1,3 +1,6 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+
 # Generic config file for all QC.
 # QC runs all the modules specified in the activeModules dict. 
 #   More info in README.md in qc directory.

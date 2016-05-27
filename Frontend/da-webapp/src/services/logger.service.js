@@ -1,3 +1,8 @@
+/*
+Copyright 2016 Matthias Petursson
+Apache 2.0
+*/
+
 (function () {
 // service to log errors/console output. Also saves it to localForage, with key 'logs' as one big string.
 

@@ -1,4 +1,6 @@
 #!/bin/bash -xeu
+# Copyright 2016 Simon Klüpfel 
+# Apache 2.0
 
 COMMIT="20cd196e10831269d459bbead70ff7acdda0c0a2"
 

@@ -1,1 +1,4 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+
 python3 ../scripts/processMIMTokens.py /home/datool/devel/da_local/MIM_prompts/sent_free/sentences/sorted 3 7 dest.txt && awk '!a[$0]++' dest.txt > src/mimtokens.unique.txt && rm dest.txt && cat src/mimtokens.unique.txt <(cut -f2 src/all_rare_tokens_malromur.txt) <(tr -d ',.:;!?-' < src/Eiki_Sentences.txt) <(cut -f2 src/mim_rare_tokens2.txt | awk '{if (NF <= 7) { print }}') | awk '!a[$0]++' > src/mim_malr_tokens_plus_rare.txt && python3 ../scripts/tokens_to_sql.py src/mim_malr_tokens_plus_rare.txt mim_malr_tokens_plus_rare.sql

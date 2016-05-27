@@ -1,3 +1,6 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+
 const = dict(
     # redis vars
     host = 'localhost',

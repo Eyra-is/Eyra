@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
 
 display_usage() { 
     echo -e "Usage:\n$0 total_tokens good_tokens\n\n\
