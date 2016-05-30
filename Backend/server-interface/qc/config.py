@@ -3,7 +3,7 @@
 
 # Generic config file for all QC.
 # QC runs all the modules specified in the activeModules dict. 
-#   More info in README.md in qc directory.
+#   More info in DEVELOPER.md in project root directory.
 
 # this try block is because when importing this file
 # in the setupActiveModules.py script, it did not work.
@@ -17,7 +17,7 @@ try:
     #from .celery_handler import qcProcSessionDummyModule
 except SystemError:
     # and here
-    qcProcSessionCleanupModule = None
+    #qcProcSessionCleanupModule = None
     qcProcSessionMarosijoModule = None
     #qcProcSessionTestModule = None
     #qcProcSessionDummyModule = None

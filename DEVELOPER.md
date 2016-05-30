@@ -144,7 +144,8 @@ This list is not exhaustive.
 
 The quality control is designed to process the recordings and try to improve the quality of gathered data by giving feedback to the user on the quality, allowing him to improve on the recordings he makes.
 
-This QC uses Celery and a task chaining system to handle load and remain scalable (that's the idea anyway). By processing only a batch of recordings at a time, and then putting the continuation back on the queue as a task.
+This QC uses Celery and a task chaining system to handle load and remain scalable (that's the idea anyway). By processing only a batch of recordings at a time, and then putting the continuation back on the queue as a task.  
+See `qc/celery_config.py` for configurable parameters, such as how long a process sleeps on an idle task (no more recordings to be processed yet).
 
 QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in `Backend/server-interface/qc/celery_config.py`. As well as being saved in the Redis datastore (Redis is also used as a message broker).
 
@@ -194,7 +195,8 @@ To add your own QC module (lets call it New), you need to satisfy a couple of cr
 
 The QC saves its reports on disk as well as in memory. This is saved to `/data/eyra/qc_reports` or as specified in `Backend/server-interface/qc/celery_config.py`.
 
-It should be simple to test the QC on a session basis (if the reports don't already exist (they do if you had QC online while the recordings were made)). Simply create a script which queries the correct API endpoint (same as the clients do, see `ClientServerAPI.md`), i.e. `/qc/report/session/<int:sessionId>` for each session you want to generate a QC report for. Take special note though, that you have to routinely check the same sessions again to avoid a timeout (or change the `session_timeout` value in `celery_config.py` and restart celery (e.g. by running `./Setup/setup.sh --backend-qc`)). The timeout is currently 15 minutes.
+It should be simple to test the QC on a session basis (if the reports don't already exist (they do if you had QC online while the recordings were made)). Simply create a script which queries the correct API endpoint (same as the clients do, see `ClientServerAPI.md`), i.e. `/qc/report/session/<int:sessionId>` for each session you want to generate a QC report for. Take special note though, that you have to routinely check the same sessions again to avoid a timeout (or change the `session_timeout` value in `celery_config.py` and restart celery (e.g. by running `./Setup/setup.sh --backend-qc`)). The timeout is currently 15 minutes.  
+And so said script was made, see `qc/scripts/runQCOffline.py`. Depending on your needs you might have to do a `redis-cli -n 1`->`flushdb` and `runQCOffline.py --from_session X` a couple of times to get everything. You probably also want to wrap the script in a `while true; do python3 runQCOffline.py --from_session 500; sleep 300; done`, something like that to avoid a timeout.
 
 There exist scripts to parse these QC dumps (well, only those from the Marosijo module, adding other modules might break this). And as an example, to create a sample of 200 recordings taken randomly from May and June along with its analysis from Marosijo, see `Backend/scripts/{parse_qc_dump.sh,combine_qc_dump_with_recinfo.sh,choose_qc_dump_combined.sh}`. You then have to manually locate those recordings.
 
