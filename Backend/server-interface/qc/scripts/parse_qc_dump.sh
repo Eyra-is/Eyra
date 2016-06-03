@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 # Copyright: 2016 Robert Kjaran <robert@kjaran.com>
-help_message="Usage: $0 <path-to-qc-report-dumps>"
+help_message="Usage: $0 <path-to-qc-report-dumps>
+Grabs the newest line from the session dumps. Only works for the Marosijo module."
 
 if [ $# -ne 1 -o "$1" = "--help" -o "$1" = "-h" ]; then
   echo "$help_message" >&2
