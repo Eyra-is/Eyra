@@ -15,6 +15,12 @@
 /scripts/data_prep/exp
 /scripts/data_prep/mfcc
 
+# ignore firebase local files
+/scripts/firebase/data
+/scripts/firebase/new
+/scripts/firebase/testing
+/scripts/firebase/data.json
+
 # python gitignore https://github.com/github/gitignore/blob/master/Python.gitignore
 
 # Byte-compiled / optimized / DLL files

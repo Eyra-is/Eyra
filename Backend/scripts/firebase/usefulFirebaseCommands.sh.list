@@ -1,0 +1,50 @@
+# grab all the keys from firebase using shallows
+curl -v 'https://YOURFIREBASEAPPHERE.firebaseio.com/.json?shallow=true&auth=YOURCREDENTIALSHERE' > data.json
+
+---
+
+# grab all keys' data from firebase, can run this command in multiple terminals to be faster.
+grep -oE "\"-(.*?)\":true" data.json | tr ',' '\n' | sed "s/^\"//g" | sed "s/\":true$//g" | while read line; do
+    if [ ! -f 'data/'$line'.json' ]; then
+        curl -v 'https://YOURFIREBASEAPPHERE.firebaseio.com/'$line'.json?auth=YOURCREDENTIALSHERE' > 'data/'$line'.json';
+    fi
+done
+
+---
+
+# compare data with mysql database, and copy all files which do not have a corresponding duplicate in the mysql database to the new folder (run this from within data folder)
+for file in ./*; do echo "just to get nice output from mysql have it in a pipe" | if [ $(mysql -u root -p"YOURPASSHERE" -D "recordings_master" -N -e "select count(*) from recording where filename='$(grep -oP "speakerInfo.*?name.*?," "$file" | grep -o 'name.*'| sed 's/^name\\":\\"//' | sed 's/\\",$//' | sed 's/\\"},$//' )_$(grep -oP "recordingsInfo.*?.wav" "$file" | perl -pe "s|recordingsInfo.*?(\d)|\1|")';") -eq 0 ]; then cp "$file" "../new/$file"; fi; done
+
+---
+
+# remove duplicates from new folder if needed (quite likely to have a lot of duplicates, unless a script is done to remove them from firebase)
+# could also, and might be a better idea, to remove the duplicates from data folder, before moving to new.
+reclist=()
+for file in ./*; do
+    recname=$(grep -oP "speakerInfo.*?name.*?," "$file" | grep -o 'name.*'| sed 's/^name\\":\\"//' | sed 's/\\",$//' | sed 's/\\"},$//' )_$(grep -oP "recordingsInfo.*?.wav" "$file" | perl -pe "s|recordingsInfo.*?(\d)|\1|")
+    # check if we have already added this recording to our list, in which case, delete the duplicated data.
+    inlist=0 # 0 false, 1 true
+    for rec in reclist; do
+        if [ "$rec" == "$recname" ]; then
+            echo "moving file with.. $recname"
+            inlist=$(( $inlist + 1 ))
+            mv "$file" test/"$file" # change to rm if this works
+            break
+        fi
+    done
+    echo $inlist
+    if [[ $inlist -eq 0 ]]; then
+        echo "adding.. $recname"
+        reclist+=($recname)
+    else
+        inlist=$(( $inlist - 1 ))
+    fi
+    #echo "reclist: ${reclist[@]}"
+done
+
+---
+
+# decode the encoded wavs and output on a format ready to be put in a lost dir, or inserted into the database (missing scripts for that)
+
+# TODO FINISH thIS
+grep -oE "\"blob64\":\"data:audio/wav;base64,.*?\"" ./-KHhFrcPZ9K0mY6rzaw8.json | sed "s/^\"blob64\":\"data:audio\/wav;base64,//" | sed "s/\".*$//" | base64 --decode > test.wav    
