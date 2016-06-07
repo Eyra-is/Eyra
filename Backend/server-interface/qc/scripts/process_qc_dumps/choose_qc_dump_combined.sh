@@ -1,5 +1,6 @@
 #!/bin/bash -ue
 # Copyright: 2016 Robert Kjaran <robert@kjaran.com>
+# Apache 2.0
 help_message="Usage: $0 <qc-report-dump-combined> <#recs> <from-month> [<to-month>]"
 
 if [ $# -le 3 -a $# -ge 4 -o "${1:-}" = "--help" -o "${1:-}" = "-h" ]; then

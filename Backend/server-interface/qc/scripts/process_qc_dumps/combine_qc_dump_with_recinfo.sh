@@ -1,5 +1,6 @@
 #!/bin/bash 
 # Copyright: 2016 Robert Kjaran <robert@kjaran.com>
+# Apache 2.0
 help_message="Usage: $0  <parse-qc-dump-file>"
 if [ $# -ne 1 -o "$1" = "--help" -o "$1" = "-h" ]; then
   echo "$help_message" >&2
