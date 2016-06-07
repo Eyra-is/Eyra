@@ -196,13 +196,14 @@ To add your own QC module (lets call it New), you need to satisfy a couple of cr
 The QC saves its reports on disk as well as in memory. This is saved to `/data/eyra/qc_reports` or as specified in `Backend/server-interface/qc/celery_config.py`.
 
 It should be simple to test the QC on a session basis (if the reports don't already exist (they do if you had QC online while the recordings were made)). Simply create a script which queries the correct API endpoint (same as the clients do, see `ClientServerAPI.md`), i.e. `/qc/report/session/<int:sessionId>` for each session you want to generate a QC report for. Take special note though, that you have to routinely check the same sessions again to avoid a timeout (or change the `session_timeout` value in `celery_config.py` and restart celery (e.g. by running `./Setup/setup.sh --backend-qc`)). The timeout is currently 15 minutes.  
-And so said script was made, see `qc/scripts/runQCOffline.py`. Depending on your needs you might have to do a `redis-cli -n 1`->`flushdb` and `runQCOffline.py --from_session X` a couple of times to get everything. You probably also want to wrap the script in a `while true; do python3 runQCOffline.py --from_session 500; sleep 300; done`, something like that to avoid a timeout.
+And so said script was made, see [`qc/scripts/runQCOffline.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/scripts/runQCOffline.py). Depending on your needs you might have to do a `redis-cli -n 1`->`flushdb` and `runQCOffline.py --from_session X --to_session Y` a couple of times to get everything. You probably also want to do something like `python3 runQCOffline.py --from_session 1000 --to_session 2000; while true; do python3 runQCOffline.py --requery_sessions --from_session 1000 --to_session 2000; sleep 300; done` to avoid a timeout. Run `python3 runQCOffline.py --help` for more options.  
+If running on a large batch of recordings, it might be better to reduce the timeout and work on a bigger batch size (modifiable in [`qc/celery_handler.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/celery_handler.py)).
 
-There exist scripts to parse these QC dumps (well, only those from the Marosijo module, adding other modules might break this). And as an example, to create a sample of 200 recordings taken randomly from May and June along with its analysis from Marosijo, see `Backend/scripts/{parse_qc_dump.sh,combine_qc_dump_with_recinfo.sh,choose_qc_dump_combined.sh}`. You then have to manually locate those recordings.
+There exist scripts to parse/process these QC dumps (well, mostly those from the Marosijo module, adding other modules might break this). See some useful scripts to this end in [`qc/scripts/process_qc_dumps`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/scripts/process_qc_dumps) And as an example, to create a sample of 200 recordings taken randomly from May and June along with its analysis from Marosijo see below. You then have to manually locate those recordings (hello `find -name`).
 
 **Example usage:**
 ```
 ./parse_qc_dump.sh /data/eyra/qc_reports > /tmp/qc_dump.txt
-./combine_qc_dump_with_recinfo.sh qc_dump.txt > qc_dump_combined.txt
+./combine_qc_dump_with_recinfo.sh /tmp/qc_dump.txt > qc_dump_combined.txt
 ./choose_qc_dump_combined.sh qc_dump_combined.txt 200 05 06
 ```

@@ -95,6 +95,7 @@ def isSessionOver(sessionId) -> bool:
 #         with open(dumpPath, 'at') as rf:
 #             print(report, file=rf)
 
+#         _redis.delete('session/{}/processing'.format(sessionId)) # remove processing flag
 #         _redis.delete(reportPath)
 #         return
 
@@ -163,6 +164,7 @@ def qcProcSessionMarosijoModule(name, sessionId, slistIdx=0, batchSize=5) -> Non
         with open(dumpPath, 'at') as rf:
             print(report, file=rf)
 
+        _redis.delete('session/{}/processing'.format(sessionId)) # remove processing flag
         _redis.delete(reportPath)
         return
 

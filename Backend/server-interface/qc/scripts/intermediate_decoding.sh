@@ -1,3 +1,6 @@
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+
 # can use this to continue selected graph decoding processes (if you stopped them using stop_deocding.sh)
 # by commenting out here and running
 ps aux | grep graph_gen_aa  | awk '{print $2}' | xargs kill -SIGCONT;

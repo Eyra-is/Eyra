@@ -25,7 +25,7 @@ _redis = redis.StrictRedis(
 
 def runQC(from_session, to_session, sleep_between, avoid_timeout):
     """
-    Runs QC on all recordings which haven't been analyzed by QC yet.
+    Runs QC on recordings which haven't been analyzed by QC yet.
     """
     if to_session is None:
         to_session = dbWork.sessionCount()
@@ -34,7 +34,7 @@ def runQC(from_session, to_session, sleep_between, avoid_timeout):
         sesRange = sys.stdin
         prevSes = []
     else:
-        sesRange = range(from_session, to_session + 1)
+        sesRange = range(from_session, min(to_session + 1, dbWork.sessionCount()))
     start = time.time()
     totalDiff = 0
     for i in sesRange:
@@ -65,16 +65,19 @@ def runQC(from_session, to_session, sleep_between, avoid_timeout):
     print('totalDiff:',totalDiff)
 
 def reQuerySessions(from_session, to_session, prevSes=None):
-    print('Doing a re-query of previous sessions up to {}'.format(to_session))
+    if to_session is None:
+        to_session = dbWork.sessionCount()
+
     if to_session == 'stdin':
         secRange = prevSes
     else:
-        secRange = range(from_session, to_session + 1)
+        secRange = range(from_session, min(to_session + 1, dbWork.sessionCount()))
+
+    print('Doing a re-query of previous sessions up to {}'.format(to_session))
     for j in secRange:
-        # assume any session with under this (1) amount of recs would have completed before this time
         if max(qcRedisRecCountBySession(j), qcDumpRecCountBySession(j)) < dbWork.recCountBySession(j):
             sh.curl('-k', 'https://localhost/backend/qc/report/session/{}'.format(j))
-            time.sleep(0.2)
+            time.sleep(0.01)
 
 def qcRedisRecCountBySession(sessionId):
     """
@@ -111,8 +114,9 @@ def qcDumpRecCountBySession(sessionId):
     """
     minimum = sys.maxsize
     for key, module in activeModules.items():
-        dumpPath = '{}/session_{}'.format(celery_config.const['qc_report_dump_path'],
-                                          sessionId)
+        dumpPath = '{}/report/{}/{}'.format(celery_config.const['qc_report_dump_path'],
+                                            module['name'],
+                                            sessionId)
         try:
             with open(dumpPath, 'r') as f:
                 reports = f.read().splitlines() # might be more than one, if a timeout occurred and recording was resumed
@@ -152,7 +156,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description="""
-        Runs QC on all recordings which QC hasn't been run on yet.""")
+        Runs QC on recordings which QC hasn't been run on yet.""")
     parser.add_argument('--from_session', type=int, nargs='?', default=1, help='Session to start querying QC.')
     parser.add_argument('--to_session', type=int, nargs='?', default=None, help='Last session queried.')
     parser.add_argument('--sleep_between', type=float, nargs='?', default=5, help='Time to sleep between curl requests on server in seconds.')

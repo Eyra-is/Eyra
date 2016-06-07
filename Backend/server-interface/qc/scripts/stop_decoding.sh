@@ -1,4 +1,7 @@
-# can use this to stop (but not terminate), i.e. pause, decoding of graphs issued by genGraphs.sh
+# Copyright 2016 Matthias Petursson
+# Apache 2.0
+
+# can use this to stop (but not terminate, use -SIGTERM for that), i.e. pause, decoding of graphs issued by genGraphs.sh
 # by commenting out here, ses also intermediate_decoding.sh to continue
 ps aux | grep graph_gen_aa  | awk '{print $2}' | xargs kill -SIGSTOP;
 ps aux | grep graph_gen_ab  | awk '{print $2}' | xargs kill -SIGSTOP;
