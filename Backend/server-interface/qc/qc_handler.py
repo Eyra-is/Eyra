@@ -178,7 +178,7 @@ class QcHandler(object):
                 if processing:
                     continue
                 else:
-                    self.redis.set('session/{}/processing').format(session_id), 'true')
+                    self.redis.set('session/{}/processing'.format(session_id), 'true')
 
                 # check to see if we have any reports dumped on disk, in which case continue
                 # where they left off

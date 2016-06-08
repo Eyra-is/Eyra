@@ -10,7 +10,7 @@ def run(sessionId):
     _redis = redis.StrictRedis(host='localhost', port=6379, db=1)
 
     report = _redis.get('report/{}/{}'.format(name, sessionId)).decode('utf-8')
-    with open('{}/session_{}'.format('/data/eyra/qc_reports', sessionId), 'at') as rf:
+    with open('{}/report/{}/{}'.format('/data/eyra/qc_reports', name, sessionId), 'at') as rf:
         print(report, file=rf)
 
 if __name__ == '__main__':

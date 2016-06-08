@@ -155,17 +155,24 @@ def qcProcSessionMarosijoModule(name, sessionId, slistIdx=0, batchSize=5) -> Non
     if isSessionOver(sessionId):
         # make sure to delete the report once the session is over (sparking a new task chain
         # if user returns to session)
-        reportPath = 'report/{}/{}'.format(name, sessionId)
-        report = _redis.get(reportPath).decode('utf-8')
-        # We also dump the report onto disk (mainly for debugging)
-        dumpPath = '{}/{}'.format(celery_config.const['qc_report_dump_path'],
-                                  reportPath)
-        os.makedirs(os.path.dirname(dumpPath), exist_ok=True)
-        with open(dumpPath, 'at') as rf:
-            print(report, file=rf)
-
         _redis.delete('session/{}/processing'.format(sessionId)) # remove processing flag
-        _redis.delete(reportPath)
+
+        reportPath = 'report/{}/{}'.format(name, sessionId)
+        try:
+            report = _redis.get(reportPath).decode('utf-8')
+            # We also dump the report onto disk (mainly for debugging)
+            dumpPath = '{}/{}'.format(celery_config.const['qc_report_dump_path'],
+                                      reportPath)
+            os.makedirs(os.path.dirname(dumpPath), exist_ok=True)
+            with open(dumpPath, 'at') as rf:
+                print(report, file=rf)
+
+            _redis.delete(reportPath)
+        except AttributeError as e:
+            print('Error, no report in database.\
+                   Probably due to a timeout before report was made.\
+                   Session id: {}, module: {}'.format(sessionId, name))
+            pass
         return
 
     # make sure not to go out of bounds on the recsInfo list
