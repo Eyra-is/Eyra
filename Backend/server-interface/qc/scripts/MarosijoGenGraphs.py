@@ -75,7 +75,7 @@ def genGraphs(tokensPath, modulePath=None, graphsArkPath=None, graphsScpPath=Non
         makeUtteranceFsts(
             common.phoneLmPath,
             common.symbolTablePath,
-            _in='\n'.join(tokensLines),
+            _in='\n'.join(tokensLines) + '\n',
             _piped=True,
             _err=simpleLog
         ),
