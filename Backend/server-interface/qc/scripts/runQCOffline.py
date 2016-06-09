@@ -56,7 +56,7 @@ def runQC(from_session, to_session, sleep_between, avoid_timeout):
 
         # also routinely check unfinished sessions already checked to avoid a timeout
         end = time.time()
-        if (end - start) > avoid_timeout * 60:
+        if (end - start) > avoid_timeout:
             start = time.time()
             if to_session == 'stdin':
                 reQuerySessions(from_session, to_session, prevSes)
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--from_session', type=int, nargs='?', default=1, help='Session to start querying QC.')
     parser.add_argument('--to_session', type=int, nargs='?', default=None, help='Last session queried.')
     parser.add_argument('--sleep_between', type=float, nargs='?', default=5, help='Time to sleep between curl requests on server in seconds.')
-    parser.add_argument('--avoid_timeout', type=float, nargs='?', default=5, help='Recheck old sessions to avoid a timeout at this interval in minutes. Only check sessions with at least 10 (or something) recordings.')
+    parser.add_argument('--avoid_timeout', type=float, nargs='?', default=300, help='Recheck old sessions to avoid a timeout at this interval in seconds.')
     parser.add_argument('--individual_sessions', action='store_true', help='Uses all sessions in stdin (1 per line) and queries them. Including this flag means to_session and from_session are ignored.')
     parser.add_argument('--requery_sessions', action='store_true', help='Queries all sessions from_session and to_session (this is also done automatically during a normal run, but can be done specifically here). Cannot be run with individual_sessions flag. Including this flag means avoid_timeout and sleep_between are ignored.')
     args = parser.parse_args()
