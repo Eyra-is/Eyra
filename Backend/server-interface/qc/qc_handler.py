@@ -150,8 +150,10 @@ class QcHandler(object):
         # see if there is a returning user to this session, in which case, start
         # counting at the index after the last made recording
         # (slistIdx is not used here unless there isn't a report)
+        # if in qc_offline mode (post-processing), this is not really useful and
+        # can be harmful, since the recordings list doesn't change now.
         recsInfo = self.redis.get('session/{}/recordings'.format(session_id))
-        if recsInfo:
+        if recsInfo and not celery_config.const['qc_offline_mode']:
             recsInfo = json.loads(recsInfo.decode('utf-8'))
             slistIdx = len(recsInfo)
         else:
@@ -173,12 +175,10 @@ class QcHandler(object):
                 reports[name] = json.loads(report.decode("utf-8")) # redis.get returns bytes, so we decode into string
             else:
                 # first check if we are already working on this session with this module, 
-                # in which case do nothing here, otherwise set the processing flag
+                # in which case do nothing here
                 processing = self.redis.get('session/{}/processing'.format(session_id))
                 if processing:
                     continue
-                else:
-                    self.redis.set('session/{}/processing'.format(session_id), 'true')
 
                 # check to see if we have any reports dumped on disk, in which case continue
                 # where they left off

@@ -15,6 +15,8 @@
 
 ## Medium priority
 
+* ~~**Fix bug with 1 token missing per .ark file [QC]**~~
+
 ## Low priority
 
 * **Write QC module for vad? [QC]**
