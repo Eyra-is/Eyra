@@ -119,3 +119,19 @@ class DbWork():
             msg = 'Error grabbing session count.' 
             log(msg, e)
             raise
+
+    def highestSessionId(self):
+        """
+        Returns highest session id used in database.
+        """
+        try:
+            cur = self.db.cursor()
+            cur.execute('SELECT MAX(id) FROM session')
+            sesCnt = cur.fetchone()
+            if sesCnt:
+                return sesCnt[0] # fetchone returns tuple
+            return 0
+        except MySQLdb.Error as e:
+            msg = 'Error grabbing session count.' 
+            log(msg, e)
+            raise

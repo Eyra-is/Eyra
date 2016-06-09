@@ -28,13 +28,13 @@ def runQC(from_session, to_session, sleep_between, avoid_timeout):
     Runs QC on recordings which haven't been analyzed by QC yet.
     """
     if to_session is None:
-        to_session = dbWork.sessionCount()
+        to_session = dbWork.highestSessionId()
 
     if to_session == 'stdin':
         sesRange = sys.stdin
         prevSes = []
     else:
-        sesRange = range(from_session, min(to_session + 1, dbWork.sessionCount()))
+        sesRange = range(from_session, min(to_session + 1, dbWork.highestSessionId()))
     start = time.time()
     totalDiff = 0
     for i in sesRange:
@@ -66,12 +66,12 @@ def runQC(from_session, to_session, sleep_between, avoid_timeout):
 
 def reQuerySessions(from_session, to_session, prevSes=None):
     if to_session is None:
-        to_session = dbWork.sessionCount()
+        to_session = dbWork.highestSessionId()
 
     if to_session == 'stdin':
         secRange = prevSes
     else:
-        secRange = range(from_session, min(to_session + 1, dbWork.sessionCount()))
+        secRange = range(from_session, min(to_session + 1, dbWork.highestSessionId()))
 
     print('Doing a re-query of previous sessions up to {}'.format(to_session))
     for j in secRange:
@@ -144,7 +144,7 @@ def calcTotalQCDone():
     Returns the number of recordings analysed by qc and dumped on disk.
     """
     dbWork = DbWork()
-    numSessions = dbWork.sessionCount()
+    numSessions = dbWork.highestSessionId()
     total = 0
     print('Session','NumRecs','QCAnalysed')
     for i in range(1, numSessions + 1):
