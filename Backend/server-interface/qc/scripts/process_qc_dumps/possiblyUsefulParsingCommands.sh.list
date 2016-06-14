@@ -4,7 +4,8 @@
 # Some possibly useful commands while parsing the QC dumps.
 
 # get rid of duplicates in qc_dump_combined file by sorting on .wav name
-sort -u -k 15 qc_dump_combined.txt
+# removes header (you'll probably want to add that manually)
+tail -n +2 qc_dump_combined.txt | sort -u -k 15
 
 # calculate average accuracy
 cat qc_dump_combined.txt | awk 'BEGIN{tot=0;}{tot+=$3;}END{print tot / NR}'

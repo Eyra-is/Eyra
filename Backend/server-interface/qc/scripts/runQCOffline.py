@@ -157,7 +157,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""
         Runs QC on recordings which QC hasn't been run on yet. 
-        You probably want to modify ../celery_config.py and set 'qc_offline_mode' to True. 
+        You probably want to modify ../celery_config.py and set 'qc_offline_mode' 
+        and 'qc_big_batch_mode' to True. 
         See more detailed instructions in DEVELOPER.md.""")
     parser.add_argument('--from_session', type=int, nargs='?', default=1, help='Session to start querying QC.')
     parser.add_argument('--to_session', type=int, nargs='?', default=None, help='Last session queried.')
