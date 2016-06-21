@@ -28,7 +28,8 @@ celery.conf.update(
     CELERY_RESULT_BACKEND='redis://{}:{}/{}'.format(host, port, backend_db),
     ACKS_LATE=True,
     PREFETCH_MULTIPLIER=1,
-    CELERY_REDIS_MAX_CONNECTIONS=0
+    CELERY_REDIS_MAX_CONNECTIONS=9999,
+    BROKER_POOL_LIMIT=999
 )
 
 # connect to redis

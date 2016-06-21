@@ -5,6 +5,7 @@
 ## High priority
 
 * **seems to be some issue where celery/apache/wsgi can only handle about ~20 qc sessions at a time. After that, it doesn't process more at a time.. (looking at cpu/core usage) [QC]**  
+    * Possibly fixed by changing celery conf, CELERY_REDIS_MAX_CONNECTIONS=9999 and BROKER_POOL_LIMIT=999 - matthias
 * ~~**Fix bug where celery_handler doesn't find a report on a session timeout [QC]**~~
     * [2016-06-03 15:14:09,349: ERROR/MainProcess] Task celery.qcProcSessionMarosijoModule[8a030f1a-6bfa-483e-a2c7-fec9bf69c4a5] raised unexpected: AttributeError("'NoneType' object has no attribute 'decode'",)
     * there also seems to be something writing a lot to disk on / filling the disk up - matthias
@@ -27,7 +28,6 @@
 * **Trim down Kaldi -> Koldi [QC]**
     * We don't need the world, just a few binaries, and the few scripts needed to train a simple system. Could just replace the Makefile...
     * Create a patch that changes the Makefile. Simon already did this for the tools/ directory (with sed though). We also don't really want to compile with debugging symbols (-g) and we want to compile optimized binaries (-O2 or -O3). OpenBLAS should also be an APT dependency, not compiled straight from Github. - Robert
-* **Change min processing time/sleep time for celery tasks to less than a second? (celery_config.py) [QC]**
 * **QC reports should be saved in mysql db [QC]**
 * **Create python extension for kaldi stuff [QC]**
     * By using Cython.
@@ -36,3 +36,4 @@
 * **Make Cleanup put recId instead of tokenId in the returned report [QC]**
     * Should take 2 secs to change..
 * **Handle corrupt/missing/empty wav files on filesystem. [QC]**
+* ~~**Change min processing time/sleep time for celery tasks to less than a second? (celery_config.py) [QC]**~~
