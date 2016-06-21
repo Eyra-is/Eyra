@@ -4,7 +4,7 @@ This document describes the software in more detail, steps to take when using th
 
 A recommended read as well is the article published on this software, which can be found at [`Docs/Petursson_et_al_2016.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/Petursson_et_al_2016.pdf). It describes many design criteria along with how the software operates and more.
 
-## [Development](#development)
+## Development
 
 ### Quick description of folder structure
 
@@ -58,7 +58,7 @@ This list is not exhaustive.
     * [`scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts)  
         Number of useful scripts here.
     * [`server-interface/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface)  
-        Set up as a pretty basic Flask application. Also contains the entire QC (see large [**section**](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#quality_control) below the [**Development**](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#development) section). Entry code is [`app.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/app.py) which handles the routes to implement the [`ClientServerAPI.md`](https://github.com/Eyra-is/Eyra/tree/master/ClientServerAPI.md) and all related. An attempt is made to separate the logic using classes in the [`*_handler.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface)'s. The [`db_handler`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/db_handler.py) uses code from [`config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/config.py) to connect to our MySQL database.
+        Set up as a pretty basic Flask application. Also contains the entire QC (see large [**section**](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#quality-control-qc) below the [**Development**](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#development) section). Entry code is [`app.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/app.py) which handles the routes to implement the [`ClientServerAPI.md`](https://github.com/Eyra-is/Eyra/tree/master/ClientServerAPI.md) and all related. An attempt is made to separate the logic using classes in the [`*_handler.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface)'s. The [`db_handler`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/db_handler.py) uses code from [`config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/config.py) to connect to our MySQL database.
         * [`auth_handler.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/auth_handler.py)  
             Contains allowed `users` to login as admins (under `Settings` in the client app).
         * [`send_mail.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/send_mail.py)  
@@ -77,7 +77,7 @@ This list is not exhaustive.
     * [`da-webapp/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp)  
         A completely useless distinction to have this [`da-webapp`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp) folder :( until they add more components to the Frontend! Stands for "data acquisition webapp". Data acquisition was the project's original title, until Simon came up with Eyra.
         * [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src)  
-            The source, code from here is comiled into the `app/` folder on a `./Setup/setup.sh --frontend-app` or a `grunt deploy` run. Under normal conditions, the application is run from the `app/` folder. Should be pretty straightforward where stuff is here. See [**Run webapp straight from `Frontend/da-webapp/src`**](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md#straight-from-src) in the [**Some useful info**](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md#useful-info) section below on how to work straight from source instead of having to compile into `app/` first. Uses Mozilla's [localForage](https://github.com/mozilla/localForage) to store data in the browsers databases on the client side (for offline use, e.g. store cached recordings). The webapp relies heavily on this database working (user data, device data, prompts etc.).
+            The source, code from here is comiled into the `app/` folder on a `./Setup/setup.sh --frontend-app` or a `grunt deploy` run. Under normal conditions, the application is run from the `app/` folder. Should be pretty straightforward where stuff is here. See **Run webapp straight from `Frontend/da-webapp/src`** in the [**Some useful info**](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md#some-useful-info) section below on how to work straight from source instead of having to compile into `app/` first. Uses Mozilla's [localForage](https://github.com/mozilla/localForage) to store data in the browsers databases on the client side (for offline use, e.g. store cached recordings). The webapp relies heavily on this database working (user data, device data, prompts etc.).
         * `app/`  
             Data generated from [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src) on a `./Setup/setup.sh --frontend-app` or a `grunt deploy` run. The need for a separate build vs source system is for the most part the application cache (appcache). See [appcache is a douche](http://alistapart.com/article/application-cache-is-a-douchebag). In order to work around all the caveats of the beloved (not) appcache, we need to for example change the filenames of views and scripts on each compile, generate a `app/app.appcache` manifest and more. This is all done in [`Gruntfile.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/Gruntfile.js), see more details below. This build process can of course in addition do other useful things such as minifying the javascript code (which it does), and watching changes in the `src/sass/app.scss` file (`grunt watch:sass`). The server that serves the website should serve it from this folder (`app/`).
         * [`Gruntfile.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/Gruntfile.js)  
@@ -104,7 +104,7 @@ This list is not exhaustive.
 
     As always, looking at the components already there will be a much better lesson than this documentation.
 
-### [Some useful info](#useful-info)
+### Some useful info
 * A very useful command to restart the Flask application (python backend) is `sudo service apache2 restart`.
 * Prompts and tokens are used interchangeably. Originally we called them tokens, but later decided to start calling them prompts.
 * Look at [`ClientServerAPI.md`](https://github.com/Eyra-is/Eyra/tree/master/ClientServerAPI.md) in the project root for the REST api which is used to transmit data between client and server. This document needs to be maintained if there are made modifications to the methods therein.
@@ -119,7 +119,7 @@ This list is not exhaustive.
  
     Wifi should now work again.
 
-* [Run webapp straight from `Frontend/da-webapp/src`](#straight-from-src):  
+* Run webapp straight from `Frontend/da-webapp/src`:  
     For development, it can be nice, not having to do a `grunt deploy` (with minification etc. and the time it takes). In which case, you can work straight from source, however some files need to be modified. These are: 
 
     * [`Frontend/da-webapp/src/index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html)  
@@ -139,7 +139,7 @@ This list is not exhaustive.
 
 * If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in [`index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) and the code at the top of [`services/delivery.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/delivery.service.js)->`submitRecordings`.        
 
-## [Quality Control (QC)](#quality-control)
+## Quality Control (QC)
 
 The quality control is designed to process the recordings and try to improve the quality of gathered data by giving feedback to the user on the quality, allowing him to improve on the recordings he makes.
 
@@ -157,7 +157,7 @@ QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Ba
 * In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/{Cleanup,Marosijo}GenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) or getting it elsewhere). These are used by Marosijo and Cleanup module. Generating them takes a long time, and depends on the number/length of the token list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
 * If you also need the monophone models/tri models/etc for these modules, you can look at [`Backend/scripts/data_prep/data_prep.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/data_prep.py) to create them from data collected with Eyra.  
 
-### [Selecting modules to use](#selecting-modules-to-use)
+### Selecting modules to use
 
 In order to decide which QC modules to use, you need to modify [`config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/config.py), both the imports and the `activeModules` dict to include the QC modules you want to use.
 
@@ -188,7 +188,7 @@ To add your own QC module (lets call it New), you need to satisfy a couple of cr
 * Look at e.g. [`modules/TestModule/TestModule.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/modules/TestModule/TestModule.py) for reference, but you need to create a class, `NewTask`, which inherits from `celery.Task` and which will be used as a base Task for all subtasks using that QC module. This means, all subtasks have access to the data in the `NewTask` class (see [celery docs](http://docs.celeryproject.org/en/latest/userguide/tasks.html#custom-task-classes) for more details on this).
   * `NewTask` needs to be able to connect to the redis datastore, to modify the report for this QC module for each session. (with key **report/NewModule/session_id** or as specified in [`redis_layout.md`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/redis_layout.md)) It is important that this report be JSON (double quotes people), use e.g. `json.dumps` before writing to redis datastore.
   * `NewTask` needs to define a method, `processBatch` which handles the processing that QC module needs to do. This method, takes as an argument a session id and indices (=[] when no new recordings are to be processed, in which case the function should return `True`) for recordings of that session to process in this batch (this list is stored in redis datastore by QC handler), and the task chaining which Celery uses, expects this processing function to work only on a small batch of recordings at a time (e.g. 5), so as to not take too long and be able to write intermediary results to redis to display on the client app. `processBatch` might take additional arguments, as specified in [`modules/TestModule/TestModule.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/modules/TestModule/TestModule.py).
-* Modify the [`config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/config.py) script, as specified in the [**Selecting modules to use**](#selecting-modules-to-use) section.
+* Modify the [`config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/config.py) script, as specified in the [**Selecting modules to use**](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#selecting-modules-to-use) section.
 * Notes:
   * All files in `modules/NewModule/local` will be ignored by git as per [.gitignore](https://github.com/Eyra-is/Eyra/tree/master/Backend/.gitignore)).
 
@@ -196,7 +196,6 @@ To add your own QC module (lets call it New), you need to satisfy a couple of cr
 
 The QC saves its reports on disk as well as in memory. This is saved to `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py).
 
-<<<<<<< HEAD
 It should be simple to test the QC on a session basis (if the reports don't already exist (they do if you had QC online while the recordings were made)). Simply create a script which queries the correct API endpoint (same as the clients do, see `ClientServerAPI.md`), i.e. `/qc/report/session/<int:sessionId>` for each session you want to generate a QC report for. Take special note though, that you have to routinely check the same sessions again to avoid a timeout (or change the `session_timeout` value in `celery_config.py` and restart celery (e.g. by running `./Setup/setup.sh --backend-qc`)). The timeout is currently 15 minutes.  
 And so said script was made, see [`qc/scripts/runQCOffline.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/scripts/runQCOffline.py).  
 Depending on your needs you might have to do a `runQCOffline.py --from_session X --to_session Y` a couple of times to get everything. You probably also want to do something like `python3 runQCOffline.py --from_session 1000 --to_session 2000; while true; do python3 runQCOffline.py --requery_sessions --from_session 1000 --to_session 2000; sleep 300; done` to avoid a timeout and modify [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/celery_config.py) and set `qc_offline_mode` to `True`. Run `python3 runQCOffline.py --help` for more options.  
@@ -210,11 +209,6 @@ which 5 times over, runs the QC on sessions with ids `0..10500`, and queries eac
 In dire situations do a `redis-cli -n 1`->`flushdb` (or -n 0). And then restart Celery/apache. Or a computer restart to free memory.
 
 There exist scripts to parse/process these QC dumps (well, mostly those from the Marosijo module, adding other modules might break this). See some useful scripts to this end in [`qc/scripts/process_qc_dumps`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/scripts/process_qc_dumps) And as an example, to create a sample of 200 recordings taken randomly from May and June along with its analysis from Marosijo see below. You then have to manually locate those recordings (hello `find -name`).
-=======
-It should be simple to test the QC on a session basis (if the reports don't already exist (they do if you had QC online while the recordings were made)). Simply create a script which queries the correct API endpoint (same as the clients do, see [`ClientServerAPI.md`](https://github.com/Eyra-is/Eyra/tree/master/ClientServerAPI.md)), i.e. `/qc/report/session/<int:sessionId>` for each session you want to generate a QC report for. Take special note though, that you have to routinely check the same sessions again to avoid a timeout (or change the `session_timeout` value in [`celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py) and restart celery (e.g. by running `./Setup/setup.sh --backend-qc`)). The timeout is currently 15 minutes.
-
-There exist scripts to parse these QC dumps (well, only those from the Marosijo module, adding other modules might break this). And as an example, to create a sample of 200 recordings taken randomly from May and June along with its analysis from Marosijo, see [`Backend/scripts/{parse_qc_dump.sh,combine_qc_dump_with_recinfo.sh,choose_qc_dump_combined.sh}`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts). You then have to manually locate those recordings.
->>>>>>> master
 
 **Example usage:**
 ```
