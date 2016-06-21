@@ -83,3 +83,55 @@ class DbWork():
                 raise
             else:
                 return False
+
+    def recCountBySession(self, sessionId):
+        """
+        Returns recording count as found in database for session.
+        0 on failure
+
+        Parameters:
+            sessionId       id of session
+        """
+        try:
+            cur = self.db.cursor()
+            cur.execute('SELECT COUNT(*) FROM recording WHERE sessionId=%s', (sessionId,))
+            recCnt = cur.fetchone()
+            if recCnt:
+                return recCnt[0] # fetchone returns tuple
+            return 0
+        except MySQLdb.Error as e:
+            msg = 'Error grabbing rec count for session: {}'.format(sessionId) 
+            log(msg, e)
+            raise
+
+    def sessionCount(self):
+        """
+        Returns session count from database.
+        """
+        try:
+            cur = self.db.cursor()
+            cur.execute('SELECT COUNT(*) FROM session')
+            sesCnt = cur.fetchone()
+            if sesCnt:
+                return sesCnt[0] # fetchone returns tuple
+            return 0
+        except MySQLdb.Error as e:
+            msg = 'Error grabbing session count.' 
+            log(msg, e)
+            raise
+
+    def highestSessionId(self):
+        """
+        Returns highest session id used in database.
+        """
+        try:
+            cur = self.db.cursor()
+            cur.execute('SELECT MAX(id) FROM session')
+            sesCnt = cur.fetchone()
+            if sesCnt:
+                return sesCnt[0] # fetchone returns tuple
+            return 0
+        except MySQLdb.Error as e:
+            msg = 'Error grabbing session count.' 
+            log(msg, e)
+            raise

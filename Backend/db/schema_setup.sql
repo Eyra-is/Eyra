@@ -54,7 +54,7 @@ alter table speaker convert to character set utf8 collate utf8_general_ci;
 create table speaker_info (
     id int not null auto_increment primary key,
     speakerId int not null,
-    s_key varchar(255) not null, -- use key/value system to allow for flexible speaker info, comma seperated
+    s_key varchar(255) not null, -- use key/value system to allow for flexible speaker info
     s_value varchar(255) not null,
     foreign key (speakerId) references speaker(id),
     unique (speakerId, s_key)

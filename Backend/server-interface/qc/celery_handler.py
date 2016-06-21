@@ -5,6 +5,7 @@ import redis
 import datetime
 import time
 import json
+import os
 
 #: Relative imports
 from celery import Celery
@@ -24,7 +25,11 @@ broker = 'redis://{}:{}/{}'.format(host, port, broker_db)
 
 celery = Celery(broker=broker)
 celery.conf.update(
-    CELERY_RESULT_BACKEND='redis://{}:{}/{}'.format(host, port, backend_db)
+    CELERY_RESULT_BACKEND='redis://{}:{}/{}'.format(host, port, backend_db),
+    ACKS_LATE=True,
+    PREFETCH_MULTIPLIER=1,
+    CELERY_REDIS_MAX_CONNECTIONS=9999,
+    BROKER_POOL_LIMIT=999
 )
 
 # connect to redis
@@ -56,19 +61,47 @@ def isSessionOver(sessionId) -> bool:
         return True
     return False
 
+def handleSessionOver(name, sessionId) -> None:
+    """
+    Removes the redis 'session/<sessionId>/processing' flag and dumps report on disk
+    at celery_config.const['qc_report_dump_path'].
+
+    Parameters:
+        name        name of the module, e.g. 'MarosijoModule'
+        sessionId   id of session
+    """
+    # make sure to delete the report once the session is over (sparking a new task chain
+    # if user returns to session), unless in celery_config.const['qc_big_batch'] mode.
+    _redis.delete('session/{}/processing'.format(sessionId)) # remove processing flag
+
+    reportPath = 'report/{}/{}'.format(name, sessionId)
+    try:
+        report = _redis.get(reportPath).decode('utf-8')
+        # We also dump the report onto disk
+        dumpPath = '{}/{}'.format(celery_config.const['qc_report_dump_path'],
+                                  reportPath)
+        os.makedirs(os.path.dirname(dumpPath), exist_ok=True)
+        with open(dumpPath, 'at') as rf:
+            print(report, file=rf)
+
+        _redis.delete(reportPath)
+    except AttributeError as e:
+        print('Error, no report in database.\
+               Probably due to a timeout before report was made.\
+               Session id: {}, module: {}'.format(sessionId, name))
 
 # this code is used as template for the setupActiveModules.py script
 # should be commented out here
 # @@CELERYQCPROCESSTEMPLATE
-# @celery.task(base=TestTask, name='celery.qcProcSessionTestModule')
-# def qcProcSessionTestModule(name, sessionId, prevTime=None, slistIdx=0, batchSize=5) -> None:
+# @celery.task(base=MarosijoTask, name='celery.qcProcSessionMarosijoModule')
+# def qcProcSessionMarosijoModule(name, sessionId, slistIdx=0, batchSize=5) -> None:
 #     """
 #     Goes through the list of recordings for this session in the redis database
 #     located at: 'session/sessionId/recordings', containing a list of all current
 #     recordings of this session, in the backend continuing from
 #     slistIdx. 
 
-#     Performs qcProcSessionTestModule.processBatch which does the processing, 
+#     Performs qcProcSessionMarosijoModule.processBatch which does the processing, 
 #     it must take exactly 3 arguments, the first being the name used for identification
 #     in the redis datastore (e.g. 'report/name/sessionId'), and
 #     the second is sessionId, third is a list of indices of recordings to process (empty
@@ -77,28 +110,16 @@ def isSessionOver(sessionId) -> bool:
 #     report in the redis datastore. Obviously, processBatch needs to be a
 #     synchronous function. If processBatch returns False, stop this particular task chain.
 
-#     prevTime is the timestamp at which the previous instance of this task
-#     put itself back on the queue. prevTime should be None when this chain
-#     is started for the first time. Checks are made if the this prevTime was too short a while
-#     ago to continue just adding tasks in rapid succession on the queue which takes up CPU,
-#     in which case a delay is made.
-
 #     Only processes batchSize recs at a time, until calling itself recursively
 #     with the updated slistIdx (and by that placing itself at the back
 #     of the celery queue), look at instagram, that's how they do it xD
 #     """
 
-#     if isSessionOver(sessionId):
-#         # make sure to delete the report once the session is over (sparking a new task chain
-#         # if user returns to session)
-#         # We also dump the report onto disk (mainly for debugging)
-#         report = _redis.get('report/{}/{}'.format(name, sessionId)).decode('utf-8')
-#         with open('{}/session_{}'.format(celery_config.const['qc_report_dump_path'],
-#                                          sessionId), 'at') as rf:
-#             print(report, file=rf)
-
-#         _redis.delete('report/{}/{}'.format(name, sessionId))
+#     if not celery_config.const['qc_big_batch_mode'] and isSessionOver(sessionId):
+#         handleSessionOver(name, sessionId)
 #         return
+
+#     _redis.set('session/{}/processing'.format(sessionId), 'true')
 
 #     # make sure not to go out of bounds on the recsInfo list
 #     recsInfo = _redis.get('session/{}/recordings'.format(sessionId))
@@ -113,28 +134,37 @@ def isSessionOver(sessionId) -> bool:
 #     # new index in list for next task in this task chain
 #     newSListIdx = slistIdx+len(indices)
 
+#     prevTime = datetime.datetime.now()
+#     result = qcProcSessionMarosijoModule.processBatch(name, sessionId, indices)
+
+#     # offline big batch qc run on data, in which case, dump report straight after it is done. 
+#     # Don't wait for a timeout.
+#     if celery_config.const['qc_big_batch_mode']:
+#         handleSessionOver(name, sessionId)
+
 #     # stall if this task executes too rapidly
 #     curTime = datetime.datetime.now()
 #     if prevTime is not None:
 #         diff = (curTime - prevTime).microseconds
 #         if diff < celery_config.const['task_min_proc_time']:
-#             # the last processing task was issued only less than task_min_proc_time ago
-#             #   wait for a second, in order to not put tasks in such rapid succession
-#             #   on the queue.
 #             time.sleep(celery_config.const['task_delay'])
 
-#     result = qcProcSessionTestModule.processBatch(name, sessionId, indices)
+#     if celery_config.const['qc_big_batch_mode']:
+#         return
+
 #     if result:
 #         # continue the task chain
-#         qcProcSessionTestModule.apply_async(
-#            args=[name, sessionId, curTime, newSListIdx, batchSize])
+#         qcProcSessionMarosijoModule.apply_async(
+#            args=[name, sessionId, newSListIdx, batchSize])
+#     else:
+#         _redis.delete('session/{}/processing'.format(sessionId)) # remove processing flag
 # @@/CELERYQCPROCESSTEMPLATE
 
 # this code is generated by setupActiveModules.py script
 # be careful modifying this, it is overwritten on a setupActiveModules.py run
 # @@CELERYQCPROCESSTASKS
 @celery.task(base=MarosijoTask, name='celery.qcProcSessionMarosijoModule')
-def qcProcSessionMarosijoModule(name, sessionId, prevTime=None, slistIdx=0, batchSize=5) -> None:
+def qcProcSessionMarosijoModule(name, sessionId, slistIdx=0, batchSize=5) -> None:
     """
     Goes through the list of recordings for this session in the redis database
     located at: 'session/sessionId/recordings', containing a list of all current
@@ -150,28 +180,16 @@ def qcProcSessionMarosijoModule(name, sessionId, prevTime=None, slistIdx=0, batc
     report in the redis datastore. Obviously, processBatch needs to be a
     synchronous function. If processBatch returns False, stop this particular task chain.
 
-    prevTime is the timestamp at which the previous instance of this task
-    put itself back on the queue. prevTime should be None when this chain
-    is started for the first time. Checks are made if the this prevTime was too short a while
-    ago to continue just adding tasks in rapid succession on the queue which takes up CPU,
-    in which case a delay is made.
-
     Only processes batchSize recs at a time, until calling itself recursively
     with the updated slistIdx (and by that placing itself at the back
     of the celery queue), look at instagram, that's how they do it xD
     """
 
-    if isSessionOver(sessionId):
-        # make sure to delete the report once the session is over (sparking a new task chain
-        # if user returns to session)
-        # We also dump the report onto disk (mainly for debugging)
-        report = _redis.get('report/{}/{}'.format(name, sessionId)).decode('utf-8')
-        with open('{}/session_{}'.format(celery_config.const['qc_report_dump_path'],
-                                         sessionId), 'at') as rf:
-            print(report, file=rf)
-
-        _redis.delete('report/{}/{}'.format(name, sessionId))
+    if not celery_config.const['qc_big_batch_mode'] and isSessionOver(sessionId):
+        handleSessionOver(name, sessionId)
         return
+
+    _redis.set('session/{}/processing'.format(sessionId), 'true')
 
     # make sure not to go out of bounds on the recsInfo list
     recsInfo = _redis.get('session/{}/recordings'.format(sessionId))
@@ -186,21 +204,31 @@ def qcProcSessionMarosijoModule(name, sessionId, prevTime=None, slistIdx=0, batc
     # new index in list for next task in this task chain
     newSListIdx = slistIdx+len(indices)
 
+    prevTime = datetime.datetime.now()
+    result = qcProcSessionMarosijoModule.processBatch(name, sessionId, indices)
+
+    # offline big batch qc run on data, in which case, dump report straight after it is done. 
+    # Don't wait for a timeout.
+    if celery_config.const['qc_big_batch_mode']:
+        handleSessionOver(name, sessionId)
+
     # stall if this task executes too rapidly
     curTime = datetime.datetime.now()
     if prevTime is not None:
         diff = (curTime - prevTime).microseconds
         if diff < celery_config.const['task_min_proc_time']:
-            # the last processing task was issued only less than task_min_proc_time ago
-            #   wait for a second, in order to not put tasks in such rapid succession
-            #   on the queue.
             time.sleep(celery_config.const['task_delay'])
 
-    result = qcProcSessionMarosijoModule.processBatch(name, sessionId, indices)
+    if celery_config.const['qc_big_batch_mode']:
+        return
+
     if result:
         # continue the task chain
         qcProcSessionMarosijoModule.apply_async(
-           args=[name, sessionId, curTime, newSListIdx, batchSize])
+           args=[name, sessionId, newSListIdx, batchSize])
+    else:
+        _redis.delete('session/{}/processing'.format(sessionId)) # remove processing flag
+
 
 
 # @@/CELERYQCPROCESSTASKS

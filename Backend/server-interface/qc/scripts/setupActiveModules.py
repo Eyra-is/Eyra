@@ -13,8 +13,8 @@ sys.path.remove(newPath)
 del newPath
 
 FILENAME = '../celery_handler.py'
-TEMPLATENAME = 'TestModule'
-TEMPLATETASK = 'TestTask'
+TEMPLATENAME = 'MarosijoModule'
+TEMPLATETASK = 'MarosijoTask'
 
 def process():
     """

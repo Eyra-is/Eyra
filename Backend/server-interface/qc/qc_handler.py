@@ -150,8 +150,10 @@ class QcHandler(object):
         # see if there is a returning user to this session, in which case, start
         # counting at the index after the last made recording
         # (slistIdx is not used here unless there isn't a report)
+        # if in qc_offline mode (post-processing), this is not really useful and
+        # can be harmful, since the recordings list doesn't change now.
         recsInfo = self.redis.get('session/{}/recordings'.format(session_id))
-        if recsInfo:
+        if recsInfo and not celery_config.const['qc_offline_mode']:
             recsInfo = json.loads(recsInfo.decode('utf-8'))
             slistIdx = len(recsInfo)
         else:
@@ -172,8 +174,39 @@ class QcHandler(object):
             if report:
                 reports[name] = json.loads(report.decode("utf-8")) # redis.get returns bytes, so we decode into string
             else:
+                # first check if we are already working on this session with this module, 
+                # in which case do nothing here
+                processing = self.redis.get('session/{}/processing'.format(session_id))
+                if processing:
+                    continue
+
+                # check to see if we have any reports dumped on disk, in which case continue
+                # where they left off
+                qcReportPath = '{}/report/{}/{}'.format(celery_config.const['qc_report_dump_path'],
+                                                        name,
+                                                        session_id)
+                try:
+                    with open(qcReportPath, 'r') as f:
+                        reports = f.read().splitlines() # might be more than one, if a timeout occurred and recording was resumed
+                        # sum the recordings of all the reports (usually only one)
+                        totalRecs = 0
+                        for report in reports:
+                            if report == '':
+                                # robustness to extra newlines
+                                continue
+                            report = json.loads(report)
+                            try:
+                                totalRecs += len(report['perRecordingStats'])
+                            except KeyError as e:
+                                # probably a module which doesn't have perRecordingStats, allow it.
+                                break
+                        if totalRecs != 0:
+                            slistIdx = totalRecs
+                except FileNotFoundError as e:
+                    pass
+
                 # start the async processing
-                processFn.delay(name, session_id, None, slistIdx, celery_config.const['batch_size'])
+                processFn.delay(name, session_id, slistIdx, celery_config.const['batch_size'])
 
         if len(reports) > 0:
             return dict(sessionId=session_id, status='processing', modules=reports)
