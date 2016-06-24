@@ -95,3 +95,4 @@
     * For example add a column in the device table, where you could put, phone A or something like that. Easier than having that cumbersome imei.
     * Until this is implemented, a simple sticker on the phones goes a long way. - Matthias
 * **Convert TODOS which are issues, into issues on github [O]**
+* **Table of contents for github readme or at least developer.md [O]**

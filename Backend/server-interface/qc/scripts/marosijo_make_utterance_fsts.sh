@@ -49,7 +49,15 @@ while read line; do
   words=(${words[@]:1})
 
 
-  lmind=$(grep -w "$lmlabel" $symtab | awk '{print $2}')
+  lmind=$(grep -w "$lmlabel" "$symtab" | awk '{print $2}')
+
+  if [ -z "$lmind" ]; then
+    echo >&2
+    echo "ERROR: Could not find $lmlabel in $symtab." >&2
+    echo "Did you forget to run lang_add_phones.sh?" >&2
+    echo "Or did you use the wrong lang folder?" >&2
+    exit 1
+  fi
 
   fstreplace \
     --epsilon_on_replace <( (
