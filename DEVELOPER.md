@@ -137,7 +137,9 @@ This list is not exhaustive.
     
 * Until more sophisticated apache monitoring is implemented (hint hint TODO), monitoring apache in a local setup is possible by navigating to https://localhost/server-status during the gathering.
 
-* If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in [`index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) and the code at the top of [`services/delivery.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/delivery.service.js)->`submitRecordings`.        
+* If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in [`index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) and the code at the top of [`services/delivery.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/delivery.service.js)->`submitRecordings`.
+
+* You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/non_eyra_data1`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/non_eyra_data1)        
 
 ## Quality Control (QC)
 
@@ -155,7 +157,13 @@ QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Ba
 * The QC needs Kaldi to be installed. This is done by running `./Setup/setup.sh --ext-kaldi`. This could take some time (hrs).
 * The QC also needs a worker running constantly. This is for Celery. You need to install Celery and redis-server, this should be in [`Setup/src/backend-qc/*.deps`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/backend-qc). Running `./Setup/setup.sh --backend-qc` should install those for you. Then, the worker is run automatically in the background (see `Setup/src/backend-qc/post_install.sh`), logging to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast). You shouldn't need to manually kill the workers with this setup, uses celery multi (you can also restart the celery worker by running `./Setup/setup.sh --backend-qc`).
 * In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/{Cleanup,Marosijo}GenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) or getting it elsewhere). These are used by Marosijo and Cleanup module. Generating them takes a long time, and depends on the number/length of the token list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
-* If you also need the monophone models/tri models/etc for these modules, you can look at [`Backend/scripts/data_prep/data_prep.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/data_prep.py) to create them from data collected with Eyra.  
+* If you also need the monophone models/tri models/etc for these modules, you can look at [`Backend/scripts/data_prep/run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) and then `Backend/scripts/data_prep/local/prepare_*_deployment.sh` to create them from data collected with Eyra.  
+Here is an example of the commands needed to run to create the models/files for the Marosijo module:
+    * Edit [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) to use your lexicon and phonemes.txt. Comment out stage 3 (only used for Cleanup).
+    * `./run.sh`
+    * `./local/lang_add_phones.sh data/local/dict/lexiconp.txt data/lang data/newlang`
+    * `./local/make_phone_bigram_fst.sh exp/mono data/newlang local/my_phone_fst`
+    * `./local/prepare_marosijo_deployment.sh data/newlang exp/mono local/my_phone_fst 16000 local/marosijo.tgz`
 
 ### Selecting modules to use
 

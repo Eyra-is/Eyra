@@ -10,6 +10,7 @@ import sys
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, 'server-interface'))
 sys.path.append(newPath)
 from config import dbConst # to connect to database
+from util import log
 sys.path.remove(newPath)
 del newPath
 
