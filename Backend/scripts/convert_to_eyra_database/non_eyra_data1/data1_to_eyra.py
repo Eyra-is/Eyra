@@ -6,7 +6,7 @@ import os
 import sys
 import csv
 import sh
-import glob
+import uuid
 
 # mv out of script directory and do relative imports from server-interface.
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, os.path.pardir, 'server-interface'))
@@ -17,6 +17,7 @@ sys.path.remove(newPath)
 del newPath
 
 EYRA_ROOT = '/data/eyra/recordings'
+_db = MySQLdb.connect(**dbConst)
 
 def run(data_path, tsv_name):
     """
@@ -30,8 +31,10 @@ def run(data_path, tsv_name):
     for i in os.listdir(data_path):
         if os.path.isdir(os.path.join(data_path, i)):
             session_id = insertIntoDatabase(i, tsv_data)
-            print(session_id)
             copyToFilesystem(data_path, i, session_id)
+
+    # finally commit if no exceptions
+    _db.commit()
 
 def insertIntoDatabase(session_path, tsv_data):
     """
@@ -48,12 +51,13 @@ def insertIntoDatabase(session_path, tsv_data):
     returns newly created session_id
 
     """
-    _db = MySQLdb.connect(**dbConst)
 
     session_name = os.path.basename(session_path)
-    print("Processing session: {}".format(session_name))
+    log("Processing session: {}".format(session_name))
 
     placeholder = 'N/A'
+    session_id = None
+    start_time = str(uuid.uuid4()) # uuid just to bypass unique constraints
 
     i = 0
     for row in tsv_data:
@@ -111,12 +115,12 @@ def insertIntoDatabase(session_path, tsv_data):
                 # session
                 cur.execute('SELECT id FROM session WHERE speakerId=%s AND instructorId=%s \
                              AND deviceId=%s AND location=%s AND start=%s AND end=%s and comments=%s',
-                            (speaker_id, 1, device_id, 'custom location', placeholder, placeholder, environment))
+                            (speaker_id, 1, device_id, 'custom location', start_time, placeholder, environment))
                 session_id = cur.fetchone()
                 if not session_id:
                     cur.execute('INSERT INTO session (speakerId, instructorId, deviceId, location, start, end, comments) \
                                  VALUES (%s, %s, %s, %s, %s, %s, %s)',
-                                (speaker_id, 1, device_id, 'custom location', placeholder, placeholder, environment))
+                                (speaker_id, 1, device_id, 'custom location', start_time, placeholder, environment))
                     session_id = cur.lastrowid
                 else:
                     session_id = session_id[0]
@@ -124,16 +128,17 @@ def insertIntoDatabase(session_path, tsv_data):
                 cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, filename) \
                              VALUES (%s, %s, %s, %s)',
                             (token_id, speaker_id, session_id, filename))
-
-                # finally commit if no exceptions
-                #_db.commit()
             except MySQLdb.Error as e:
                 msg = 'Error inserting info into database.'
                 log(msg, e)
                 raise
         i += 1
 
-    return session_id
+    if session_id is not None:
+        return session_id
+    else:
+        raise ValueError('Warning, no data found for current session, could be a session folder not in .tsv, \
+            aborting (remember that files are still copied to EYRA_ROOT even though the db is untouched.')
 
 def copyToFilesystem(data_path, session_path, session_id):
     """
@@ -148,9 +153,12 @@ def copyToFilesystem(data_path, session_path, session_id):
         /data/eyra/recordings/session_<session_id>/wav*.{wav,txt}
     """
     recPath = os.path.join(EYRA_ROOT, 'session_{}'.format(session_id))
-    os.makedirs(recPath)
+    os.makedirs(recPath, exist_ok=True)
     full_session_path = os.path.join(data_path, session_path)
-    sh.cp(glob.glob(full_session_path + '/*'), recPath)
+
+    log('Copying all files from {} to {}'.format(full_session_path, recPath))
+    
+    sh.cp(sh.glob(full_session_path + '/*'), recPath)
 
 if __name__ == '__main__':
     import argparse
@@ -167,7 +175,19 @@ if __name__ == '__main__':
                  epilogue_length total_audio_samples audio_sample_size sample_coding cluster_id 
                  sample_rate atomic_type atomic_size audio_sample_type"
               where eyra_id is the filename.
-            - and filename.wav and filename.txt (with the prompt) for each session.""")
+            - and filename.wav and filename.txt (with the prompt) for each session.
+
+        E.g. data_path
+                some_id1
+                    wav1.wav
+                    wav1.txt
+                    ..
+                some_id2
+                    wav10.wav
+                    wav10.txt
+                    ..
+                ..
+                data.tsv""")
     parser.add_argument('data_path', type=str, help='Path to the data on format as in description.')
     parser.add_argument('tsv_name', type=str, help='Basename of the .tsv file located in <data_path>.')
     args = parser.parse_args()
