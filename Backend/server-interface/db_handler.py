@@ -423,6 +423,11 @@ class DbHandler:
         """
         jsonDecoded = None
         sessionId = None
+        # can be a number of messages, depending on the error.
+        # sent back to the user, and used as a flag to see
+        # if recordings should be saved but not put in mysqldb
+        error = '' 
+        errorStatusCode = 400 # modified if something else
 
         # vars from jsonData
         speakerId, instructorId, deviceId, location, start, end, comments = \
@@ -441,6 +446,7 @@ class DbHandler:
      
             if jsonDecoded['type'] == 'session':
                 jsonDecoded = jsonDecoded['data']
+                speakerName = jsonDecoded['speakerInfo']['name']
                 # this inserts speaker into database
                 speakerId = json.loads(
                                 self.processSpeakerData(
@@ -458,49 +464,50 @@ class DbHandler:
                 start = jsonDecoded['start']
                 end = jsonDecoded['end']
                 comments = jsonDecoded['comments']
-                speakerName = jsonDecoded['speakerInfo']['name']
             else:
-                msg = 'Wrong type of data.'
-                log(msg)
-                return dict(msg=msg, statusCode=400)
-
+                error = 'Wrong type of data.'
+                log(error)
         except (KeyError, TypeError, ValueError) as e:
-            msg = 'Session data not on correct format, aborting.'
-            log(msg, e)
-            return dict(msg=msg, statusCode=400)
+            error = 'Session data not on correct format.'
+            log(error, e)
 
-        try: # one big try block simply for readability of code (lol)
-            # insert into session
-            cur = self.mysql.connection.cursor()
+        if not error:
+            try:
+                # insert into session
+                cur = self.mysql.connection.cursor()
 
-            # firstly, check if this session already exists, if so, update end time, otherwise add session
-            cur.execute('SELECT id FROM session WHERE \
-                         speakerId=%s AND instructorId=%s AND deviceId=%s AND location=%s AND start=%s',
-                        (speakerId, instructorId, deviceId, location, start))
-            sessionId = cur.fetchone()
-            if (sessionId is None):
-                # create new session entry in database
-                cur.execute('INSERT INTO session (speakerId, instructorId, deviceId, location, start, end, comments) \
-                             VALUES (%s, %s, %s, %s, %s, %s, %s)', 
-                            (speakerId, instructorId, deviceId, location, start, end, comments))
-                # get the newly auto generated session.id 
+                # firstly, check if this session already exists, if so, update end time, otherwise add session
                 cur.execute('SELECT id FROM session WHERE \
-                             speakerId=%s AND instructorId=%s AND deviceId=%s AND location=%s AND start=%s AND end=%s',
-                            (speakerId, instructorId, deviceId, location, start, end))
-                sessionId = cur.fetchone()[0] # fetchone returns a tuple
-            else:
-                # session already exists, simply update end-time
-                sessionId = sessionId[0] # fetchone() returns tuple
-                cur.execute('UPDATE session \
-                             SET end=%s \
-                             WHERE id=%s', 
-                            (end, sessionId))
-        
+                             speakerId=%s AND instructorId=%s AND deviceId=%s AND location=%s AND start=%s',
+                            (speakerId, instructorId, deviceId, location, start))
+                sessionId = cur.fetchone()
+                if sessionId is None:
+                    # create new session entry in database
+                    cur.execute('INSERT INTO session (speakerId, instructorId, deviceId, location, start, end, comments) \
+                                 VALUES (%s, %s, %s, %s, %s, %s, %s)', 
+                                (speakerId, instructorId, deviceId, location, start, end, comments))
+                    # get the newly auto generated session.id 
+                    cur.execute('SELECT id FROM session WHERE \
+                                 speakerId=%s AND instructorId=%s AND deviceId=%s AND location=%s AND start=%s AND end=%s',
+                                (speakerId, instructorId, deviceId, location, start, end))
+                    sessionId = cur.fetchone()[0] # fetchone returns a tuple
+                else:
+                    # session already exists, simply update end-time
+                    sessionId = sessionId[0] # fetchone() returns tuple
+                    cur.execute('UPDATE session \
+                                 SET end=%s \
+                                 WHERE id=%s', 
+                                (end, sessionId))
+            except MySQLError as e:
+                error = 'Error inserting sessionInfo into database.'
+                errorStatusCode = 500
+                log(error, e)
+
+        try:
             # now populate recordings table and save recordings+extra data to file/s
 
             # make sure path to recordings exists
-            if not os.path.exists(self.recordings_path):
-                os.makedirs(self.recordings_path)
+            os.makedirs(self.recordings_path, exist_ok=True)
 
             for rec in recordings:
                 # grab token to save as extra metadata later, and id to insert into table recording
@@ -514,38 +521,24 @@ class DbHandler:
                     # otherwise, grab it from the database
                     cur.execute('SELECT inputToken FROM token WHERE id=%s', (tokenId,))
                     token = cur.fetchone()
-                    if (token is None):
-                        msg = 'No token with supplied id.'
-                        log(msg.replace('id.','id: %d.' % tokenId))
-                        return dict(msg=msg, statusCode=400)
+                    if token is None:
+                        error = 'No token with supplied id.'
+                        log(error.replace('id.','id: {}.'.format(tokenId)))
                     else:
                         token = token[0] # fetchone() returns tuple
 
-                # save recordings to app.config['MAIN_RECORDINGS_PATH']/session_sessionId/filename
-                sessionPath = os.path.join(self.recordings_path, 'session_'+str(sessionId))
-                if not os.path.exists(sessionPath):
-                    os.mkdir(sessionPath)
-                
-                recName = filename(speakerName) + '_' + filename(rec.filename)
-                wavePath = os.path.join(sessionPath, recName)
-                # rec is a werkzeug FileStorage object
-                rec.save(wavePath)
-                # save additional metadata to text file with same name as recording
-                # open with codecs to avoid encoding issues.
-                # right now, only save the token
-                with open(wavePath.replace('.wav','.txt'), mode='w', encoding='utf8') as f:
-                    f.write(token)
+                if not error:
+                    recName = self.writeRecToFilesystem(rec, token, sessionId, speakerName, lost=False)
+                else:
+                    recName = self.writeRecToFilesystem(rec, token, sessionId, speakerName, lost=True)
 
-                # insert recording data into database
-                cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, filename) \
-                             VALUES (%s, %s, %s, %s)', 
-                            (tokenId, speakerId, sessionId, recName))
-
-            # only commit if we had no exceptions until this point
-            self.mysql.connection.commit()
-
+                if not error:
+                    # insert recording data into database
+                    cur.execute('INSERT INTO recording (tokenId, speakerId, sessionId, filename) \
+                                 VALUES (%s, %s, %s, %s)', 
+                                (tokenId, speakerId, sessionId, recName))
         except MySQLError as e:
-            msg = 'Database error.'
+            msg = 'Error adding recording to database.'
             log(msg, e)
             return dict(msg=msg, statusCode=500)
         except os.error as e:
@@ -557,11 +550,61 @@ class DbHandler:
             log(msg, e)
             return dict(msg=msg, statusCode=400)
 
-        # extra, add the number of tokens (recordings) we have actually received from this speaker
-        numRecs = self.getRecordingCount(speakerName, speakerId, deviceId)
+        # only commit if we had no exceptions until this point
+        # and no error
+        if not error:
+            self.mysql.connection.commit()
 
-        return dict(msg=json.dumps(dict(sessionId=sessionId, deviceId=deviceId, speakerId=speakerId, recsDelivered=numRecs)), 
+            # extra, add the number of tokens (recordings) we have actually received from this speaker
+            numRecs = self.getRecordingCount(speakerName, speakerId, deviceId)
+
+            return dict(msg=json.dumps(dict(sessionId=sessionId, deviceId=deviceId, speakerId=speakerId, recsDelivered=numRecs)), 
                     statusCode=200)
+        else:
+            log('There was an error: {}, not committing to MySQL database.'.format(error))
+            return dict(msg=error, statusCode=errorStatusCode)
+
+    def writeRecToFilesystem(self, rec, token, sessionId, speakerName, lost=False):
+        """
+        Writes rec (as .wav) and token (as .txt with same name as rec) to filesystem at 
+        app.config['MAIN_RECORDINGS_PATH']/session_<sessionId>/filename
+
+        Parameters:
+            rec         a werkzeug FileStorage object representing a .wav recording
+            token       a string representing the prompt read during rec. None if 
+                        there was no token, or an error in retrieving it.
+            sessionId   id of session, None if error obtaining it.
+            speakerName the name of the speaker, None if there was an error
+            lost        True if there was an error in handling the metadata, means we 
+                        still write the recording to file, just categorized as lost.
+
+        Return:
+            recName     returns the name of the saved recording (basename)
+        """
+        if not token:
+            token = 'No prompt.'
+        if not sessionId:
+            sessionId = 'unknown'
+        if not speakerName:
+            speakerName = 'unknown'
+
+        # save recordings to app.config['MAIN_RECORDINGS_PATH']/session_sessionId/filename
+        sessionPath = os.path.join(self.recordings_path, 'session_{}'.format(sessionId))
+        if lost:
+            sessionPath = os.path.join(self.recordings_path, 'lost', 'session_{}'.format(sessionId))
+        os.makedirs(sessionPath, exist_ok=True)
+        
+        recName = filename(speakerName) + '_' + filename(rec.filename)
+        wavePath = os.path.join(sessionPath, recName)
+        # rec is a werkzeug FileStorage object
+        rec.save(wavePath)
+        # save additional metadata to text file with same name as recording
+        # open with utf8 to avoid encoding issues.
+        # right now, only save the token
+        with open(wavePath.replace('.wav','.txt'), mode='w', encoding='utf8') as f:
+            f.write(token)
+
+        return recName
 
     def getRecordingCount(self, speakerName, speakerId, deviceId):
         """
