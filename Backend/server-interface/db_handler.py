@@ -554,16 +554,14 @@ class DbHandler:
         # and no error
         if not error:
             self.mysql.connection.commit()
-        else:
-            log('There was an error: {}, not committing to MySQL database.'.format(error))
 
-        # extra, add the number of tokens (recordings) we have actually received from this speaker
-        numRecs = self.getRecordingCount(speakerName, speakerId, deviceId)
+            # extra, add the number of tokens (recordings) we have actually received from this speaker
+            numRecs = self.getRecordingCount(speakerName, speakerId, deviceId)
 
-        if not error:
             return dict(msg=json.dumps(dict(sessionId=sessionId, deviceId=deviceId, speakerId=speakerId, recsDelivered=numRecs)), 
                     statusCode=200)
         else:
+            log('There was an error: {}, not committing to MySQL database.'.format(error))
             return dict(msg=error, statusCode=errorStatusCode)
 
     def writeRecToFilesystem(self, rec, token, sessionId, speakerName, lost=False):
@@ -601,7 +599,7 @@ class DbHandler:
         # rec is a werkzeug FileStorage object
         rec.save(wavePath)
         # save additional metadata to text file with same name as recording
-        # open with codecs to avoid encoding issues.
+        # open with utf8 to avoid encoding issues.
         # right now, only save the token
         with open(wavePath.replace('.wav','.txt'), mode='w', encoding='utf8') as f:
             f.write(token)
