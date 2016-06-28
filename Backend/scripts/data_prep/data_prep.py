@@ -39,8 +39,7 @@ def genKaldiDatadir(recordings_path, kaldi_datadir_path):
         cur.execute('SELECT recording.id, tokenId, recording.speakerId, sessionId, filename '
                     'FROM ( SELECT speakerId, COUNT(speakerId) '
                     '       AS rCnt FROM recording GROUP BY speakerId ) AS t1, '
-                    '     recording WHERE recording.speakerId = t1.speakerId AND t1.rCnt > %s\
-                          AND recording.id < 6059', # TEMP ADDITION FOR SHITFIX
+                    '     recording WHERE recording.speakerId = t1.speakerId AND t1.rCnt > %s',
                     (REC_COUNT_THRESHOLD,))
         recordings = cur.fetchall()
     except MySQLdb.Error as e:

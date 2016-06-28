@@ -82,8 +82,6 @@ def genGraphs(tokensPath, modulePath=None, graphsArkPath=None, graphsScpPath=Non
             else:
                 raise ValueError('Could not verify token, "{}" with id {}.'.format(token, tokenKey))
 
-            #print(locals())
-
     simpleLog('Compiling the decoding graphs (files {} and {}).  This will take a long time.'
               .format(graphsArkPath, graphsScpPath))
 
