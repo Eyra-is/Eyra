@@ -15,6 +15,9 @@
 /scripts/data_prep/exp
 /scripts/data_prep/mfcc
 
+# ignore test data
+/scripts/test
+
 # python gitignore https://github.com/github/gitignore/blob/master/Python.gitignore
 
 # Byte-compiled / optimized / DLL files
