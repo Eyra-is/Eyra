@@ -1,3 +1,24 @@
+/*
+Copyright 2016 The Eyra Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+/*
+File author/s:
+    Matthias Petursson <oldschool01123@gmail.com>
+*/
+
 insert into token (inputToken)
 values
 (' Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean sed finibus risus. Sed a quam semper, scelerisque urna ac, dapibus nibh. Duis vel diam arcu. Pellentesque a tellus scelerisque, aliquet metus at, elementum felis. Pellentesque molestie sit amet magna quis tempus. Praesent sed lacus a enim euismod fermentum quis ut augue. Vestibulum eget iaculis erat, nec porta felis. Maecenas scelerisque placerat odio. In ornare ipsum nec diam ornare, euismod molestie velit auctor. Fusce egestas ipsum non odio aliquet pellentesque. Fusce vulputate egestas malesuada. Donec in accumsan erat. Integer mattis nulla in odio bibendum, in dignissim nibh lacinia. Aenean vel est vitae sem blandit semper.
