@@ -48,7 +48,6 @@ Setup a server (we use apache).
     
 * **Client-side**  
     Same as the laptop installation, except, no need to manually install the certificates and of course the link to your server depends on where you host it (you might need to change this in the Android app code (see [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md) for details)).
-    
 
 ## Usage
 
@@ -67,18 +66,9 @@ See [`Docs/UserGuideInstructions.pdf`](https://github.com/Eyra-is/Eyra/tree/mast
 
 If you require your users to give consent for their recordings to be used, you can look at an example participant agreement used at RU at [`Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf). This is only an example, and you should have your lawyers look over your own agreement.
 
-
 ## Contributing
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature` (try to follow [this](https://gist.github.com/dmglab/8402579#allowed-prefixes) convention)
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
-
-See a list of our todos in [TODOS.md](https://github.com/Eyra-is/Eyra/tree/master/TODOS.md) and [TODOS_QC.md](https://github.com/Eyra-is/Eyra/tree/master/TODOS_QC.md).  
-Look at [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md) for much more detailed info on how the software operates.
-
+See [`CONTRIBUTING.md`](https://github.com/Eyra-is/Eyra/tree/master/CONTRIBUTING.md). A list of contributors with contact info can be found in the  [`CONTRIBUTORS`](https://github.com/Eyra-is/Eyra/tree/master/CONTRIBUTORS) file.
 
 ## Credits
 
@@ -104,7 +94,6 @@ Many thanks to the people at Google:
 * Martin Jansche  
 * and more  
 
-
 ## License
 
-This software is licenced under the Apache Version 2.0 licence as stated in the [LICENCE](https://github.com/Eyra-is/Eyra/tree/master/LICENSE) document. Some parts of the software are licenced under the MIT licence or other open licences. These differences are noted in [NOTICE](https://github.com/Eyra-is/Eyra/tree/master/NOTICE) document.
+This software is licenced under the Apache Version 2.0 licence as stated in the [LICENCE](https://github.com/Eyra-is/Eyra/tree/master/LICENSE) document. Some parts of the software are licenced under the MIT licence or other open licences. A non-exhaustive list can be found in the [NOTICE](https://github.com/Eyra-is/Eyra/tree/master/NOTICE) document.
