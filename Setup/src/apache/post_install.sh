@@ -22,17 +22,22 @@
   exit 1
 }
 
-
 report "Setting Up Apache ..."
 
 mkdir -p etc/apache2/vhosts/
+
+if [ ! -f etc/apache2/server-status_htpasswd ]; then
+    report "Provide password for /diagnostics-status (server-status)"
+    report "Username will be 'admin'"
+    htpasswd -c etc/apache2/server-status_htpasswd admin
+fi
 
 for i in $(ls -1 /etc/apache2/sites-available/); do
   sudo a2dissite ${i} 
 done && \
 sudo a2ensite datatool.conf && \
 sudo a2dismod mpm_prefork mpm_event && \
-sudo a2enmod ssl wsgi mpm_worker rewrite && \
+sudo a2enmod ssl wsgi mpm_worker rewrite status && \
 sudo service apache2 restart && suc || err
 
 return
