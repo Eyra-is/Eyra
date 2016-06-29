@@ -1,3 +1,21 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Eyra developer's guide](#eyra-developers-guide)
+  - [Development](#development)
+    - [Quick description of folder structure](#quick-description-of-folder-structure)
+    - [Detailed description of the components](#detailed-description-of-the-components)
+    - [Some useful info](#some-useful-info)
+    - [Maintaining code](#maintaining-code)
+  - [Quality Control (QC)](#quality-control-qc)
+    - [Firing up the QC](#firing-up-the-qc)
+    - [Selecting modules to use](#selecting-modules-to-use)
+    - [Creating your own modules](#creating-your-own-modules)
+    - [Running QC offline](#running-qc-offline)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Eyra developer's guide
 
 This document describes the software in more detail, steps to take when using the software/making modifications, a description of how to use the quality control, and how the different components are linked together.
@@ -105,8 +123,11 @@ This list is not exhaustive.
     As always, looking at the components already there will be a much better lesson than this documentation.
 
 ### Some useful info
+
 * A very useful command to restart the Flask application (python backend) is `sudo service apache2 restart`.
+
 * Prompts and tokens are used interchangeably. Originally we called them tokens, but later decided to start calling them prompts.
+
 * Look at [`ClientServerAPI.md`](https://github.com/Eyra-is/Eyra/tree/master/ClientServerAPI.md) in the project root for the REST api which is used to transmit data between client and server. This document needs to be maintained if there are made modifications to the methods therein.
 
 * Logs are located in `Local/Log`. A typical use case would be to for example have a terminal open with a `tail -f {error.log,celery.log}` to watch the apache error log and the celery (QC) log respectively.
@@ -140,6 +161,14 @@ This list is not exhaustive.
 * If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in [`index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) and the code at the top of [`services/delivery.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/delivery.service.js)->`submitRecordings`.
 
 * You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/non_eyra_data1`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/non_eyra_data1)        
+
+### Maintaining code
+
+Most of this should be self explanatory, but if you change code, remember to:
+
+* Change relevant comments.
+* Change relevant documentation (for example here in DEVELOPER.md and any other descriptors)
+* Rerun `doctoc --notitle DEVELOPER.md` if you modify this file. (manual for now) You can install doctoc by running `sudo npm install -g doctoc`.
 
 ## Quality Control (QC)
 
