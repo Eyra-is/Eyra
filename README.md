@@ -66,6 +66,8 @@ See [`Docs/UserGuideInstructions.pdf`](https://github.com/Eyra-is/Eyra/tree/mast
 
 If you require your users to give consent for their recordings to be used, you can look at an example participant agreement used at RU at [`Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf). This is only an example, and you should have your lawyers look over your own agreement.
 
+More details about the software and it's usage can be found in [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md).
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](https://github.com/Eyra-is/Eyra/tree/master/CONTRIBUTING.md). A list of contributors with contact info can be found in the  [`CONTRIBUTORS`](https://github.com/Eyra-is/Eyra/tree/master/CONTRIBUTORS) file.
