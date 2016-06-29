@@ -9,9 +9,9 @@
 
 * **Sync doesn't work properly on many many phones (older os's it seems) [BUG] [FE]**
     * Mismatch between tokens read and utts uploaded and utts read & not uploaded. (big mismatch, like e.g. 200)
-* **Always save recordings even if not inserted into mysql database [BE]**
+* ~~**Add mod_status and any other tools to be able to monitor apache [BE]**~~
+* ~~**Always save recordings even if not inserted into mysql database [BE]**~~
     * Change code in `Backend/server-interface/db_handler.py` to always save recordings even if not inserted into mysql database. Add to e.g. lost dir or something. In order to not lose data.
-* **Add mod_status and any other tools to be able to monitor apache [BE]**
 
 ## Medium priority
 
