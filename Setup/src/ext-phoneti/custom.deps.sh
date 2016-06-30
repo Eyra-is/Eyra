@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # File author/s:
-#     Simon Klüpfel 
+#     Simon Klüpfel <simon.kluepfel@gmail.com> 
 
 COMMIT="dbd09a0db94d29099bb81c958c63bce74a976fc2"
 

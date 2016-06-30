@@ -16,7 +16,7 @@ limitations under the License.
 
 /*
 File author/s:
-    Simon Klüpfel
+    Simon Klüpfel <simon.kluepfel@gmail.com>
     Matthias Petursson <oldschool01123@gmail.com>
 */
 

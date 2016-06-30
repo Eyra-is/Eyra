@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # File author/s:
-#     Simon Klüpfel
+#     Simon Klüpfel <simon.kluepfel@gmail.com>
 
 SDIR=$( dirname $( readlink -f $0 ) )
 

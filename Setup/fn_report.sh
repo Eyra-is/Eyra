@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # File author/s:
-#     Simon Klüpfel 
+#     Simon Klüpfel <simon.kluepfel@gmail.com> 
 
 color() {
       printf '\033[%sm%s\033[m' "$@"

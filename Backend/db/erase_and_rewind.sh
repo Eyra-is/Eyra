@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # File author/s:
-#     Simon Klüpfel
+#     Simon Klüpfel <simon.kluepfel@gmail.com>
 
 BDIR=$( dirname $( readlink -f $0 ) )
 cd $BDIR && mysql -u root -p < erase_and_rewind.sql

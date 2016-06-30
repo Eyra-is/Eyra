@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # File author/s:
-#     Simon Klüpfel 
+#     Simon Klüpfel <simon.kluepfel@gmail.com> 
 
 KALDI_COMMIT="ce708ea1679467b915d50c5439eeb41a249e2d32"
 
