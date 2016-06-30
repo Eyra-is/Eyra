@@ -16,7 +16,7 @@
 
 # File author/s:
 #     Róbert Kjaran <robert@kjaran.com>
-#     Simon Klüpfel
+#     Simon Klüpfel <simon.kluepfel@gmail.com>
 
 extra_disambig_sym="#00"
 nonfincost=$(echo "-l(1/3)" | bc -l)
