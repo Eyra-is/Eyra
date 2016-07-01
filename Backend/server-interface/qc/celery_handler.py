@@ -40,11 +40,14 @@ broker = 'redis://{}:{}/{}'.format(host, port, broker_db)
 celery = Celery(broker=broker)
 celery.conf.update(
     CELERY_RESULT_BACKEND='redis://{}:{}/{}'.format(host, port, backend_db),
-    ACKS_LATE=True,
-    PREFETCH_MULTIPLIER=1,
     CELERY_REDIS_MAX_CONNECTIONS=9999,
     BROKER_POOL_LIMIT=999
 )
+if celery_config.const['qc_big_batch_mode']:
+    celery.conf.update(
+        CELERYD_PREFETCH_MULTIPLIER = 1,
+        BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 172800}  # 48 hours.
+    )
 
 # connect to redis
 _redis = redis.StrictRedis(host=host, port=port, db=backend_db)

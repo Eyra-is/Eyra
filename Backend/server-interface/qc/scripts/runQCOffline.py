@@ -36,6 +36,7 @@ _redis = redis.StrictRedis(
             host=celery_config.const['host'], 
             port=celery_config.const['port'], 
             db=celery_config.const['backend_db'])
+verbose = False
 
 def runQC(from_session, to_session, sleep_between, avoid_timeout):
     """
@@ -49,6 +50,7 @@ def runQC(from_session, to_session, sleep_between, avoid_timeout):
         prevSes = []
     else:
         sesRange = range(from_session, min(to_session + 1, dbWork.highestSessionId()))
+
     start = time.time()
     totalDiff = 0
     for i in sesRange:
@@ -59,8 +61,16 @@ def runQC(from_session, to_session, sleep_between, avoid_timeout):
             prevSes.append(i)
 
         print('Processing session {}'.format(i))
-        recsDone = max(qcRedisRecCountBySession(i), qcDumpRecCountBySession(i))
-        if (recsDone < dbWork.recCountBySession(i)):
+        recsOnDisk = qcDumpRecCountBySession(i)
+        recsInRedis = qcRedisRecCountBySession(i)
+        recsInDb = dbWork.recCountBySession(i)
+        recsDone = max(recsInRedis, recsOnDisk)
+        if verbose:
+            print('Recs done: {}'.format(recsDone))
+            print('..in redis: {}'.format(recsInRedis))
+            print('..on disk: {}'.format(recsOnDisk))
+            print('..recs in db: {}'.format(recsInDb))
+        if (recsDone < recsInDb):
             print('Querying QC for session {}'.format(i))
             sh.curl('-k', 'https://localhost/backend/qc/report/session/{}'.format(i))
             time.sleep(sleep_between)
@@ -180,7 +190,11 @@ if __name__ == '__main__':
     parser.add_argument('--avoid_timeout', type=float, nargs='?', default=300, help='Recheck old sessions to avoid a timeout at this interval in seconds.')
     parser.add_argument('--individual_sessions', action='store_true', help='Uses all sessions in stdin (1 per line) and queries them. Including this flag means to_session and from_session are ignored.')
     parser.add_argument('--requery_sessions', action='store_true', help='Queries all sessions from_session and to_session (this is also done automatically during a normal run, but can be done specifically here). Cannot be run with individual_sessions flag. Including this flag means avoid_timeout and sleep_between are ignored.')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Increase output verbosity.')
     args = parser.parse_args()
+
+    if args.verbose:
+        verbose = True
 
     if args.individual_sessions:
         runQC(None, 'stdin', args.sleep_between, args.avoid_timeout)
