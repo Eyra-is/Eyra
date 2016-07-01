@@ -36,8 +36,7 @@ function utilityService(logger) {
   utilityHandler.stdErrCallback = stdErrCallback;
 
   var CONSTANTS = { 
-    // sentinel value for invalid recordings
-    'invalidTitle' : 'no_data.wav',
+    'invalidTitle' : 'no_data.wav', // sentinel value for invalid recordings
     'tokenThreshold' : 600, 
     'tokenGetCount' : 1500, 
     'QCAccThreshold' : 0.2,
@@ -72,9 +71,8 @@ function utilityService(logger) {
     return idx;
   }
 
-  // part=3, whole=10, accuracy=2 would result in 33.33
+  // part=3, whole=9, accuracy=2 would result in 33.33
   function percentage(part, whole, accuracy) {
-    
     return Math.round(part/whole*100 * Math.pow(10, accuracy)) / Math.pow(10, accuracy);
   }
 
