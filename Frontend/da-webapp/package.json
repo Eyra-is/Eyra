@@ -2,7 +2,7 @@
   "name": "eyra",
   "private": true,
   "version": "1.0.0",
-  "description": "Speech recognition data gathering tools for under-resoudced languages.",
+  "description": "Speech recognition data gathering tools for under-resourced languages.",
   "repository": "https://github.com/Eyra-is/Eyra",
   "license": "APACHE 2.0",
   "devDependencies": {
@@ -18,13 +18,24 @@
     "grunt-ng-annotate": "^1.0.1",
     "grunt-replace": "^0.11.0",
     "grunt-sass": "^1.1.0",
-    "http-server": "^0.6.1"
+    "http-server": "^0.6.1",
+
+    "jasmine-core": "^2.3.4",
+    "karma": "~0.12",
+    "karma-chrome-launcher": "^0.1.12",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-jasmine": "^0.3.5",
+    "karma-junit-reporter": "^0.2.2"
   },
   "scripts": {
     "postinstall": "bower install",
     "prestart": "npm install",
     "start": "http-server -a localhost -p 8000 -c-1",
     "preupdate-webdriver": "npm install",
-    "update-webdriver": "webdriver-manager update"
+    "update-webdriver": "webdriver-manager update",
+
+    "pretest": "npm install",
+    "test": "karma start test/karma.conf.js",
+    "test-single-run": "karma start test/karma.conf.js  --single-run"
   }
 }
