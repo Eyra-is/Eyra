@@ -31,7 +31,7 @@ import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
 import celery_config
-from util import errLog
+from util import errLog, log
 sys.path.remove(newPath)
 del newPath
 
@@ -349,24 +349,26 @@ class _SimpleMarosijoTask(Task):
         return self._common
 
     @property
-    def decodedScpLines(self):
+    def decodedScpRefs(self):
         """
-        Returns graphs.scp contents in memory as a dict.
+        Returns the reference part of graphs.scp contents in memory as a dict. Indexed
+        by the tokenId.
 
-        {'tokenId' -> 'corresponding line in .scp script with no newline at the end'}
+        {'tokenId' -> 'reference in .ark file (corresponding to the data in a .scp file) '}
         so we can take from this the lines we need to form the partial
         .scp to pass into Kaldi scripts
 
         """
-        if not hasattr(self, '_decodedScpLines'):
-            self._decodedScpLines = dict()
+        if not hasattr(self, '_decodedScpRefs'):
+            self._decodedScpRefs = dict()
             with open(self.common.graphsScpPath) as f:
                 for line in f:
                     line = line.strip()
                     tokenKey = line.split()[0]
-                    self._decodedScpLines[tokenKey] = line
+                    arkRef = line.split(' ')[1:]
+                    self._decodedScpRefs[tokenKey] = ' '.join(arkRef)
 
-        return self._decodedScpLines
+        return self._decodedScpRefs
 
     def processBatch(self, name, session_id, indices) -> bool:
         """
@@ -421,21 +423,22 @@ class _SimpleMarosijoTask(Task):
                 graphsScp = []
                 for r in recordings:
                     if self.common.downsample:
-                        print('{token_id} sox {rec_path} -r{sample_freq} -t wav - |'
+                        print('{rec_id} sox {rec_path} -r{sample_freq} -t wav - |'
                               .format(
-                                  token_id=r['tokenId'],
+                                  rec_id=r['recId'],
                                   rec_path=r['recPath'],
                                   sample_freq=self.common.sampleFreq), file=mfccFeatsTmp)
                     else:
-                        print('{} {}'.format(r['tokenId'], r['recPath']),
+                        print('{} {}'.format(r['recId'], r['recPath']),
                               file=mfccFeatsTmp)
 
                     tokenInts = self.common.symToInt(r['token'])
 
-                    print('{} {}'.format(r['tokenId'], tokenInts),
+                    print('{} {}'.format(r['recId'], tokenInts),
                           file=tokensF)
 
-                    graphsScp.append(self.decodedScpLines[str(r['tokenId'])])
+                    graphsScp.append('{} {}'.format(r['recId'],
+                                                    self.decodedScpRefs[str(r['tokenId'])]))
 
                 # make sure .scp file is sorted on keys
                 graphsScp = sorted(graphsScp, key=lambda x: x.split()[0])
@@ -498,7 +501,7 @@ class _SimpleMarosijoTask(Task):
                     (splitAlsoEmpty(line.strip()) for line in hypLines)}
 
             refs = {str(recId): tok_ for recId, tok_ in
-                    ((r['tokenId'], self.common.symToInt(r['token']))
+                    ((r['recId'], self.common.symToInt(r['token']))
                      for r in recordings)}
 
             details = {hypKey: MarosijoAnalyzer(hypTok.split(), refs[hypKey].split()).details() for
@@ -515,15 +518,14 @@ class _SimpleMarosijoTask(Task):
             # TODO: use something other than WER (binary value perhaps)
             cumAccuracy = 0.0
             for r in recordings:
-                wer = edits[str(r['tokenId'])] / len(r['token'].split())
+                wer = edits[str(r['recId'])] / len(r['token'].split())
                 accuracy = 0.0 if 1 - wer < 0 else 1 - wer
                 cumAccuracy += accuracy
 
                 prec = qcReport['perRecordingStats']
                 stats = {"accuracy": accuracy}
-                stats.update(details[str(r['tokenId'])])
-                # FIXME: recordingId should be the actual recording ID... (does't really matter though)
-                prec.append({"recordingId": r['tokenId'], "stats": stats})
+                stats.update(details[str(r['recId'])])
+                prec.append({"recordingId": r['recId'], "stats": stats})
 
             try:
                 avgAccuracy = cumAccuracy / len(qcReport['perRecordingStats'])
