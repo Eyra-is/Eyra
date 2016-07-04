@@ -238,18 +238,17 @@ And so said script was made, see [`qc/scripts/runQCOffline.py`](https://github.c
 Depending on your needs you might have to do a `runQCOffline.py --from_session X --to_session Y` a couple of times to get everything. You probably also want to do something like `python3 runQCOffline.py --from_session 1000 --to_session 2000; while true; do python3 runQCOffline.py --requery_sessions --from_session 1000 --to_session 2000; sleep 300; done` to avoid a timeout and modify [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/celery_config.py) and set `qc_offline_mode` to `True`. Run `python3 runQCOffline.py --help` for more options.  
 Look at `qc/redis_layout.md` to see how you can monitor the redis database during processing. For example, you can run `redis-cli -n 1 -> keys *processing` to see which reports are being processed (or were being processed and encountered an error) and `redis-cli -n 1 -> keys report*` to see which reports are in the redis database but haven't been dumped to disk (you can manually dump using [`qc/scripts/dumpCertainReports.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/scripts/dumpCertainReports.py)).
 
-If running on a large batch of recordings, it might be better to skip the timeout and work on a bigger batch size (modifiable in [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/celery_config.py)). E.g. change `batch_size` to 500. Then you can skip requerying the sessions to avoid the timeout, and they should be done in big batches. An example script which seemed to perform well with the current QC (still some snags) was this one:
+If running on a large batch of recordings, it might be better to skip the timeout and work on a bigger batch size (modifiable in [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/celery_config.py)). E.g. change `batch_size` to 500. Then you can skip requerying the sessions to avoid the timeout, and they should be done in big batches. An example script which seemed to perform well was this one (query each 5 sessions from 116706 to 117330 and wait 20 minutes each 5 sessions.):
 ```
-for k in {1..5}; do for i in {1..105}; do for j in {1..2}; do python3 runQCOffline.py --from_session $(( $(( $(( $i - 1 )) * 100 )) + 1 )) --to_session $(( $i * 100 )) --avoid_timeout 99999 --sleep_between 1; sleep 200; done; sleep 1; done; done
+for i in {23342..23466}; do python3 runQCOffline.py --from_session $(( $(( $(( $i - 1 )) * 5 )) + 1 )) --to_session $(( $i * 5 )) --avoid_timeout 99999 --sleep_between 1; sleep 1200; done
 ```  
-which 5 times over, runs the QC on sessions with ids `0..10500`, and queries each 100 session interval twice each go. This can obviously be different depending on your computer setup (and if the QC gets fixed, this shouldn't be so hard). Don't forget to set `qc_big_batch_mode` to `True` in [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/celery_config.py). That will ignore the timeout altogether, and dump the report on disk the moment it is ready.  
+This can obviously be different depending on your computer setup. Don't forget to set `qc_big_batch_mode` to `True` in [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/celery_config.py). That will ignore the timeout altogether, and dump the report on disk the moment it is ready.  
 In dire situations do a `redis-cli -n 1`->`flushdb` (or -n 0). And then restart Celery/apache. Or a computer restart to free memory.
 
 There exist scripts to parse/process these QC dumps (well, mostly those from the Marosijo module, adding other modules might break this). See some useful scripts to this end in [`qc/scripts/process_qc_dumps`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/scripts/process_qc_dumps) And as an example, to create a sample of 200 recordings taken randomly from May and June along with its analysis from Marosijo see below. You then have to manually locate those recordings (hello `find -name`).
 
 **Example usage:**
 ```
-./parse_qc_dump.sh /data/eyra/qc_reports > /tmp/qc_dump.txt
-./combine_qc_dump_with_recinfo.sh /tmp/qc_dump.txt > qc_dump_combined.txt
+python3 parse_qc_dump.py /data/eyra/qc_reports/report/MarosijoModule > qc_dump_combined.txt
 ./choose_qc_dump_combined.sh qc_dump_combined.txt 200 05 06
 ```

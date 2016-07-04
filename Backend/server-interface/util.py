@@ -21,6 +21,7 @@ import sys
 import unicodedata
 import re
 import MySQLdb
+import os
 
 from datetime import datetime
 from celery.utils.log import get_task_logger
@@ -63,6 +64,16 @@ def filename(name):
     name = unicodedata.normalize('NFKC', name)
     name = re.sub('[-\s]+', '-', name, flags=re.U).strip()
     return name.replace('/', '\\')
+
+def isWavHeaderOnly(wavAbsPath) -> bool:
+    """
+    Parameters:
+        wavAbsPath  absolute path to a wav file
+
+    Return:
+        True if wav file contains only a wav header and no data (is 44 bytes)
+    """
+    return os.path.getsize(wavAbsPath) == 44
 
 class DbWork():
     """
