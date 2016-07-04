@@ -6,6 +6,7 @@
 
 * **seems to be some issue where celery/apache/wsgi can only handle about ~20 qc sessions at a time. After that, it doesn't process more at a time.. (looking at cpu/core usage) [QC]**  
     * Possibly fixed by changing celery conf, CELERY_REDIS_MAX_CONNECTIONS=9999 and BROKER_POOL_LIMIT=999 - matthias
+    * Starting to think it's just the queue system in celery, and that with this configuration, you only get about <50% cpu usage on average with 8 cores. - matthias
 * ~~**Fix bug where celery_handler doesn't find a report on a session timeout [QC]**~~
     * [2016-06-03 15:14:09,349: ERROR/MainProcess] Task celery.qcProcSessionMarosijoModule[8a030f1a-6bfa-483e-a2c7-fec9bf69c4a5] raised unexpected: AttributeError("'NoneType' object has no attribute 'decode'",)
     * there also seems to be something writing a lot to disk on / filling the disk up - matthias
@@ -35,5 +36,6 @@
     * Instead of getting it from text file in db/src and thenverifying with the db... (tunnelvision I had)
 * **Make Cleanup put recId instead of tokenId in the returned report [QC]**
     * Should take 2 secs to change..
-* **Handle corrupt/missing/empty wav files on filesystem. [QC]**
+    * Fixed for Marosijo
+* ~~**Handle corrupt/missing/empty wav files on filesystem. [QC]**~~
 * ~~**Change min processing time/sleep time for celery tasks to less than a second? (celery_config.py) [QC]**~~
