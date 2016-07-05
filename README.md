@@ -2,13 +2,13 @@
 
 Eyra provides tools for data gathering designed to be used to make speech corpora for under-resourced languages.  
 
-The team at Reykjavik University published an article on this software for the SLTU 2016 conference, which can be found online and in this repository at `Docs/Petursson_et_al_2016.pdf`.
+The team at Reykjavik University published an article on this software for the SLTU 2016 conference, which can be found online and in this repository at [`Docs/Petursson_et_al_2016.pdf`](https://github.com/Eyra-is/Eyra/blob/master/Docs/Petursson_et_al_2016.pdf).
 
 ## Installation
 
 Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and to a lesser degree, **Ubuntu 14.04**.
 
-The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in `AndroidApp`). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
+The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in [`AndroidApp`](https://github.com/Eyra-is/Eyra/blob/master/AndroidApp). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
     
 If you want Quality Control (QC) to work, you need to install Kaldi and more, look at how to set it up in DEVELOPER.md. 
 
@@ -22,8 +22,8 @@ Setup a laptop which the phones (recording devices) can connect to in an offline
     
 * **Client-side (on the devices)**
     * Android app  
-        1. Install `AndroidApp/versions/v1.4/app-debug-v1.4.apk` (or whatever is the latest version) on your phone.  
-        2. Install the self-signed certificate on your phone (`Setup/src/apache/tmpl/etc_ssl_certs_rootCA.pem`)
+        1. Install [`AndroidApp/versions/v1.4/app-debug-v1.4.apk`](https://github.com/Eyra-is/Eyra/blob/master/AndroidApp/versions/v1.4/app-debug-v1.4.apk) (or whatever is the latest version) on your phone.  
+        2. Install the self-signed certificate on your phone ([`Setup/src/apache/tmpl/etc_ssl_certs_rootCA.pem`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/apache/tmpl/etc_ssl_certs_rootCA.pem))
         3. Connect to FeedMeData Wifi and start the Eyra Android app.
     * Straight outta browser  
         1. Connect to FeedMeData Wifi.
@@ -39,7 +39,7 @@ Setup a server (we use apache).
 * **Backend**  
     Run `./Setup/setup.sh --all --no-ap`.
 
-    You might want to look at `Setup/src/apache/tmpl/etc_apache2_sites-available_datatool.conf` (src) or `/etc/apache2/sites-enabled/datool.conf` (generated) and e.g. adjust the parameters for the `mpm_worker_module`.  
+    You might want to look at [`Setup/src/apache/tmpl/etc_apache2_sites-available_datatool.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/apache/tmpl/etc_apache2_sites-available_datatool.conf) (src) or `/etc/apache2/sites-enabled/datool.conf` (generated) and e.g. adjust the parameters for the `mpm_worker_module`.  
 
     The laptop setup uses a self-signed certificate (which needs to be manually put on and installed on the phones), but the internet one should use a real certificate (this depends on which certificate used). We used [letsencrypt](https://letsencrypt.org/) for a free certificate. This has to be done manually.
     
@@ -47,8 +47,7 @@ Setup a server (we use apache).
     
     
 * **Client-side**  
-    Same as the laptop installation, except, no need to manually install the certificates and of course the link to your server depends on where you host it (you might need to change this in the Android app code (see DEVELOPER.md for details)).
-    
+    Same as the laptop installation, except, no need to manually install the certificates and of course the link to your server depends on where you host it (you might need to change this in the Android app code (see [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md) for details)).
 
 ## Usage
 
@@ -63,22 +62,15 @@ In the GUI
 5. [optional] Hit Skip to skip this prompt and immediately start the next one
 6. Hit Stop when you have read the prompt
 
-See `Docs/UserGuideInstructions.pdf`. An example instructions on recording offline can be found at `Docs/DataUploadingInstructions.pdf`.
+See [`Docs/UserGuideInstructions.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/UserGuideInstructions.pdf). An example instructions on recording offline can be found at [`Docs/DataUploadingInstructions.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/DataUploadingInstructions.pdf).
 
-If you require your users to give consent for their recordings to be used, you can look at an example participant agreement used at RU at `Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf`. This is only an example, and you should have your lawyers look over your own agreement.
+If you require your users to give consent for their recordings to be used, you can look at an example participant agreement used at RU at [`Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf). This is only an example, and you should have your lawyers look over your own agreement.
 
+More details about the software and it's usage can be found in [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md).
 
 ## Contributing
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature` (try to follow [this](https://gist.github.com/dmglab/8402579#allowed-prefixes) convention)
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
-
-See a list of our todos in TODOS.md and TODOS_QC.md.  
-Look at DEVELOPER.md for much more detailed info on how the software operates.
-
+See [`CONTRIBUTING.md`](https://github.com/Eyra-is/Eyra/tree/master/CONTRIBUTING.md). A list of contributors with contact info can be found in the  [`CONTRIBUTORS`](https://github.com/Eyra-is/Eyra/tree/master/CONTRIBUTORS) file.
 
 ## Credits
 
@@ -104,7 +96,6 @@ Many thanks to the people at Google:
 * Martin Jansche  
 * and more  
 
-
 ## License
 
-This software is licenced under the Apache Version 2.0 licence as stated in the LICENCE document. Some parts of the software are licenced under the MIT licence or other open licences. These differences are noted in NOTICE document.
+This software is licenced under the Apache Version 2.0 licence as stated in the [LICENCE](https://github.com/Eyra-is/Eyra/tree/master/LICENSE) document. Some parts of the software are licenced under the MIT licence or other open licences. A non-exhaustive list can be found in the [NOTICE](https://github.com/Eyra-is/Eyra/tree/master/NOTICE) document.

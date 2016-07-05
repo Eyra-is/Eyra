@@ -1,5 +1,20 @@
-# Copyright 2016 Robert Kjaran <robert@kjaran.com>
-# Apache 2.0
+# Copyright 2016 The Eyra Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# File author/s:
+#     Róbert Kjaran <robert@kjaran.com>
+#     Matthias Petursson <oldschool01123@gmail.com>
 
 import os
 import json
@@ -17,7 +32,7 @@ import os.path
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
 import celery_config
-from util import errLog
+from util import errLog, log, isWavHeaderOnly
 sys.path.remove(newPath)
 del newPath
 
@@ -157,7 +172,16 @@ class MarosijoAnalyzer(object):
         return {'correct': self.nC, 'sub': self.nS, 'ins': self.nI,
                 'del': self.nD, 'distance': self._distance}
 
-    def details(self):
+    def details(self) -> '{onlyInsOrSub: bool\
+            correct: int\
+            sub: int\
+            ins: int\
+            del: int\
+            startdel: int\
+            enddel: int\
+            extraInsertions: int\
+            empty: bool\
+            distance: int}':
         """Returns dict with details of analysis
 
         """
@@ -335,24 +359,26 @@ class _SimpleMarosijoTask(Task):
         return self._common
 
     @property
-    def decodedScpLines(self):
+    def decodedScpRefs(self):
         """
-        Returns graphs.scp contents in memory as a dict.
+        Returns the reference part of graphs.scp contents in memory as a dict. Indexed
+        by the tokenId.
 
-        {'tokenId' -> 'corresponding line in .scp script with no newline at the end'}
+        {'tokenId' -> 'reference in .ark file (corresponding to the data in a .scp file) '}
         so we can take from this the lines we need to form the partial
         .scp to pass into Kaldi scripts
 
         """
-        if not hasattr(self, '_decodedScpLines'):
-            self._decodedScpLines = dict()
+        if not hasattr(self, '_decodedScpRefs'):
+            self._decodedScpRefs = dict()
             with open(self.common.graphsScpPath) as f:
                 for line in f:
                     line = line.strip()
                     tokenKey = line.split()[0]
-                    self._decodedScpLines[tokenKey] = line
+                    arkRef = line.split(' ')[1:]
+                    self._decodedScpRefs[tokenKey] = ' '.join(arkRef)
 
-        return self._decodedScpLines
+        return self._decodedScpRefs
 
     def processBatch(self, name, session_id, indices) -> bool:
         """
@@ -407,69 +433,76 @@ class _SimpleMarosijoTask(Task):
                 graphsScp = []
                 for r in recordings:
                     if self.common.downsample:
-                        print('{token_id} sox {rec_path} -r{sample_freq} -t wav - |'
+                        print('{rec_id} sox {rec_path} -r{sample_freq} -t wav - |'
                               .format(
-                                  token_id=r['tokenId'],
+                                  rec_id=r['recId'],
                                   rec_path=r['recPath'],
                                   sample_freq=self.common.sampleFreq), file=mfccFeatsTmp)
                     else:
-                        print('{} {}'.format(r['tokenId'], r['recPath']),
+                        print('{} {}'.format(r['recId'], r['recPath']),
                               file=mfccFeatsTmp)
 
                     tokenInts = self.common.symToInt(r['token'])
 
-                    print('{} {}'.format(r['tokenId'], tokenInts),
+                    print('{} {}'.format(r['recId'], tokenInts),
                           file=tokensF)
 
-                    graphsScp.append(self.decodedScpLines[str(r['tokenId'])])
+                    graphsScp.append('{} {}'.format(r['recId'],
+                                                    self.decodedScpRefs[str(r['tokenId'])]))
 
                 # make sure .scp file is sorted on keys
                 graphsScp = sorted(graphsScp, key=lambda x: x.split()[0])
                 for line in graphsScp:
                     print(line, file=tokensGraphsScp)
 
-            # We save the features on disk
-            computeMfccFeats(
-                'scp:{}'.format(mfccFeatsScpPath),
-                'ark:{}'.format(mfccFeatsPath))
+            try:
+                # We save the features on disk (the ,p means permissive. Let kaldi ignore errors,
+                # and handle missing recordings later)
+                computeMfccFeats(
+                    'scp,p:{}'.format(mfccFeatsScpPath),
+                    'ark:{}'.format(mfccFeatsPath))
 
-            computeCmvnCmd = ('{kaldi_root}/src/featbin/compute-cmvn-stats ' +
-                              'ark:{mfcc_feats_path} ' +
-                              'ark:- ').format(mfcc_feats_path=mfccFeatsPath,
-                                               kaldi_root=self.common.kaldiRoot)
-            featsCmd = ('{kaldi_root}/src/featbin/apply-cmvn ' +
-                        '"ark:{compute_cmvn_cmd} |" ' +
-                        'ark:{mfcc_feats_path} ' +
-                        '"ark:| {kaldi_root}/src/featbin/add-deltas ark:- ark:-" '
-                       ).format(compute_cmvn_cmd=computeCmvnCmd,
-                                mfcc_feats_path=mfccFeatsPath,
-                                kaldi_root=self.common.kaldiRoot)
+                computeCmvnCmd = ('{kaldi_root}/src/featbin/compute-cmvn-stats ' +
+                                  'ark,p:{mfcc_feats_path} ' +
+                                  'ark:- ').format(mfcc_feats_path=mfccFeatsPath,
+                                                   kaldi_root=self.common.kaldiRoot)
+                featsCmd = ('{kaldi_root}/src/featbin/apply-cmvn ' +
+                            '"ark,p:{compute_cmvn_cmd} |" ' +
+                            'ark:{mfcc_feats_path} ' +
+                            '"ark:| {kaldi_root}/src/featbin/add-deltas ark,p:- ark:-" '
+                           ).format(compute_cmvn_cmd=computeCmvnCmd,
+                                    mfcc_feats_path=mfccFeatsPath,
+                                    kaldi_root=self.common.kaldiRoot)
 
 
-            # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
-            # piping in contents of tokens_graphs_scp_path and writing to edits_path
-            # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
-            #   https://github.com/amoffat/sh/issues/309
-            # ...
-            hypLines = latticeBestPath(
-                gmmLatgenFaster(
-                    '--acoustic-scale=0.1',
-                    '--beam=12',
-                    '--max-active=1000',
-                    '--lattice-beam=10.0',
-                    '--max-mem=50000000',
-                    self.common.acousticModelPath,
-                    'scp,p:{}'.format(tokensGraphsScpPath),  # fsts-rspecifier
-                    'ark:{} |'.format(featsCmd),             # features-rspecifier
-                    'ark:-',                                 # lattice-wspecifier
-                    _err=errLog,
-                    _piped=True),
-                '--acoustic-scale=0.06',
-                '--word-symbol-table={}'.format(self.common.symbolTablePath),
-                'ark:-',
-                'ark,t:-',
-                _iter=True,
-                _err=errLog)
+                # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
+                # piping in contents of tokens_graphs_scp_path and writing to edits_path
+                # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
+                #   https://github.com/amoffat/sh/issues/309
+                # ...
+                hypLines = latticeBestPath(
+                    gmmLatgenFaster(
+                        '--acoustic-scale=0.1',
+                        '--beam=12',
+                        '--max-active=1000',
+                        '--lattice-beam=10.0',
+                        '--max-mem=50000000',
+                        self.common.acousticModelPath,
+                        'scp,p:{}'.format(tokensGraphsScpPath),  # fsts-rspecifier
+                        'ark,p:{} |'.format(featsCmd),           # features-rspecifier
+                        'ark:-',                                 # lattice-wspecifier
+                        _err=errLog,
+                        _piped=True),
+                    '--acoustic-scale=0.06',
+                    '--word-symbol-table={}'.format(self.common.symbolTablePath),
+                    'ark,p:-',
+                    'ark,t:-',
+                    _iter=True,
+                    _err=errLog)
+            except sh.ErrorReturnCode_1 as e:
+                # No data (e.g. all wavs unreadable)
+                hypLines = []
+                log('e.stderr: ', e.stderr)
 
             def splitAlsoEmpty(s):
                 cols = s.split(maxsplit=1)
@@ -484,11 +517,25 @@ class _SimpleMarosijoTask(Task):
                     (splitAlsoEmpty(line.strip()) for line in hypLines)}
 
             refs = {str(recId): tok_ for recId, tok_ in
-                    ((r['tokenId'], self.common.symToInt(r['token']))
+                    ((r['recId'], self.common.symToInt(r['token']))
                      for r in recordings)}
 
             details = {hypKey: MarosijoAnalyzer(hypTok.split(), refs[hypKey].split()).details() for
                        hypKey, hypTok in hyps.items()}
+            # 'empty' analysis in case Kaldi couldn't analyse recording for some reason
+            # look at MarosijoAnalyzer.details() for format
+            placeholderDetails = {
+                'onlyInsOrSub': False,
+                'correct': 0,
+                'sub': 0,
+                'ins': 0,
+                'del': 0,
+                'startdel': 0,
+                'enddel': 0,
+                'extraInsertions': 0,
+                'empty': False,
+                'distance': 0
+            }
 
             edits = {hypKey: details[hypKey]['distance'] for
                      hypKey, hypTok in hyps.items()}
@@ -501,15 +548,43 @@ class _SimpleMarosijoTask(Task):
             # TODO: use something other than WER (binary value perhaps)
             cumAccuracy = 0.0
             for r in recordings:
-                wer = edits[str(r['tokenId'])] / len(r['token'].split())
-                accuracy = 0.0 if 1 - wer < 0 else 1 - wer
+                error = ''
+                try:
+                    wer = edits[str(r['recId'])] / len(r['token'].split())
+                except KeyError as e:
+                    # Kaldi must have choked on this recording for some reason
+                    if isWavHeaderOnly(r['recPath']):
+                        error = 'wav_header_only'
+                        log('Error, only wav header in recording: {} for session: {}'
+                            .format(r['recId'], session_id))
+                    else:
+                        # unknown error
+                        error = 'unknown_error'
+                        log('Error, unknown error processing recording: {} for session {}'
+                            .format(r['recId'], session_id))
+
+                if not error:
+                    accuracy = 0.0 if 1 - wer < 0 else 1 - wer
+                else:
+                    accuracy = 0.0
+                
                 cumAccuracy += accuracy
 
                 prec = qcReport['perRecordingStats']
                 stats = {"accuracy": accuracy}
-                stats.update(details[str(r['tokenId'])])
-                # FIXME: recordingId should be the actual recording ID... (does't really matter though)
-                prec.append({"recordingId": r['tokenId'], "stats": stats})
+                if not error:
+                    analysis = details[str(r['recId'])]
+                    analysis.update(error='no_error')
+                else:
+                    analysis = placeholderDetails
+                    analysis.update(error=error)
+
+                # handle specific errors
+                if error == 'wav_header_only':
+                    analysis.update(empty=True)
+
+                stats.update(analysis)
+                prec.append({"recordingId": r['recId'], "stats": stats})
 
             try:
                 avgAccuracy = cumAccuracy / len(qcReport['perRecordingStats'])
