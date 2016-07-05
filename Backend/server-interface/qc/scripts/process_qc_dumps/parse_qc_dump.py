@@ -90,7 +90,7 @@ def run(dump_path):
                         if not recIds:
                             raise ValueError('Error: no recording id found with prompt {} and session {}.'.format(
                                    token_id, session_id))
-                        recording_id = recIds[0]
+                        recording_id = recIds[0][0]
                         if len(recIds) > 1:
                             log('Warning: same prompt read twice with old report configuration. Cannot\
                                    find all recording ids. Using recId: {} for all.'.format(recording_id), 'warning')
@@ -111,16 +111,12 @@ def run(dump_path):
                         log('Error: no inputToken for token with id: {}'.format(token_id))
                         raise
                     # now we should have all we need to print the correct line for this recording
-                    print('{session_id}\t{token_id}\t{accuracy}\t{onlyInsOrSub}\t{correct}\t{sub}\
-                           \t{ins}\t{dels}\t{startdel}\t{enddel}\t{extraInsertions}\t{empty}\t{distance}\
-                           \t{error}\t{recordingId}\t{filename}\t{token}\t{session_id}'.format(
-                            session_id=session_id, token_id=token_id, accuracy=stats['accuracy'],
-                            onlyInsOrSub=stats['onlyInsOrSub'], correct=stats['correct'],
-                            sub=stats['sub'], ins=stats['ins'], dels=stats['del'],
-                            startdel=stats['startdel'], enddel=stats['enddel'],
-                            extraInsertions=stats['extraInsertions'], empty=stats['empty'],
-                            distance=stats['distance'], error=error, recordingId=recording_id,
-                            filename=filename, token=token))
+                    row = [ int(session_id), int(token_id), float(stats['accuracy']), bool(stats['onlyInsOrSub']), 
+                            int(stats['correct']), int(stats['sub']), int(stats['ins']), int(stats['del']),
+                            int(stats['startdel']), int(stats['enddel']), int(stats['extraInsertions']), 
+                            bool(stats['empty']), int(stats['distance']), error, int(recording_id),
+                            filename, token, int(session_id)]
+                    print(*row, sep='\t') # thanks, Glenn Maynard, http://stackoverflow.com/a/4049043/5272567
     log('Finished with {} warnings.'.format(_warnings))
 
 if __name__ == '__main__':
