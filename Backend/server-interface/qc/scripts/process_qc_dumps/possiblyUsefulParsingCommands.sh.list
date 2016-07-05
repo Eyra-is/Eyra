@@ -17,7 +17,7 @@
 #
 # Some possibly useful commands while parsing the QC dumps.
 
-# get rid of duplicates in qc_dump_combined file by sorting on .wav name
+# get rid of duplicates in qc_dump_combined file by sorting on recording id
 # removes header (you'll probably want to add that manually)
 tail -n +2 qc_dump_combined.txt | sort -t $'\t' -u -k 15
 
