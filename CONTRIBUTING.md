@@ -7,7 +7,8 @@
 5. Fill out the appropriate Contributor License Agreement (CLA) as explained below.
 6. Submit a pull request :D
 
-See a list of our todos in [TODOS.md](https://github.com/Eyra-is/Eyra/tree/master/TODOS.md) and [TODOS_QC.md](https://github.com/Eyra-is/Eyra/tree/master/TODOS_QC.md).  
+Look at open [issues on github](https://github.com/Eyra-is/Eyra/issues). If you submit an issue, try to label it with the appropriate piece of the code it refers to, e.g. frontend, backend, android app, quality control or no label if none of the previous apply.  
+ 
 Look at [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md) for much more detailed info on how the software operates.
 
 
