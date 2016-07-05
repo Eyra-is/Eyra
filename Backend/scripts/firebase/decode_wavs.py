@@ -28,8 +28,12 @@ def run(encoded_wav_dir, output_dir='firebase_wavs'):
     for encoded_file in os.listdir(encoded_wav_dir):
         encoded_file = os.path.join(encoded_wav_dir, encoded_file)
         print('Processing file: {}'.format(encoded_file))
-        with open(encoded_file) as f:
-            encoded_data = json.load(f)
+        try:
+            with open(encoded_file) as f:
+                encoded_data = json.load(f)
+        except ValueError as e:
+            print('Some error in file. Skipping. Error: {}'.format(e))
+            continue
 
         metadata = encoded_data['metadata']
         metadata = json.loads(metadata.replace('\\"', '"'))
@@ -42,14 +46,22 @@ def run(encoded_wav_dir, output_dir='firebase_wavs'):
             raise ValueError('recordingsInfo ({}) and recordings ({}) not same length.'.format(len(recordingsInfo), len(recordings)))
 
         for rec, info in recordingsInfo.items():
-            token = info['tokenText']
+            try:
+                token = info['tokenText']
+            except KeyError as e:
+                print('No tokenText in recordingsInfo. Skipping rec. Error: {}'.format(e))
+                continue
             for blob in recordings:
-                if blob['title'] == rec:
-                    wav = base64.b64decode(blob['blob64'][22:])
-                    with open(os.path.join(output_dir,'{}_{}'.format(speaker, rec)), 'wb') as f:
-                        f.write(wav)
-                    with open(os.path.join(output_dir,'{}_{}.txt'.format(speaker, rec[:-4])), 'w') as g:
-                        g.write(token)
+                try:
+                    if blob['title'] == rec:
+                        wav = base64.b64decode(blob['blob64'][22:])
+                        with open(os.path.join(output_dir,'{}_{}'.format(speaker, rec)), 'wb') as f:
+                            f.write(wav)
+                        with open(os.path.join(output_dir,'{}_{}.txt'.format(speaker, rec[:-4])), 'w') as g:
+                            g.write(token)
+                except TypeError as e:
+                    print('Something wrong with recordings array. Skipping. Error: {}'.format(e))
+                    continue
 
 if __name__ == '__main__':
     import argparse
