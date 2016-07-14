@@ -19,7 +19,7 @@
 
 # get rid of duplicates in qc_dump_combined file by sorting on recording id
 # removes header (you'll probably want to add that manually)
-tail -n +2 qc_dump_combined.txt | sort -t $'\t' -u -k 15
+tail -n +2 qc_dump_combined.txt | sort -t $'\t' -u -k 15,15
 
 # calculate average accuracy
 awk 'BEGIN{tot=0;}{tot+=$3;}END{print tot / NR}' qc_dump_combined.txt
