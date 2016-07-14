@@ -1,26 +1,25 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-
-- [Eyra developer's guide](#eyra-developers-guide)
-  - [Development](#development)
-    - [Quick description of folder structure](#quick-description-of-folder-structure)
-    - [Detailed description of the components](#detailed-description-of-the-components)
-    - [Some useful info](#some-useful-info)
-    - [Maintaining code](#maintaining-code)
-  - [Quality Control (QC)](#quality-control-qc)
-    - [Firing up the QC](#firing-up-the-qc)
-    - [Selecting modules to use](#selecting-modules-to-use)
-    - [Creating your own modules](#creating-your-own-modules)
-    - [Running QC offline](#running-qc-offline)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Eyra developer's guide
 
 This document describes the software in more detail, steps to take when using the software/making modifications, a description of how to use the quality control, and how the different components are linked together.
 
 A recommended read as well is the article published on this software, which can be found at [`Docs/Petursson_et_al_2016.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/Petursson_et_al_2016.pdf). It describes many design criteria along with how the software operates and more.
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Development](#development)
+  - [Quick description of folder structure](#quick-description-of-folder-structure)
+  - [Detailed description of the components](#detailed-description-of-the-components)
+  - [Some useful info](#some-useful-info)
+  - [Maintaining code](#maintaining-code)
+- [Quality Control (QC)](#quality-control-qc)
+  - [Firing up the QC](#firing-up-the-qc)
+  - [Selecting modules to use](#selecting-modules-to-use)
+  - [Creating your own modules](#creating-your-own-modules)
+  - [Running QC offline](#running-qc-offline)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Development
 
@@ -74,7 +73,11 @@ This list is not exhaustive.
         * [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/db/src) and other language specific data  
             [`src`](https://github.com/Eyra-is/Eyra/tree/master/Backend/db/src), [`oldTokens`](https://github.com/Eyra-is/Eyra/tree/master/Backend/db/oldTokens) and more contain language specific data, which should really be placed in [`lang_data`](https://github.com/Eyra-is/Eyra/tree/master/Backend/lang_data) or not at all in the github repo.
     * [`scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts)  
-        Number of useful scripts here.
+        Number of useful scripts here. Including
+        * [`convert_to_eyra_database/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database)  
+        Which contains code to migrate from other databases to Eyra, you can use it for reference if you need to do the same. Note though, that these migrations might only apply to an earlier version of Eyra, depending on when they were done (these are obviously not maintained).
+        * [`firebase/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/firebase)  
+        Code to recover data uploaded as backup to [firebase](https://www.firebase.com/).
     * [`server-interface/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface)  
         Set up as a pretty basic Flask application. Also contains the entire QC (see large [**section**](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#quality-control-qc) below the [**Development**](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#development) section). Entry code is [`app.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/app.py) which handles the routes to implement the [`ClientServerAPI.md`](https://github.com/Eyra-is/Eyra/tree/master/ClientServerAPI.md) and all related. An attempt is made to separate the logic using classes in the [`*_handler.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface)'s. The [`db_handler`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/db_handler.py) uses code from [`config.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/config.py) to connect to our MySQL database.
         * [`auth_handler.py`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/auth_handler.py)  
@@ -171,6 +174,8 @@ Most of this should be self explanatory, but if you change code, remember to:
 * Rerun `doctoc --notitle DEVELOPER.md` if you modify this file. (manual for now) You can install doctoc by running `sudo npm install -g doctoc`.
 
 ## Quality Control (QC)
+
+**NOTE currently, the frontend queries the QC as normal, but doesn't display anything it receives back.**
 
 The quality control is designed to process the recordings and try to improve the quality of gathered data by giving feedback to the user on the quality, allowing him to improve on the recordings he makes.
 
