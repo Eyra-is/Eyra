@@ -99,6 +99,7 @@ body {
   position: fixed;
   height: 1.8em;
   bottom: 0;
+  left: 0; /* fix for firefox */
   width: 100%;
   .container {
     padding-left: 0;
