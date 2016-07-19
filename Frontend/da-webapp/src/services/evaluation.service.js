@@ -60,9 +60,8 @@ function evaluationService($http, BACKENDURL, utilityService) {
     return $http.get( BACKENDURL + '/evaluation/set/' + currentSetLabel 
                       + '/progress/' + currentSet.length
                       + '/count/' + evalBufferSize).then(function(response){
+      //console.log(response);
       currentSet = currentSet.concat(response.data);
-      console.log(response);
-      return;
     });
   }
 

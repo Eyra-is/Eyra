@@ -42,14 +42,14 @@ File author/s:
             </div>
         </div>
         <p class="token">{{evalCtrl.displayToken}}</p>
-        <div id="playback" ng-hide="hidePlayback">
-            <audio ng-src="{{evalCtrl.recording | trustUrl}}" controls></audio>
+        <div id="playback">
+            <audio id="audio-playback" ng-src="{{evalCtrl.recording | trustUrl}}" controls></audio>
         </div>
         <div class="record-ctrl-wrapper">
-            <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="evalCtrl.playBtnDisabled" ng-click="evalCtrl.play()">
-                <span class="glyphicon glyphicon-play"></span>
+            <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="evalCtrl.actionBtnDisabled" ng-click="evalCtrl.action()">
+                <span class="glyphicon {{evalCtrl.actionGlyph}}"></span>
             </button>
-            <p>Play</p>
+            <p>{{evalCtrl.actionText}}</p>
         </div>
         <div class="record-ctrl-wrapper">
             <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="evalCtrl.skipBtnDisabled" ng-click="evalCtrl.skip()">

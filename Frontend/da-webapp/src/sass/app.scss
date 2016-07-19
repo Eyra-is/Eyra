@@ -173,7 +173,7 @@ body {
 .btn-main {
   font-size: 1.5em;
 }
-.glyphicon-play {
+.glyphicon-play, .glyphicon-pause {
   @extend .glyph-default;
 }
 .glyphicon-record {

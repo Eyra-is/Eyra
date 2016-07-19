@@ -34,15 +34,22 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
   var evalService = evaluationService;
   var util = utilityService;
 
-  evalCtrl.play = play;
+  evalCtrl.action = action;
   evalCtrl.skip = skip;
 
   $scope.msg = ''; // single information msg
 
-  evalCtrl.playBtnDisabled = false;
+  evalCtrl.actionBtnDisabled = false;
   evalCtrl.skipBtnDisabled = true;
 
-  evalCtrl.hidePlayback = false;
+  var actionType = 'play'; // current state
+
+  var PLAYTEXT = 'Play'; // text under the buttons
+  var PAUSETEXT = 'Pause';
+  var PLAYGLYPH = 'glyphicon-play'; // bootstrap glyph class
+  var PAUSEGLYPH = 'glyphicon-pause';
+  evalCtrl.actionText = PLAYTEXT;
+  evalCtrl.actionGlyph = PLAYGLYPH;
 
   evalCtrl.commentOpts = [
     'yeye',
@@ -50,6 +57,12 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
   ];
 
   var currentSet = 'malromur_3k';
+
+  // save reference to the audio element on the page, for play/pause
+  // thanks, Shushanth Pallegar, http://stackoverflow.com/a/30899643/5272567
+  // TODO: would probably be nicer to make a directive
+  var audioPlayback = angular.element("#audio-playback")[0];
+  audioPlayback.addEventListener('ended', audioEnded);
 
   activate();
 
@@ -65,6 +78,8 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
 
     initSet(currentSet).then(
       function success(data){
+        next(); // grab initial prompt/utterance
+
         $rootScope.isLoaded = true; // is page loaded?
       }, 
       function error(response){
@@ -75,6 +90,30 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
         $rootScope.isLoaded = true;
       }
     );
+  }
+
+  function action() {
+    /*
+    Signifies the combined rec/pause button
+    */
+    evalCtrl.actionBtnDisabled = true;
+    if (actionType === 'play') {
+      play();
+    } else if (actionType === 'pause') {
+      pause();
+    }
+    toggleActionBtn();
+    evalCtrl.actionBtnDisabled = false;
+  }
+
+  function audioEnded() {
+    /*
+    Automatically hit pause on our custom controls on reaching audio playback end.
+    */
+    if (actionType === 'pause') {
+      action();
+      $scope.$apply();
+    }
   }
 
   function initSet(set) {
@@ -94,15 +133,32 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
   }
 
   function play() {
-    evalCtrl.playBtnDisabled = true;
+    /*
+    Start playback on audio.
+    */
     evalCtrl.skipBtnDisabled = false;
 
-    console.log(evalCtrl.grade);
-    console.log(evalCtrl.comment);
+    audioPlayback.play();
   }
 
   function skip() {
     evalCtrl.skipBtnDisabled = true;
+  }
+
+  function pause() {
+    audioPlayback.pause();
+  }
+
+  function toggleActionBtn() {
+    if (actionType === 'play') {
+      actionType = 'pause';
+      evalCtrl.actionText = PAUSETEXT;
+      evalCtrl.actionGlyph = PAUSEGLYPH;
+    } else if (actionType === 'pause') {
+      actionType = 'play';
+      evalCtrl.actionText = PLAYTEXT;
+      evalCtrl.actionGlyph = PLAYGLYPH;
+    }
   }
 
   function watchGrade() {
@@ -115,6 +171,7 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
     // if valid grade has been clicked
     // thanks, Gumbo, http://stackoverflow.com/a/4728164/5272567
     if (['1','2','3','4'].indexOf(evalCtrl.grade) > -1) {
+      evalCtrl.skipBtnDisabled = true;
       evalCtrl.uttsGraded++;
       next();
     }
