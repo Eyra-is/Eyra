@@ -768,4 +768,39 @@ class DbHandler:
         else:
             return False
 
-    
+    def getFromSet(self, eval_set, progress, count):
+        """
+        Get link/prompt pairs from specified set in ascending order by recording id.
+
+        Parameters:
+            set         name of the set corresponding to evaluation_sets(eval_set) in database.
+            progress    progress (index) into the set
+            count       number of pairs to get
+
+        Returns tuple
+            (json, status_code)
+
+        Returned JSON definition:
+            [[recId, promptN], .., [recIdN+count, promptN+count]]
+
+        where N is progress. An error string on failure.
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT recording.id, inputToken FROM recording, token, evaluation_sets '+
+                        'WHERE recording.tokenId = token.id '+
+                        'AND recording.id = evaluation_sets.recordingId '+
+                        'AND eval_set=%s '+
+                        'ORDER BY recording.id ASC', (eval_set,))
+            partialSet = cur.fetchall()
+        except MySQLError as e:
+            msg = 'Error grabbing from set.'
+            log(msg, e)
+            return (msg, 500)
+
+        if partialSet:
+            return (list(partialSet)[progress:progress+count], 200)
+        else:
+            msg = 'No set by that name in database.'
+            log(msg+' Set: {}'.format(eval_set))
+            return (msg, 400)

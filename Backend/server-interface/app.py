@@ -191,5 +191,27 @@ def qc_report(sessionId):
 
     return 'Unexpected error.', 500
 
+# EVALUATION ROUTES
+
+@app.route('/evaluation/set/<string:eval_set>/progress/<int:progress>/count/<int:count>', methods=['GET'])
+def get_from_set(eval_set, progress, count):
+    """
+    Get link/prompt pairs from specified set in ascending order by recording id.
+
+    Parameters:
+        eval_set    name of the set corresponding to evaluation_sets(eval_set) in database.
+        progress    progress (index) into the set
+        count       number of pairs to get
+
+    Returned JSON definition:
+
+        [[recIdN, promptN], .., [recIdN+count, promptN+count]]
+
+    where N is progress.
+    """
+    if request.method == 'GET':
+        partialSet = dbHandler.getFromSet(eval_set, progress, count)
+        return json.dumps(partialSet[0]), partialSet[1]
+
 if __name__ == '__main__':
     app.run(debug=True)
