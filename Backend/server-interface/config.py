@@ -23,3 +23,6 @@ dbConst = dict(host='localhost',
     db='recordings_master',
     use_unicode=True,
     charset='utf8')
+# alias for eyra recordings root (e.g. /data/eyra/recordings)
+# meaning you can navigate to /recs/session_X/recX.wav
+RECSURL = '/recs'

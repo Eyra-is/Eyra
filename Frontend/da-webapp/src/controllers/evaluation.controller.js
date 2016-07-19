@@ -23,7 +23,7 @@ File author/s:
 angular.module('daApp')
 .controller('EvaluationController', EvaluationController);
 
-EvaluationController.$inject = [  '$rootScope',
+EvaluationController.$inject = ['$rootScope',
                                 '$scope',
                                 'evaluationService',
                                 'logger',
@@ -115,8 +115,7 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
     // if valid grade has been clicked
     // thanks, Gumbo, http://stackoverflow.com/a/4728164/5272567
     if (['1','2','3','4'].indexOf(evalCtrl.grade) > -1) {
-      console.log('sup');
-
+      evalCtrl.uttsGraded++;
       next();
     }
   }

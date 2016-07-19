@@ -23,7 +23,7 @@ import os
 import random
 
 from util import log, filename
-from config import dbConst
+from config import dbConst, RECSURL
 
 class DbHandler:
     def __init__(self, app):
@@ -778,28 +778,30 @@ class DbHandler:
             count       number of pairs to get
 
         Returns tuple
-            (json, status_code)
+            (json, http_status_code)
 
         Returned JSON definition:
-            [[recId, promptN], .., [recIdN+count, promptN+count]]
+            [[recLink, promptN], .., [recLinkN+count, promptN+count]]
 
-        where N is progress. An error string on failure.
+        where N is progress and recLink is the relative link to the RECSROOT folder,
+        e.g. 'session_26/user_date.wav'. An error string on failure.
         """
         try:
             cur = self.mysql.connection.cursor()
-            cur.execute('SELECT recording.id, inputToken FROM recording, token, evaluation_sets '+
+            cur.execute('SELECT recording.sessionId, recording.filename, inputToken FROM recording, token, evaluation_sets '+
                         'WHERE recording.tokenId = token.id '+
                         'AND recording.id = evaluation_sets.recordingId '+
                         'AND eval_set=%s '+
                         'ORDER BY recording.id ASC', (eval_set,))
-            partialSet = cur.fetchall()
+            partialSet = [['{}/session_{}/{}'.format(RECSURL, sesId, filename), prompt]
+                           for sesId, filename, prompt in cur.fetchall()]
         except MySQLError as e:
             msg = 'Error grabbing from set.'
             log(msg, e)
             return (msg, 500)
 
         if partialSet:
-            return (list(partialSet)[progress:progress+count], 200)
+            return (partialSet[progress:progress+count], 200)
         else:
             msg = 'No set by that name in database.'
             log(msg+' Set: {}'.format(eval_set))

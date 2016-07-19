@@ -205,13 +205,15 @@ def get_from_set(eval_set, progress, count):
 
     Returned JSON definition:
 
-        [[recIdN, promptN], .., [recIdN+count, promptN+count]]
+        [[recLink, promptN], .., [recLinkN+count, promptN+count]]
 
-    where N is progress.
+    where N is progress and recLink is the relative link to the RECSROOT folder,
+    e.g. 'session_26/user_date.wav'.
     """
     if request.method == 'GET':
         partialSet = dbHandler.getFromSet(eval_set, progress, count)
         return json.dumps(partialSet[0]), partialSet[1]
+
 
 if __name__ == '__main__':
     app.run(debug=True)

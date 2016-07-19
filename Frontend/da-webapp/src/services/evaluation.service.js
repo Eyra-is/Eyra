@@ -27,8 +27,8 @@ angular.module('daApp')
   .factory('evaluationService', evaluationService);
 
 evaluationService.$inject = [ '$http',
-                            'BACKENDURL',
-                            'utilityService'];
+                              'BACKENDURL',
+                              'utilityService'];
 
 function evaluationService($http, BACKENDURL, utilityService) {
   var evaluationHandler = {};
@@ -41,7 +41,11 @@ function evaluationService($http, BACKENDURL, utilityService) {
   var currentSetLabel = 'No set.';
   // contains at most 2 x evalBufferSize active elements (rest are undefined)
   // starts at 0 and then changes those elements to undefined after they have been used
-  // format: [[recLink0, prompt0], ...]
+  //         | -- active elements --  |
+  // [ ud ud [stuff], [stuff], ..     ]
+  //         ^                 
+  //    setProgress   
+  // format: [stuff] == [recLink, prompt]
   var currentSet = [];
   var setProgress = 0;
 
@@ -50,8 +54,11 @@ function evaluationService($http, BACKENDURL, utilityService) {
   //////////
 
   function addToBuffer() {
+    /*
+
+    */
     return $http.get( BACKENDURL + '/evaluation/set/' + currentSetLabel 
-                      + '/progress/' + setProgress
+                      + '/progress/' + currentSet.length
                       + '/count/' + evalBufferSize).then(function(response){
       currentSet = currentSet.concat(response.data);
       console.log(response);
@@ -80,10 +87,14 @@ function evaluationService($http, BACKENDURL, utilityService) {
     returns [recLink, prompt]
     */
     var next = currentSet[setProgress];
-    console.log(next);
     currentSet[setProgress] = undefined;
     setProgress++;
-    console.log(next);
+
+    // when we are half # utts into the most recent buffer, add to the buffer (server call)
+    if ((currentSet.length - setProgress) < (evalBufferSize / 2)) {
+      addToBuffer();
+    }
+
     return next;
   }
 
