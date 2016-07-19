@@ -173,6 +173,9 @@ body {
 .btn-main {
   font-size: 1.5em;
 }
+.glyphicon-play {
+  @extend .glyph-default;
+}
 .glyphicon-record {
   @extend .glyph-default;
   color: red;

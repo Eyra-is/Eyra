@@ -148,11 +148,11 @@ This list is not exhaustive.
 
     * [`Frontend/da-webapp/src/index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html)  
       **What to do**  
-      A sample `index.html` file for this is at [`Frontend/da-webapp/extra_dev_files/dev_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/dev_index.html). Compare and modify your current [`src/index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) file to this (or do a merge). A sample copy of the `index.html` file for use in deployment is at [`Frontend/da-webapp/extra_dev_files/release_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/release_index.html).
+      A sample `index.html` file for this is at [`Frontend/da-webapp/extra_dev_files/development_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/development_index.html). Compare and modify your current [`src/index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) file to this (or do a merge). A sample copy of the `index.html` file for use in deployment is at [`Frontend/da-webapp/extra_dev_files/release_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/release_index.html).
 
     * [`Setup/src/frontend-app/default.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/frontend-app/default.conf)  
       **What to do**  
-      Change the line `YYY_SITEROOT=Frontend/da-webapp/app` to `YYY_SITEROOT=Frontend/da-webapp/src` and run a [`./Setup/setup.sh --apache`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) and a `sudo service apache2 restart`.
+      Change the line `YYY_SITEROOT=Frontend/da-webapp/app` to `YYY_SITEROOT=Frontend/da-webapp/src` and run a [`./Setup/setup.sh --frontend-app`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) and a `sudo service apache2 restart`.
 
       **What does it do**  
       It changes which folder apache uses to serve the application. From the `app/` directory to [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src).

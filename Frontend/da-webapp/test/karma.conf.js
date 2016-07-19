@@ -23,6 +23,8 @@ module.exports = function(config){
       'src/controllers/*.js',
       'src/services/*.js',
 
+      'src/views/*.html',
+
       'test/unit/**/*.spec.js'
     ],
 
@@ -30,7 +32,7 @@ module.exports = function(config){
 
     frameworks: ['jasmine'],
 
-    browsers : ['Chrome'],//, 'Firefox'],
+    browsers : ['Chrome', 'Firefox'],
 
     plugins : [
             'karma-chrome-launcher',
