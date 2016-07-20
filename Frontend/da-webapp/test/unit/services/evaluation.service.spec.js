@@ -19,18 +19,20 @@ File author/s:
 
 "use strict";
 
-describe('evaluation controller', function(){
+describe('evaluation service', function(){
   beforeEach(module('daApp'));
+  // TODO handle more than one set
+  var testSets = ['malromur_3k'];
+  // TODO handle more than evalBufferSize TESTNEXTS
+  var TESTNEXTS = 4; // test getNext X times.
+  var evalBufferSize = 5; // should be same as in utilityService
 
-  var $rootScope, $controller, $document, $httpBackend, $scope, evalCtrl;
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$document_, _$httpBackend_){
+  var $httpBackend, evalService;
+  beforeEach(inject(function(_$httpBackend_, _evaluationService_){
     // The injector unwraps the underscores (_) from around the parameter names when matching
-    $rootScope = _$rootScope_;
-    $controller = _$controller_;
-    $document = _$document_;
     $httpBackend = _$httpBackend_;
+    evalService = _evaluationService_;
 
-    // same as in evaluation.service.spec.js
     $httpBackend.whenRoute('GET', '/backend/evaluation/set/:set/progress/:progress/count/:count')
       .respond(function(method, url, data, headers, params) {
         // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
@@ -38,7 +40,7 @@ describe('evaluation controller', function(){
         var progress = Number(params.progress);
         var count = Number(params.count);
 
-        //expect(testSets).toContain(set);
+        expect(testSets).toContain(set);
         expect(progress >= 0).toBe(true);
         expect(count).toBeGreaterThan(0);
 
@@ -48,24 +50,34 @@ describe('evaluation controller', function(){
         }
         return [200, partialSet];
       });
-
-    $scope = {};
-    $scope.$watch = function(){};
-
-    evalCtrl = $controller('EvaluationController', { $scope: $scope });
-    $httpBackend.flush(); // evalCtrl calls initSet which calls $http
   }));
 
-  it('should initialize', function(){
-    expect(typeof(evalCtrl.action)).toBe('function');
-    expect(typeof(evalCtrl.skip)).toBe('function');
-    expect(evalCtrl.actionBtnDisabled).toBeDefined();
-    expect(evalCtrl.skipBtnDisabled).toBeDefined();
-    expect(typeof(evalCtrl.displayToken)).toBe('string');
-    expect(typeof(evalCtrl.uttsGraded)).toBe('number');
-    expect(typeof(evalCtrl.gradesDelivered)).toBe('number');
+  afterEach(function() {
+   $httpBackend.verifyNoOutstandingExpectation();
+   $httpBackend.verifyNoOutstandingRequest();
+  });
 
-    // need to flush before this line
-    expect($rootScope.isLoaded).toBe(true);
+  it('should initialize sets, and be able to grab nexts', function(){
+    testSet(testSets[0]);
+
+    // this is real messy
+    // thanks, hansmaad, http://stackoverflow.com/a/37750595/5272567
+    try { $httpBackend.flush(99); }  // resolve all the possible requests my service might have to do
+    catch(e) {}
+
+    function testSet(set) {
+      var promise = evalService.initSet(set);
+      $httpBackend.flush();
+      promise.then(function(){
+        for (var j = 0; j < TESTNEXTS; j++) {
+          var next = evalService.getNext();
+
+          expect(typeof(next[0])).toBe('string');
+          expect(typeof(next[1])).toBe('string');
+        }
+      }, function(){
+        expect('async error').toEqual('no no');
+      });
+    }
   });
 });

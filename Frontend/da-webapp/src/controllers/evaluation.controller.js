@@ -23,13 +23,14 @@ File author/s:
 angular.module('daApp')
 .controller('EvaluationController', EvaluationController);
 
-EvaluationController.$inject = ['$rootScope',
+EvaluationController.$inject = ['$document',
+                                '$rootScope',
                                 '$scope',
                                 'evaluationService',
                                 'logger',
                                 'utilityService'];
 
-function EvaluationController($rootScope, $scope, evaluationService, logger, utilityService) {
+function EvaluationController($document, $rootScope, $scope, evaluationService, logger, utilityService) {
   var evalCtrl = this;
   var evalService = evaluationService;
   var util = utilityService;
@@ -61,8 +62,10 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
   // save reference to the audio element on the page, for play/pause
   // thanks, Shushanth Pallegar, http://stackoverflow.com/a/30899643/5272567
   // TODO: would probably be nicer to make a directive
-  var audioPlayback = angular.element("#audio-playback")[0];
-  audioPlayback.addEventListener('ended', audioEnded);
+  var audioPlayback = $document.find("#audio-playback")[0];
+  if (audioPlayback) {
+    audioPlayback.addEventListener('ended', audioEnded);
+  }
 
   activate();
 
@@ -76,20 +79,23 @@ function EvaluationController($rootScope, $scope, evaluationService, logger, uti
     evalCtrl.grade = undefined; // initially unchecked
     $scope.$watch(function(){ return evalCtrl.grade; }, watchGrade);
 
-    initSet(currentSet).then(
-      function success(data){
-        next(); // grab initial prompt/utterance
+    var promise = initSet(currentSet);
+    if (promise) {
+      promise.then(
+        function success(data){
+          next(); // grab initial prompt/utterance
 
-        $rootScope.isLoaded = true; // is page loaded?
-      }, 
-      function error(response){
-        $scope.msg = 'Something went wrong.';
+          $rootScope.isLoaded = true; // is page loaded?
+        }, 
+        function error(response){
+          $scope.msg = 'Something went wrong.';
 
-        logger.error(response);
+          logger.error(response);
 
-        $rootScope.isLoaded = true;
-      }
-    );
+          $rootScope.isLoaded = true;
+        }
+      );
+    }
   }
 
   function action() {
