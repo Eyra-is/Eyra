@@ -26,19 +26,23 @@ File author/s:
 angular.module('daApp')
   .factory('evaluationService', evaluationService);
 
-evaluationService.$inject = [ '$http',
-                              'BACKENDURL',
+evaluationService.$inject = [ 'deliveryService',
+                              'localDbMiscService',
                               'utilityService'];
 
-function evaluationService($http, BACKENDURL, utilityService) {
+function evaluationService(deliveryService, localDbMiscService, utilityService) {
   var evaluationHandler = {};
+  var delService = deliveryService;
+  var localDb = localDbMiscService;
   var util = utilityService;
 
   evaluationHandler.initSet = initSet;
   evaluationHandler.getNext = getNext;
 
   var evalBufferSize = util.getConstant('evalBufferSize');
+  var evalSubmitFreq = util.getConstant('evalSubmitFreq');
   var currentSetLabel = 'No set.';
+  var currentUser = 'No user.';
   // contains at most 2 x evalBufferSize active elements (rest are undefined)
   // starts at 0 and then changes those elements to undefined after they have been used
   //         | -- active elements --  |
@@ -49,6 +53,20 @@ function evaluationService($http, BACKENDURL, utilityService) {
   var currentSet = [];
   var setProgress = 0;
 
+  // format as in "submitEvaluation" in client-server API or
+  /*  [
+        {
+            "evaluator": "daphne",
+            "sessionId": 5,
+            "recordingFilename": "asdf_2016-03-05T11:11:09.287Z.wav",
+            "grade": 2,
+            "comments": "Bad pronunciation",
+            "skipped": false
+        },
+        ..
+      ]*/
+  var evaluation = [];
+
   return evaluationHandler;
 
   //////////
@@ -57,34 +75,50 @@ function evaluationService($http, BACKENDURL, utilityService) {
     /*
     Adds evalBufferSize elements to currentSet.
     */
-    return $http.get( BACKENDURL + '/evaluation/set/' + currentSetLabel 
-                      + '/progress/' + currentSet.length
-                      + '/count/' + evalBufferSize).then(function(response){
-      currentSet = currentSet.concat(response.data);
-      //console.log(response);
-    });
+    return deliveryService.getFromSet(currentSetLabel, currentSet.length, evalBufferSize).then(
+      function(response){
+        currentSet = currentSet.concat(response.data);
+        //console.log(response);
+      }
+    );
   }
 
-  function initSet(set) {
+  function initSet(set, user) {
     /*
     Code using this service must call initSet with the set name before
     trying to use that set.
     */
+    if (currentUser !== user) {
+      currentUser = user;
+    }
     if (currentSetLabel !== set) {
       currentSetLabel = set;
       currentSet = [];
       setProgress = 0;
       // grab evalBufferSize set from server
       return addToBuffer();
-    }    
+    }
   }
 
-  function getNext() {
+  function getNext(grade) {
     /*
     Gets next link to recording and prompt.
 
+    Parameters:
+      grade     the grade for the current prompt (1-4), if undefined, 
+                means the prompt was skipped. If grade === 'initial', means this
+                is the initial grab of a prompt, meaning we want neither
+                an evaluation or to mark it as skipped.
+
     returns [recLink, prompt]
     */
+    if (grade !== 'initial') {
+      updateEvaluation(grade); // add the results for current recording received from evalCtrl
+      if (setProgress !== 0 && setProgress % evalSubmitFreq === 0) {
+        submitEvaluation();
+      }
+    }
+
     var next = currentSet[setProgress];
     currentSet[setProgress] = undefined;
     setProgress++;
@@ -97,5 +131,66 @@ function evaluationService($http, BACKENDURL, utilityService) {
     return next;
   }
 
+  function submitEvaluation() {
+    /*
+    Submits evaluation to server. Sends everything we have currently.
+
+    Takes a copy, and then deletes what it sent on a successful send.
+    */
+    var evalCopy = JSON.parse(JSON.stringify(evaluation));
+    var count = evalCopy.length;
+
+    deliveryService.submitEvaluation(currentSetLabel, evalCopy).then(
+      function success(response) {
+        deleteFromEvaluation(count);
+      }, function error(response) {
+        // save our failed send copy locally, but abandon trying to send if we
+        // get any of the errors currently submitted after handling by server
+        // currently only: 400 and 500
+        if (response.status === 400 || response.status === 500) {
+          localDb.saveEvaluation(currentUser, currentSetLabel, evalCopy).then(
+            function success(response) {
+              deleteFromEvaluation(count);
+            }, util.stdErrCallback
+          );
+        } else {
+          localDb.saveEvaluation(currentUser, currentSetLabel, evalCopy).then(
+            angular.noop, util.stdErrCallback);
+        }
+      }
+    );
+
+    function deleteFromEvaluation(count) {
+      /*
+      Delete elements 0 to count-1 from evaluation array.
+      */
+      evaluation.splice(0, count);
+    }
+  }
+
+  function updateEvaluation(grade, comments) {
+    /*
+    Grabs relevant info from e.g. currentSet[setProgress], grade, currentUser
+    and adds it to our evaluation array containing the results for current recording.
+
+    Returns nothing.
+    */
+    // extract sessionId and recordingFilename from our recLink in currentSet[setProgress]
+    var recLink = currentSet[setProgress][0];
+    var sessionIdMatch = recLink.match(/session_(\d+)/);
+    var sessionId = sessionIdMatch ? Number(sessionIdMatch[1]) : -1; // fallback session is -1
+    var recNameMatch = recLink.match(/session_\d+\/(.*)$/);
+    var recName = recNameMatch ? recNameMatch[1] : 'error_no_rec.wav';
+
+    var uttEval = {};
+    uttEval.evaluator = currentUser;
+    uttEval.sessionId = sessionId;
+    uttEval.recordingFilename = recName;
+    uttEval.grade = grade || -1;
+    uttEval.comments = comments || 'No comments.';
+    uttEval.skipped = grade ? false : true;
+
+    evaluation.push(uttEval);
+  }
 }
 }());

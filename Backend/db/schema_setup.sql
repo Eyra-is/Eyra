@@ -111,8 +111,9 @@ create table evaluation (
     evaluator varchar(255) not null,
     grade int not null,
     comments varchar(255) not null default '',
-    skipCount int not null default 0,
+    skipped boolean not null default FALSE,
     foreign key (recordingId) references recording(id),
+    foreign key (eval_set) references evaluation_sets(eval_set),
     unique(recordingId, eval_set, evaluator)
 );
 alter table evaluation convert to character set utf8 collate utf8_general_ci;

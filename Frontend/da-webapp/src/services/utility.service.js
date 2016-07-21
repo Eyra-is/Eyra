@@ -46,7 +46,8 @@ function utilityService(logger) {
     'tokenAnnouncementFreq' : 500,
     'tokenCountGoal' : 500,
     'syncRecCountPerSend' : 5, // recs to send each transmission to server during a Sync operation,
-    'evalBufferSize' : 5 // number of prompts and/or recs to fetch and keep in memory during evaluation
+    'evalBufferSize' : 5, // number of prompts and/or recs to fetch and keep in memory during evaluation
+    'evalSubmitFreq' : 5 // per utterance graded, after X send to server
   };
   
 

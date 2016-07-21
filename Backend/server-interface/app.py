@@ -198,22 +198,29 @@ def get_from_set(eval_set, progress, count):
     """
     Get link/prompt pairs from specified set in ascending order by recording id.
 
-    Parameters:
-        eval_set    name of the set corresponding to evaluation_sets(eval_set) in database.
-        progress    progress (index) into the set
-        count       number of pairs to get
-
-    Returned JSON definition:
-
-        [[recLink, promptN], .., [recLinkN+count, promptN+count]]
-
-    where N is progress and recLink is the relative link to the RECSROOT folder,
-    e.g. 'session_26/user_date.wav'.
+    Format described in client-server API and db_handler.
     """
     if request.method == 'GET':
         partialSet = dbHandler.getFromSet(eval_set, progress, count)
         return json.dumps(partialSet[0]), partialSet[1]
 
+@app.route('/evaluation/submit/<string:eval_set>', methods=['POST'])
+def submit_evaluation(eval_set):
+    """
+    Client submits evaluation of X utterances.
+
+    Form should contain key 'json' with value on format as described
+    in client-server API or db_handler.
+    """
+    if request.method == 'POST':
+        if 'json' in request.form:
+            data = request.form['json']
+            #log(data)
+        else:
+            msg = 'No data found in submission, aborting.'
+            log(msg + ' For set: {}'.format(eval_set))
+            return msg, 400
+        return dbHandler.processEvaluation(eval_set, data)
 
 if __name__ == '__main__':
     app.run(debug=True)

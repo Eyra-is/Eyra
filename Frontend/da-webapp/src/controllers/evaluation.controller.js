@@ -41,7 +41,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
   $scope.msg = ''; // single information msg
 
   evalCtrl.actionBtnDisabled = false;
-  evalCtrl.skipBtnDisabled = true;
+  evalCtrl.skipBtnDisabled = false;
 
   var actionType = 'play'; // current state
 
@@ -57,6 +57,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     'nono'
   ];
 
+  var currentUser = 'No user.';
   var currentSet = 'malromur_3k';
 
   // save reference to the audio element on the page, for play/pause
@@ -65,6 +66,8 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
   var audioPlayback = $document.find("#audio-playback")[0];
   if (audioPlayback) {
     audioPlayback.addEventListener('ended', audioEnded);
+  } else {
+    $scope.msg = 'Something went wrong with the audio playback.';
   }
 
   activate();
@@ -72,18 +75,18 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
   ////////// 
   
   function activate() {
-    evalCtrl.displayToken = 'sup';
+    evalCtrl.displayToken = 'No prompt yet.';
     evalCtrl.uttsGraded = 0;
     evalCtrl.gradesDelivered = 0;
 
     evalCtrl.grade = undefined; // initially unchecked
     $scope.$watch(function(){ return evalCtrl.grade; }, watchGrade);
 
-    var promise = initSet(currentSet);
+    var promise = initSet(currentSet, currentUser);
     if (promise) {
       promise.then(
         function success(data){
-          next(); // grab initial prompt/utterance
+          next('initial'); // grab initial prompt/utterance
 
           $rootScope.isLoaded = true; // is page loaded?
         }, 
@@ -122,18 +125,23 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     }
   }
 
-  function initSet(set) {
+  function initSet(set, user) {
     /*
     Returns promise resolved when evalService has init'd set.
     */
-    return evalService.initSet(set);
+    return evalService.initSet(set, user);
   }
 
-  function next() {
+  function next(grade, comments) {
     /*
     Sets next recording and prompt.
+
+    Parameters:
+      grade     the grade for the current prompt (1-4), if undefined, 
+                means the prompt was skipped
     */
-    var recNPrompt = evalService.getNext();
+    var recNPrompt = evalService.getNext(grade, comments);
+    evalCtrl.grade = undefined; // reset grade
     evalCtrl.recording = recNPrompt[0];
     evalCtrl.displayToken = recNPrompt[1];
   }
@@ -142,13 +150,16 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     /*
     Start playback on audio.
     */
-    evalCtrl.skipBtnDisabled = false;
-
     audioPlayback.play();
   }
 
   function skip() {
     evalCtrl.skipBtnDisabled = true;
+    if (actionType === 'pause') {
+      toggleActionBtn();
+    }
+    next(undefined);
+    evalCtrl.skipBtnDisabled = false;
   }
 
   function pause() {
@@ -179,7 +190,8 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     if (['1','2','3','4'].indexOf(evalCtrl.grade) > -1) {
       evalCtrl.skipBtnDisabled = true;
       evalCtrl.uttsGraded++;
-      next();
+      next(evalCtrl.grade, evalCtrl.comments);
+      evalCtrl.skipBtnDisabled = false;
     }
   }
 }

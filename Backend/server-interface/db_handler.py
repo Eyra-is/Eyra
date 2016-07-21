@@ -781,10 +781,10 @@ class DbHandler:
             (json, http_status_code)
 
         Returned JSON definition:
-            [[recLink, promptN], .., [recLinkN+count, promptN+count]]
+            [[recLinkN, promptN], .., [recLinkN+count, promptN+count]]
 
-        where N is progress and recLink is the relative link to the RECSROOT folder,
-        e.g. 'session_26/user_date.wav'. An error string on failure.
+        where N is progress and recLink is the RECSURL + the relative path in the RECSROOT folder,
+        e.g. '/recs/session_26/user_date.wav'. An error string on failure.
         """
         try:
             cur = self.mysql.connection.cursor()
@@ -805,4 +805,84 @@ class DbHandler:
         else:
             msg = 'No set by that name in database.'
             log(msg+' Set: {}'.format(eval_set))
+            return (msg, 404)
+
+    def processEvaluation(self, eval_set, data):
+        """
+        Process and save evaluation in database table: evaluation.
+
+        Parameters:
+            eval_set    name of the set corresponding to evaluation_sets table
+            data        json on format:
+                        [
+                            {
+                                "evaluator": "daphne",
+                                "sessionId": 5,
+                                "recordingFilename": "asdf_2016-03-05T11:11:09.287Z.wav",
+                                "grade": 2,
+                                "comments": "Bad pronunciation",
+                                "skipped": false
+                            },
+                            ..
+                        ]
+
+        Returns (msg, http_status_code)
+        """
+        eval_set = str(eval_set)
+        try:
+            jsonDecoded = json.loads(data)
+            #log('json: ', jsonDecoded)
+        except (TypeError, ValueError) as e:
+            msg = 'Evaluation data not on correct format.'
+            log(msg, e)
             return (msg, 400)
+
+        error = '' 
+        errorStatusCode = 500
+        for evaluation in jsonDecoded:
+            evaluator, sessionId, recordingFilename, grade, comments, skipped = \
+                None, None, None, None, None, None
+            try:
+                evaluator = evaluation['evaluator']
+                sessionId = evaluation['sessionId']
+                recordingFilename = evaluation['recordingFilename']
+                grade = evaluation['grade']
+                comments = evaluation['comments']
+                skipped = evaluation['skipped']
+            except KeyError as e:
+                error = 'Evaluation data not on correct format, wrong key.'
+                errorStatusCode = 400
+                log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
+                continue
+
+            try:
+                cur = self.mysql.connection.cursor()
+                cur.execute('SELECT recording.id FROM recording, evaluation_sets '+
+                            'WHERE evaluation_sets.recordingId = recording.id '+
+                            'AND recording.sessionId = %s '+
+                            'AND recording.filename = %s '+
+                            'AND eval_set = %s',
+                            (sessionId, recordingFilename, eval_set))
+                try:
+                    recId = cur.fetchone()[0]
+                except TypeError as e:
+                    error = 'Could not find a recording with this data.'
+                    errorStatusCode = 400
+                    log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
+                    continue
+
+                cur.execute('INSERT INTO evaluation (recordingId, eval_set, evaluator, grade, comments, skipped) \
+                             VALUES (%s, %s, %s, %s, %s, %s)', 
+                            (recId, eval_set, evaluator, grade, comments, skipped))
+            except MySQLError as e:
+                error = 'Error inserting evaluation into database.'
+                errorStatusCode = 500
+                log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
+                continue
+
+        self.mysql.connection.commit()
+
+        if error:
+            return (error, errorStatusCode)
+        else:
+            return ('Successfully processed evaluation.', 200)

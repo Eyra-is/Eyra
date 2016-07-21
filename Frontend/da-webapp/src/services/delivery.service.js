@@ -52,9 +52,14 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   reqHandler.submitDevice = submitDevice;
   reqHandler.submitInstructor = submitInstructor;
   reqHandler.submitRecordings = submitRecordings;
+  reqHandler.getFromSet = getFromSet;
+  reqHandler.submitEvaluation = submitEvaluation;
+  // OTHER
   reqHandler.testServerGet = testServerGet;
 
   var TOKENURL = '/submit/gettokens';
+  var EVALUATIONGETSETURL = '/evaluation/set/[SET]/progress/[PROGRESS]/count/[COUNT]';
+  var EVALUATIONSUBMITURL = '/evaluation/submit/[SET]';
   var invalidTitle = util.getConstant('invalidTitle');
   var failedSessionSends = 0;
 
@@ -238,6 +243,19 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
         });
     }
     return $q.reject('No valid recordings in submission, not sending anything.');
+  }
+
+  function getFromSet(set, progress, count) {
+    return $http.get(
+      BACKENDURL + 
+      EVALUATIONGETSETURL.replace('[SET]', set)
+      .replace('[PROGRESS]', progress)
+      .replace('[COUNT]', count)
+    );
+  }
+
+  function submitEvaluation(set, jsonData) {
+    return submitGeneralJson(jsonData, EVALUATIONSUBMITURL.replace('[SET]', set));
   }
 
   // NOT USED, speaker data is sent with each session

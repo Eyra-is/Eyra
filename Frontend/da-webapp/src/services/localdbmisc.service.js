@@ -45,10 +45,12 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
   dbHandler.getRecsSaved = getRecsSaved;
   dbHandler.getSpeaker = getSpeaker;
   dbHandler.setSpeaker = setSpeaker;
+  dbHandler.saveEvaluation = saveEvaluation;
 
   var devicePath = 'device';
   var instructorIdPath = 'instructorId';
   var speakersPrefix = 'speakers/';
+  var evalPrefix = 'evaluation/';
 
   return dbHandler;
 
@@ -138,6 +140,14 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
       );
       return res.promise;
     }
+  }
+
+  function saveEvaluation(user, set, evaluation) {
+    /*
+    Save evaluation json string in our ldb as a backup under key:
+      evaluation/user/set/UUID
+    */
+    return lfService.setItem(evalPrefix + user + '/' + set + '/' + util.generateUUID(), evaluation);
   }
 }
 }());

@@ -50,6 +50,15 @@ describe('evaluation service', function(){
         }
         return [200, partialSet];
       });
+    $httpBackend.whenRoute('POST', '/backend/evaluation/submit/:set')
+      .respond(function(method, url, data, headers, params) {
+        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
+        var set = params.set;
+
+        expect(testSets).toContain(set);
+
+        return 200;
+      });
   }));
 
   afterEach(function() {

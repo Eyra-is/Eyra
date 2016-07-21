@@ -1,7 +1,7 @@
 # API from Client to Server
 
-1. submitRecordings
-----------------
+
+## 1. submitRecordings
 
 *Submit recordings, 1 or more, including metadata. Receives in return some way to ID said session.*
 
@@ -56,8 +56,8 @@ Current implementation:
         /submit/session
 ```
 
-2. getTokens
-------------
+
+## 2. getTokens
 
 *Client queries server for X number of tokens. Server returns tokens.*
 
@@ -72,8 +72,8 @@ Current implementation:
 ```
 Where X is number of tokens.
 
-3. submitInstructor
-------------
+
+## 3. submitInstructor
 
 *Submit instructor data, receives in return some way to ID said instructor.*
 
@@ -98,8 +98,8 @@ Current implementation:
         /submit/general/instructor
 ```
 
-4. submitDevice
-------------
+
+## 4. submitDevice
 
 *Submit device data.*
 
@@ -116,8 +116,8 @@ Current implementation:
         /submit/general/device
 ```
 
-5. queryQC
-----------
+
+## 5. queryQC
 
 *Query server for Quality Control reports.*
 
@@ -160,3 +160,49 @@ Returned dict definition:
         /qc/report/session/X
 ```
 Where X is the session id.
+
+
+## 6. getFromSet
+
+*Get a part from a certain set for evaluation.*
+
+Current implementation:
+* json format of response:
+```
+    [[recLinkN, promptN], .., [recLinkN+count, promptN+count]]
+```
+Where N is progress and recLink is the RECSURL + the relative path in the RECSROOT folder, e.g. `/recs/session_26/user_date.wav`.
+* url:
+```
+        /evaluation/set/<string:eval_set>/progress/<int:progress>/count/<int:count>
+```
+Where `eval_set` is the set in question, corresponding to the entry in the `evaluation_sets` table in the database. `progress` is the first index in the set the client hasn't fetched yet (e.g. 5 if client has already fetched 5 elements already (0-4)). count is the number of elements to fetch.
+* **Notes**:  
+  * If the status code of the response is not 200, an error message might be supplied as `response.data`. E.g. if the set is not found, the server returns a 404.
+
+
+## 7. submitEvaluation
+
+*Submit evaluation of a part from a certain set.*
+
+Current implementation:
+* json format of submission:
+```
+'json': [
+            {
+                "evaluator": "daphne",
+                "sessionId": 5,
+                "recordingFilename": "asdf_2016-03-05T11:11:09.287Z.wav",
+                "grade": 2,
+                "comments": "Bad pronunciation",
+                "skipped": false
+            },
+            ..
+        ]
+```
+Where grade can be in [1-4]. If skipped is true, grade is ignored and it means the user skipped evaluating this recording.
+* url:
+```
+        /evaluation/submit/<string:eval_set>
+```
+Where `eval_set` is the set in question, corresponding to the entry in the `evaluation_sets` table in the database.
