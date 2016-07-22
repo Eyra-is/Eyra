@@ -55,8 +55,14 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
   evalCtrl.actionGlyph = PLAYGLYPH;
 
   evalCtrl.commentOpts = [
-    'yeye',
-    'nono'
+    'mispronunciation',
+    'pause(s) in the middle of a word',
+    're-attempting more than once',
+    'self-correction (hesitation or frustration)',
+    'comments before or after the recording',
+    'unclear speech, mumbling or stuttering',
+    'adding a syllable(s) and/or word(s)',
+    'dropping or missing a section of the prompt'
   ];
 
   evalCtrl.currentUser = dataService.get('currentUser');

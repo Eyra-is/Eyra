@@ -191,15 +191,17 @@ function evaluationService($q, deliveryService, localDbMiscService, utilityServi
     */
     var evalCopy = JSON.parse(JSON.stringify(evaluation));
     var count = evalCopy.length;
+    var progress = setProgress;
 
     deliveryService.submitEvaluation(currentSetLabel, evalCopy).then(
       function success(response) {
         // update progress only on a send to server (meaning user might have to evaluate 
         // < evalBufferSize utterances again.
-        setProgressInLdb(currentUser, currentSetLabel, setProgress).then(
+        setProgressInLdb(currentUser, currentSetLabel, progress).then(
           angular.noop, util.stdErrCallback);
         deleteFromEvaluation(count);
       }, function error(response) {
+        logger.error('Error sending to server, saving evaluation in local db.');
         // save our failed send copy locally, but abandon trying to send if we
         // get any of the errors currently submitted after handling by server
         // currently only: 400 and 500
