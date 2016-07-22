@@ -88,6 +88,7 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
     evalCtrl.uttsGraded = 0;
     evalCtrl.setCount = '?';
     evalCtrl.comment = '';
+    evalCtrl.autoplay = false;
 
     evalCtrl.grade = undefined; // initially unchecked
     $scope.$watch(function(){ return evalCtrl.grade; }, watchGrade);
@@ -233,6 +234,16 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
       }
       evalCtrl.comment = '';
       evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
+
+      if (evalCtrl.autoplay) {
+        // just writing action() here didn't seem to work.
+        // not sure about this. Perhaps the angular digest has
+        // to finish before this can be called?
+        // real messy. If the rest of the digest takes longer
+        // than 100ms, the autoplay might break.
+        // TODO: fix this
+        setTimeout(function(){ action(); }, 100);
+      }
     }
   }
 }

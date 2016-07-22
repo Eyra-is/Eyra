@@ -57,6 +57,12 @@ File author/s:
             </button>
             <p>Skip</p>
         </div>
+        <div class="checkbox">
+                <label for="autoplay">
+                    <input id="autoplay" type="checkbox" ng-model="evalCtrl.autoplay">
+                    Autoplay
+                </label>
+            </div>
         <div class="feedbackDisplay">
             <p>Utterances graded: {{evalCtrl.uttsGraded}} / {{evalCtrl.setCount}}</p>
         </div>
