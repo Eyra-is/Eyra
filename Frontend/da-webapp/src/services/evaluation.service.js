@@ -29,9 +29,10 @@ angular.module('daApp')
 evaluationService.$inject = [ '$q',
                               'deliveryService',
                               'localDbMiscService',
+                              'logger',
                               'utilityService'];
 
-function evaluationService($q, deliveryService, localDbMiscService, utilityService) {
+function evaluationService($q, deliveryService, localDbMiscService, logger, utilityService) {
   var evalHandler = {};
   var delService = deliveryService;
   var localDb = localDbMiscService;
@@ -123,7 +124,7 @@ function evaluationService($q, deliveryService, localDbMiscService, utilityServi
     }
   }
 
-  function getNext(grade) {
+  function getNext(grade, comments) {
     /*
     Gets next link to recording and prompt.
 
@@ -141,7 +142,7 @@ function evaluationService($q, deliveryService, localDbMiscService, utilityServi
       return currentSet[setProgress];
     }
 
-    updateEvaluation(grade); // add the results for current recording received from evalCtrl
+    updateEvaluation(grade, comments); // add the results for current recording received from evalCtrl
     if ((setProgress + 1) % evalSubmitFreq === 0 
         || setProgress === setCount - 1) {
       // submit the current evaluation if our progress is a multiple of the frequency
@@ -197,7 +198,7 @@ function evaluationService($q, deliveryService, localDbMiscService, utilityServi
       function success(response) {
         // update progress only on a send to server (meaning user might have to evaluate 
         // < evalBufferSize utterances again.
-        setProgressInLdb(currentUser, currentSetLabel, progress).then(
+        setProgressInLdb(currentUser, currentSetLabel, progress + 1).then(
           angular.noop, util.stdErrCallback);
         deleteFromEvaluation(count);
       }, function error(response) {

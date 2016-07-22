@@ -87,7 +87,7 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
     evalCtrl.displayToken = 'No prompt yet.';
     evalCtrl.uttsGraded = 0;
     evalCtrl.setCount = '?';
-    evalCtrl.comment = '';
+    evalCtrl.comments = '';
     evalCtrl.autoplay = false;
 
     evalCtrl.grade = undefined; // initially unchecked
@@ -223,7 +223,7 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
     // if valid grade has been clicked
     // thanks, Gumbo, http://stackoverflow.com/a/4728164/5272567
     if (['1','2','3','4'].indexOf(evalCtrl.grade) > -1 && !isSetComplete) {
-      logger.log('Grade: '+evalCtrl.grade+', and comment: '+evalCtrl.comment+
+      logger.log('Grade: '+evalCtrl.grade+', and comment: '+evalCtrl.comments+
                  ', detected for prompt: '+evalCtrl.displayToken);
 
       evalCtrl.skipBtnDisabled = true;
@@ -232,7 +232,7 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
       if (actionType === 'pause') {
         toggleActionBtn();
       }
-      evalCtrl.comment = '';
+      evalCtrl.comments = '';
       evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
 
       if (evalCtrl.autoplay) {
