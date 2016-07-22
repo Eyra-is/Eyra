@@ -27,9 +27,9 @@ File author/s:
 angular.module('daApp')
   .factory('routeService', routeService);
 
-routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'logger'];
+routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger'];
 
-function routeService($location, $q, $rootScope, authenticationService, logger) {
+function routeService($location, $q, $rootScope, authenticationService, dataService, logger) {
   var routeHandler = {};
   var authService = authenticationService;
 
@@ -38,6 +38,7 @@ function routeService($location, $q, $rootScope, authenticationService, logger) 
 
   routeHandler.appInitialized = appInitialized;
   routeHandler.loggedIn = loggedIn;
+  routeHandler.evalReady = evalReady;
 
   return routeHandler;
 
@@ -63,6 +64,11 @@ function routeService($location, $q, $rootScope, authenticationService, logger) 
 
   // fired when for example app isn't initialized and we try to access another page manually
   function routeError(eventInfo, data) {
+    if (data.loadedTemplateUrl.contains('evaluation') && !$rootScope.evalReady) {
+      logger.log('No info about user submitted for evaluation.');
+      $location.path('/evaluation-login');
+      return;
+    }
     // for some reason, couldn't find for example the rejection messages in the eventInfo or the data...
     if (!$rootScope.appInitialized) {
       logger.log('App not initialized, going back to main page.');
@@ -70,6 +76,18 @@ function routeService($location, $q, $rootScope, authenticationService, logger) 
     } else if (!authService.loggedIn()) {
       logger.log('Access denied, no one logged in, going to login page.');
       $location.path('/login');
+    }
+  }
+
+  function evalReady() {
+    /*
+    Returns truthy if evaluation is ready (meaning it is okay to navigate to evaluation.html).
+    E.g. user has typed in credentials.
+    */
+    if ($rootScope.evalReady) {
+      return $q.when(true);
+    } else {
+      return $q.reject('Error, no info about user submitted.');
     }
   }
 }

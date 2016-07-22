@@ -58,7 +58,7 @@ describe('evaluation controller', function(){
     $scope.$watch = function(){};
 
     evalCtrl = $controller('EvaluationController', { $scope: $scope });
-    //$httpBackend.flush(); // evalCtrl calls initSet which calls $http
+    $httpBackend.flush(); // evalCtrl calls initSet which calls $http
   }));
 
   it('should initialize', function(){
@@ -66,9 +66,8 @@ describe('evaluation controller', function(){
     expect(typeof(evalCtrl.skip)).toBe('function');
     expect(evalCtrl.actionBtnDisabled).toBeDefined();
     expect(evalCtrl.skipBtnDisabled).toBeDefined();
-    /*expect(typeof(evalCtrl.displayToken)).toBe('string');
+    expect(typeof(evalCtrl.displayToken)).toBe('string');
     expect(typeof(evalCtrl.uttsGraded)).toBe('number');
-    expect(typeof(evalCtrl.gradesDelivered)).toBe('number');*/
 
     // need to flush before this line
     expect($rootScope.isLoaded).toBe(true);

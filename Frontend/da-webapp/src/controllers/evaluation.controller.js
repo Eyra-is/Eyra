@@ -26,25 +26,24 @@ angular.module('daApp')
 EvaluationController.$inject = ['$document',
                                 '$rootScope',
                                 '$scope',
+                                'dataService',
                                 'evaluationService',
                                 'logger',
                                 'utilityService'];
 
-function EvaluationController($document, $rootScope, $scope, evaluationService, logger, utilityService) {
+function EvaluationController($document, $rootScope, $scope, dataService, evaluationService, logger, utilityService) {
   var evalCtrl = this;
   var evalService = evaluationService;
   var util = utilityService;
 
   evalCtrl.action = action;
   evalCtrl.skip = skip;
-  evalCtrl.submit = submit;
 
   $scope.msg = ''; // single information msg
+  $rootScope.isLoaded = false;
 
   evalCtrl.actionBtnDisabled = false;
   evalCtrl.skipBtnDisabled = false;
-
-  evalCtrl.credentialsTyped = false; // has user put in info (e.g. user name)
 
   var actionType = 'play'; // current state
 
@@ -59,12 +58,9 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     'yeye',
     'nono'
   ];
-  evalCtrl.possibleSets = [
-    'malromur_3k'
-  ];
 
-  evalCtrl.currentUser = '';
-  evalCtrl.currentSet = '';
+  evalCtrl.currentUser = dataService.get('currentUser');
+  evalCtrl.currentSet = dataService.get('currentSet');
   var isSetComplete = false;
 
   // save reference to the audio element on the page, for play/pause
@@ -77,7 +73,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     $scope.msg = 'Something went wrong with the audio playback.';
   }
 
-  $rootScope.isLoaded = true;
+  activate();
 
   ////////// 
   
@@ -194,27 +190,6 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     info about the set (currently only count).
     */
     evalCtrl.setCount = info.data.count;
-  }
-
-  function submit() {
-    /*
-    Called when user hits submit button for his info.
-    */
-    if (evalCtrl.currentUser && evalCtrl.currentSet) {
-      evalCtrl.credentialsTyped = true;
-      $scope.msg = '';
-      $rootScope.isLoaded = false; // trigger loading
-      activate();
-    } else {
-      if (!evalCtrl.currentUser) {
-        $scope.msg = 'Please type a username.';
-      } else if (!evalCtrl.currentSet) {
-        $scope.msg = 'Please select a set.';
-      }
-      if (!evalCtrl.currentUser && !evalCtrl.currentSet) {
-        $scope.msg = 'Type a username and select a set';
-      }
-    }
   }
 
   function toggleActionBtn() {

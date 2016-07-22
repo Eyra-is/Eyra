@@ -68,12 +68,17 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
       when('/evaluation', {
         templateUrl: 'views/evaluation.html',
         controller: 'EvaluationController',
-        controllerAs: 'evalCtrl'//,
-        /*resolve: {
-          appInitialized: function(routeService){
-            return routeService.appInitialized();
+        controllerAs: 'evalCtrl',
+        resolve: {
+          evalReady: function(routeService){
+            return routeService.evalReady();
           }
-        }*/
+        }
+      }).
+      when('/evaluation-login', {
+        templateUrl: 'views/evaluation-login.html',
+        controller: 'EvaluationLoginController',
+        controllerAs: 'evalLoginCtrl'
       }).
       when('/info', {
         templateUrl: 'views/info.html',
