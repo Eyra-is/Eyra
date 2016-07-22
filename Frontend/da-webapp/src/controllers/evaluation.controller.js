@@ -90,9 +90,11 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
     if (promise) {
       promise.then(
         function success(data){
+          evalCtrl.uttsGraded = evalService.getProgress();
           next('initial'); // grab initial prompt/utterance
 
           $rootScope.isLoaded = true; // is page loaded?
+          logger.log('Ready for evaluation.');
         }, 
         function error(response){
           $scope.msg = 'Something went wrong.';
@@ -214,9 +216,15 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
     // if valid grade has been clicked
     // thanks, Gumbo, http://stackoverflow.com/a/4728164/5272567
     if (['1','2','3','4'].indexOf(evalCtrl.grade) > -1 && !isSetComplete) {
+      logger.log('Grade: '+evalCtrl.grade+', and comment: '+evalCtrl.comment+
+                 ', detected for prompt: '+evalCtrl.displayToken);
+
       evalCtrl.skipBtnDisabled = true;
       evalCtrl.uttsGraded++;
       next(evalCtrl.grade, evalCtrl.comments);
+      if (actionType === 'pause') {
+        toggleActionBtn();
+      }
       evalCtrl.comment = '';
       evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
     }

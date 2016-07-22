@@ -26,11 +26,12 @@ File author/s:
 angular.module('daApp')
   .factory('evaluationService', evaluationService);
 
-evaluationService.$inject = [ 'deliveryService',
+evaluationService.$inject = [ '$q',
+                              'deliveryService',
                               'localDbMiscService',
                               'utilityService'];
 
-function evaluationService(deliveryService, localDbMiscService, utilityService) {
+function evaluationService($q, deliveryService, localDbMiscService, utilityService) {
   var evalHandler = {};
   var delService = deliveryService;
   var localDb = localDbMiscService;
@@ -38,6 +39,7 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
 
   evalHandler.initSet = initSet;
   evalHandler.getNext = getNext;
+  evalHandler.getProgress = getProgress;
   evalHandler.setInfoReadyCallback = angular.noop; // for unit tests, make placeholder
 
   var evalBufferSize = util.getConstant('evalBufferSize');
@@ -110,8 +112,14 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
         evalHandler.setInfoReadyCallback(response);
         setCount = response.data.count;
       }, util.stdErrCallback);
-      // grab evalBufferSize set from server
-      return addToBuffer();
+      // get progress from local db and then grab evalBufferSize from set from server
+      return $q.when()
+        .then(function(){
+          return getProgressFromLdb();
+        })
+        .then(function(){
+          return addToBuffer();
+        });
     }
   }
 
@@ -130,7 +138,7 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
     returns [recLink, prompt]
     */
     if (grade === 'initial') {
-      return currentSet[0];
+      return currentSet[setProgress];
     }
 
     updateEvaluation(grade); // add the results for current recording received from evalCtrl
@@ -158,6 +166,23 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
     return next;
   }
 
+  function getProgress() {
+    return setProgress;
+  }
+
+  function getProgressFromLdb() {
+    return localDb.getEvaluationProgress(currentUser, currentSetLabel).then(function(progress){
+      setProgress = progress || setProgress;
+      if (setProgress > 0) {
+        currentSet[setProgress - 1] = undefined;
+      }
+    });
+  }
+
+  function setProgressInLdb(user, set, progress) {
+    return localDb.setEvaluationProgress(user, set, progress);
+  }
+
   function submitEvaluation() {
     /*
     Submits evaluation to server. Sends everything we have currently.
@@ -169,6 +194,10 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
 
     deliveryService.submitEvaluation(currentSetLabel, evalCopy).then(
       function success(response) {
+        // update progress only on a send to server (meaning user might have to evaluate 
+        // < evalBufferSize utterances again.
+        setProgressInLdb(currentUser, currentSetLabel, setProgress).then(
+          angular.noop, util.stdErrCallback);
         deleteFromEvaluation(count);
       }, function error(response) {
         // save our failed send copy locally, but abandon trying to send if we

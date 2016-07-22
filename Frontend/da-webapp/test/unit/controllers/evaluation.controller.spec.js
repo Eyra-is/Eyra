@@ -69,7 +69,9 @@ describe('evaluation controller', function(){
     expect(typeof(evalCtrl.displayToken)).toBe('string');
     expect(typeof(evalCtrl.uttsGraded)).toBe('number');
 
-    // need to flush before this line
-    expect($rootScope.isLoaded).toBe(true);
+    // wait for getProgress from ldb and addToBuffer
+    setTimeout(function(){
+      expect($rootScope.isLoaded).toBe(true);
+    }, 50);
   });
 });

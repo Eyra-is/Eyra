@@ -64,8 +64,8 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
 
   // fired when for example app isn't initialized and we try to access another page manually
   function routeError(eventInfo, data) {
-    if (data.loadedTemplateUrl.contains('evaluation') && !$rootScope.evalReady) {
-      logger.log('No info about user submitted for evaluation.');
+    if (data.loadedTemplateUrl.indexOf('evaluation') > -1 && !$rootScope.evalReady) {
+      logger.log('No info about user submitted for evaluation, redirecting to login.');
       $location.path('/evaluation-login');
       return;
     }
