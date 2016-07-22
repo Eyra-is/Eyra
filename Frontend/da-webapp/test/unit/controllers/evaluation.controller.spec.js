@@ -48,6 +48,11 @@ describe('evaluation controller', function(){
         }
         return [200, partialSet];
       });
+    $httpBackend.whenRoute('GET', '/backend/evaluation/setinfo/:set')
+      .respond(function(method, url, data, headers, params) {
+        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
+        return [200, '{"count":50}'];
+      });
 
     $scope = {};
     $scope.$watch = function(){};

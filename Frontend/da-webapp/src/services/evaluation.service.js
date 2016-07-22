@@ -31,13 +31,14 @@ evaluationService.$inject = [ 'deliveryService',
                               'utilityService'];
 
 function evaluationService(deliveryService, localDbMiscService, utilityService) {
-  var evaluationHandler = {};
+  var evalHandler = {};
   var delService = deliveryService;
   var localDb = localDbMiscService;
   var util = utilityService;
 
-  evaluationHandler.initSet = initSet;
-  evaluationHandler.getNext = getNext;
+  evalHandler.initSet = initSet;
+  evalHandler.getNext = getNext;
+  evalHandler.setInfoReadyCallback = angular.noop; // for unit tests, make placeholder
 
   var evalBufferSize = util.getConstant('evalBufferSize');
   var evalSubmitFreq = util.getConstant('evalSubmitFreq');
@@ -47,11 +48,13 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
   // starts at 0 and then changes those elements to undefined after they have been used
   //         | -- active elements --  |
   // [ ud ud [stuff], [stuff], ..     ]
-  //         ^                 
-  //    setProgress   
+  //          ^                 
+  //     setProgress   
   // format: [stuff] == [recLink, prompt]
   var currentSet = [];
   var setProgress = 0;
+  var setCount = '?'; // total number of elements in set, updated through $http call
+  var initialPlusOne = false; // true iff this call to getNext is the one right after initial
 
   // format as in "submitEvaluation" in client-server API or
   /*  [
@@ -67,7 +70,7 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
       ]*/
   var evaluation = [];
 
-  return evaluationHandler;
+  return evalHandler;
 
   //////////
 
@@ -83,11 +86,19 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
     );
   }
 
-  function initSet(set, user) {
+  function initSet(set, user, setInfoReadyCallback, setCompleteCallback) {
     /*
     Code using this service must call initSet with the set name before
     trying to use that set.
+
+    Parameters:
+        set                   the set in question (a string)
+        user                  a string representing the user doing the evaluation
+        setInfoReadyCallback  call with info from server after receiving info about set
+        setCompleteCallback   call after user has evaluated the entire set
     */
+    evalHandler.setInfoReadyCallback = setInfoReadyCallback || evalHandler.setInfoReadyCallback;
+    evalHandler.setCompleteCallback = setCompleteCallback || evalHandler.setCompleteCallback;
     if (currentUser !== user) {
       currentUser = user;
     }
@@ -95,6 +106,10 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
       currentSetLabel = set;
       currentSet = [];
       setProgress = 0;
+      delService.getSetInfo(set).then(function(response){
+        evalHandler.setInfoReadyCallback(response);
+        setCount = response.data.count;
+      }, util.stdErrCallback);
       // grab evalBufferSize set from server
       return addToBuffer();
     }
@@ -110,16 +125,28 @@ function evaluationService(deliveryService, localDbMiscService, utilityService) 
                 is the initial grab of a prompt, meaning we want neither
                 an evaluation or to mark it as skipped.
 
+    If we have reached the end of the specified set, notify the controller.
+
     returns [recLink, prompt]
     */
-    if (grade !== 'initial') {
-      updateEvaluation(grade); // add the results for current recording received from evalCtrl
-      if (setProgress !== 0 && setProgress % evalSubmitFreq === 0) {
-        submitEvaluation();
-      }
+    if (grade === 'initial') {
+      return currentSet[0];
     }
 
-    var next = currentSet[setProgress];
+    updateEvaluation(grade); // add the results for current recording received from evalCtrl
+    if ((setProgress + 1) % evalSubmitFreq === 0 
+        || setProgress === setCount - 1) {
+      // submit the current evaluation if our progress is a multiple of the frequency
+      // or if we have reached the end of the set
+      submitEvaluation();
+    }
+
+    if (setProgress === setCount - 1) {
+      evalHandler.setCompleteCallback();
+      return ['', ''];
+    }
+
+    var next = currentSet[setProgress + 1];
     currentSet[setProgress] = undefined;
     setProgress++;
 

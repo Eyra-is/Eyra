@@ -206,3 +206,21 @@ Where grade can be in [1-4]. If skipped is true, grade is ignored and it means t
         /evaluation/submit/<string:eval_set>
 ```
 Where `eval_set` is the set in question, corresponding to the entry in the `evaluation_sets` table in the database.
+
+## 8. getSetInfo
+
+*Query for info about a specific set.*
+
+Current implementation:
+* json format of response:
+```
+    {
+        "count": 52
+    }
+```
+Currently only returns the number of elements in the set.
+* url:
+```
+        /evaluation/setinfo/<string:eval_set>
+```
+Where `eval_set` is the set in question, corresponding to the entry in the `evaluation_sets` table in the database.

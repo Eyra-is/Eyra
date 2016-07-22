@@ -222,5 +222,13 @@ def submit_evaluation(eval_set):
             return msg, 400
         return dbHandler.processEvaluation(eval_set, data)
 
+@app.route('/evaluation/setinfo/<string:eval_set>', methods=['GET'])
+def get_set_info(eval_set):
+    """
+    Get info about set as json. More info in client-server API and db_handler.
+    """
+    if request.method == 'GET':
+        return dbHandler.getSetInfo(eval_set)
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -831,7 +831,7 @@ class DbHandler:
         eval_set = str(eval_set)
         try:
             jsonDecoded = json.loads(data)
-            #log('json: ', jsonDecoded)
+            log('json: ', jsonDecoded)
         except (TypeError, ValueError) as e:
             msg = 'Evaluation data not on correct format.'
             log(msg, e)
@@ -850,7 +850,7 @@ class DbHandler:
                 comments = evaluation['comments']
                 skipped = evaluation['skipped']
             except KeyError as e:
-                error = 'Evaluation data not on correct format, wrong key.'
+                error = 'Some evaluation data not on correct format, wrong key.'
                 errorStatusCode = 400
                 log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
                 continue
@@ -866,7 +866,7 @@ class DbHandler:
                 try:
                     recId = cur.fetchone()[0]
                 except TypeError as e:
-                    error = 'Could not find a recording with this data.'
+                    error = 'Could not find a recording with some data.'
                     errorStatusCode = 400
                     log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
                     continue
@@ -875,7 +875,7 @@ class DbHandler:
                              VALUES (%s, %s, %s, %s, %s, %s)', 
                             (recId, eval_set, evaluator, grade, comments, skipped))
             except MySQLError as e:
-                error = 'Error inserting evaluation into database.'
+                error = 'Error inserting some evaluation into database.'
                 errorStatusCode = 500
                 log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
                 continue
@@ -886,3 +886,27 @@ class DbHandler:
             return (error, errorStatusCode)
         else:
             return ('Successfully processed evaluation.', 200)
+
+    def getSetInfo(self, eval_set):
+        """
+        Currently, only returns the number of elements in <eval_set> on format:
+            {
+                "count": 52
+            }
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT COUNT(*) FROM evaluation_sets '+
+                        'WHERE eval_set=%s ', (eval_set,))
+            try:
+                count = cur.fetchone()[0]
+            except TypeError as e:
+                msg = 'Could not find supplied set.'
+                log(msg + ' Eval_set: {}'.format(eval_set), e)
+                return (msg, 404)
+        except MySQLError as e:
+            msg = 'Error getting set info.'
+            log(msg + ' Eval_set: {}'.format(eval_set), e)
+            return (msg, 500)
+
+        return (json.dumps(dict(count=count)), 200)

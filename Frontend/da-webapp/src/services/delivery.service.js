@@ -54,12 +54,14 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   reqHandler.submitRecordings = submitRecordings;
   reqHandler.getFromSet = getFromSet;
   reqHandler.submitEvaluation = submitEvaluation;
+  reqHandler.getSetInfo = getSetInfo;
   // OTHER
   reqHandler.testServerGet = testServerGet;
 
   var TOKENURL = '/submit/gettokens';
   var EVALUATIONGETSETURL = '/evaluation/set/[SET]/progress/[PROGRESS]/count/[COUNT]';
   var EVALUATIONSUBMITURL = '/evaluation/submit/[SET]';
+  var EVALUATIONGETSETINFOURL = '/evaluation/setinfo/[SET]';
   var invalidTitle = util.getConstant('invalidTitle');
   var failedSessionSends = 0;
 
@@ -256,6 +258,13 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
 
   function submitEvaluation(set, jsonData) {
     return submitGeneralJson(jsonData, EVALUATIONSUBMITURL.replace('[SET]', set));
+  }
+
+  function getSetInfo(set) {
+    return $http.get(
+      BACKENDURL + 
+      EVALUATIONGETSETINFOURL.replace('[SET]', set)
+    );
   }
 
   // NOT USED, speaker data is sent with each session

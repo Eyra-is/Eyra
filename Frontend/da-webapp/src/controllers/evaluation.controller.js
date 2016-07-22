@@ -59,6 +59,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
 
   var currentUser = 'No user.';
   var currentSet = 'malromur_3k';
+  var isSetComplete = false;
 
   // save reference to the audio element on the page, for play/pause
   // thanks, Shushanth Pallegar, http://stackoverflow.com/a/30899643/5272567
@@ -77,6 +78,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
   function activate() {
     evalCtrl.displayToken = 'No prompt yet.';
     evalCtrl.uttsGraded = 0;
+    evalCtrl.setCount = '?';
     evalCtrl.gradesDelivered = 0;
 
     evalCtrl.grade = undefined; // initially unchecked
@@ -125,11 +127,19 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     }
   }
 
+  function disableAllControls() {
+    /*
+    Disable most user interaction on page.
+    */
+    evalCtrl.actionBtnDisabled = true;
+    evalCtrl.skipBtnDisabled = true;
+  }
+
   function initSet(set, user) {
     /*
     Returns promise resolved when evalService has init'd set.
     */
-    return evalService.initSet(set, user);
+    return evalService.initSet(set, user, setInfoReadyCallback, setCompleteCallback);
   }
 
   function next(grade, comments) {
@@ -140,6 +150,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
       grade     the grade for the current prompt (1-4), if undefined, 
                 means the prompt was skipped
     */
+    console.log(grade);
     var recNPrompt = evalService.getNext(grade, comments);
     evalCtrl.grade = undefined; // reset grade
     evalCtrl.recording = recNPrompt[0];
@@ -166,6 +177,20 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     audioPlayback.pause();
   }
 
+  function setCompleteCallback() {
+    $scope.msg = 'Grading set complete. Thank you.';
+    isSetComplete = true;
+    disableAllControls();
+  }
+
+  function setInfoReadyCallback(info) {
+    /*
+    Function supplied to evaluation.service as a callback for when it has received
+    info about the set (currently only count).
+    */
+    evalCtrl.setCount = info.data.count;
+  }
+
   function toggleActionBtn() {
     if (actionType === 'play') {
       actionType = 'pause';
@@ -187,11 +212,11 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     */
     // if valid grade has been clicked
     // thanks, Gumbo, http://stackoverflow.com/a/4728164/5272567
-    if (['1','2','3','4'].indexOf(evalCtrl.grade) > -1) {
+    if (['1','2','3','4'].indexOf(evalCtrl.grade) > -1 && !isSetComplete) {
       evalCtrl.skipBtnDisabled = true;
       evalCtrl.uttsGraded++;
       next(evalCtrl.grade, evalCtrl.comments);
-      evalCtrl.skipBtnDisabled = false;
+      evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
     }
   }
 }
