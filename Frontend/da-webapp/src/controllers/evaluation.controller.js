@@ -37,11 +37,14 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
 
   evalCtrl.action = action;
   evalCtrl.skip = skip;
+  evalCtrl.submit = submit;
 
   $scope.msg = ''; // single information msg
 
   evalCtrl.actionBtnDisabled = false;
   evalCtrl.skipBtnDisabled = false;
+
+  evalCtrl.credentialsTyped = false; // has user put in info (e.g. user name)
 
   var actionType = 'play'; // current state
 
@@ -56,9 +59,12 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     'yeye',
     'nono'
   ];
+  evalCtrl.possibleSets = [
+    'malromur_3k'
+  ];
 
-  var currentUser = 'No user.';
-  var currentSet = 'malromur_3k';
+  evalCtrl.currentUser = '';
+  evalCtrl.currentSet = '';
   var isSetComplete = false;
 
   // save reference to the audio element on the page, for play/pause
@@ -71,7 +77,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     $scope.msg = 'Something went wrong with the audio playback.';
   }
 
-  activate();
+  $rootScope.isLoaded = true;
 
   ////////// 
   
@@ -79,12 +85,12 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     evalCtrl.displayToken = 'No prompt yet.';
     evalCtrl.uttsGraded = 0;
     evalCtrl.setCount = '?';
-    evalCtrl.gradesDelivered = 0;
+    evalCtrl.comment = '';
 
     evalCtrl.grade = undefined; // initially unchecked
     $scope.$watch(function(){ return evalCtrl.grade; }, watchGrade);
 
-    var promise = initSet(currentSet, currentUser);
+    var promise = initSet(evalCtrl.currentSet, evalCtrl.currentUser);
     if (promise) {
       promise.then(
         function success(data){
@@ -150,7 +156,6 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
       grade     the grade for the current prompt (1-4), if undefined, 
                 means the prompt was skipped
     */
-    console.log(grade);
     var recNPrompt = evalService.getNext(grade, comments);
     evalCtrl.grade = undefined; // reset grade
     evalCtrl.recording = recNPrompt[0];
@@ -191,6 +196,27 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
     evalCtrl.setCount = info.data.count;
   }
 
+  function submit() {
+    /*
+    Called when user hits submit button for his info.
+    */
+    if (evalCtrl.currentUser && evalCtrl.currentSet) {
+      evalCtrl.credentialsTyped = true;
+      $scope.msg = '';
+      $rootScope.isLoaded = false; // trigger loading
+      activate();
+    } else {
+      if (!evalCtrl.currentUser) {
+        $scope.msg = 'Please type a username.';
+      } else if (!evalCtrl.currentSet) {
+        $scope.msg = 'Please select a set.';
+      }
+      if (!evalCtrl.currentUser && !evalCtrl.currentSet) {
+        $scope.msg = 'Type a username and select a set';
+      }
+    }
+  }
+
   function toggleActionBtn() {
     if (actionType === 'play') {
       actionType = 'pause';
@@ -216,6 +242,7 @@ function EvaluationController($document, $rootScope, $scope, evaluationService, 
       evalCtrl.skipBtnDisabled = true;
       evalCtrl.uttsGraded++;
       next(evalCtrl.grade, evalCtrl.comments);
+      evalCtrl.comment = '';
       evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
     }
   }
