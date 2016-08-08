@@ -24,6 +24,7 @@ angular.module('daApp')
 .controller('EvaluationController', EvaluationController);
 
 EvaluationController.$inject = ['$document',
+                                '$http',
                                 '$rootScope',
                                 '$scope',
                                 'dataService',
@@ -31,7 +32,7 @@ EvaluationController.$inject = ['$document',
                                 'logger',
                                 'utilityService'];
 
-function EvaluationController($document, $rootScope, $scope, dataService, evaluationService, logger, utilityService) {
+function EvaluationController($document, $http, $rootScope, $scope, dataService, evaluationService, logger, utilityService) {
   var evalCtrl = this;
   var evalService = evaluationService;
   var util = utilityService;
@@ -165,6 +166,19 @@ function EvaluationController($document, $rootScope, $scope, dataService, evalua
     evalCtrl.grade = undefined; // reset grade
     evalCtrl.recording = recNPrompt[0];
     evalCtrl.displayToken = recNPrompt[1];
+
+    // workaround for mobile playback, where it didn't work on chrome/android.
+    // fetch blob at url using xhr, and use url generated from that blob.
+    // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
+    // thanks, gbrlg
+    $http.get(evalCtrl.recording, {'responseType':'blob'}).then(
+      function success(response) {
+        var reBlob = response.data;
+        if (reBlob) {
+          evalCtrl.recording = (window.URL || window.webkitURL).createObjectURL(reBlob);
+        }
+      }, util.stdErrCallback
+    );
   }
 
   function play() {
