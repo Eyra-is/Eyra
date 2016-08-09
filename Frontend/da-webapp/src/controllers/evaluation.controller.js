@@ -25,14 +25,16 @@ angular.module('daApp')
 
 EvaluationController.$inject = ['$document',
                                 '$http',
+                                '$q',
                                 '$rootScope',
                                 '$scope',
+                                '$timeout',
                                 'dataService',
                                 'evaluationService',
                                 'logger',
                                 'utilityService'];
 
-function EvaluationController($document, $http, $rootScope, $scope, dataService, evaluationService, logger, utilityService) {
+function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout, dataService, evaluationService, logger, utilityService) {
   var evalCtrl = this;
   var evalService = evaluationService;
   var util = utilityService;
@@ -99,16 +101,21 @@ function EvaluationController($document, $http, $rootScope, $scope, dataService,
       promise.then(
         function success(data){
           evalCtrl.uttsGraded = evalService.getProgress();
-          next('initial'); // grab initial prompt/utterance
-
-          $rootScope.isLoaded = true; // is page loaded?
-          logger.log('Ready for evaluation.');
+          // grab initial prompt/utterance
+          next('initial').then(
+            function success(response) {
+              $rootScope.isLoaded = true; // is page loaded?
+              logger.log('Ready for evaluation.');
+            },
+            function error(error) {
+              $scope.msg = 'Something went wrong.';
+              logger.error(error);
+              $rootScope.isLoaded = true;
+            });
         }, 
         function error(response){
           $scope.msg = 'Something went wrong.';
-
           logger.error(response);
-
           $rootScope.isLoaded = true;
         }
       );
@@ -161,24 +168,40 @@ function EvaluationController($document, $http, $rootScope, $scope, dataService,
     Parameters:
       grade     the grade for the current prompt (1-4), if undefined, 
                 means the prompt was skipped
+
+    Return: promise which is resolved when the audio playback is ready to go.
     */
     var recNPrompt = evalService.getNext(grade, comments);
     evalCtrl.grade = undefined; // reset grade
     evalCtrl.recording = recNPrompt[0];
     evalCtrl.displayToken = recNPrompt[1];
 
-    // workaround for mobile playback, where it didn't work on chrome/android.
-    // fetch blob at url using xhr, and use url generated from that blob.
-    // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
-    // thanks, gbrlg
-    $http.get(evalCtrl.recording, {'responseType':'blob'}).then(
-      function success(response) {
-        var reBlob = response.data;
-        if (reBlob) {
-          evalCtrl.recording = (window.URL || window.webkitURL).createObjectURL(reBlob);
+    var playbackReady = $q.defer();
+
+    // thanks QuasarDonkey, http://stackoverflow.com/a/24600597/5272567 for the Mobi test quote
+    if (/Mobi/i.test(navigator.userAgent)) {
+      // workaround for mobile playback, where it didn't work on chrome/android.
+      // fetch blob at url using xhr, and use url generated from that blob.
+      // see issue: https://code.google.com/p/chromium/issues/detail?id=227476
+      // thanks, gbrlg
+      $http.get(evalCtrl.recording, {'responseType':'blob'}).then(
+        function success(response) {
+          var reBlob = response.data;
+          if (reBlob) {
+            evalCtrl.recording = (window.URL || window.webkitURL).createObjectURL(reBlob);
+          }
+          playbackReady.resolve(true);
+        }, 
+        function error(error) {
+          logger.error(error);
+          playbackReady.reject(false);
         }
-      }, util.stdErrCallback
-    );
+      );
+    } else {
+      return $q.resolve(true);
+    }
+
+    return playbackReady.promise;
   }
 
   function play() {
@@ -242,21 +265,27 @@ function EvaluationController($document, $http, $rootScope, $scope, dataService,
 
       evalCtrl.skipBtnDisabled = true;
       evalCtrl.uttsGraded++;
-      next(evalCtrl.grade, evalCtrl.comments);
       if (actionType === 'pause') {
         toggleActionBtn();
       }
       evalCtrl.comments = '';
       evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
 
+      next(evalCtrl.grade, evalCtrl.comments).then(
+        finishWatchGrade,
+        util.stdErrCallback
+      );
+    }
+
+    function finishWatchGrade() {
       if (evalCtrl.autoplay) {
         // just writing action() here didn't seem to work.
         // not sure about this. Perhaps the angular digest has
         // to finish before this can be called?
         // real messy. If the rest of the digest takes longer
-        // than 100ms, the autoplay might break.
+        // than X ms, the autoplay might break.
         // TODO: fix this
-        setTimeout(function(){ action(); }, 100);
+        $timeout(function(){ action(); }, 100);
       }
     }
   }
