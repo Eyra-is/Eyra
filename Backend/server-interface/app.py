@@ -230,5 +230,13 @@ def get_set_info(eval_set):
     if request.method == 'GET':
         return dbHandler.getSetInfo(eval_set)
 
+@app.route('/evaluation/progress/user/<string:user>/set/<string:eval_set>', methods=['GET'])
+def get_user_progress(user, eval_set):
+    """
+    Get user progress into a specific set. If user has recorded 5, progress is 5.
+    """
+    if request.method == 'GET':
+        return dbHandler.getUserProgress(user, eval_set)
+
 if __name__ == '__main__':
     app.run(debug=True)

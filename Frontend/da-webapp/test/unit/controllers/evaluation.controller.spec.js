@@ -53,6 +53,11 @@ describe('evaluation controller', function(){
         // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         return [200, '{"count":50}'];
       });
+    $httpBackend.whenRoute('GET', '/backend/evaluation/progress/user/:user/set/:set')
+      .respond(function(method, url, data, headers, params) {
+        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
+        return [200, '{"progress":2}'];
+      });
 
     $scope = {};
     $scope.$watch = function(){};

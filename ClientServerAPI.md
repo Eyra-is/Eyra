@@ -224,3 +224,20 @@ Currently only returns the number of elements in the set.
         /evaluation/setinfo/<string:eval_set>
 ```
 Where `eval_set` is the set in question, corresponding to the entry in the `evaluation_sets` table in the database.
+
+## 9. getUserProgress
+
+*Query for progress into a specific set by a specific user.*
+
+Current implementation:
+* json format of response:
+```
+    {
+        "progress": 541
+    }
+```
+* url:
+```
+        /evaluation/progress/user/<string:user>/set/<string:eval_set>
+```
+Where `eval_set` is the set in question, corresponding to the entry in the `evaluation_sets` table in the database.

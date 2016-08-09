@@ -116,7 +116,7 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
       // get progress from local db and then grab evalBufferSize from set from server
       return $q.when()
         .then(function(){
-          return getProgressFromLdb();
+          return getProgressFromServer();
         })
         .then(function(){
           return addToBuffer();
@@ -171,17 +171,13 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
     return setProgress;
   }
 
-  function getProgressFromLdb() {
-    return localDb.getEvaluationProgress(currentUser, currentSetLabel).then(function(progress){
-      setProgress = progress || setProgress;
+  function getProgressFromServer() {
+    return delService.getUserProgress(currentUser, currentSetLabel).then(function(response){
+      setProgress = response.data.progress || setProgress;
       if (setProgress > 0) {
         currentSet[setProgress - 1] = undefined;
       }
     });
-  }
-
-  function setProgressInLdb(user, set, progress) {
-    return localDb.setEvaluationProgress(user, set, progress);
   }
 
   function submitEvaluation() {
@@ -194,17 +190,13 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
     var count = evalCopy.length;
     var progress = setProgress;
 
-    deliveryService.submitEvaluation(currentSetLabel, evalCopy).then(
+    delService.submitEvaluation(currentSetLabel, evalCopy).then(
       function success(response) {
-        // update progress only on a send to server (meaning user might have to evaluate 
-        // < evalBufferSize utterances again.
-        setProgressInLdb(currentUser, currentSetLabel, progress + 1).then(
-          angular.noop, util.stdErrCallback);
         deleteFromEvaluation(count);
       }, function error(response) {
         logger.error('Error sending to server, saving evaluation in local db.');
         // save our failed send copy locally, but abandon trying to send if we
-        // get any of the errors currently submitted after handling by server
+        // get any of the errors currently submitted after handling by server.
         // currently only: 400 and 500
         if (response.status === 400 || response.status === 500) {
           localDb.saveEvaluation(currentUser, currentSetLabel, evalCopy).then(

@@ -910,3 +910,28 @@ class DbHandler:
             return (msg, 500)
 
         return (json.dumps(dict(count=count)), 200)
+
+    def getUserProgress(self, user, eval_set):
+        """
+        Returns user progress into eval_set, format:
+            {
+                "progress": 541
+            }
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT COUNT(*) FROM evaluation '+
+                        'WHERE eval_set=%s '+
+                        'AND evaluator=%s', (eval_set, user))
+            try:
+                progress = cur.fetchone()[0]
+            except TypeError as e:
+                msg = 'Could not find progress of user.'
+                log(msg + ' Eval_set: {}, user: {}'.format(eval_set, user), e)
+                return (msg, 404)
+        except MySQLError as e:
+            msg = 'Error getting user progress.'
+            log(msg + ' Eval_set: {}, user: {}'.format(eval_set, user), e)
+            return (msg, 500)
+
+        return (json.dumps(dict(progress=progress)), 200)

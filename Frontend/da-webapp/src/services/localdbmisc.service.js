@@ -46,8 +46,6 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
   dbHandler.getSpeaker = getSpeaker;
   dbHandler.setSpeaker = setSpeaker;
   dbHandler.saveEvaluation = saveEvaluation;
-  dbHandler.setEvaluationProgress = setEvaluationProgress;
-  dbHandler.getEvaluationProgress = getEvaluationProgress;
 
   var devicePath = 'device';
   var instructorIdPath = 'instructorId';
@@ -150,18 +148,6 @@ function localDbMiscService($q, dataService, logger, myLocalForageService, utili
       evaluation/user/set/UUID
     */
     return lfService.setItem(evalPrefix + user + '/' + set + '/' + util.generateUUID(), evaluation);
-  }
-
-  function setEvaluationProgress(user, set, progress) {
-    /*
-    Save evaluation progress (how far into the set he is). Key:
-      evaluation/user/set/progress
-    */
-    return lfService.setItem(evalPrefix + user + '/' + set + '/progress', progress);
-  }
-
-  function getEvaluationProgress(user, set) {
-    return lfService.getItem(evalPrefix + user + '/' + set + '/progress');
   }
 }
 }());
