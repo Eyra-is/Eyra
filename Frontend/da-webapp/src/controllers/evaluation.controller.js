@@ -265,11 +265,6 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
 
       evalCtrl.skipBtnDisabled = true;
       evalCtrl.uttsGraded++;
-      if (actionType === 'pause') {
-        toggleActionBtn();
-      }
-      evalCtrl.comments = '';
-      evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
 
       next(evalCtrl.grade, evalCtrl.comments).then(
         finishWatchGrade,
@@ -278,6 +273,12 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
     }
 
     function finishWatchGrade() {
+      if (actionType === 'pause') {
+        toggleActionBtn();
+      }
+      evalCtrl.comments = '';
+      evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
+
       if (evalCtrl.autoplay) {
         // just writing action() here didn't seem to work.
         // not sure about this. Perhaps the angular digest has
