@@ -49,7 +49,7 @@ function EvaluationLoginController($location, $rootScope, $scope, dataService, d
       evalLoginCtrl.possibleSets = response.data;
     },
     function error(error){
-      $scope.msg = 'Couldn\'t grab available sets.';
+      $scope.msg = 'Couldn\'t grab available sets. Are you online?';
       logger.error(error);
     }
   )
