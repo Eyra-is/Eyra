@@ -276,7 +276,16 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
       logger.log('Grade: '+evalCtrl.grade+', and comment: '+evalCtrl.comments+
                  ', detected for prompt: '+evalCtrl.displayToken);
 
+      $scope.msg = '';
       evalCtrl.skipBtnDisabled = true;
+
+      // if grade is low (2 or lower) make comment mandatory
+      if (evalCtrl.comments === '' && evalCtrl.grade <= 2) {
+        $scope.msg = 'Please comment on your grade.';
+        evalCtrl.grade = undefined;
+        return;
+      }
+
       evalCtrl.uttsGraded++;
 
       next(evalCtrl.grade, evalCtrl.comments).then(
