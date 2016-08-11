@@ -56,6 +56,7 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   reqHandler.submitEvaluation = submitEvaluation;
   reqHandler.getSetInfo = getSetInfo;
   reqHandler.getUserProgress = getUserProgress;
+  reqHandler.getPossibleSets = getPossibleSets;
   // OTHER
   reqHandler.testServerGet = testServerGet;
 
@@ -64,6 +65,7 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   var EVALUATIONSUBMITURL = '/evaluation/submit/[SET]';
   var EVALUATIONGETSETINFOURL = '/evaluation/setinfo/[SET]';
   var EVALUATIONGETUSERPROGRESSURL = '/evaluation/progress/user/[USER]/set/[SET]';
+  var EVALUATIONGETPOSSIBLESETSURL = '/evaluation/possiblesets';
   var invalidTitle = util.getConstant('invalidTitle');
   var failedSessionSends = 0;
 
@@ -274,6 +276,13 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
       BACKENDURL +
       EVALUATIONGETUSERPROGRESSURL.replace('[USER]', user)
       .replace('[SET]', set)
+    );
+  }
+
+  function getPossibleSets() {
+    return $http.get(
+      BACKENDURL +
+      EVALUATIONGETPOSSIBLESETSURL
     );
   }
 

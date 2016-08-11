@@ -27,24 +27,37 @@ EvaluationLoginController.$inject = [ '$location',
                                       '$rootScope',
                                       '$scope',
                                       'dataService',
+                                      'deliveryService',
+                                      'logger',
                                       'utilityService'];
 
-function EvaluationLoginController($location, $rootScope, $scope, dataService, utilityService) {
+function EvaluationLoginController($location, $rootScope, $scope, dataService, deliveryService, logger, utilityService) {
   var evalLoginCtrl = this;
+  var delService = deliveryService;
   var util = utilityService;
 
   evalLoginCtrl.submit = submit;
 
   $scope.msg = ''; // single information msg
 
-  evalLoginCtrl.possibleSets = [
-    'malromur_3k'
-  ];
-
   evalLoginCtrl.currentUser = '';
   evalLoginCtrl.currentSet = '';
 
-  $rootScope.isLoaded = true;
+  evalLoginCtrl.possibleSets = [];
+  delService.getPossibleSets().then(
+    function success(response){
+      evalLoginCtrl.possibleSets = response.data;
+    },
+    function error(error){
+      $scope.msg = 'Couldn\'t grab available sets.';
+      logger.error(error);
+    }
+  )
+  .then(
+    function success(data){
+      $rootScope.isLoaded = true;
+    }, util.stdErrCallback
+  );
 
   ////////// 
 

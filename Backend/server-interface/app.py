@@ -238,5 +238,13 @@ def get_user_progress(user, eval_set):
     if request.method == 'GET':
         return dbHandler.getUserProgress(user, eval_set)
 
+@app.route('/evaluation/possiblesets', methods=['GET'])
+def get_possible_sets():
+    """
+    Get a list of all possible sets.
+    """
+    if request.method == 'GET':
+        return dbHandler.getPossibleSets()
+
 if __name__ == '__main__':
     app.run(debug=True)

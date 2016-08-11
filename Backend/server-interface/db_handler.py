@@ -935,3 +935,25 @@ class DbHandler:
             return (msg, 500)
 
         return (json.dumps(dict(progress=progress)), 200)
+
+    def getPossibleSets(self):
+        """
+        Returns possible sets, format:
+            [
+                "set1",
+                "set2",
+                ..
+            ]
+        or as in client-server API.
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT eval_set FROM evaluation_sets '+
+                        'GROUP BY eval_set')
+            sets = [x[0] for x in cur.fetchall()]
+        except MySQLError as e:
+            msg = 'Error getting possible sets.'
+            log(msg, e)
+            return (msg, 500)
+
+        return (json.dumps(sets), 200)

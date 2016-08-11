@@ -241,3 +241,21 @@ Current implementation:
         /evaluation/progress/user/<string:user>/set/<string:eval_set>
 ```
 Where `eval_set` is the set in question, corresponding to the entry in the `evaluation_sets` table in the database.
+
+## 10. getPossibleSets
+
+*Query for a list of all the sets available.*
+
+Current implementation:
+* json format of response:
+```
+    [
+        "set1",
+        "set2",
+        ..
+    ]
+```
+* url:
+```
+        /evaluation/possiblesets
+```
