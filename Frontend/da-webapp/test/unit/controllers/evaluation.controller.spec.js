@@ -58,6 +58,11 @@ describe('evaluation controller', function(){
         // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         return [200, '{"progress":2}'];
       });
+    $httpBackend.whenRoute('GET', 'json/evaluation-comments.json')
+    .respond(function(method, url, data, headers, params) {
+      // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
+      return [200, '["comment1", "comment2"]'];
+    });
 
     $scope = {};
     $scope.$watch = function(){};
@@ -74,7 +79,7 @@ describe('evaluation controller', function(){
     expect(typeof(evalCtrl.displayToken)).toBe('string');
     expect(typeof(evalCtrl.uttsGraded)).toBe('number');
 
-    // wait for getProgress from ldb and addToBuffer
+    // wait for getProgress from server and addToBuffer
     setTimeout(function(){
       expect($rootScope.isLoaded).toBe(true);
     }, 50);

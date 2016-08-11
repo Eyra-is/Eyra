@@ -82,9 +82,9 @@ module.exports = function(grunt) {
     copy: {
       main: {
         files: [
-          { expand: true, flatten: true, cwd: source,
+          { expand: true, cwd: source,
             src: ['views/*.html'],
-            dest: depl+'views/',
+            dest: depl,
             rename: function(dest, src) {
               return dest + src.replace(/\.html$/, '.'+cache_breaker+'.html');
             }
@@ -104,7 +104,7 @@ module.exports = function(grunt) {
             }
           },
           { expand: true, cwd: source,
-            src: ['json/speaker-info-format.json'],
+            src: ['json/**'],
             dest: depl,
             rename: function(dest, src) {
               return dest + src.replace(/\.json$/, '.'+cache_breaker+'.json');
@@ -186,6 +186,10 @@ module.exports = function(grunt) {
             {
               match: /json\/speaker-info-format\.json/g,
               replacement: 'json/speaker-info-format.'+cache_breaker+'.json'
+            },
+            {
+              match: /json\/evaluation-comments\.json/g,
+              replacement: 'json/evaluation-comments.'+cache_breaker+'.json'
             }
           ]
         },

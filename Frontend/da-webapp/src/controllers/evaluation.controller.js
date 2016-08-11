@@ -57,16 +57,8 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   evalCtrl.actionText = PLAYTEXT;
   evalCtrl.actionGlyph = PLAYGLYPH;
 
-  evalCtrl.commentOpts = [
-    'mispronunciation',
-    'pause(s) in the middle of a word',
-    're-attempting more than once',
-    'self-correction (hesitation or frustration)',
-    'comments before or after the recording',
-    'unclear speech, mumbling or stuttering',
-    'adding a syllable(s) and/or word(s)',
-    'dropping or missing a section of the prompt'
-  ];
+  var EVALUATIONCOMMENTSURL = 'json/evaluation-comments.json';
+  evalCtrl.commentOpts = [];
 
   evalCtrl.currentUser = dataService.get('currentUser');
   evalCtrl.currentSet = dataService.get('currentSet');
@@ -102,22 +94,43 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
         function success(data){
           evalCtrl.uttsGraded = evalService.getProgress();
           // grab initial prompt/utterance
-          next('initial').then(
+          return next('initial').then(
             function success(response) {
-              $rootScope.isLoaded = true; // is page loaded?
               logger.log('Ready for evaluation.');
             },
             function error(error) {
               $scope.msg = 'Something went wrong.';
               logger.error(error);
-              $rootScope.isLoaded = true;
             });
         }, 
         function error(response){
           $scope.msg = 'Something went wrong.';
           logger.error(response);
-          $rootScope.isLoaded = true;
         }
+      )
+      // grab comments from server
+      .then(
+        function success(data){
+          return $http.get(EVALUATIONCOMMENTSURL).then(
+            function success(response) {
+              evalCtrl.commentOpts = response.data;
+            },
+            function error(response) {
+              $scope.msg = 'Something went wrong grabbing comments from server.';
+              logger.error(response);
+            }
+          );
+        },
+        function error(response){
+          $scope.msg = 'Something went wrong.';
+          logger.error(response);
+        }
+      )
+      // now page is loaded
+      .then(
+        function success(data){
+          $rootScope.isLoaded = true;
+        }, util.stdErrCallback
       );
     }
   }
