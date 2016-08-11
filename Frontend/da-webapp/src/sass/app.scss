@@ -117,6 +117,23 @@ body {
     }
   }
 }
+#grades {
+  label[for="grade1"] {
+    color: red;
+  }
+  label[for="grade4"] {
+    color: green;
+  }
+
+  input[type="radio"] {
+    margin: 0 5%;
+
+    /* All browsers except webkit*/
+    transform: scale(1.7);
+    /* Webkit browsers*/
+    -webkit-transform: scale(1.7);
+  }
+}
 /* http://stackoverflow.com/a/24688640/5272567 */
 .checkbox input[type='checkbox'] {
   /* All browsers except webkit*/
