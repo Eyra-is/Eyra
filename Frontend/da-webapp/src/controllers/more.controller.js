@@ -114,7 +114,7 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   function sync() {
     $scope.msg = 'Syncing - please wait';
 
-    delService.sendLocalSessions(syncDoneCallback);
+    delService.sendLocalSessions(syncDoneCallback, angular.noop);
   }
 
   // result is true if sync completed successfully

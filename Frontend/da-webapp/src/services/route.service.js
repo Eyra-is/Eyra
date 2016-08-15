@@ -69,13 +69,28 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
       $location.path('/evaluation-login');
       return;
     }
-    // for some reason, couldn't find for example the rejection messages in the eventInfo or the data...
-    if (!$rootScope.appInitialized) {
+    // list of pages not requiring app initialization but requiring login
+    if (data.loadedTemplateUrl.indexOf('more') > -1) {
+      handleLogin();
+    } else if (data.loadedTemplateUrl.indexOf('register-device') > -1) {
+      handleLogin();
+    } else if (data.loadedTemplateUrl.indexOf('set-instructor') > -1) {
+      handleLogin();
+    } 
+    // handle regular routeError
+    else if (!$rootScope.appInitialized) {
+      // for some reason, couldn't find for example the rejection messages in the eventInfo or the data...
       logger.log('App not initialized, going back to main page.');
       $location.path('/main');
-    } else if (!authService.loggedIn()) {
-      logger.log('Access denied, no one logged in, going to login page.');
-      $location.path('/login');
+    } else {
+      handleLogin();
+    }
+
+    function handleLogin() {
+      if (!authService.loggedIn()) {
+        logger.log('Access denied, no one logged in, going to login page.');
+        $location.path('/login');
+      }
     }
   }
 

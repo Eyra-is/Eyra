@@ -40,44 +40,45 @@ File author/s:
     src="https://cdnjs.cloudflare.com/ajax/libs/async/1.5.2/async.js"></script>-->
 </head>
 <body>
+    <nav class="navbar navbar-inverse navbar-static-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".main-nav">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-cd"> EYRA</span></a>
+        </div>
+        <div class="collapse navbar-collapse main-nav">
+          <ul class="nav navbar-nav">
+            <li><a ng-href="#/info">
+                Info <span class="glyphicon glyphicon-info-sign navbar-glyph"></span>
+            </a></li>
+            <li><a ng-href="#/sync">
+                Sync <span class="glyphicon glyphicon-refresh navbar-glyph"></span>
+            </a></li>
+            <li><a ng-href="#/evaluation">
+                Evaluate <span class="glyphicon glyphicon-headphones navbar-glyph"></span>
+            </a></li>
+            <li><a ng-href="#/more">
+                Admin <span class="glyphicon glyphicon-cog navbar-glyph"></span>
+            </a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
     <!-- BEGIN: Pre-Bootstrap Loading Screen. -->
     <div ng-if="false">
-
-        <p class="loading_msg"> Starting Angular</p>
-
+        <p class="loading_msg">Starting Angular</p>
     </div>
     <!-- END: Pre-Bootstrap Loading Screen. -->
     <div class="vertical-center" ng-show="!isLoaded">
         <span class="glyphicon glyphicon-hourglass loading-icon"></span>
-        <p class="loading_msg">{{loading_msg}}</p>
+        <p class="loading_msg" ng-cloak>{{loading_msg}}</p>
        <!--e: You have to allow microphone access for app to load.</p>-->
     </div>
     <div ng-show="isLoaded">
-        <nav class="navbar navbar-inverse navbar-static-top">
-          <div class="container-fluid">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".main-nav">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-cd"> EYRA</span></a>
-            </div>
-            <div class="collapse navbar-collapse main-nav">
-              <ul class="nav navbar-nav">
-                <li><a ng-href="#/more">
-                    Settings <span class="glyphicon glyphicon-cog navbar-glyph"></span>
-                </a></li>
-                <li><a ng-href="#/info">
-                    Info <span class="glyphicon glyphicon-info-sign navbar-glyph"></span>
-                </a></li>
-                <li><a ng-href="#/sync">
-                    Sync <span class="glyphicon glyphicon-refresh navbar-glyph"></span>
-                </a></li>
-              </ul>
-            </div>
-          </div>
-        </nav>
         <div ng-view class="view"><!-- possibly put loading here too --></div>
     </div>
     
