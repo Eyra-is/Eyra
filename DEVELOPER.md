@@ -257,3 +257,24 @@ There exist scripts to parse/process these QC dumps (well, mostly those from the
 python3 parse_qc_dump.py /data/eyra/qc_reports/report/MarosijoModule > qc_dump_combined.txt
 ./choose_qc_dump_combined.sh qc_dump_combined.txt 200 05 06
 ```
+
+## Evaluation
+
+A feature to allow users to evaluate (grade and comment) on the recording quality of specific recordings.
+
+Located at `yoursite.com/#/evaluation` and with a link to it in the navbar (hamburger).
+
+### Creating sets for evaluation
+
+All you have to do is insert into `evaluation_sets` a label (`eval_set`) and a `recordingId` for all the recordings you want to be part of that set.
+
+A 5 recording set example:
+```
+INSERT INTO evaluation_sets (eval_set, recordingId)
+VALUES 
+  ('example_set', 50),
+  ('example_set', 51),
+  ('example_set', 12),
+  ('example_set', 5),
+  ('example_set',196);
+```
