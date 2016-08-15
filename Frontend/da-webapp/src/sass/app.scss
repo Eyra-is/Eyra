@@ -96,10 +96,9 @@ body {
 }
 .footer {
   text-align: center;
-  position: fixed;
   height: 1.8em;
   bottom: 0;
-  left: 0; /* fix for firefox */
+  left: 0; /* fix for centering in firefox */
   width: 100%;
   .container {
     padding-left: 0;
@@ -190,7 +189,7 @@ body {
 .btn-main {
   font-size: 1.5em;
 }
-.glyphicon-play, .glyphicon-pause {
+.evaluation-action-glyph {
   @extend .glyph-default;
 }
 .glyphicon-record {

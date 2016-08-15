@@ -47,7 +47,7 @@ File author/s:
         </div>
         <div class="record-ctrl-wrapper">
             <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="evalCtrl.actionBtnDisabled" ng-click="evalCtrl.action()">
-                <span class="glyphicon {{evalCtrl.actionGlyph}}"></span>
+                <span class="glyphicon {{evalCtrl.actionGlyph}} evaluation-action-glyph"></span>
             </button>
             <p>{{evalCtrl.actionText}}</p>
         </div>
@@ -68,7 +68,9 @@ File author/s:
         </div>
         <p class="message">{{msg}}</p>
     </div>
-    
+</div>
+
+<div class="content">
     <footer class="footer">
       <div class="container minorFeedbackDisplay text-center">
         <p>User: {{evalCtrl.currentUser}}, set: {{evalCtrl.currentSet}}</p>

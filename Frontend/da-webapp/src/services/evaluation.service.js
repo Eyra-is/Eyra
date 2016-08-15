@@ -57,7 +57,6 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
   var currentSet = [];
   var setProgress = 0;
   var setCount = '?'; // total number of elements in set, updated through $http call
-  var initialPlusOne = false; // true iff this call to getNext is the one right after initial
 
   // format as in "submitEvaluation" in client-server API or
   /*  [
