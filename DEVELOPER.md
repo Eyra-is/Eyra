@@ -18,6 +18,8 @@ A recommended read as well is the article published on this software, which can 
   - [Selecting modules to use](#selecting-modules-to-use)
   - [Creating your own modules](#creating-your-own-modules)
   - [Running QC offline](#running-qc-offline)
+- [Evaluation](#evaluation)
+  - [Creating sets for evaluation](#creating-sets-for-evaluation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -148,11 +150,11 @@ This list is not exhaustive.
 
     * [`Frontend/da-webapp/src/index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html)  
       **What to do**  
-      A sample `index.html` file for this is at [`Frontend/da-webapp/extra_dev_files/dev_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/dev_index.html). Compare and modify your current [`src/index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) file to this (or do a merge). A sample copy of the `index.html` file for use in deployment is at [`Frontend/da-webapp/extra_dev_files/release_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/release_index.html).
+      A sample `index.html` file for this is at [`Frontend/da-webapp/extra_dev_files/development_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/development_index.html). Compare and modify your current [`src/index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) file to this (or do a merge). A sample copy of the `index.html` file for use in deployment is at [`Frontend/da-webapp/extra_dev_files/release_index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/extra_dev_files/release_index.html).
 
     * [`Setup/src/frontend-app/default.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/frontend-app/default.conf)  
       **What to do**  
-      Change the line `YYY_SITEROOT=Frontend/da-webapp/app` to `YYY_SITEROOT=Frontend/da-webapp/src` and run a [`./Setup/setup.sh --apache`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) and a `sudo service apache2 restart`.
+      Change the line `YYY_SITEROOT=Frontend/da-webapp/app` to `YYY_SITEROOT=Frontend/da-webapp/src` and run a [`./Setup/setup.sh --frontend-app`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) and a `sudo service apache2 restart`.
 
       **What does it do**  
       It changes which folder apache uses to serve the application. From the `app/` directory to [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src).
@@ -169,6 +171,7 @@ This list is not exhaustive.
 
 Most of this should be self explanatory, but if you change code, remember to:
 
+* Write tests or make sure existing tests pass. (for now tests are seriously lacking, but you can run some Frontend tests with `npm test`)
 * Change relevant comments.
 * Change relevant documentation (for example here in DEVELOPER.md and any other descriptors)
 * Rerun `doctoc --notitle DEVELOPER.md` if you modify this file. (manual for now) You can install doctoc by running `sudo npm install -g doctoc`.
@@ -256,4 +259,25 @@ There exist scripts to parse/process these QC dumps (well, mostly those from the
 ```
 python3 parse_qc_dump.py /data/eyra/qc_reports/report/MarosijoModule > qc_dump_combined.txt
 ./choose_qc_dump_combined.sh qc_dump_combined.txt 200 05 06
+```
+
+## Evaluation
+
+A feature to allow users to evaluate (grade and comment) on the recording quality of specific recordings.
+
+Located at `yoursite.com/#/evaluation` and with a link to it in the navbar (hamburger).
+
+### Creating sets for evaluation
+
+All you have to do is insert into `evaluation_sets` a label (`eval_set`) and a `recordingId` for all the recordings you want to be part of that set.
+
+A 5 recording set example:
+```
+INSERT INTO evaluation_sets (eval_set, recordingId)
+VALUES 
+  ('example_set', 50),
+  ('example_set', 51),
+  ('example_set', 12),
+  ('example_set', 5),
+  ('example_set',196);
 ```

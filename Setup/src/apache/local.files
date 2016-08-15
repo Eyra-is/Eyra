@@ -3,3 +3,4 @@
 /etc/ssl/certs/datool.crt
 /etc/ssl/certs/rootCA.pem
 /etc/apache2/vhosts/root_ca.conf
+/etc/apache2/vhosts/recs.conf

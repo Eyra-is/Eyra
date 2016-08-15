@@ -23,6 +23,8 @@ module.exports = function(config){
       'src/controllers/*.js',
       'src/services/*.js',
 
+      'src/views/*.html',
+
       'test/unit/**/*.spec.js'
     ],
 

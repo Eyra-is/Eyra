@@ -40,10 +40,12 @@ describe('utility service', function(){
         'QCInitRecThreshold',
         'tokenAnnouncementFreq',
         'tokenCountGoal',
-        'syncRecCountPerSend'
+        'syncRecCountPerSend',
+        'evalBufferSize'
       ];
       var valueTypes = [
         'string',
+        'number',
         'number',
         'number',
         'number',
@@ -59,6 +61,27 @@ describe('utility service', function(){
       for (var i = 0; i < currentKeys.length; i++) {
         var constant = util.getConstant(currentKeys[i]);
         expect(typeof(constant)).toEqual(valueTypes[i]);
+      }
+    });
+  });
+
+  describe('generateUUID', function(){
+    it('should generate uuid on rfc4122 version 4 format', function(){
+      var uuid = util.generateUUID();
+      // match RFC 4122: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+      // https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29
+      //[0-9A-Fa-f]{6}
+      expect(uuid.match(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/)).toBeTruthy();
+    });
+
+    it('should not be the same if repeated many times', function(){
+      var REPEAT = 300; // lets not go overboard here.
+      var uuids = [];
+      for (var i = 0; i < REPEAT; i++) {
+        uuids.push(util.generateUUID());
+        for (var j = 0; j < i; j++) {
+          expect(uuids[j]).not.toEqual(uuids[i]);
+        }
       }
     });
   });

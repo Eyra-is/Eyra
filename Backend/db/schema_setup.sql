@@ -104,4 +104,26 @@ create table recording (
 );
 alter table recording convert to character set utf8 collate utf8_general_ci;
 
+create table evaluation (
+    id int not null auto_increment primary key,
+    recordingId int not null,
+    eval_set varchar(255) not null,
+    evaluator varchar(255) not null,
+    grade int not null,
+    comments varchar(255) not null default '',
+    skipped boolean not null default FALSE,
+    foreign key (recordingId) references recording(id),
+    foreign key (eval_set) references evaluation_sets(eval_set),
+    unique(recordingId, eval_set, evaluator)
+);
+alter table evaluation convert to character set utf8 collate utf8_general_ci;
+
+create table evaluation_sets (
+    id int not null auto_increment primary key,
+    eval_set varchar(255) not null,
+    recordingId int not null,
+    foreign key (recordingId) references recording(id)
+);
+alter table evaluation_sets convert to character set utf8 collate utf8_general_ci;
+
 commit;

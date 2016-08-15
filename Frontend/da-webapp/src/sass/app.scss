@@ -96,9 +96,9 @@ body {
 }
 .footer {
   text-align: center;
-  position: fixed;
   height: 1.8em;
   bottom: 0;
+  left: 0; /* fix for centering in firefox */
   width: 100%;
   .container {
     padding-left: 0;
@@ -114,6 +114,23 @@ body {
     button {
       margin-top: 1em;
     }
+  }
+}
+#grades {
+  label[for="grade1"] {
+    color: red;
+  }
+  label[for="grade4"] {
+    color: green;
+  }
+
+  input[type="radio"] {
+    margin: 0 5%;
+
+    /* All browsers except webkit*/
+    transform: scale(1.7);
+    /* Webkit browsers*/
+    -webkit-transform: scale(1.7);
   }
 }
 /* http://stackoverflow.com/a/24688640/5272567 */
@@ -171,6 +188,9 @@ body {
 }
 .btn-main {
   font-size: 1.5em;
+}
+.evaluation-action-glyph {
+  @extend .glyph-default;
 }
 .glyphicon-record {
   @extend .glyph-default;

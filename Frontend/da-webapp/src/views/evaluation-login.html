@@ -1,0 +1,24 @@
+<div class="content vertical-center">
+    <div class="data-entry">
+        <h3 class="default-heading">Enter your info</h3>
+        <form ng-submit="evalLoginCtrl.submit()">
+            <div class="form-group">
+                <label for="currentUser">Username</label>
+                <input class="form-control" id="currentUser" type="text" ng-model="evalLoginCtrl.currentUser" placeholder="jane9">
+            </div>
+            <div class="form-group">
+                <label for="currentSet">
+                    Set
+                </label>
+                <select class="form-control" id="currentSet" name="currentSet" ng-model="evalLoginCtrl.currentSet">
+                    <option value=""></option>
+                    <option ng-repeat="opt in evalLoginCtrl.possibleSets" value="{{opt}}">{{opt}}</option>
+                </select>
+            </div>
+            <button class="form-control btn btn-primary" type="submit" value="">
+                <span class="glyphicon glyphicon-ok"></span>
+            </button>
+        </form>
+        <p class="message">{{msg}}</p>
+    </div>
+</div>

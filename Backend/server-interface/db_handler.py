@@ -23,7 +23,7 @@ import os
 import random
 
 from util import log, filename
-from config import dbConst
+from config import dbConst, RECSURL
 
 class DbHandler:
     def __init__(self, app):
@@ -768,4 +768,192 @@ class DbHandler:
         else:
             return False
 
-    
+    def getFromSet(self, eval_set, progress, count):
+        """
+        Get link/prompt pairs from specified set in ascending order by recording id.
+
+        Parameters:
+            set         name of the set corresponding to evaluation_sets(eval_set) in database.
+            progress    progress (index) into the set
+            count       number of pairs to get
+
+        Returns tuple
+            (json, http_status_code)
+
+        Returned JSON definition:
+            [[recLinkN, promptN], .., [recLinkN+count, promptN+count]]
+
+        where N is progress and recLink is the RECSURL + the relative path in the RECSROOT folder,
+        e.g. '/recs/session_26/user_date.wav'. An error string on failure.
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT recording.sessionId, recording.filename, inputToken FROM recording, token, evaluation_sets '+
+                        'WHERE recording.tokenId = token.id '+
+                        'AND recording.id = evaluation_sets.recordingId '+
+                        'AND eval_set=%s '+
+                        'ORDER BY recording.id ASC', (eval_set,))
+            partialSet = [['{}/session_{}/{}'.format(RECSURL, sesId, filename), prompt]
+                           for sesId, filename, prompt in cur.fetchall()]
+        except MySQLError as e:
+            msg = 'Error grabbing from set.'
+            log(msg, e)
+            return (msg, 500)
+
+        if partialSet:
+            return (partialSet[progress:progress+count], 200)
+        else:
+            msg = 'No set by that name in database.'
+            log(msg+' Set: {}'.format(eval_set))
+            return (msg, 404)
+
+    def processEvaluation(self, eval_set, data):
+        """
+        Process and save evaluation in database table: evaluation.
+
+        Parameters:
+            eval_set    name of the set corresponding to evaluation_sets table
+            data        json on format:
+                        [
+                            {
+                                "evaluator": "daphne",
+                                "sessionId": 5,
+                                "recordingFilename": "asdf_2016-03-05T11:11:09.287Z.wav",
+                                "grade": 2,
+                                "comments": "Bad pronunciation",
+                                "skipped": false
+                            },
+                            ..
+                        ]
+
+        Returns (msg, http_status_code)
+        """
+        eval_set = str(eval_set)
+        try:
+            jsonDecoded = json.loads(data)
+            log('json: ', jsonDecoded)
+        except (TypeError, ValueError) as e:
+            msg = 'Evaluation data not on correct format.'
+            log(msg, e)
+            return (msg, 400)
+
+        error = '' 
+        errorStatusCode = 500
+        for evaluation in jsonDecoded:
+            evaluator, sessionId, recordingFilename, grade, comments, skipped = \
+                None, None, None, None, None, None
+            try:
+                evaluator = evaluation['evaluator']
+                sessionId = evaluation['sessionId']
+                recordingFilename = evaluation['recordingFilename']
+                grade = evaluation['grade']
+                comments = evaluation['comments']
+                skipped = evaluation['skipped']
+            except KeyError as e:
+                error = 'Some evaluation data not on correct format, wrong key.'
+                errorStatusCode = 400
+                log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
+                continue
+
+            try:
+                cur = self.mysql.connection.cursor()
+                cur.execute('SELECT recording.id FROM recording, evaluation_sets '+
+                            'WHERE evaluation_sets.recordingId = recording.id '+
+                            'AND recording.sessionId = %s '+
+                            'AND recording.filename = %s '+
+                            'AND eval_set = %s',
+                            (sessionId, recordingFilename, eval_set))
+                try:
+                    recId = cur.fetchone()[0]
+                except TypeError as e:
+                    error = 'Could not find a recording with some data.'
+                    errorStatusCode = 400
+                    log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
+                    continue
+
+                cur.execute('INSERT INTO evaluation (recordingId, eval_set, evaluator, grade, comments, skipped) \
+                             VALUES (%s, %s, %s, %s, %s, %s)', 
+                            (recId, eval_set, evaluator, grade, comments, skipped))
+            except MySQLError as e:
+                error = 'Error inserting some evaluation into database.'
+                errorStatusCode = 500
+                log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
+                continue
+
+        self.mysql.connection.commit()
+
+        if error:
+            return (error, errorStatusCode)
+        else:
+            return ('Successfully processed evaluation.', 200)
+
+    def getSetInfo(self, eval_set):
+        """
+        Currently, only returns the number of elements in <eval_set> on format:
+            {
+                "count": 52
+            }
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT COUNT(*) FROM evaluation_sets '+
+                        'WHERE eval_set=%s ', (eval_set,))
+            try:
+                count = cur.fetchone()[0]
+            except TypeError as e:
+                msg = 'Could not find supplied set.'
+                log(msg + ' Eval_set: {}'.format(eval_set), e)
+                return (msg, 404)
+        except MySQLError as e:
+            msg = 'Error getting set info.'
+            log(msg + ' Eval_set: {}'.format(eval_set), e)
+            return (msg, 500)
+
+        return (json.dumps(dict(count=count)), 200)
+
+    def getUserProgress(self, user, eval_set):
+        """
+        Returns user progress into eval_set, format:
+            {
+                "progress": 541
+            }
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT COUNT(*) FROM evaluation '+
+                        'WHERE eval_set=%s '+
+                        'AND evaluator=%s', (eval_set, user))
+            try:
+                progress = cur.fetchone()[0]
+            except TypeError as e:
+                msg = 'Could not find progress of user.'
+                log(msg + ' Eval_set: {}, user: {}'.format(eval_set, user), e)
+                return (msg, 404)
+        except MySQLError as e:
+            msg = 'Error getting user progress.'
+            log(msg + ' Eval_set: {}, user: {}'.format(eval_set, user), e)
+            return (msg, 500)
+
+        return (json.dumps(dict(progress=progress)), 200)
+
+    def getPossibleSets(self):
+        """
+        Returns possible sets, format:
+            [
+                "set1",
+                "set2",
+                ..
+            ]
+        or as in client-server API.
+        """
+        try:
+            cur = self.mysql.connection.cursor()
+            cur.execute('SELECT eval_set FROM evaluation_sets '+
+                        'GROUP BY eval_set')
+            sets = [x[0] for x in cur.fetchall()]
+        except MySQLError as e:
+            msg = 'Error getting possible sets.'
+            log(msg, e)
+            return (msg, 500)
+
+        return (json.dumps(sets), 200)

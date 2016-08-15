@@ -52,9 +52,20 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
   reqHandler.submitDevice = submitDevice;
   reqHandler.submitInstructor = submitInstructor;
   reqHandler.submitRecordings = submitRecordings;
+  reqHandler.getFromSet = getFromSet;
+  reqHandler.submitEvaluation = submitEvaluation;
+  reqHandler.getSetInfo = getSetInfo;
+  reqHandler.getUserProgress = getUserProgress;
+  reqHandler.getPossibleSets = getPossibleSets;
+  // OTHER
   reqHandler.testServerGet = testServerGet;
 
   var TOKENURL = '/submit/gettokens';
+  var EVALUATIONGETSETURL = '/evaluation/set/[SET]/progress/[PROGRESS]/count/[COUNT]';
+  var EVALUATIONSUBMITURL = '/evaluation/submit/[SET]';
+  var EVALUATIONGETSETINFOURL = '/evaluation/setinfo/[SET]';
+  var EVALUATIONGETUSERPROGRESSURL = '/evaluation/progress/user/[USER]/set/[SET]';
+  var EVALUATIONGETPOSSIBLESETSURL = '/evaluation/possiblesets';
   var invalidTitle = util.getConstant('invalidTitle');
   var failedSessionSends = 0;
 
@@ -238,6 +249,41 @@ function deliveryService($http, $q, $rootScope, BACKENDURL, dataService, logger,
         });
     }
     return $q.reject('No valid recordings in submission, not sending anything.');
+  }
+
+  function getFromSet(set, progress, count) {
+    return $http.get(
+      BACKENDURL + 
+      EVALUATIONGETSETURL.replace('[SET]', set)
+      .replace('[PROGRESS]', progress)
+      .replace('[COUNT]', count)
+    );
+  }
+
+  function submitEvaluation(set, jsonData) {
+    return submitGeneralJson(jsonData, EVALUATIONSUBMITURL.replace('[SET]', set));
+  }
+
+  function getSetInfo(set) {
+    return $http.get(
+      BACKENDURL + 
+      EVALUATIONGETSETINFOURL.replace('[SET]', set)
+    );
+  }
+
+  function getUserProgress(user, set) {
+    return $http.get(
+      BACKENDURL +
+      EVALUATIONGETUSERPROGRESSURL.replace('[USER]', user)
+      .replace('[SET]', set)
+    );
+  }
+
+  function getPossibleSets() {
+    return $http.get(
+      BACKENDURL +
+      EVALUATIONGETPOSSIBLESETSURL
+    );
   }
 
   // NOT USED, speaker data is sent with each session

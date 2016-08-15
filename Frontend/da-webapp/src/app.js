@@ -65,25 +65,30 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
   '$routeProvider',
   function($routeProvider) {
     $routeProvider.
+      when('/evaluation', {
+        templateUrl: 'views/evaluation.html',
+        controller: 'EvaluationController',
+        controllerAs: 'evalCtrl',
+        resolve: {
+          evalReady: function(routeService){
+            return routeService.evalReady();
+          }
+        }
+      }).
+      when('/evaluation-login', {
+        templateUrl: 'views/evaluation-login.html',
+        controller: 'EvaluationLoginController',
+        controllerAs: 'evalLoginCtrl'
+      }).
       when('/info', {
         templateUrl: 'views/info.html',
         controller: 'InfoController',
-        controllerAs: 'infoCtrl',
-        resolve: {
-          appInitialized: function(routeService){
-            return routeService.appInitialized();
-          }
-        }
+        controllerAs: 'infoCtrl'
       }).
       when('/login', {
         templateUrl: 'views/login.html',
         controller: 'LoginController',
-        controllerAs: 'loginCtrl',
-        resolve: {
-          appInitialized: function(routeService){
-            return routeService.appInitialized();
-          }
-        }
+        controllerAs: 'loginCtrl'
       }).
       when('/main', {
         templateUrl: 'views/main.html',
@@ -95,9 +100,6 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         controller: 'MoreController',
         controllerAs: 'moreCtrl',
         resolve: {
-          appInitialized: function(routeService){
-            return routeService.appInitialized();
-          },
           loggedIn: function(routeService){
             return routeService.loggedIn();
           }
@@ -118,9 +120,6 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         controller: 'RegisterDeviceController',
         controllerAs: 'regdCtrl',
         resolve: {
-          appInitialized: function(routeService){
-            return routeService.appInitialized();
-          },
           loggedIn: function(routeService){
             return routeService.loggedIn();
           }
@@ -131,9 +130,6 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         controller: 'SetInstructorController',
         controllerAs: 'setiCtrl',
         resolve: {
-          appInitialized: function(routeService){
-            return routeService.appInitialized();
-          },
           loggedIn: function(routeService){
             return routeService.loggedIn();
           }
@@ -162,12 +158,7 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
       when('/sync', {
         templateUrl: 'views/sync.html',
         controller: 'SyncController',
-        controllerAs: 'syncCtrl',
-        resolve: {
-          appInitialized: function(routeService){
-            return routeService.appInitialized();
-          }
-        }
+        controllerAs: 'syncCtrl'
       }).
       otherwise({
         redirectTo: '/main'

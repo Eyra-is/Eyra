@@ -32,6 +32,7 @@ function utilityService(logger) {
 
   utilityHandler.getConstant = getConstant;
   utilityHandler.getIdxFromPath = getIdxFromPath;
+  utilityHandler.generateUUID = generateUUID;
   utilityHandler.percentage = percentage;
   utilityHandler.stdErrCallback = stdErrCallback;
 
@@ -44,7 +45,9 @@ function utilityService(logger) {
     'QCInitRecThreshold' : 10, // recording count before QC can report, adjustment period for speaker
     'tokenAnnouncementFreq' : 500,
     'tokenCountGoal' : 500,
-    'syncRecCountPerSend' : 5 // recs to send each transmission to server during a Sync operation
+    'syncRecCountPerSend' : 5, // recs to send each transmission to server during a Sync operation,
+    'evalBufferSize' : 5, // number of prompts and/or recs to fetch and keep in memory during evaluation
+    'evalSubmitFreq' : 5 // per utterance graded, after X send to server
   };
   
 
@@ -69,6 +72,14 @@ function utilityService(logger) {
       logger.error(e);
     }
     return idx;
+  }
+
+  function generateUUID() {
+    // Thanks, broofa, http://stackoverflow.com/a/2117523/5272567
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+      return v.toString(16);
+    });
   }
 
   // part=3, whole=9, accuracy=2 would result in 33.33

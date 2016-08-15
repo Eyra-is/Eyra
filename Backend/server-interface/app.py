@@ -191,5 +191,60 @@ def qc_report(sessionId):
 
     return 'Unexpected error.', 500
 
+# EVALUATION ROUTES
+
+@app.route('/evaluation/set/<string:eval_set>/progress/<int:progress>/count/<int:count>', methods=['GET'])
+def get_from_set(eval_set, progress, count):
+    """
+    Get link/prompt pairs from specified set in ascending order by recording id.
+
+    Format described in client-server API and db_handler.
+    """
+    if request.method == 'GET':
+        partialSet = dbHandler.getFromSet(eval_set, progress, count)
+        return json.dumps(partialSet[0]), partialSet[1]
+
+@app.route('/evaluation/submit/<string:eval_set>', methods=['POST'])
+def submit_evaluation(eval_set):
+    """
+    Client submits evaluation of X utterances.
+
+    Form should contain key 'json' with value on format as described
+    in client-server API or db_handler.
+    """
+    if request.method == 'POST':
+        if 'json' in request.form:
+            data = request.form['json']
+            #log(data)
+        else:
+            msg = 'No data found in submission, aborting.'
+            log(msg + ' For set: {}'.format(eval_set))
+            return msg, 400
+        return dbHandler.processEvaluation(eval_set, data)
+
+@app.route('/evaluation/setinfo/<string:eval_set>', methods=['GET'])
+def get_set_info(eval_set):
+    """
+    Get info about set as json. More info in client-server API and db_handler.
+    """
+    if request.method == 'GET':
+        return dbHandler.getSetInfo(eval_set)
+
+@app.route('/evaluation/progress/user/<string:user>/set/<string:eval_set>', methods=['GET'])
+def get_user_progress(user, eval_set):
+    """
+    Get user progress into a specific set. If user has recorded 5, progress is 5.
+    """
+    if request.method == 'GET':
+        return dbHandler.getUserProgress(user, eval_set)
+
+@app.route('/evaluation/possiblesets', methods=['GET'])
+def get_possible_sets():
+    """
+    Get a list of all possible sets.
+    """
+    if request.method == 'GET':
+        return dbHandler.getPossibleSets()
+
 if __name__ == '__main__':
     app.run(debug=True)
