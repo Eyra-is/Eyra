@@ -18,6 +18,8 @@ A recommended read as well is the article published on this software, which can 
   - [Selecting modules to use](#selecting-modules-to-use)
   - [Creating your own modules](#creating-your-own-modules)
   - [Running QC offline](#running-qc-offline)
+- [Evaluation](#evaluation)
+  - [Creating sets for evaluation](#creating-sets-for-evaluation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -169,6 +171,7 @@ This list is not exhaustive.
 
 Most of this should be self explanatory, but if you change code, remember to:
 
+* Write tests or make sure existing tests pass. (for now tests are seriously lacking, but you can run some Frontend tests with `npm test`)
 * Change relevant comments.
 * Change relevant documentation (for example here in DEVELOPER.md and any other descriptors)
 * Rerun `doctoc --notitle DEVELOPER.md` if you modify this file. (manual for now) You can install doctoc by running `sudo npm install -g doctoc`.
