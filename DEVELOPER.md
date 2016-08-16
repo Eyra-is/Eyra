@@ -267,6 +267,8 @@ A feature to allow users to evaluate (grade and comment) on the recording qualit
 
 Located at `yoursite.com/#/evaluation` and with a link to it in the navbar (hamburger).
 
+A special set "Random" is in place by default (a single record in `evaluation_sets` with special handling by the backend (i.e. serving random recordings)).
+
 ### Creating sets for evaluation
 
 All you have to do is insert into `evaluation_sets` a label (`eval_set`) and a `recordingId` for all the recordings you want to be part of that set.
