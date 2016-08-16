@@ -777,6 +777,9 @@ class DbHandler:
             progress    progress (index) into the set
             count       number of pairs to get
 
+        A special set, Random, will receive count random recordings from the total recordings
+        so far, unrelated to progress.
+
         Returns tuple
             (json, http_status_code)
 
@@ -788,11 +791,28 @@ class DbHandler:
         """
         try:
             cur = self.mysql.connection.cursor()
-            cur.execute('SELECT recording.sessionId, recording.filename, inputToken FROM recording, token, evaluation_sets '+
-                        'WHERE recording.tokenId = token.id '+
-                        'AND recording.id = evaluation_sets.recordingId '+
-                        'AND eval_set=%s '+
-                        'ORDER BY recording.id ASC', (eval_set,))
+            # select count random recordings from a special set (Random)
+            if eval_set == 'Random':
+                cur.execute('SELECT COUNT(*) FROM recording');
+                numRows = cur.fetchone()[0]
+
+                total_recording_ids = range(1, numRows+1)
+
+                randIds = [random.choice(total_recording_ids) for i in range(int(count))]
+                randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
+                cur.execute('SELECT recording.sessionId, recording.filename, inputToken '+
+                            'FROM recording, token '+
+                            'WHERE recording.tokenId = token.id '+
+                            'AND recording.id IN %s ',
+                            (randIds,))
+            else:
+                # branch for the normal usage, taking from a specific set
+                cur.execute('SELECT recording.sessionId, recording.filename, inputToken '+
+                            'FROM recording, token, evaluation_sets '+
+                            'WHERE recording.tokenId = token.id '+
+                            'AND recording.id = evaluation_sets.recordingId '+
+                            'AND eval_set=%s '+
+                            'ORDER BY recording.id ASC', (eval_set,))
             partialSet = [['{}/session_{}/{}'.format(RECSURL, sesId, filename), prompt]
                            for sesId, filename, prompt in cur.fetchall()]
         except MySQLError as e:
@@ -800,8 +820,10 @@ class DbHandler:
             log(msg, e)
             return (msg, 500)
 
-        if partialSet:
+        if partialSet and eval_set != 'Random':
             return (partialSet[progress:progress+count], 200)
+        elif partialSet and eval_set == 'Random':
+            return (partialSet, 200) # not actually a partial set in this case, just set with count elements
         else:
             msg = 'No set by that name in database.'
             log(msg+' Set: {}'.format(eval_set))
@@ -857,12 +879,18 @@ class DbHandler:
 
             try:
                 cur = self.mysql.connection.cursor()
-                cur.execute('SELECT recording.id FROM recording, evaluation_sets '+
-                            'WHERE evaluation_sets.recordingId = recording.id '+
-                            'AND recording.sessionId = %s '+
-                            'AND recording.filename = %s '+
-                            'AND eval_set = %s',
-                            (sessionId, recordingFilename, eval_set))
+                if eval_set == 'Random':
+                    cur.execute('SELECT recording.id FROM recording '+
+                                'WHERE recording.sessionId = %s '+
+                                'AND recording.filename = %s ',
+                                (sessionId, recordingFilename))
+                else:
+                    cur.execute('SELECT recording.id FROM recording, evaluation_sets '+
+                                'WHERE evaluation_sets.recordingId = recording.id '+
+                                'AND recording.sessionId = %s '+
+                                'AND recording.filename = %s '+
+                                'AND eval_set = %s',
+                                (sessionId, recordingFilename, eval_set))
                 try:
                     recId = cur.fetchone()[0]
                 except TypeError as e:
@@ -894,6 +922,9 @@ class DbHandler:
                 "count": 52
             }
         """
+        if eval_set == 'Random':
+            return (json.dumps(dict(count='∞')), 200)
+
         try:
             cur = self.mysql.connection.cursor()
             cur.execute('SELECT COUNT(*) FROM evaluation_sets '+
