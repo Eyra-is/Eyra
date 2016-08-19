@@ -219,7 +219,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description="""
-        Transfers data from Icelandic speech corpusMalromur (http://www.malfong.is/index.php?lang=en&pg=malromur) 
+        Transfers data from Icelandic speech corpus Malromur (http://www.malfong.is/index.php?lang=en&pg=malromur) 
         to Eyra format. Writes to MySQL database and copies to the filesystem. This was used on the full 
         Malromur set though, not the one currently online [2016/07/12].
 

@@ -10,7 +10,7 @@ Currently, the Eyra backend has to be run on Linux. Systems we've used are mainl
 
 The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in [`AndroidApp`](https://github.com/Eyra-is/Eyra/blob/master/AndroidApp). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
     
-If you want Quality Control (QC) to work, you need to install Kaldi and more, look at how to set it up in DEVELOPER.md. 
+If you want Quality Control (QC) to work, you need to install Kaldi and more, look at how to set it up in [DEVELOPER.md](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md). 
 
 ### Laptop installation (local wifi)
 
