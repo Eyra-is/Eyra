@@ -655,10 +655,15 @@ class DbHandler:
 
     def getTokens(self, numTokens):
         """
-        gets numTokens tokens randomly selected from the database and returns them in a nice json format.
+        Gets numTokens tokens randomly selected from the database and returns them in a nice json format.
         look at format in the client-server API
+        
         Does not return any tokens marked with valid:FALSE in db.
         or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
+        
+        Attention: In case the same token is selected >1, the count of tokens returned
+                   reduces accordingly. E.g. getTokens(1500) will typically result in about 1490 tokens.
+        
         returns [] on failure
         """
         # start by getting the list of invalid tokens, and create it if we haven't already
@@ -693,30 +698,6 @@ class DbHandler:
             jsonTokens.append({"id":pair[0], "token":pair[1]})
 
         random.shuffle(jsonTokens) # the select seemed to alphabetize the tokens
-        return jsonTokens
-        
-    def getTokensAll(self):
-        """
-        gets *ALL* tokens from the database and returns them in a nice json format.
-        look at format in the client-server API
-        or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
-        returns [] on failure
-        """
-        tokens = []
-        try:
-            cur = self.mysql.connection.cursor()
-            cur.execute('SELECT id, inputToken FROM token')
-            tokens = cur.fetchall()
-        except MySQLError as e:
-            msg = 'Error getting tokens from database.'
-            log(msg, e)
-            return []
-
-        jsonTokens = []
-        # parse our tuple object from the cursor.execute into our desired json object
-        for pair in tokens:
-            jsonTokens.append({"id":pair[0], "token":pair[1]})
-
         return jsonTokens
 
     def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str - absolute path, "tokenId": ...}]':
@@ -954,12 +935,8 @@ class DbHandler:
             cur.execute('SELECT COUNT(*) FROM evaluation '+
                         'WHERE eval_set=%s '+
                         'AND evaluator=%s', (eval_set, user))
-            try:
-                progress = cur.fetchone()[0]
-            except TypeError as e:
-                msg = 'Could not find progress of user.'
-                log(msg + ' Eval_set: {}, user: {}'.format(eval_set, user), e)
-                return (msg, 404)
+            # COUNT(*) always returns a number, so no need for a try block here
+            progress = cur.fetchone()[0]
         except MySQLError as e:
             msg = 'Error getting user progress.'
             log(msg + ' Eval_set: {}, user: {}'.format(eval_set, user), e)

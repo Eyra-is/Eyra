@@ -121,26 +121,16 @@ def submit_session():
 def submit_gettokens(numTokens):
     if request.method == 'GET':
         response = ''
-        tokens = dbHandler.getTokens(numTokens)
+        if numTokens > 0:
+            tokens = dbHandler.getTokens(numTokens)
+        else:
+            msg = 'Can\'t grab <= 0 tokens.'
+            log(msg)
+            return msg, 404
+
         if len(tokens) > 0:
             response += json.dumps(tokens)
             #log('Got tokens from db: ' + response)
-            return response, 200
-        else:
-            msg = 'Failed getting tokens from database.'
-            log(msg)
-            return msg, 500
-
-    return 'Unexpected error.', 500
-
-@app.route('/submit/gettokens/all', methods=['GET'])
-def submit_gettokens_all():
-    if request.method == 'GET':
-        response = ''
-        tokens = dbHandler.getTokensAll()
-        if len(tokens) > 0:
-            response += json.dumps(tokens)
-            log('Got tokens from db: ' + response)
             return response, 200
         else:
             msg = 'Failed getting tokens from database.'
