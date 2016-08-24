@@ -40,11 +40,11 @@ def run(rec_path, dest_dir, retain_speakers, remove_imei, remove_location, remov
     if not retain_speakers:
         removeSpeakers(rec_path, dest_dir)
     if remove_imei:
-        removeImei()
+        removeImei(dest_dir)
     if remove_location:
-        removeLocation()
+        removeLocation(dest_dir)
     if remove_evaluators:
-        removeEvaluators()
+        removeEvaluators(dest_dir)
 
     _db.commit()
 
@@ -106,14 +106,102 @@ def removeSpeakers(rec_path, dest_dir):
             os.rename(  os.path.join(rec_path, session, f), 
                         os.path.join(rec_path, session, f.replace(speakerName, newSpeaker)))
 
-def removeImei():
+def removeImei(dest_dir):
     print('Removing imei.')
+    cur = _db.cursor()
+    cur.execute('SELECT id, imei FROM device')
+    devices = list(cur.fetchall())
+    # idToImei = {
+    #   'deviceId' : 'imei1',
+    #   'deviceId' : 'imei2',
+    #   ..
+    # }
+    idToImei = {}
+    oldImeiToNewImei = {}
+    for i, s in enumerate(devices):
+        newImei = 'imei{}'.format(i+1)
+        idToImei[s[0]] = newImei
+        oldImeiToNewImei[s[1]] = newImei
 
-def removeLocation():
+    # write the oldImei -> newImei file
+    print('Creating hash file for imeis.')
+    with open(os.path.join(dest_dir, 'imeis.tsv'), 'w') as f:
+        f.write('deviceId\toldImei\tnewImei\n')
+        for s in devices:
+            f.write('{}\t{}\t{}\n'.format(s[0], s[1], idToImei[s[0]]))
+
+    # update our devices by overwriting the previous ones with our new ones
+    # thanks Michiel de Mare, http://stackoverflow.com/questions/3432/multiple-updates-in-mysql
+    cur.execute('INSERT INTO device (id, imei) '+
+                'VALUES {} ON DUPLICATE KEY UPDATE imei = VALUES(imei)'
+                .format
+                    (
+                        ','.join([str((x[0], idToImei[x[0]])) for x in devices])      
+                    )
+                )
+
+    # also modify the imeis in the speaker table
+    cur.execute('SELECT id, deviceImei FROM speaker')
+    speakers = list(cur.fetchall())
+    cur.execute('INSERT INTO speaker (id, deviceImei) '+
+                'VALUES {} ON DUPLICATE KEY UPDATE deviceImei = VALUES(deviceImei)'
+                .format
+                    (
+                        ','.join([str((x[0], oldImeiToNewImei[x[1]])) for x in speakers])      
+                    )
+                )
+
+def removeLocation(dest_dir):
     print('Removing location.')
+    cur = _db.cursor()
+    cur.execute('SELECT id, location FROM session')
+    sessions = list(cur.fetchall())
+    # idToLoc = {
+    #   'sessionId' : 'loc1',
+    #   'sessionId' : 'loc2',
+    #   ..
+    # }
+    idToLoc = {}
+    for i, s in enumerate(sessions):
+        idToLoc[s[0]] = 'loc{}'.format(i+1)
 
-def removeEvaluators():
+    # write the oldLoc -> newLoc file
+    print('Creating hash file for locations.')
+    with open(os.path.join(dest_dir, 'locations.tsv'), 'w') as f:
+        f.write('sessionId\toldLoc\tnewLoc\n')
+        for s in sessions:
+            f.write('{}\t{}\t{}\n'.format(s[0], s[1], idToLoc[s[0]]))
+
+    # update our sessions by overwriting the previous ones with our new ones
+    # thanks Michiel de Mare, http://stackoverflow.com/questions/3432/multiple-updates-in-mysql
+    cur.execute('INSERT INTO session (id, location) '+
+                'VALUES {} ON DUPLICATE KEY UPDATE location = VALUES(location)'
+                .format
+                    (
+                        ','.join([str((x[0], idToLoc[x[0]])) for x in sessions])      
+                    )
+                )
+
+def removeEvaluators(dest_dir):
     print('Removing evaluators.')
+    cur = _db.cursor()
+    cur.execute('SELECT evaluator FROM evaluation GROUP BY evaluator')
+    evaluators = list(cur.fetchall())
+    oldToNew = {}
+    for i, s in enumerate(evaluators):
+        oldToNew[s[0]] = 'evaluator{}'.format(i+1)
+
+    # write the oldEvaluator -> newEvaluator file
+    print('Creating hash file for evaluators.')
+    with open(os.path.join(dest_dir, 'evaluators.tsv'), 'w') as f:
+        f.write('oldEvaluator\tnewEvaluator\n')
+        for s in evaluators:
+            f.write('{}\t{}\n'.format(s[0], oldToNew[s[0]]))
+
+    # update our evaluators by overwriting the previous ones with our new ones
+    for s in evaluators:
+        cur.execute('UPDATE evaluation SET evaluator=%s WHERE evaluator=%s',
+                    (oldToNew[s[0]], s[0]))
 
 if __name__ == '__main__':
     import argparse
@@ -139,7 +227,7 @@ if __name__ == '__main__':
         exit(0)
 
     if (input(
-'This will modify the database and remove personal information.\
+'This will modify the database (possibly files) and remove personal information.\
  Be sure to take a backup just in case. Are you sure you want \
  to continue? (y/n)\n') == 'y'):
         run(args.rec_path, args.dest_dir, args.retain_speakers, args.remove_imei, args.remove_location, args.remove_evaluators)
