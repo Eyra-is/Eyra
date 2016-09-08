@@ -16,12 +16,20 @@
 
 # File author/s:
 #     Robert Kjaran <robert@kjaran.com>
+#     Matthias Petursson <oldschool01123@gmail.com> (the adding of the last three lines mostly)
 
 # Generic LVCSR built using open/freely accessible data
+# Prepares data for Marosijo module, outfile: local/marosijo.tgz. 
+
+# For the Cleanup module, you have to uncomment stage 3 and run
+# lang_add_phones, make_phone_bigram and prepare_cleanup_deployment.sh
+# similar to what is done for Marosijo here.
 
 nj=8
 stage=-100
 
+# LEXICON_PATH="../../lang_data/is/lexicon.txt"
+# PHONEME_PATH="../../lang_data/is/phonemes.txt"
 LEXICON_PATH="../../lang_data/jv/jv_lexicon_2016-04-25.txt"
 PHONEME_PATH="../../lang_data/jv/phonemes.txt"
 LANGDIR="data/lang"
@@ -39,7 +47,7 @@ if [ $stage -le 0 ]; then
         --nj $nj       \
         --mfcc-config conf/mfcc.conf \
         --cmd "$train_cmd"           \
-        data/all exp/make_mfcc mfcc
+        data/all exp/make_mfcc mfcc || utils/fix_data_dir.sh data/all
 
     steps/compute_cmvn_stats.sh \
         data/all exp/make_mfcc mfcc
@@ -86,12 +94,16 @@ if [ $stage -le 2 ]; then
         exp/mono
 fi
 
-if [ $stage -le 3 ]; then
-    steps/align_si.sh \
-        --nj $nj --cmd "$train_cmd" \
-        data/train data/lang exp/mono exp/mono_ali
-    steps/train_deltas.sh  \
-        --cmd "$train_cmd" \
-        2000 10000         \
-        data/train data/lang exp/mono_ali exp/tri1b
-fi
+# if [ $stage -le 3 ]; then
+#     steps/align_si.sh \
+#         --nj $nj --cmd "$train_cmd" \
+#         data/train data/lang exp/mono exp/mono_ali
+#     steps/train_deltas.sh  \
+#         --cmd "$train_cmd" \
+#         2000 10000         \
+#         data/train data/lang exp/mono_ali exp/tri1b
+# fi
+
+./local/lang_add_phones.sh data/local/dict/lexiconp.txt data/lang data/newlang
+./local/make_phone_bigram_fst.sh exp/mono data/newlang local/my_phone_fst
+./local/prepare_marosijo_deployment.sh data/newlang exp/mono local/my_phone_fst 16000 local/marosijo.tgz
