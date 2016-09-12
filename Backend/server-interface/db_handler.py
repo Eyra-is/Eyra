@@ -793,7 +793,7 @@ class DbHandler:
                             'WHERE recording.tokenId = token.id '+
                             'AND recording.id = evaluation_sets.recordingId '+
                             'AND eval_set=%s '+
-                            'ORDER BY recording.id ASC', (eval_set,))
+                            'ORDER BY evaluation_sets.id ASC', (eval_set,))
             partialSet = [['{}/session_{}/{}'.format(RECSURL, sesId, filename), prompt]
                            for sesId, filename, prompt in cur.fetchall()]
         except MySQLError as e:
