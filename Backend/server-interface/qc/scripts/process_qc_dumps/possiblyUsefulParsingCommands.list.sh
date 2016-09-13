@@ -63,3 +63,7 @@ while read line; do
 done
 tar -czf "$name".tgz "$name"
 rm -rf "$name"
+
+# filter out only certain recordings in a QC dump based on a list of wavnames in a file
+join -1 16 -2 1 -t $'\t' <(tail -n +2 qc_dump.tsv | sort -k16,16) <(cat file1.txt $(awk '{print $1".wav"}' file2_with_no_extension.tsv) | sort -k1,1) > graded_total.tsv
+

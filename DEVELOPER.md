@@ -171,7 +171,7 @@ This list is not exhaustive.
 
 Most of this should be self explanatory, but if you change code, remember to:
 
-* Write tests or make sure existing tests pass. (for now tests are seriously lacking, but you can run some Frontend tests with `npm test`)
+* Write tests or make sure existing tests pass. (for now tests are seriously lacking, but you can run some [`Frontend`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp) tests with `npm test` and Backend tests in [`Backend/server-interface/test`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/test))
 * Change relevant comments.
 * Change relevant documentation (for example here in DEVELOPER.md and any other descriptors)
 * Rerun `doctoc --notitle DEVELOPER.md` if you modify this file. (manual for now) You can install doctoc by running `sudo npm install -g doctoc`.
