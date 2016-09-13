@@ -39,5 +39,6 @@ gunzip -c $(for n in $(seq 1 $nj); do echo $ali/ali.$n.gz; done) \
   | ali-to-phones $ali/final.mdl ark:- ark,t:- \
   | utils/int2sym.pl -f 2- $lang/phones.txt \
   | awk '{printf "%s ", $1; for(i=2; i<=NF; i+=1) { if($i!="sil" && $i !~ /^spn_[BEIS]/) {gsub(/_[BEIS]/, "", $i); printf "!%s ", $i } } printf "\n" }' \
+  | grep -vE "[0-9-]+ $" \
   | utils/sym2int.pl -f 2- $lang/words.txt \
   | chain-est-phone-lm --num-extra-lm-states=1000 --ngram-order=2 --no-prune-ngram-order=1 ark:- $out

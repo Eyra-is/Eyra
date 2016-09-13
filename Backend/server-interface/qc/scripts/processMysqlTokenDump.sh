@@ -35,4 +35,4 @@ if [[ "$#" -ne 2 ]]; then
     exit 1
 fi
 
-cat $1 | sed "s/INSERT INTO \`token\` VALUES //g" | sed "s/([0-9]*,'//g" | sed "s/',[0-1],'[jv|en]*')//g" | sed "s/;$//g" | sed "s/\\\'/'/g" | tr "," "\n" | nl -n ln | sed "s/ \+/ /g" | sed "s/\t\+//g" > $2
+sed "s/INSERT INTO \`token\` VALUES //g" $1 | sed "s/([0-9]*,'//g" | sed -r "s/',[0-1],'[A-Za-z_0-9]{2}|'\)//g" | sed "s/;$//g" | sed "s/\\\'/'/g" | tr "," "\n" | nl -n ln | sed "s/ \+/ /g" | sed "s/\t\+//g" > $2

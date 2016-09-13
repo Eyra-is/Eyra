@@ -171,7 +171,7 @@ This list is not exhaustive.
 
 Most of this should be self explanatory, but if you change code, remember to:
 
-* Write tests or make sure existing tests pass. (for now tests are seriously lacking, but you can run some Frontend tests with `npm test`)
+* Write tests or make sure existing tests pass. (for now tests are seriously lacking, but you can run some [`Frontend`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp) tests with `npm test` and Backend tests in [`Backend/server-interface/test`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/test))
 * Change relevant comments.
 * Change relevant documentation (for example here in DEVELOPER.md and any other descriptors)
 * Rerun `doctoc --notitle DEVELOPER.md` if you modify this file. (manual for now) You can install doctoc by running `sudo npm install -g doctoc`.
@@ -196,11 +196,10 @@ QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Ba
 * In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/{Cleanup,Marosijo}GenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) or getting it elsewhere). These are used by Marosijo and Cleanup module. Generating them takes a long time, and depends on the number/length of the token list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
 * If you also need the monophone models/tri models/etc for these modules, you can look at [`Backend/scripts/data_prep/run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) and then `Backend/scripts/data_prep/local/prepare_*_deployment.sh` to create them from data collected with Eyra.  
 Here is an example of the commands needed to run to create the models/files for the Marosijo module:
-    * Edit [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) to use your lexicon and phonemes.txt. Comment out stage 3 (only used for Cleanup).
+    * Edit [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) to use your lexicon and phonemes.txt.
     * `./run.sh`
-    * `./local/lang_add_phones.sh data/local/dict/lexiconp.txt data/lang data/newlang`
-    * `./local/make_phone_bigram_fst.sh exp/mono data/newlang local/my_phone_fst`
-    * `./local/prepare_marosijo_deployment.sh data/newlang exp/mono local/my_phone_fst 16000 local/marosijo.tgz`
+
+  The files for Marosijo should be located at `local/marosijo.tgz` after you run.
 
 ### Selecting modules to use
 

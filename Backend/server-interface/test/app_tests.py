@@ -50,7 +50,8 @@ class AppTestCase(unittest.TestCase):
         self.assertIn(b'GET success baby', response.data)
 
         self.assertEqual(type(appMain.app.config['MAIN_RECORDINGS_PATH']), type('aString'))
-        assert os.path.exists(appMain.app.config['MAIN_RECORDINGS_PATH'])
+        print('If you have never saved anything to filesystem through Eyra, this test might fail.')
+        self.assertTrue(os.path.exists(appMain.app.config['MAIN_RECORDINGS_PATH']))
 
     def test_submission_routes(self):
         print('\nIn test submission')
