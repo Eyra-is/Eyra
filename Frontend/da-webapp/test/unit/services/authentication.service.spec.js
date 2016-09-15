@@ -22,17 +22,14 @@ File author/s:
 describe('authentication service', function(){
   beforeEach(module('daApp'));
   
+  // TODO mock the JWT token creation of Flask-JWT correctly and use $httpBackend to
+  // mock /backend/auth/login to verify login/logout functionality
   var authenticationService;
   beforeEach(inject(function(_authenticationService_){
     authenticationService = _authenticationService_;
   }));
 
-  it('should be able to login, logout and detect state', function(){
-    authenticationService.login({'email':'rooney@ru.is', 'password':'suchPass'});
-    setTimeout(function(){
-      expect(authenticationService.loggedIn()).toBeTruthy();
-      authenticationService.logout();
-      setTimeout(function(){expect(authenticationService.loggedIn()).toBeFalsy();}, 10);
-    }, 10);
+  it('should not be logged in', function(){
+    expect(authenticationService.loggedIn()).toBeFalsy();
   });
 });
