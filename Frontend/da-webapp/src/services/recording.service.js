@@ -110,7 +110,7 @@ function recordingService($http, logger, utilityService) {
       logger.log('Token skipped, no recording made.');
     }
     
-    recorder.clear();
+    recorder && recorder.clear();
   } 
 
   //////////

@@ -32,7 +32,15 @@ module.exports = function(config){
 
     frameworks: ['jasmine'],
 
-    browsers : ['Chrome'],//, 'Firefox'],
+    browsers : ['chrome_webrtc'],//, 'Firefox'],
+
+    customLaunchers: {
+      chrome_webrtc: {
+        base: 'Chrome',
+        flags: ['--use-fake-ui-for-media-stream'],
+        displayName: 'Chrome WebRTC'
+      }
+    },
 
     plugins : [
             'karma-chrome-launcher',
