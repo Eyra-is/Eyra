@@ -53,7 +53,7 @@ describe('android recording service', function(){
     expect(initCallback).toHaveBeenCalled();
   });
 
-  it('should call stop and start recording and recording complete callback', function(done){
+  it('should call stop and start recording and recording complete callback appropriately', function(done){
     // try recording a couple of times (literally hehe)
     var T = 2;
     for (var i = 0; i < T; i++) {
@@ -62,11 +62,22 @@ describe('android recording service', function(){
       $httpBackend.flush(1);
     }
 
-    expect(AndroidRecorder.startRecording).toHaveBeenCalledTimes(T);
-    expect(AndroidRecorder.stopRecording).toHaveBeenCalledTimes(T);
+    // should not call recording complete callback with .stop(falsy)
+    androidRecordingService.record();
+    androidRecordingService.stop(false);
+
+    expect(AndroidRecorder.startRecording).toHaveBeenCalledTimes(T+1);
+    expect(AndroidRecorder.stopRecording).toHaveBeenCalledTimes(T+1);
     setTimeout(function(){
       expect(recordingCompleteCallback).toHaveBeenCalledTimes(T);
-      done(); 
+
+      expect(typeof(androidRecordingService.currentRecording)).toEqual('object');
+      expect(typeof(androidRecordingService.currentRecording[0])).toEqual('object');
+      expect(typeof(androidRecordingService.currentRecording[0].blob)).toEqual('object');
+      expect(typeof(androidRecordingService.currentRecording[0].url)).toEqual('string');
+      expect(typeof(androidRecordingService.currentRecording[0].title)).toEqual('string');
+
+      done();
     }, 10);
   });
 });
