@@ -285,6 +285,12 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
         evalCtrl.grade = undefined;
         return;
       }
+      // make evaluator at least have started listening
+      if (audioPlayback.currentTime === 0) {
+        $scope.msg = 'Please listen to the recording.';
+        evalCtrl.grade = undefined;
+        return;
+      }
 
       evalCtrl.uttsGraded++;
 
