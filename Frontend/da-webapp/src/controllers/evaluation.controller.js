@@ -41,12 +41,14 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
 
   evalCtrl.action = action;
   evalCtrl.skip = skip;
+  evalCtrl.undo = undo;
 
   $scope.msg = ''; // single information msg
   $rootScope.isLoaded = false;
 
   evalCtrl.actionBtnDisabled = false;
   evalCtrl.skipBtnDisabled = false;
+  evalCtrl.undoBtnDisabled = true;
 
   var actionType = 'play'; // current state
 
@@ -165,6 +167,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
     */
     evalCtrl.actionBtnDisabled = true;
     evalCtrl.skipBtnDisabled = true;
+    evalCtrl.undoBtnDisabled = true;
   }
 
   function initSet(set, user) {
@@ -185,6 +188,18 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
     Return: promise which is resolved when the audio playback is ready to go.
     */
     var recNPrompt = evalService.getNext(grade, comments);
+    return handleRecNPrompt(recNPrompt);
+  }
+
+  function handleRecNPrompt(recNPrompt) {
+    /*
+    Update the current recording/prompt pair.
+    
+    Parameters:
+      recNPrompt    format [recLink, prompt]
+
+    Return: promise when playback is ready to go.
+    */
     evalCtrl.grade = undefined; // reset grade
     evalCtrl.recording = recNPrompt[0];
     evalCtrl.displayToken = recNPrompt[1];
@@ -207,6 +222,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
         }, 
         function error(error) {
           logger.error(error);
+          $scope.msg = 'Something went wrong.';
           playbackReady.reject(false);
         }
       );
@@ -229,8 +245,9 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
     if (actionType === 'pause') {
       toggleActionBtn();
     }
-    next(undefined);
-    evalCtrl.skipBtnDisabled = false;
+    next(undefined).then(function(){
+      evalCtrl.skipBtnDisabled = false;
+    }, util.stdErrCallback);
   }
 
   function pause() {
@@ -260,6 +277,19 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
       actionType = 'play';
       evalCtrl.actionText = PLAYTEXT;
       evalCtrl.actionGlyph = PLAYGLYPH;
+    }
+  }
+
+  function undo() {
+    /*
+    Undo last grade and grade again. Can only be used to go back one grade.
+    */
+    evalCtrl.undoBtnDisabled = true;
+    var recNPrompt = evalService.undo();
+    evalCtrl.uttsGraded--;
+    handleRecNPrompt(recNPrompt);
+    if (actionType === 'pause') {
+      toggleActionBtn();
     }
   }
 
@@ -306,6 +336,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
       }
       evalCtrl.comments = '';
       evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
+      evalCtrl.undoBtnDisabled = isSetComplete ? true : false;
 
       if (evalCtrl.autoplay) {
         // just writing action() here didn't seem to work.

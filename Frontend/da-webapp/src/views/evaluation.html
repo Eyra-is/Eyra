@@ -57,6 +57,12 @@ File author/s:
             </button>
             <p>Skip</p>
         </div>
+        <div class="record-ctrl-wrapper">
+            <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="evalCtrl.undoBtnDisabled" ng-click="evalCtrl.undo()">
+                <span class="glyphicon glyphicon-step-backward"></span>
+            </button>
+            <p>Undo</p>
+        </div>
         <div class="checkbox">
                 <label for="autoplay">
                     <input id="autoplay" type="checkbox" ng-model="evalCtrl.autoplay">

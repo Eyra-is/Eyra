@@ -196,7 +196,7 @@ body {
   @extend .glyph-default;
   color: red;
 }
-.glyphicon-stop {
+.glyphicon-stop, .glyphicon-step-backward {
   @extend .glyph-default;
 }
 .glyphicon-ban-circle {
