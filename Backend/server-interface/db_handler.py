@@ -834,7 +834,7 @@ class DbHandler:
         eval_set = str(eval_set)
         try:
             jsonDecoded = json.loads(data)
-            log('json: ', jsonDecoded)
+            #log('json: ', jsonDecoded)
         except (TypeError, ValueError) as e:
             msg = 'Evaluation data not on correct format.'
             log(msg, e)

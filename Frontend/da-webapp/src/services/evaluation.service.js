@@ -205,9 +205,6 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
       return;
     }
 
-    console.log('evalCopy: ');
-    console.log(evalCopy);
-
     delService.submitEvaluation(currentSetLabel, evalCopy).then(
       function success(response) {
         deleteFromEvaluation(count);
@@ -249,19 +246,9 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
     }
     undoFlag = true;
 
-    console.log('before.');    
-    console.log('setProgress: ' + setProgress);
-    console.log('currentSet: ');
-    console.log(currentSet);
-
     currentSet[setProgress - 1] = lastUtterance;
     evaluation.pop(); // delete last grade from evaluation
     setProgress--;
-
-    console.log('after.');
-    console.log('setProgress: ' + setProgress);
-    console.log('currentSet: ');
-    console.log(currentSet);
 
     return lastUtterance;
   }

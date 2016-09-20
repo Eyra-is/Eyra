@@ -22,7 +22,7 @@ File author/s:
 describe('evaluation service', function(){
   beforeEach(module('daApp'));
   // TODO handle more than one set
-  var testSets = ['malromur_3k'];
+  var testSets = ['Random'];
   // TODO handle more than evalBufferSize TESTNEXTS
   var TESTNEXTS = 4; // test getNext X times.
   var evalBufferSize = 5; // should be same as in utilityService
@@ -46,7 +46,7 @@ describe('evaluation service', function(){
 
         var partialSet = [];
         for (var i = 0; i < params.count; i++) {
-          partialSet.push(['link','prompt']);
+          partialSet.push(['link'+i,'prompt'+i]);
         }
         return [200, partialSet];
       });
@@ -104,8 +104,25 @@ describe('evaluation service', function(){
           expect(typeof(next[1])).toBe('string');
         }
       }, function(){
-        expect('async error').toEqual('no no');
+        fail('Error in initSet.');
       });
     }
+  });
+
+  it('should correctly undo and be able to click next afterwards', function(){
+    var promise = evalService.initSet(testSets[0]);
+    $httpBackend.flush();
+    promise.then(function(){
+      evalService.getNext('initial');
+      // prompt is short for recnprompt
+      var oldPrompt = evalService.getNext(4);
+      var newPrompt = evalService.getNext(4);
+      var undoPrompt = evalService.undo();
+      expect(oldPrompt).toBe(undoPrompt);
+      var afterUndoPrompt = evalService.getNext(4);
+      expect(newPrompt).toBe(afterUndoPrompt);
+    }, function(){
+      fail('Error in initSet.');
+    });
   });
 });
