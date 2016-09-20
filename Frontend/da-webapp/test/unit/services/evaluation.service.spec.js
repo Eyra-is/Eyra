@@ -52,7 +52,6 @@ describe('evaluation service', function(){
       });
     $httpBackend.whenRoute('POST', '/backend/evaluation/submit/:set')
       .respond(function(method, url, data, headers, params) {
-        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         var set = params.set;
 
         expect(testSets).toContain(set);
@@ -61,7 +60,6 @@ describe('evaluation service', function(){
       });
     $httpBackend.whenRoute('GET', '/backend/evaluation/setinfo/:set')
       .respond(function(method, url, data, headers, params) {
-        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         var set = params.set;
 
         expect(testSets).toContain(set);
@@ -70,7 +68,6 @@ describe('evaluation service', function(){
       });
     $httpBackend.whenRoute('GET', '/backend/evaluation/progress/user/:user/set/:set')
       .respond(function(method, url, data, headers, params) {
-        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         var set = params.set;
         var user = params.user;
 
@@ -100,8 +97,8 @@ describe('evaluation service', function(){
         for (var j = 0; j < TESTNEXTS; j++) {
           var next = j === 0 ? evalService.getNext('initial') : evalService.getNext(4);
 
-          expect(typeof(next[0])).toBe('string');
-          expect(typeof(next[1])).toBe('string');
+          expect(next[0]).toBe('link'+j);
+          expect(next[1]).toBe('prompt'+j);
         }
       }, function(){
         fail('Error in initSet.');
