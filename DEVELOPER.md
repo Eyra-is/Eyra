@@ -283,6 +283,7 @@ You listen to the utterance, if there was something wrong, you select what was w
 **Notes:**
 * You can tick the **Autoplay** checkbox if you want the next utterance to start playing automatically.
 * Clicking **Skip** will bring the next utterance without grading the current one.
+* The **Undo** button will allow you to go one and only one utterance back and re-grade.
 * Regarding the grading scale **1-4**; of course these can be interpreted differently, but the main idea is that **1** would be what the evaluator sees as a useless recording, **4** would be a perfect recording (at least the entire prompt spoken correctly). If you are unsure, **2** would mean you think it is probably bad and **3** you think it is probably good.
 
 
