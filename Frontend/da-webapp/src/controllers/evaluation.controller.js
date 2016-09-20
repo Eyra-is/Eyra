@@ -65,6 +65,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   evalCtrl.currentUser = dataService.get('currentUser');
   evalCtrl.currentSet = dataService.get('currentSet');
   var isSetComplete = false;
+  var undoFlag = false; // true if an undo utterance is the current one (used to circumvent needing to listen for grading)
 
   // save reference to the audio element on the page, for play/pause
   // thanks, Shushanth Pallegar, http://stackoverflow.com/a/30899643/5272567
@@ -285,12 +286,15 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
     Undo last grade and grade again. Can only be used to go back one grade.
     */
     evalCtrl.undoBtnDisabled = true;
+    undoFlag = true;
+
     var recNPrompt = evalService.undo();
     evalCtrl.uttsGraded--;
-    handleRecNPrompt(recNPrompt);
-    if (actionType === 'pause') {
-      toggleActionBtn();
-    }
+    handleRecNPrompt(recNPrompt).then(function(){
+      if (actionType === 'pause') {
+        toggleActionBtn();
+      }
+    }, util.stdErrCallback);
   }
 
   function watchGrade() {
@@ -316,7 +320,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
         return;
       }
       // make evaluator at least have started listening
-      if (audioPlayback.currentTime === 0) {
+      if (audioPlayback.currentTime === 0 && !undoFlag) {
         $scope.msg = 'Please listen to the recording.';
         evalCtrl.grade = undefined;
         return;
@@ -337,6 +341,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
       evalCtrl.comments = '';
       evalCtrl.skipBtnDisabled = isSetComplete ? true : false;
       evalCtrl.undoBtnDisabled = isSetComplete ? true : false;
+      undoFlag = false;
 
       if (evalCtrl.autoplay) {
         // just writing action() here didn't seem to work.
