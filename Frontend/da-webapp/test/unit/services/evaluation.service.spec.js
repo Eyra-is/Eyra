@@ -22,7 +22,7 @@ File author/s:
 describe('evaluation service', function(){
   beforeEach(module('daApp'));
   // TODO handle more than one set
-  var testSets = ['malromur_3k'];
+  var testSets = ['Random'];
   // TODO handle more than evalBufferSize TESTNEXTS
   var TESTNEXTS = 4; // test getNext X times.
   var evalBufferSize = 5; // should be same as in utilityService
@@ -46,13 +46,12 @@ describe('evaluation service', function(){
 
         var partialSet = [];
         for (var i = 0; i < params.count; i++) {
-          partialSet.push(['link','prompt']);
+          partialSet.push(['link'+i,'prompt'+i]);
         }
         return [200, partialSet];
       });
     $httpBackend.whenRoute('POST', '/backend/evaluation/submit/:set')
       .respond(function(method, url, data, headers, params) {
-        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         var set = params.set;
 
         expect(testSets).toContain(set);
@@ -61,7 +60,6 @@ describe('evaluation service', function(){
       });
     $httpBackend.whenRoute('GET', '/backend/evaluation/setinfo/:set')
       .respond(function(method, url, data, headers, params) {
-        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         var set = params.set;
 
         expect(testSets).toContain(set);
@@ -70,7 +68,6 @@ describe('evaluation service', function(){
       });
     $httpBackend.whenRoute('GET', '/backend/evaluation/progress/user/:user/set/:set')
       .respond(function(method, url, data, headers, params) {
-        // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         var set = params.set;
         var user = params.user;
 
@@ -100,12 +97,29 @@ describe('evaluation service', function(){
         for (var j = 0; j < TESTNEXTS; j++) {
           var next = j === 0 ? evalService.getNext('initial') : evalService.getNext(4);
 
-          expect(typeof(next[0])).toBe('string');
-          expect(typeof(next[1])).toBe('string');
+          expect(next[0]).toBe('link'+j);
+          expect(next[1]).toBe('prompt'+j);
         }
       }, function(){
-        expect('async error').toEqual('no no');
+        fail('Error in initSet.');
       });
     }
+  });
+
+  it('should correctly undo and be able to click next afterwards', function(){
+    var promise = evalService.initSet(testSets[0]);
+    $httpBackend.flush();
+    promise.then(function(){
+      evalService.getNext('initial');
+      // prompt is short for recnprompt
+      var oldPrompt = evalService.getNext(4);
+      var newPrompt = evalService.getNext(4);
+      var undoPrompt = evalService.undo();
+      expect(oldPrompt).toBe(undoPrompt);
+      var afterUndoPrompt = evalService.getNext(4);
+      expect(newPrompt).toBe(afterUndoPrompt);
+    }, function(){
+      fail('Error in initSet.');
+    });
   });
 });

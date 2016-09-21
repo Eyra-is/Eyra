@@ -76,6 +76,7 @@ describe('evaluation controller', function(){
     expect(typeof(evalCtrl.skip)).toBe('function');
     expect(evalCtrl.actionBtnDisabled).toBeDefined();
     expect(evalCtrl.skipBtnDisabled).toBeDefined();
+    expect(evalCtrl.undoBtnDisabled).toBeDefined();
     expect(typeof(evalCtrl.displayToken)).toBe('string');
     expect(typeof(evalCtrl.uttsGraded)).toBe('number');
 

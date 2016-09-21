@@ -42,6 +42,7 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
   evalHandler.getNext = getNext;
   evalHandler.getProgress = getProgress;
   evalHandler.setInfoReadyCallback = angular.noop; // for unit tests, make placeholder
+  evalHandler.undo = undo;
 
   var evalBufferSize = util.getConstant('evalBufferSize');
   var evalSubmitFreq = util.getConstant('evalSubmitFreq');
@@ -71,6 +72,10 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
         ..
       ]*/
   var evaluation = [];
+
+  // keep a copy of the last utterance graded to allow for an undo.
+  var lastUtterance = ['error_no_rec.wav', 'Not a real prompt.'];
+  var undoFlag = false; // true if an undo utterance is the current one (used to prevent consecutive undos)
 
   return evalHandler;
 
@@ -112,7 +117,7 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
         evalHandler.setInfoReadyCallback(response);
         setCount = response.data.count;
       }, util.stdErrCallback);
-      // get progress from local db and then grab evalBufferSize from set from server
+      // get progress from server and then grab evalBufferSize from set from server
       return $q.when()
         .then(function(){
           return getProgressFromServer();
@@ -142,7 +147,9 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
     }
 
     updateEvaluation(grade, comments); // add the results for current recording received from evalCtrl
-    if ((setProgress + 1) % evalSubmitFreq === 0 
+    // additional - 1 in (setProgress + 1 - 1) % evalSubmitFreq === 0 to account for the one we
+    // retain for undo purposes.
+    if ((setProgress + 1 - 1) % evalSubmitFreq === 0
         || setProgress === setCount - 1) {
       // submit the current evaluation if our progress is a multiple of the frequency
       // or if we have reached the end of the set
@@ -155,6 +162,7 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
     }
 
     var next = currentSet[setProgress + 1];
+    lastUtterance = currentSet[setProgress];
     currentSet[setProgress] = undefined;
     setProgress++;
 
@@ -163,6 +171,7 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
       addToBuffer();
     }
 
+    undoFlag = false;
     return next;
   }
 
@@ -181,13 +190,20 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
 
   function submitEvaluation() {
     /*
-    Submits evaluation to server. Sends everything we have currently.
+    Submits evaluation to server. Sends everything except the most recent grade (for 
+    undo purposes). (unless we have reached the end of the set, in which case send everything)
 
     Takes a copy, and then deletes what it sent on a successful send.
     */
-    var evalCopy = JSON.parse(JSON.stringify(evaluation));
+    var evalCopy = setProgress === setCount - 1 ? 
+                      JSON.parse(JSON.stringify(evaluation)) :
+                      JSON.parse(JSON.stringify(evaluation.slice(0, evaluation.length - 1)));
     var count = evalCopy.length;
     var progress = setProgress;
+
+    if (count === 0) {
+      return;
+    }
 
     delService.submitEvaluation(currentSetLabel, evalCopy).then(
       function success(response) {
@@ -216,6 +232,25 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
       */
       evaluation.splice(0, count);
     }
+  }
+
+  function undo() {
+    /*
+    Undo the last grade to be able to grade again. Can only be used on the last grade, no more!
+
+    Returns element on same format as "getNext", i.e. [recLink, prompt]
+    */
+    if (undoFlag) {
+      logger.error('Undo called while undo going on. Shouldn\'t happen.');
+      return;
+    }
+    undoFlag = true;
+
+    currentSet[setProgress - 1] = lastUtterance;
+    evaluation.pop(); // delete last grade from evaluation
+    setProgress--;
+
+    return lastUtterance;
   }
 
   function updateEvaluation(grade, comments) {
