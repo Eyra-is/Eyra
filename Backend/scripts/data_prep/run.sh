@@ -16,7 +16,7 @@
 
 # File author/s:
 #     Robert Kjaran <robert@kjaran.com>
-#     Matthias Petursson <oldschool01123@gmail.com> (the adding of the last three lines mostly)
+#     Matthias Petursson <oldschool01123@gmail.com> (the adding of the last couple of lines mostly)
 
 # Generic LVCSR built using open/freely accessible data
 # Prepares data for Marosijo module, outfile: local/marosijo.tgz. 
@@ -107,3 +107,7 @@ fi
 ./local/lang_add_phones.sh data/local/dict/lexiconp.txt data/lang data/newlang
 ./local/make_phone_bigram_fst.sh exp/mono data/newlang local/my_phone_fst
 ./local/prepare_marosijo_deployment.sh data/newlang exp/mono local/my_phone_fst 16000 local/marosijo.tgz
+
+#./local/prepare_cleanup_deployment.sh data/lang exp/tri1b 16000 local/cleanup.tgz
+# you should modify the "my_prompts.txt" to use whatever prompts you have if you do this
+#./local/cleanup_make_top_words.sh ../../server-interface/qc/scripts/my_prompts.txt
