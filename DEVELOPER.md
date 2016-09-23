@@ -200,7 +200,8 @@ Here is an example of the commands needed to run to create the models/files for 
     * Edit [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) to use your lexicon and phonemes.txt.
     * `./run.sh`
 
-  The files for Marosijo should be located at `local/marosijo.tgz` after you run.
+  The files for Marosijo should be located at `local/marosijo.tgz` after you run.  
+  A similar process applies for the Cleanup module, look at commenting out Stage 3 and the last 2 lines in [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh).
 
 ### Selecting modules to use
 

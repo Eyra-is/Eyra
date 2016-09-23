@@ -36,7 +36,7 @@ del newPath
 # grab errLog from util from 3 dirs above this one
 newPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, os.path.pardir))
 sys.path.append(newPath)
-from util import errLog, log
+from util import errLog, log, isWavHeaderOnly
 sys.path.remove(newPath)
 del newPath
 
@@ -264,59 +264,64 @@ class CleanupTask(Task):
                 for line in graphs_scp:
                     print(line, file=tokens_graphs_scp)
 
-            # MFCCs are needed at 2 stages of the pipeline so we have to dump on disk
-            compute_mfcc_feats(
-                '--sample-frequency={}'.format(self.common.sample_freq),
-                '--use-energy=false',
-                'scp:{}'.format(mfcc_feats_scp_path),
-                'ark:{}'.format(mfcc_feats_path)
-            )
+            try:
+                # MFCCs are needed at 2 stages of the pipeline so we have to dump on disk
+                compute_mfcc_feats(
+                    '--sample-frequency={}'.format(self.common.sample_freq),
+                    '--use-energy=false',
+                    'scp,p:{}'.format(mfcc_feats_scp_path),
+                    'ark:{}'.format(mfcc_feats_path)
+                )
 
-            compute_cmvn_cmd = ('{kaldi_root}/src/featbin/compute-cmvn-stats ' +
-                                '"ark:{mfcc_feats_path}" ' +
-                                '"ark:-" ').format(mfcc_feats_path=mfcc_feats_path,
-                                                   kaldi_root=self.common.kaldi_root)
-            feats_cmd = ('{kaldi_root}/src/featbin/apply-cmvn ' +
-                         '"ark:{compute_cmvn_cmd} |" ' +
-                         '"ark:{mfcc_feats_path}" ' +
-                         '"ark:| {kaldi_root}/src/featbin/add-deltas ark:- ark:-" '
-                        ).format(compute_cmvn_cmd=compute_cmvn_cmd,
-                                 mfcc_feats_path=mfcc_feats_path,
-                                 kaldi_root=self.common.kaldi_root)
+                compute_cmvn_cmd = ('{kaldi_root}/src/featbin/compute-cmvn-stats ' +
+                                    '"ark,p:{mfcc_feats_path}" ' +
+                                    '"ark:-" ').format(mfcc_feats_path=mfcc_feats_path,
+                                                       kaldi_root=self.common.kaldi_root)
+                feats_cmd = ('{kaldi_root}/src/featbin/apply-cmvn ' +
+                             '"ark,p:{compute_cmvn_cmd} |" ' +
+                             '"ark:{mfcc_feats_path}" ' +
+                             '"ark:| {kaldi_root}/src/featbin/add-deltas ark:- ark:-" '
+                            ).format(compute_cmvn_cmd=compute_cmvn_cmd,
+                                     mfcc_feats_path=mfcc_feats_path,
+                                     kaldi_root=self.common.kaldi_root)
 
-            # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
-            # piping in contents of tokens_graphs_scp_path and writing to edits_path
-            # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
-            #   https://github.com/amoffat/sh/issues/309
-            lattice_oracle( 
-                gmm_latgen_faster(
-                    sh.cat(
-                        tokens_graphs_scp_path,
+                # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
+                # piping in contents of tokens_graphs_scp_path and writing to edits_path
+                # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
+                #   https://github.com/amoffat/sh/issues/309
+                lattice_oracle( 
+                    gmm_latgen_faster(
+                        sh.cat(
+                            tokens_graphs_scp_path,
+                            _piped=True,
+                            _err=errLog
+                        ),
+                        '--acoustic-scale={}'.format(acoustic_scale),
+                        '--beam={}'.format(beam),
+                        '--max-active={}'.format(max_active),
+                        '--lattice-beam={}'.format(lattice_beam),
+                        '--word-symbol-table={}'.format(self.common.sym_id_path),
+                        '{}'.format(self.common.acoustic_model_path),
+                        'scp,p:-',
+                        'ark,p:{} |'.format(feats_cmd),
+                        'ark:-',
                         _piped=True,
                         _err=errLog
                     ),
-                    '--acoustic-scale={}'.format(acoustic_scale),
-                    '--beam={}'.format(beam),
-                    '--max-active={}'.format(max_active),
-                    '--lattice-beam={}'.format(lattice_beam),
-                    '--word-symbol-table={}'.format(self.common.sym_id_path),
-                    '{}'.format(self.common.acoustic_model_path),
-                    'scp:-',
-                    'ark:{} |'.format(feats_cmd),
-                    'ark:-',
-                    _piped=True,
-                    _err=errLog
-                ),
-                'ark:-', 
-                'ark:{ref_tokens}'.format(ref_tokens=tokens_path), 
-                'ark:/dev/null', 
-                'ark,t:-',
-                _out=edits_path
-            )
+                    'ark,p:-', 
+                    'ark,p:{ref_tokens}'.format(ref_tokens=tokens_path), 
+                    'ark,p:/dev/null', 
+                    'ark,t:-',
+                    _out=edits_path
+                )
 
-            with open(edits_path, 'rt') as edits_f:
-                edits = dict((int(rec_id), int(n_edits)) for rec_id, n_edits
-                             in (line.strip().split() for line in edits_f))
+                with open(edits_path, 'rt') as edits_f:
+                    edits = dict((int(rec_id), int(n_edits)) for rec_id, n_edits
+                                 in (line.strip().split() for line in edits_f))
+            except sh.ErrorReturnCode_1 as e:
+                # No data (e.g. all wavs unreadable)
+                edits = {}
+                log('e.stderr: ', e.stderr)
         finally:
             os.chdir(oldDir)
 
@@ -334,13 +339,32 @@ class CleanupTask(Task):
 
         cum_accuracy = 0.0
         for r in recordings:
-            wer = edits[r['recId']] / len(r['token'].split())
-            accuracy = 0.0 if 1 - wer < 0 else 1 - wer
+            error = ''
+            try:
+                wer = edits[r['recId']] / len(r['token'].split())
+            except KeyError as e:
+                # Kaldi must have choked on this recording for some reason
+                if isWavHeaderOnly(r['recPath']):
+                    error = 'wav_header_only'
+                    log('Error, only wav header in recording: {} for session: {}'
+                        .format(r['recId'], session_id))
+                else:
+                    # unknown error
+                    error = 'unknown_error'
+                    log('Error, unknown error processing recording: {} for session {}'
+                        .format(r['recId'], session_id))
+
+            if not error:
+                error = 'no_error'
+                accuracy = 0.0 if 1 - wer < 0 else 1 - wer
+            else:
+                accuracy = 0.0
+
             cum_accuracy += accuracy
 
             prec = qc_report['perRecordingStats']
             stats = {"accuracy": accuracy}
-            prec.append({"recordingId": r['recId'], "stats": stats})
+            prec.append({"recordingId": r['recId'], "stats": stats, "error": error})
 
         try:
             avg_accuracy = cum_accuracy / len(qc_report['perRecordingStats'])
