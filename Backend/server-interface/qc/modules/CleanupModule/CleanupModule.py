@@ -363,8 +363,8 @@ class CleanupTask(Task):
             cum_accuracy += accuracy
 
             prec = qc_report['perRecordingStats']
-            stats = {"accuracy": accuracy}
-            prec.append({"recordingId": r['recId'], "stats": stats, "error": error})
+            stats = {"accuracy": accuracy, "error": error}
+            prec.append({"recordingId": r['recId'], "stats": stats})
 
         try:
             avg_accuracy = cum_accuracy / len(qc_report['perRecordingStats'])
