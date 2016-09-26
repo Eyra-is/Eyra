@@ -45,8 +45,11 @@ def log(arg, category=None):
         _warnings += 1
     print(arg, file=sys.stderr)
 
-def run(dump_path):
-    print('# sessionId\ttokenId\taccuracy\tonlyInsOrSub\tcorrect\tsub\tins\tdel\tstartdel\tenddel\textraInsertions\tempty\tdistance\terror\trecordingId\tfilename\ttoken\tsessionId')
+def run(dump_path, module):
+    if module == 'Marosijo':
+        print('# sessionId\ttokenId\taccuracy\tonlyInsOrSub\tcorrect\tsub\tins\tdel\tstartdel\tenddel\textraInsertions\tempty\tdistance\terror\trecordingId\tfilename\ttoken\tsessionId')
+    elif module == 'Cleanup':
+        print('# sessionId\ttokenId\taccuracy\terror\trecordingId\tfilename\ttoken\tsessionId')
 
     cur = _db.cursor()
 
@@ -111,11 +114,15 @@ def run(dump_path):
                         log('Error: no inputToken for token with id: {}'.format(token_id))
                         raise
                     # now we should have all we need to print the correct line for this recording
-                    row = [ int(session_id), int(token_id), float(stats['accuracy']), bool(stats['onlyInsOrSub']), 
-                            int(stats['correct']), int(stats['sub']), int(stats['ins']), int(stats['del']),
-                            int(stats['startdel']), int(stats['enddel']), int(stats['extraInsertions']), 
-                            bool(stats['empty']), int(stats['distance']), error, int(recording_id),
-                            filename, token, int(session_id)]
+                    if module == 'Marosijo':
+                        row = [ int(session_id), int(token_id), float(stats['accuracy']), bool(stats['onlyInsOrSub']), 
+                                int(stats['correct']), int(stats['sub']), int(stats['ins']), int(stats['del']),
+                                int(stats['startdel']), int(stats['enddel']), int(stats['extraInsertions']), 
+                                bool(stats['empty']), int(stats['distance']), error, int(recording_id),
+                                filename, token, int(session_id)]
+                    elif module == 'Cleanup':
+                        row = [ int(session_id), int(token_id), float(stats['accuracy']), error, 
+                                int(recording_id), filename, token, int(session_id)]
                     print(*row, sep='\t') # thanks, Glenn Maynard, http://stackoverflow.com/a/4049043/5272567
     log('Finished with {} warnings.'.format(_warnings))
 
@@ -123,9 +130,10 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description="""
-        Quick and dirty script to parse Marosijo module dumps and present their data.
-        Writes to stdout. """)
-    parser.add_argument('dump_path', type=str, help='Path to the Marosijo dumps.')
+        A script to parse Marosijo or Cleanup module dumps and present their data.
+        Writes to stdout.""")
+    parser.add_argument('dump_path', type=str, help='Path to the QC module dumps.')
+    parser.add_argument('module', type=str, choices=['Marosijo', 'Cleanup'], help='The QC module.')
     args = parser.parse_args()
 
-    run(args.dump_path)
+    run(args.dump_path, args.module)
