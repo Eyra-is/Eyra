@@ -72,9 +72,10 @@ class MarosijoAnalyzer(object):
     string.
 
     """
-    def __init__(self, hypothesis, reference):
+    def __init__(self, hypothesis, reference, marosijoCommon):
         self.reference = reference
         self.hypothesis = hypothesis
+        self.marosijoCommon = marosijoCommon # used to grab info like symbolTable
 
     @staticmethod
     def _levenshteinDistance(hyp, ref, cost_sub=1, cost_del=1, cost_ins=1):
@@ -152,6 +153,142 @@ class MarosijoAnalyzer(object):
         self._distance, self.d = self._levenshteinDistance(self.hypothesis, self.reference)
         self.seq, self.nC, self.nS, self.nI, self.nD = self.shortestPath(self.d)
 
+    def _alignHyp(self, hyp, ref) -> list:
+        """
+        Attempts to enumerate the hypothesis in some smart manner. E.g.
+
+        ref:    the dog jumped    across
+        hyp:        dog /j/u/m/p/ across
+        output:     1   -1-1-1-1  3
+
+        Where /j/u/m/p/ represents 4 phonemes inserted instead of jumped and
+        these would usually be the integer ids of the words.
+        Output is the indices in ref the words in hyp correspond to.
+
+        Parameters:
+            hyp     list with the integer ids of the hyp words
+            ref     same as hyp with the reference
+
+        Pairs the hypotheses with the index of correct words in the reference. 
+        -1 for hypotheses words not in ref or if hyp word is oov <UNK>.
+
+        Would have used align-text.cc from Kaldi, but it seemed to not perform well
+        with all the inserted phonemes (on a very informal check).
+
+        Better description of the algorithm used:
+            TO DO WRITE DESC
+        """
+
+        # private functions to _alignHyp
+        def _wordsBetween(aligned, idx):
+            """
+            Attempts to see if there are any words between
+            the current idx and the last matched word in hyp, 
+            and no word in between it in the ref.
+            E.g.
+                ref: joke about stuff
+                hyp: joke and go to stuff
+
+            With: aligned = [0, -1, -1, -1]
+                  idx     = 2
+            Would result in False, since "and go to" could be the aligners interpretation of about.
+
+                ref: go to France
+                hyp:    to five France
+
+            With: aligned = [1, -1]
+                  idx     = 2
+            Would result in True, since "five" is between to and France
+            """
+            newAligned = [x for x in aligned if x != -1] # remove -1's
+            try:
+                lastMatch = newAligned[-1]
+            except IndexError as e:
+                # return True if we have some -1's but no match.
+                if len(aligned) > 1:
+                    return True
+                else:
+                    return False
+            if idx - lastMatch > 1:
+                return False
+
+            # if we have some -1's after our last match, return true
+            if aligned.index(lastMatch) != len(aligned) - 1:
+                return True
+
+            return False
+
+        def _isLater(idx, ref):
+            """
+            Checks to see if ref[idx] is repeated in ref somewhere later,
+            and in which case return the later idx.
+
+            Returns -1 if ref[idx] is not repeated.
+            """
+            refSlice = ref[idx:]
+            refSlice[0] = -1
+            try:
+                return refSlice.index(ref[idx]) + idx
+            except ValueError as e:
+                return -1
+
+        oovId = self.marosijoCommon.symbolTable['<UNK>']
+        refC = list(ref) # ref copy
+        aligned = []
+        for h in hyp:
+            try:
+                if h == oovId:
+                    aligned.append(-1)
+                    continue
+
+                idx = refC.index(h)
+                # handle cases with multiple instances of the same word
+                # in case our hypothesised index in the hyp is lower than 
+                # some idx in aligned, we know that cannot be, so the only
+                # chance is that it is the same word later in the hyp (or not there)
+                # In addition, if we see 1 or more words (like dung in the example)
+                # which could have been the interpretation of dog, we assume it is the
+                # second instance of the word (if present, otherwise assume first instance).
+                # e.g. 
+                #    ref: the dog ate the dog
+                #    hyp: the dung dog
+                #    res:   0   -1   4
+                refC[idx] = -1 # remove word from ref if we match, in case we have multiple of the same
+                while True:
+                    try:
+                        if idx < any(aligned) or _wordsBetween(aligned, idx):
+                            idx = refC.index(h)
+                            refC[idx] = -1
+                        else:
+                            break
+                    except ValueError as e:
+                        break
+            except ValueError as e:
+                idx = -1
+            aligned.append(idx)
+        # do a second pass
+        # if the aligned array is not strictly non-decreasing, fix it
+        # e.g. if aligned = [0, -1, -1, 3, 2]
+        # see if the one marked 2 isn't supposed to be the same word later in ref
+        # this could be problematic if the same 2 words are repeated twice,
+        # and possibly if the same word is repeated 3 times as well
+        prevA = -1
+        for i, a in enumerate(aligned):
+            if a == -1:
+                continue
+            if a <= prevA:
+                # we have decreasing
+                newIdx = _isLater(a, ref)
+                if newIdx != -1:
+                    aligned[i] = newIdx
+                else:
+                    log('Error: couldn\'t align {} with hyp: {} and ref: {}'
+                        .format(ref[a], hyp, ref))
+                    aligned[i] = -1 # error
+            prevA = a
+
+        return aligned
+
     def editSequence(self):
         """Returns sequence of edits as an iterable
 
@@ -185,6 +322,11 @@ class MarosijoAnalyzer(object):
         """Returns dict with details of analysis
 
         """
+        # log('ref: ', self.reference)
+        # log('hyp: ', self.hypothesis)
+        # log(self._alignHyp(self.hypothesis, self.reference))
+
+
         res = self.edits()
         seq = self.editSequence()
         details = {'empty': False, 'onlyInsOrSub': False,
@@ -520,7 +662,7 @@ class _SimpleMarosijoTask(Task):
                     ((r['recId'], self.common.symToInt(r['token']))
                      for r in recordings)}
 
-            details = {hypKey: MarosijoAnalyzer(hypTok.split(), refs[hypKey].split()).details() for
+            details = {hypKey: MarosijoAnalyzer(hypTok.split(), refs[hypKey].split(), self.common).details() for
                        hypKey, hypTok in hyps.items()}
             # 'empty' analysis in case Kaldi couldn't analyse recording for some reason
             # look at MarosijoAnalyzer.details() for format
