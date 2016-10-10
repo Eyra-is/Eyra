@@ -20,7 +20,7 @@
 # Prepares a tarball with files necessary for the Marosijo QC module
 # in Eyra
 
-help_message="Usage: $0 <lang-dir> <exp-dir> <phone-lm-fst> <sample-freq> <out-tgz>"
+help_message="Usage: $0 <lang-dir> <exp-dir> <phone-lm-fst> <sample-freq> <lexicon> <out-tgz>"
 
 err() {
   msg=$1
@@ -41,7 +41,8 @@ lang=$1
 exp=$2
 phone_lm_fst=$3
 sample_freq=$4
-out_tgz=$5
+lexicon=$5
+out_tgz=$6
 
 tmp="$(mktemp -d)"
 trap "rm -rf $tmp" EXIT
@@ -66,6 +67,9 @@ echo "$sample_freq" > $tmp/sample_freq
 
 msg "Using Phoneme LM from $phone_lm_fst"
 cp $phone_lm_fst $tmp/phone_lm || err "$phone_lm_fst missing"
+
+msg "Copying lexicon as is."
+cp $lexicon $tmp/lexicon.txt || err "$lexicon missing"
 
 tar --transform 's/.*\///g' -cvzf $out_tgz $tmp/*
 

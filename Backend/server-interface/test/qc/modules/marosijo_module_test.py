@@ -43,50 +43,131 @@ class AppTestCase(unittest.TestCase):
     def test_marosijo_analyzer(self):
         common = self.marosijo.common
 
-        # test _alignHyp
+        # 27901 - 27943 are the phonemes
+        # average phoneme length: 9
+        # these tests are specific to the icelandic data, since phoneme overlap and more is tested
+        # TODO automate these tests (locate the phonemes, and use random words with some overlap from lexicon)
         oov = common.symbolTable['<UNK>']
         refs_hyps = [
-            ('the dog jumped across',
-             'dog j u m p across',
-             [1, -1, -1, -1, -1, 3]),
-            ('dog ate the dog in dog',
-             'dog ate',
-             [0, 1]),
-            ('dog ate the dog in dog ate',
-             'in dog',
-             [4, 5]),
-            ('the dog ate the dog and',
-             'the d u n g dog and',
-             [0, -1, -1, -1, -1, 4, 5]),
+            # test some generic stuff
+            # bunki / fylkis / hlíðarbraut / athuga
+            # p ʏ ɲ̊ c ɪ / f ɪ l̥ c ɪ s / l̥ i ð a r p r ø y t / a t h ʏ ɣ a         27
+            ('3624 7363 10345 1479',                                             # ref
+            # !a    !u    !n    fylkis  !p !ɔ    !s hlíðarbraut !t !h    !ɛ
+             '27903 27935 27920 7363 27928 27926 27932 10345 27933 27911 27909', # hyp
+             [-1, -1, -1, 1, -1, -1, -1, 2, -1, -1, -1],                         # alignHyp
+             2/4 + 2/6*1/4,                                                      # accuracy
+             15/27),                                                             # phone_acc
+            # kaupmenn / kerti / rögn / áhyggjufullur
+            # kʰ ø y p m ɛ n / cʰ ɛ r̥ t ɪ / r œ k n / a u h ɪ c ʏ f ʏ t l ʏ r       28
             ('12657 12768 19593 543',
+            # !a    !n    !p    !m    !ɛ    kerti !tʰ   !ɲ    !ɪ
+             '27903 27920 27928 27918 27909 12768 27934 27943 27901',
+             [-1,   -1,   -1,   -1,   -1,   1,   -1,   -1,   -1],
+             1/4 + 3/7*1/4 + 1/16*2*1/4,
+             9/28),
+            # kaupmenn / kerti / rögn / áhyggjufullur
+            # kʰ ø y p m ɛ n / cʰ ɛ r̥ t ɪ / r œ k n / a u h ɪ c ʏ f ʏ t l ʏ r       28
+            ('12657 12768 19593 543',
+            # !a    !n    !ŋ̊   !pʰ   !cʰ   !ɪ    !ɲ̊   !tʰ   !ɲ    !ɪ
              '27903 27920 27923 27929 27905 27901 27902 27934 27943 27901',
-             [-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1]),
-            # test marking oov, <UNK> as -1, this number, e.g. 25140, must match <UNK> in symbol table
-            ('12657 12768 19593 543 {oov} {oov}'.format(oov=oov),
+             [-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1],
+             3/28,
+             3/28),
+            # test that the error caps at -1/2 * wc (in this case -0.5*2)
+            # kaupmenn / rögn / kerti/ áhyggjufullur
+            # kʰ ø y p m ɛ n / r œ k n / cʰ ɛ r̥ t ɪ / a u h ɪ c ʏ f ʏ t l ʏ r        28
+            ('12657 19593 12768 543',
+            # !a    !tʰ   !n̥   !ɪ    !ɲ    !a    !tʰ   !n̥   !ɪ    !ɲ
+             '27903 27934 27921 27901 27943 27903 27934 27921 27901 27943 \
+              27903 27934 27921 27901 27943 27903 27934 27921 27901 27943 \
+              27903 27934 27921 27901 27943 27903 27934 27921 27901 27943 \
+              12768 27934 27943 27901',
+            # kerti !tʰ   !ɲ    !ɪ
+             [-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+              -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+              -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+               2,   -1,   -1,   -1],
+             1/4 + -0.5*2/4 + 1/12*1/4,
+             0),
+            # test that it correctly gives error when there are no words to compare to
+            # bunki / fylkis / hlíðarbraut / athuga
+            # p ʏ ɲ̊ c ɪ / f ɪ l̥ c ɪ s / l̥ i ð a r p r ø y t / a t h ʏ ɣ a
+            ('3624 7363 10345 1479',
+            # !a    !u    !n    fylkis  !p !ɔ    !s x3  hlíðarbraut !t !h    !ɛ
+             '27903 27935 27920 7363 27928 27926 27932 27928 27926 27932 27928 27926 27932 27928 27926 27932 10345 27933 27911 27909',
+             [-1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1],
+             2/4 - 0.5*1/4 + 2/6*1/4),
+            # test marking oov, <UNK> as -2, this number, e.g. 25140, must match <UNK> in symbol table
+            ('12657 12768 19593 543',
              '12657 12768 {oov} {oov} {oov}'.format(oov=oov),
-             [0, 1, -1, -1, -1]),
+             [0, 1, -2, -2, -2],
+             2/4),
             # edge cases
-            ('{oov}'.format(oov=oov),
+            ('12657',
              '{oov}'.format(oov=oov),
-             [-1]),
-            ('{oov}'.format(oov=oov),
+             [-2],
+             0),
+            ('{}'.format(oov),
+             '27903 27935',
+             [-1, -1],
+             0),
+            ('{}'.format(oov),
              '',
-             []),
+             [],
+             0),
+            ('{}'.format(oov),
+             '{}'.format(oov),
+             [-2],
+             0),
+            # test align hyp a bit
+            ('8591 10022 3683 8591 2663 8591',
+             '8591 10022',
+             [0, 1],
+             2/6),
+            ('10021 5257 3751 10021 5789 10021 5257',
+             '5789 10021',
+             [4, 5],
+             2/7),
             #
-            ('out of out of out of out of',
-             'out of out of out of out of',
-             [0,  1, 2,  3, 4,  5, 6,  7]),
-            ('out of the out of the out of',
-             'out of the out out',
-             [0,  1, 2,  3,  6])
+            ('3365 3373 3365 3373 3365 3373 3365 3373',
+             '3365 3373 3365 3373 3365 3373 3365 3373',
+             [0,  1, 2,  3, 4,  5, 6,  7],
+             1),
+            ('3365 3373 3416 3365 3373 3416 3365 3373',
+             '3365 3373 3416 3365 3365',
+             [0,  1, 2,  3,  6],
+             5/8),
+            # fyrst með jurtum og galdri en síðan með oddhvössu járni
+            # f ɪ r̥ s t 
+            ('7435 15985 12381 17716 7520 4969 20565 15985 17597 12159',
+            #    !f !ɪ    !s
+             '27910 27901 27932 15985 12381 17716 7520 4969 20565 17597 12159',
+             [-1, -1, -1, 1, 2, 3, 4, 5, 6, 8, 9],
+             3/5*1/10 + 8/10),
+            # ég
+            # j ɛ ɣ
+            ('4501 5455 26062 32 4501 10587 23149 20809',
+            # !m
+             '27918 4501 5455 26062 32 4501 10587 23149 20809',
+             [-1, 0, 1, 2, 3, 4, 5, 6, 7],
+             1)
         ]
 
         for rh in refs_hyps:
             ref = rh[0].split()
             hyp = rh[1].split()
             anal = marosijo.MarosijoAnalyzer(hyp, ref, common)
+            # test _alignHyp
             self.assertEqual(anal._alignHyp(hyp, ref), rh[2])
-            print(anal._alignHyp(hyp, ref))
+            # test _calculateAccuracy
+            self.assertAlmostEqual(anal._calculateAccuracy(), rh[3])
+
+        for rh in refs_hyps[:4]:
+            ref = rh[0].split()
+            hyp = rh[1].split()
+            anal = marosijo.MarosijoAnalyzer(hyp, ref, common)
+            self.assertAlmostEqual(anal._calculatePhoneAccuracy(), rh[4])
 
 if __name__ == '__main__':
     unittest.main()
