@@ -75,7 +75,7 @@ This list is not exhaustive.
         * [`schema_setup.sql`](https://github.com/Eyra-is/Eyra/tree/master/Backend/db/schema_setup.sql)  
              The main file here is [`schema_setup.sql`](https://github.com/Eyra-is/Eyra/tree/master/Backend/db/schema_setup.sql) which as you might suspect contains the layout of our database.
     * [`scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts)  
-        Number of useful scripts here. Including
+        Number of useful scripts here, should be for the most part self-documenting. Including but not limited to
         * [`tokens_to_sql.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/tokens_to_sql.py)  
             If you have a list of prompts (tokens) in a file ready to [make decoding graphs](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md#firing-up-the-qc), i.e. a key, space and then the prompt as per [malromur_toks.txt](https://github.com/Eyra-is/Eyra/tree/master/Backend/lang_data/is/malromur_toks.txt) (an example), then you can convert them to the required [`malromur_toks.sql`](https://github.com/Eyra-is/Eyra/tree/master/Backend/db/malromur_toks.sql) file running this command:
             ```
