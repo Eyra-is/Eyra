@@ -35,6 +35,7 @@ del newPath
 dbConst['user'] = 'root'
 _db = MySQLdb.connect(**dbConst)
 verbose = False
+dry_run = False
 
 def run(rec_path, dest_dir, retain_speakers, remove_imei, remove_location, remove_evaluators):
     if not retain_speakers:
@@ -46,7 +47,8 @@ def run(rec_path, dest_dir, retain_speakers, remove_imei, remove_location, remov
     if remove_evaluators:
         removeEvaluators(dest_dir)
 
-    _db.commit()
+    if not dry_run:
+        _db.commit()
 
 def removeSpeakers(rec_path, dest_dir):
     print('Removing speakers from database.')
@@ -65,10 +67,11 @@ def removeSpeakers(rec_path, dest_dir):
 
     # write the oldSpeaker -> newSpeaker file
     print('Creating hash file for speakers.')
-    with open(os.path.join(dest_dir, 'speakers.tsv'), 'w') as f:
-        f.write('speakerId\toldName\tnewName\n')
-        for s in speakers:
-            f.write('{}\t{}\t{}\n'.format(s[0], s[1], idToSpeaker[s[0]]))
+    if not dry_run:
+        with open(os.path.join(dest_dir, 'speakers.tsv'), 'w') as f:
+            f.write('speakerId\toldName\tnewName\n')
+            for s in speakers:
+                f.write('{}\t{}\t{}\n'.format(s[0], s[1], idToSpeaker[s[0]]))
 
     # update our speakers by overwriting the previous ones with our new ones
     # thanks Michiel de Mare, http://stackoverflow.com/questions/3432/multiple-updates-in-mysql
@@ -87,9 +90,15 @@ def removeSpeakers(rec_path, dest_dir):
             # we have to use the session number and speaker name
             # for a definitely correct speaker id.
             speakerName = '_'.join(f.split('_')[0:-1]) # just in case someone wrote _ in their name, take everything up until the last _
+            sesId = session.split('_')[-1]
             cur.execute('SELECT speakerId FROM session WHERE id=%s',
-                        (session.split('_')[-1],))
-            speakerId = cur.fetchone()[0]
+                        (sesId,))
+            try:
+                speakerId = cur.fetchone()[0]
+            except TypeError as e:
+                print('Warning: couldn\'t find speakerId for file: {} with name: {} and sesId: {}'
+                      .format(f, speakerName, sesId))
+                continue
             newSpeaker = idToSpeaker[speakerId]
             # make sure speakerId from session has the same name as our speaker.
             speakerFromDb = speakers[int(newSpeaker[7:])][1]
@@ -103,8 +112,16 @@ def removeSpeakers(rec_path, dest_dir):
             if verbose:
                 print(  'Renaming file: {}, changing: {} to {}'
                         .format(os.path.join(rec_path, session, f), speakerName, newSpeaker))
-            os.rename(  os.path.join(rec_path, session, f), 
-                        os.path.join(rec_path, session, f.replace(speakerName, newSpeaker)))
+            newRecName = f.replace(speakerName, newSpeaker)
+            if not dry_run:
+                os.rename(  os.path.join(rec_path, session, f), 
+                            os.path.join(rec_path, session, newRecName))
+            # change reference to the file as well in the database.
+            # comment this out if you want a faster dry-run, this takes a lot of time
+            if f[-4:] != '.txt':
+                cur.execute('UPDATE recording SET filename=%s '
+                            'WHERE filename=%s',
+                            (newRecName, f))
 
 def removeImei(dest_dir):
     print('Removing imei.')
@@ -217,17 +234,21 @@ if __name__ == '__main__':
     parser.add_argument('--remove-location', action='store_true', help='Remove all location info.')
     parser.add_argument('--remove-evaluators', action='store_true', help='Remove all evaluator names.')
     parser.add_argument('--verbose', '-v', action='store_true', help='A more verbose output.')
+    parser.add_argument('--dry-run', '-n', action='store_true', help='Run all the code, but don\'t commit anything to the database, and don\'t change any files.')
     args = parser.parse_args()
 
     if args.verbose:
         verbose = True
 
+    if args.dry_run:
+        dry_run = True
+
     if args.retain_speakers and not args.remove_imei and not args.remove_location:
         print('These options will mean no changes made to anything. Exiting.')
         exit(0)
 
-    if (input(
+    if dry_run or (input(
 'This will modify the database (possibly files) and remove personal information.\
- Be sure to take a backup just in case. Are you sure you want \
+ Be sure to take a backup just in case (or use the --dry-run flag). Are you sure you want \
  to continue? (y/n)\n') == 'y'):
         run(args.rec_path, args.dest_dir, args.retain_speakers, args.remove_imei, args.remove_location, args.remove_evaluators)
