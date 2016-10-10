@@ -22,16 +22,13 @@
 # Prepares data for Marosijo module, outfile: local/marosijo.tgz. 
 
 # For the Cleanup module, you have to uncomment stage 3 and run
-# lang_add_phones, make_phone_bigram and prepare_cleanup_deployment.sh
-# similar to what is done for Marosijo here.
+# the last couple of lines.
 
 nj=8
 stage=-100
 
-# LEXICON_PATH="../../lang_data/is/lexicon.txt"
-# PHONEME_PATH="../../lang_data/is/phonemes.txt"
-LEXICON_PATH="../../lang_data/jv/jv_lexicon_2016-04-25.txt"
-PHONEME_PATH="../../lang_data/jv/phonemes.txt"
+LEXICON_PATH="../../lang_data/is/lexicon.txt"
+PHONEME_PATH="../../lang_data/is/phonemes.txt"
 LANGDIR="data/lang"
 
 . ./cmd.sh
@@ -106,7 +103,7 @@ fi
 
 ./local/lang_add_phones.sh data/local/dict/lexiconp.txt data/lang data/newlang
 ./local/make_phone_bigram_fst.sh exp/mono data/newlang local/my_phone_fst
-./local/prepare_marosijo_deployment.sh data/newlang exp/mono local/my_phone_fst 16000 local/marosijo.tgz
+./local/prepare_marosijo_deployment.sh data/newlang exp/mono local/my_phone_fst 16000 "$LEXICON_PATH" local/marosijo.tgz
 
 #./local/prepare_cleanup_deployment.sh data/lang exp/tri1b 16000 local/cleanup.tgz
 # you should modify the "my_prompts.txt" to use whatever prompts you have if you do this
