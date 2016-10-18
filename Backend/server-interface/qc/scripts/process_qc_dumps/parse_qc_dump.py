@@ -15,7 +15,7 @@
 # File author/s:
 #     Matthias Petursson <oldschool01123@gmail.com>
 
-# Quick and dirty script to parse marosijo module dumps and present their data.
+# Script to parse marosijo/cleanup module dumps and present their data.
 # Based on scripts from earlier commits, parse_qc_dump.sh and combine_qc_dump_with_recinfo.sh
 # written by Robert Kjaran <robert@kjaran.com>
 
