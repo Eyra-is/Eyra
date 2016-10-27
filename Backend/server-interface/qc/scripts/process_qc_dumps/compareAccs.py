@@ -119,8 +119,46 @@ def printRes(res):
     print('Wer norm:\t{0:.5f}\t(stdev: {0:.5f})'.format(res['wer_norm_mean'], res['wer_norm_stdev']))
     print('Grade avg:\t{0:.5f}\t(stdev: {0:.5f})'.format(res['grade_mean'], res['grade_stdev']))
 
+def printTsvLines(data, new_tsv):
+    """
+    Print recId\tnew_grade\thybrid_acc\tphone_acc\twer_norm_acc
 
-def run(data_path, rec_id_col, listener_col, grade_col, hybrid_col, phone_col, wer_norm_col):
+    where new grade is 1,2,3,4 meaning 1 if <new_tsv> (all or all but one) gave grade 1, etc.
+
+    if new_tsv is normalize new grade is grade is [0..1], i.e. ((4..16 - 4) / 12)
+    """
+    print('recId\tnew_grade\thybrid_acc\tphone_acc\twer_norm_acc')
+    for recId, d in data.items():
+        if len(d) > 4:
+            log('More than 4 graders for same rec, is this right? data: { {} : [{}]}'.format(recId, d), 'warning')
+        if len(d) < 4:
+            log('Less than 4 graders for same rec, is this right? data: { {} : [{}]}'.format(recId, d), 'warning')
+        
+        new_grade = None
+        if new_tsv == 'normalize':
+            new_grade = (sum([grade[1] for grade in d]) - 4) / 12
+        else:
+            if new_tsv == 'all_agree':
+                permissive = 4
+            elif new_tsv == 'all_but_one':
+                permissive = 3
+            cnts = [-1, 0, 0, 0, 0] #counts for grade 1, 2, 3, 4
+            done = False
+            for grade in d:
+                cnts[int(grade[1])] += 1
+                for i, cnt in enumerate(cnts):
+                    if cnt >= permissive:
+                        new_grade = i
+                        done = True
+                        break
+                if done:
+                    break
+        if new_grade:
+            print('{}\t{}\t{}\t{}\t{}'.format(
+                recId, new_grade, d[0][2], d[0][3], d[0][4]
+            ))
+
+def run(data_path, rec_id_col, listener_col, grade_col, hybrid_col, phone_col, wer_norm_col, new_tsv):
     # create a dict with: { recId : [(listener, grade, hybrid_acc, phone_acc, wer_norm_acc), ..], .. }
     data = {}
     with open(data_path, 'r') as f:
@@ -138,22 +176,25 @@ def run(data_path, rec_id_col, listener_col, grade_col, hybrid_col, phone_col, w
             except KeyError as e:
                 data[recId] = [listened_data]
 
-    print('Showing results for {} graded recordings.'.format(len(data)))
-    gradeCombinations = [(1,), (1,2), (2,), (3,), (3,4), (4,)]
-    print('All agree:')
-    for gradeC in gradeCombinations:
-        res = calcAvg(data, gradeC, 0)
-        print('Avg accuracies for combination: {} with count: {}'.format(gradeC, res['count']))
-        printRes(res)
+    if new_tsv == 'normal_execution':
+        print('Showing results for {} graded recordings.'.format(len(data)))
+        gradeCombinations = [(1,), (1,2), (2,), (3,), (3,4), (4,)]
+        print('All agree:')
+        for gradeC in gradeCombinations:
+            res = calcAvg(data, gradeC, 0)
+            print('Avg accuracies for combination: {} with count: {}'.format(gradeC, res['count']))
+            printRes(res)
 
 
-    print('All but one agree:')
-    for gradeC in gradeCombinations:
-        res = calcAvg(data, gradeC, 1)
-        print('Avg accuracies for combination: {} with count: {}'.format(gradeC, res['count']))
-        printRes(res)
+        print('All but one agree:')
+        for gradeC in gradeCombinations:
+            res = calcAvg(data, gradeC, 1)
+            print('Avg accuracies for combination: {} with count: {}'.format(gradeC, res['count']))
+            printRes(res)
+    else:
+        printTsvLines(data, new_tsv)
 
-    print('Finished with {} warning/s.'.format(_warnings))
+    print('Finished with {} warning/s.'.format(_warnings), file=sys.stderr)
 
 if __name__ == '__main__':
     import argparse
@@ -168,6 +209,8 @@ if __name__ == '__main__':
     parser.add_argument('hybrid_col', type=int, help='Number of column containing the accuracy (by hybrid method).')
     parser.add_argument('phone_col', type=int, help='Number of column containing the accuracy (by phoneme method).')
     parser.add_argument('wer_norm_col', type=int, help='Number of column containing the accuracy (by wer norm method).')
+    parser.add_argument('new_tsv', nargs='?', choices=['normal_execution', 'all_agree', 'all_but_one', 'normalize'], default='normal_execution', help='Make the script output only a new tsv with certain data and only the number of utterances lines, after deciding on a mutual grade for each.')
     args = parser.parse_args()
 
-    run(args.data_path, args.rec_id_col, args.listener_col, args.grade_col, args.hybrid_col, args.phone_col, args.wer_norm_col)
+    run(args.data_path, args.rec_id_col, args.listener_col, args.grade_col, 
+        args.hybrid_col, args.phone_col, args.wer_norm_col, args.new_tsv)
