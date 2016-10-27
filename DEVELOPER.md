@@ -278,7 +278,8 @@ python3 parse_qc_dump.py /data/eyra/qc_reports/report/MarosijoModule Marosijo > 
 
 #### Marosijo module
 
-An aligner which uses a phone bigram model to be able to insert phonemes between words in the prompt.
+An aligner which uses a phone bigram model to be able to insert phonemes between words in the prompt. Based on method in 
+> [1] Panayotov, V., Chen, G., Povey, D., & Khudanpur, S. (2015). Librispeech: An ASR corpus based on public domain audio books. In ICASSP, IEEE International Conference on Acoustics, Speech and Signal Processing - Proceedings (Vol. 2015-August, pp. 5206–5210). http://doi.org/10.1109/ICASSP.2015.7178964
 
 Here is a bit taken from [`marosijo_make_utterance_fsts.sh`](https://github.com/Eyra-is/Eyra/blob/master/Backend/server-interface/qc/scripts/marosijo_make_utterance_fsts.sh):
 

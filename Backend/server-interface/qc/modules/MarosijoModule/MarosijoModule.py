@@ -183,7 +183,7 @@ class MarosijoAnalyzer(object):
             ref_phones = [self.common.lexicon[self.common.symbolTableToInt[x]] for x in ref]
         except KeyError as e:
             # word in ref not in lexicon, abort trying to convert it to phonemes
-            log('Error: couldn\'t find prompt words in lexicon or symbol table, prompt: {}'.format(ref))
+            log('Warning: couldn\'t find prompt words in lexicon or symbol table (grading 0.0), prompt: {}'.format(ref))
             return 0.0
 
         aligned = self._alignHyp(hyp, ref)
@@ -288,7 +288,7 @@ class MarosijoAnalyzer(object):
             ref_phones = [self.common.lexicon[self.common.symbolTableToInt[x]] for x in ref if x != oovId]
         except KeyError as e:
             # word in ref not in lexicon, abort trying to convert it to phonemes
-            log('Error: couldn\'t find prompt words in lexicon or symbol table, prompt: {}'.format(ref))
+            log('Warning: couldn\'t find prompt words in lexicon or symbol table (grading with 0.0), prompt: {}'.format(ref))
             return 0.0
 
         # convert all words in hyp to phonemes
@@ -600,7 +600,14 @@ class MarosijoCommon:
 
         self.symbolTableToInt = dict((val, key) for key, val in
                                      self.symbolTable.items())
+
         with open(self.lexiconTxtPath) as f_:
+            # self.lexicon = {}
+            # for line in f_:
+            #     try:
+            #         self.lexicon[line.strip().split('\t')[0]] = line.strip().split('\t')[1].split(' ')
+            #     except IndexError as e:
+            #         print(line)
             self.lexicon = {line.strip().split('\t')[0]:line.strip().split('\t')[1].split(' ')
                             for line in f_}
 
