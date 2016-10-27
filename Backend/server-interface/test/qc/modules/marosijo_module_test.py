@@ -44,45 +44,60 @@ class AppTestCase(unittest.TestCase):
         common = self.marosijo.common
 
         # 27901 - 27943 are the phonemes
+        # 32866 - 32908 are the phonemes
         # average phoneme length: 9
         # these tests are specific to the icelandic data, since phoneme overlap and more is tested
-        # TODO automate these tests (locate the phonemes, and use random words with some overlap from lexicon)
+        # TODO automate these tests more (use random words with some overlap from lexicon)
         oov = common.symbolTable['<UNK>']
+        # locate phonemes
+        basePhone = int(common.symbolTable['</s>']) + 1
+        endPhone = int(common.symbolTable['#00'])
+        phones = [basePhone + i for i in range(0, endPhone - basePhone)]
+        print('phones:', phones)
         refs_hyps = [
             # test some generic stuff
             # bunki / fylkis / hlíðarbraut / athuga
             # p ʏ ɲ̊ c ɪ / f ɪ l̥ c ɪ s / l̥ i ð a r p r ø y t / a t h ʏ ɣ a         27
-            ('3624 7363 10345 1479',                                             # ref
-            # !a    !u    !n    fylkis  !p !ɔ    !s hlíðarbraut !t !h    !ɛ
-             '27903 27935 27920 7363 27928 27926 27932 10345 27933 27911 27909', # hyp
+            ('4257 8656 12171 1736',                                             # ref
+            # !a !u !n fylkis !p !ɔ !s hlíðarbraut !t !h !ɛ
+             '{} {} {} 8656 {} {} {} 12171 {} {} {}'
+             .format(phones[2], phones[34], phones[19], phones[27], phones[25], phones[31], phones[32], phones[10], phones[8]), # hyp
              [-1, -1, -1, 1, -1, -1, -1, 2, -1, -1, -1],                         # alignHyp
              2/4 + 2/6*1/4,                                                      # accuracy
              15/27),                                                             # phone_acc
             # kaupmenn / kerti / rögn / áhyggjufullur
             # kʰ ø y p m ɛ n / cʰ ɛ r̥ t ɪ / r œ k n / a u h ɪ c ʏ f ʏ t l ʏ r       28
-            ('12657 12768 19593 543',
-            # !a    !n    !p    !m    !ɛ    kerti !tʰ   !ɲ    !ɪ
-             '27903 27920 27928 27918 27909 12768 27934 27943 27901',
+            ('14932 15066 23070 640',
+            # !a !n !p !m !ɛ kerti !tʰ !ɲ !ɪ
+             '{} {} {} {} {} 15066 {} {} {}'
+             .format(phones[2], phones[19], phones[27], phones[17], phones[8], phones[33], phones[42], phones[0]),
              [-1,   -1,   -1,   -1,   -1,   1,   -1,   -1,   -1],
              1/4 + 3/7*1/4 + 1/16*2*1/4,
              9/28),
             # kaupmenn / kerti / rögn / áhyggjufullur
             # kʰ ø y p m ɛ n / cʰ ɛ r̥ t ɪ / r œ k n / a u h ɪ c ʏ f ʏ t l ʏ r       28
-            ('12657 12768 19593 543',
+            ('14932 15066 23070 640',
             # !a    !n    !ŋ̊   !pʰ   !cʰ   !ɪ    !ɲ̊   !tʰ   !ɲ    !ɪ
-             '27903 27920 27923 27929 27905 27901 27902 27934 27943 27901',
+             '{} {} {} {} {} {} {} {} {} {}'
+             .format(phones[2], phones[19], phones[22], phones[28], phones[4], phones[0], phones[1], phones[33], phones[42], phones[0]),
              [-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1],
              3/28,
              3/28),
             # test that the error caps at -1/2 * wc (in this case -0.5*2)
             # kaupmenn / rögn / kerti/ áhyggjufullur
             # kʰ ø y p m ɛ n / r œ k n / cʰ ɛ r̥ t ɪ / a u h ɪ c ʏ f ʏ t l ʏ r        28
-            ('12657 19593 12768 543',
-            # !a    !tʰ   !n̥   !ɪ    !ɲ    !a    !tʰ   !n̥   !ɪ    !ɲ
-             '27903 27934 27921 27901 27943 27903 27934 27921 27901 27943 \
-              27903 27934 27921 27901 27943 27903 27934 27921 27901 27943 \
-              27903 27934 27921 27901 27943 27903 27934 27921 27901 27943 \
-              12768 27934 27943 27901',
+            ('14932 23070 15066 640',
+            # !a !tʰ !n̥  !ɪ !ɲ !a  !tʰ  !n̥ !ɪ !ɲ
+             '{} {} {} {} {} {} {} {} {} {} \
+              {} {} {} {} {} {} {} {} {} {} \
+              {} {} {} {} {} {} {} {} {} {} \
+              15066 {} {} {}'
+              .format(
+                phones[2], phones[33], phones[20], phones[0], phones[42], phones[2], phones[33], phones[20], phones[0], phones[42],
+                phones[2], phones[33], phones[20], phones[0], phones[42], phones[2], phones[33], phones[20], phones[0], phones[42],
+                phones[2], phones[33], phones[20], phones[0], phones[42], phones[2], phones[33], phones[20], phones[0], phones[42],
+                phones[33], phones[42], phones[0]
+              ),
             # kerti !tʰ   !ɲ    !ɪ
              [-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
               -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
@@ -93,23 +108,25 @@ class AppTestCase(unittest.TestCase):
             # test that it correctly gives error when there are no words to compare to
             # bunki / fylkis / hlíðarbraut / athuga
             # p ʏ ɲ̊ c ɪ / f ɪ l̥ c ɪ s / l̥ i ð a r p r ø y t / a t h ʏ ɣ a
-            ('3624 7363 10345 1479',
+            ('4257 8656 12171 1736',
             # !a    !u    !n    fylkis  !p !ɔ    !s x3  hlíðarbraut !t !h    !ɛ
-             '27903 27935 27920 7363 27928 27926 27932 27928 27926 27932 27928 27926 27932 27928 27926 27932 10345 27933 27911 27909',
+             '{} {} {} 8656 {} {} {} {} {} {} {} {} {} {} {} {} 12171 {} {} {}'
+             .format(phones[2], phones[34], phones[19], phones[27], phones[25], phones[31], phones[27], phones[25], phones[31], phones[27], phones[25], phones[31], phones[27], phones[25], phones[31], phones[32], phones[10], phones[8]),
              [-1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1],
              2/4 - 0.5*1/4 + 2/6*1/4),
             # test marking oov, <UNK> as -2, this number, e.g. 25140, must match <UNK> in symbol table
-            ('12657 12768 19593 543',
-             '12657 12768 {oov} {oov} {oov}'.format(oov=oov),
+            ('14932 15066 23070 640',
+             '14932 15066 {oov} {oov} {oov}'.format(oov=oov),
              [0, 1, -2, -2, -2],
              2/4),
             # edge cases
-            ('12657',
+            ('14932',
              '{oov}'.format(oov=oov),
              [-2],
              0),
             ('{}'.format(oov),
-             '27903 27935',
+             '{} {}'
+             .format(phones[2], phones[34]),
              [-1, -1],
              0),
             ('{}'.format(oov),
@@ -140,23 +157,27 @@ class AppTestCase(unittest.TestCase):
              5/8),
             # fyrst með jurtum og galdri en síðan með oddhvössu járni
             # f ɪ r̥ s t 
-            ('7435 15985 12381 17716 7520 4969 20565 15985 17597 12159',
-            #    !f !ɪ    !s
-             '27910 27901 27932 15985 12381 17716 7520 4969 20565 17597 12159',
+            ('8744 18841 14591 20867 8841 5879 24211 18841 20717 14329',
+            # !f !ɪ !s
+             '{} {} {} 18841 14591 20867 8841 5879 24211 20717 14329'
+             .format(phones[9], phones[0], phones[31]),
              [-1, -1, -1, 1, 2, 3, 4, 5, 6, 8, 9],
              3/5*1/10 + 8/10),
             # ég
             # j ɛ ɣ
-            ('4501 5455 26062 32 4501 10587 23149 20809',
+            ('5340 5455 26062 32 5340 10587 23149 20809',
             # !m
-             '27918 4501 5455 26062 32 4501 10587 23149 20809',
+             '{} 5340 5455 26062 32 5340 10587 23149 20809'
+             .format(phones[17]),
              [-1, 0, 1, 2, 3, 4, 5, 6, 7],
              1)
         ]
 
         for rh in refs_hyps:
+            print('rh:', rh)
             ref = rh[0].split()
             hyp = rh[1].split()
+            print(ref,hyp)
             anal = marosijo.MarosijoAnalyzer(hyp, ref, common)
             # test _alignHyp
             self.assertEqual(anal._alignHyp(hyp, ref), rh[2])
