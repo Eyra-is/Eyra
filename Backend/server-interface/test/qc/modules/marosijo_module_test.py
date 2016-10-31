@@ -43,8 +43,7 @@ class AppTestCase(unittest.TestCase):
     def test_marosijo_analyzer(self):
         common = self.marosijo.common
 
-        # 27901 - 27943 are the phonemes
-        # 32866 - 32908 are the phonemes
+        # e.g. 32866 - 32908 are the phonemes
         # average phoneme length: 9
         # these tests are specific to the icelandic data, since phoneme overlap and more is tested
         # TODO automate these tests more (use random words with some overlap from lexicon)
@@ -53,7 +52,6 @@ class AppTestCase(unittest.TestCase):
         basePhone = int(common.symbolTable['</s>']) + 1
         endPhone = int(common.symbolTable['#00'])
         phones = [basePhone + i for i in range(0, endPhone - basePhone)]
-        print('phones:', phones)
         refs_hyps = [
             # test some generic stuff
             # bunki / fylkis / hlíðarbraut / athuga
@@ -174,10 +172,8 @@ class AppTestCase(unittest.TestCase):
         ]
 
         for rh in refs_hyps:
-            print('rh:', rh)
             ref = rh[0].split()
             hyp = rh[1].split()
-            print(ref,hyp)
             anal = marosijo.MarosijoAnalyzer(hyp, ref, common)
             # test _alignHyp
             self.assertEqual(anal._alignHyp(hyp, ref), rh[2])
