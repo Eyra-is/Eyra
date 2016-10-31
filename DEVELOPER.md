@@ -291,6 +291,7 @@ Here is a bit taken from [`marosijo_make_utterance_fsts.sh`](https://github.com/
       /   \   /   \   /   \   /   \   /   \
       \_P_/   \_P_/   \_P_/   \_P_/   \_P_/
 ```
+
 so the `wi`s could be e.g. `The quick fox jumped` and a possible hypothesis would then be `The quick p1 p2 p3 jumped` where the `pi`s would be e.g. phonemes representing `pog` meaning the aligner didn't get `fox` correctly.
 
 #### Cleanup module
