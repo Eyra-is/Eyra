@@ -239,14 +239,16 @@ class MarosijoAnalyzer(object):
                 # e.g. aligned: [0, 1, -1, -1, -1, 4]
                 # we want to look at words ref[2:4]
                 ref_phones_range = (ali_no_oov[seq[0]-1]+1, ali_no_oov[seq[1]])
+            
+            hybridPenalty = 1.5
             if ref_phones_range[1] - ref_phones_range[0] > 0:
                 # use formula
-                # (1 - min(ed/N, 1.5))*wc
+                # (1 - min(ed/N, hybridPenalty))*wc
                 # meaning, if edit distance (levenshtein)
                 # is =N (number of phonemes in our attempted words to match (from ref_phones)) 
                 # we get a score of zero for this sequence.
                 # If edit distance is more (e.g. our aligner inserted more phonemes than are in
-                # the reference), we can get a penalty for at most -1/2*ref word count
+                # the reference), we can get a penalty for at most (1-hybridPenalty)*ref word count
                 # for the entire sequence.
                 N = sum([len(ref_phones[i]) for i in range(ref_phones_range[0], ref_phones_range[1])])
                 ed, _ = self._levenshteinDistance(seq_phones, 
@@ -255,17 +257,17 @@ class MarosijoAnalyzer(object):
                                                         ref_phones[ref_phones_range[0] : ref_phones_range[1]])
                                                   ))
 
-                ratio = 1 - min(ed / N, 1.5)
+                ratio = 1 - min(ed / N, hybridPenalty)
                 normalized_ratio = ratio*(ref_phones_range[1] - ref_phones_range[0])
                 ratios.append(normalized_ratio)
             else:
                 # no words to compare to (empty interval this seq compares to)
                 # attempt to attempt to give some sort of minus penalty
-                # in similar ratio to the one above (at most -1/2*wc)
+                # in similar ratio to the one above (if hybridPenalty=1.5 then at most -1/2*wc)
                 # use average phoneme count from lexicon, and give at most
                 # an error of 1/2 that. For example if avg=5 and our seq has
                 # 11 phonemes we give an error of -1/2 * floor(11/5) = -1
-                ratios.append(-1/2 * int((seq[1]-seq[0]) / self.common.avgPhonemeCount))
+                ratios.append((1 - hybridPenalty) * int((seq[1]-seq[0]) / self.common.avgPhonemeCount))
 
         return max((len(rec_words) + sum(ratios)) / len(ref) , 0)
 
@@ -744,7 +746,9 @@ class _SimpleMarosijoTask(Task):
         gmmLatgenFaster = sh.Command('{}/src/gmmbin/gmm-latgen-faster'
                                      .format(self.common.kaldiRoot))
         latticeBestPath = sh.Command('{}/src/latbin/lattice-best-path'
-                                     .format(self.common.kaldiRoot))
+                                      .format(self.common.kaldiRoot))  
+        latticeConfidence = sh.Command('{}/src/latbin/lattice-confidence'
+                                       .format(self.common.kaldiRoot))         
 
         recordings = json.loads(
             self.redis.get(
@@ -757,7 +761,7 @@ class _SimpleMarosijoTask(Task):
             mfccFeatsScpPath = os.path.join(tmpdir, 'feats.scp')
             mfccFeatsPath = os.path.join(tmpdir, 'feats.ark')
             tokensPath = os.path.join(tmpdir, 'tokens')
-            editsPath = os.path.join(tmpdir, 'edits')  # ???
+            latticePath = os.path.join(tmpdir, 'lattice.ark')
             with open(tokensPath, 'w') as tokensF, \
                  open(mfccFeatsScpPath, 'w') as mfccFeatsTmp, \
                  open(tokensGraphsScpPath, 'w') as tokensGraphsScp:
@@ -806,34 +810,39 @@ class _SimpleMarosijoTask(Task):
                                     mfcc_feats_path=mfccFeatsPath,
                                     kaldi_root=self.common.kaldiRoot)
 
+                # need to save the lattice as well (for confidence and best path)
+                gmmLatgenFaster(
+                    '--acoustic-scale=0.1',
+                    '--beam=12',
+                    '--max-active=1000',
+                    '--lattice-beam=10.0',
+                    '--max-mem=50000000',
+                    self.common.acousticModelPath,
+                    'scp,p:{}'.format(tokensGraphsScpPath),  # fsts-rspecifier
+                    'ark,p:{} |'.format(featsCmd),           # features-rspecifier
+                    'ark:{}'.format(latticePath)             # lattice-wspecifier
+                )
 
-                # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
-                # piping in contents of tokens_graphs_scp_path and writing to edits_path
                 # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
                 #   https://github.com/amoffat/sh/issues/309
                 # ...
                 hypLines = latticeBestPath(
-                    gmmLatgenFaster(
-                        '--acoustic-scale=0.1',
-                        '--beam=12',
-                        '--max-active=1000',
-                        '--lattice-beam=10.0',
-                        '--max-mem=50000000',
-                        self.common.acousticModelPath,
-                        'scp,p:{}'.format(tokensGraphsScpPath),  # fsts-rspecifier
-                        'ark,p:{} |'.format(featsCmd),           # features-rspecifier
-                        'ark:-',                                 # lattice-wspecifier
-                        _err=errLog,
-                        _piped=True),
                     '--acoustic-scale=0.06',
                     '--word-symbol-table={}'.format(self.common.symbolTablePath),
-                    'ark,p:-',
+                    'ark,p:{}'.format(latticePath),
                     'ark,t:-',
-                    _iter=True,
-                    _err=errLog)
+                    _iter=True
+                )
+                confidence = latticeConfidence(
+                    '--acoustic-scale=0.06',
+                    'ark,p:{}'.format(latticePath),
+                    'ark,t:-',
+                    _iter=True
+                )
             except sh.ErrorReturnCode_1 as e:
                 # No data (e.g. all wavs unreadable)
                 hypLines = []
+                confidence = []
                 log('e.stderr: ', e.stderr)
 
             def splitAlsoEmpty(s):
@@ -847,6 +856,9 @@ class _SimpleMarosijoTask(Task):
 
             hyps = {str(recId): tok_ for recId, tok_ in
                     (splitAlsoEmpty(line.strip()) for line in hypLines)}
+
+            conf = {str(recId): confidence for recId, confidence in
+                    (splitAlsoEmpty(line.strip()) for line in confidence)}
 
             refs = {str(recId): tok_ for recId, tok_ in
                     ((r['recId'], self.common.symToInt(r['token']))
@@ -879,28 +891,40 @@ class _SimpleMarosijoTask(Task):
                         "totalStats": {"accuracy": 0.0},
                         "perRecordingStats": []}
 
-            # TODO: use something other than WER (binary value perhaps)
             cumAccuracy = 0.0
             for r in recordings:
                 error = ''
+                exception = False
                 try:
                     wer = edits[str(r['recId'])] / len(r['token'].split())
+                    confidence = conf[str(r['recId'])]
                 except KeyError as e:
                     # Kaldi must have choked on this recording for some reason
                     if isWavHeaderOnly(r['recPath']):
                         error = 'wav_header_only'
-                        log('Error, only wav header in recording: {} for session: {}'
-                            .format(r['recId'], session_id))
+                        log('Error, only wav header in recording: {} for session: {}; {}'
+                            .format(r['recId'], session_id, repr(e)))
                     else:
                         # unknown error
                         error = 'unknown_error'
-                        log('Error, unknown error processing recording: {} for session {}'
-                            .format(r['recId'], session_id))
+                        log('Error, unknown error processing recording: {} for session {}; {}'
+                            .format(r['recId'], session_id, repr(e)))
+
+                try:
+                    hyp =  ' '.join([self.common.symbolTableToInt[x] 
+                                        for x in hyps[str(r['recId'])].split(' ')]) # hypothesis (words not ints)
+                except KeyError as e:
+                    if not error:
+                        error = 'hyp_error'
+                        log('Error, hypothesis error processing recording: {} for session {}; {}'
+                            .format(r['recId'], session_id, repr(e)))
 
                 if not error:
                     wer_norm = 0.0 if 1 - wer < 0 else 1 - wer
                 else:
                     wer_norm = 0.0
+                    confidence = -1.0
+                    hyp = ''
 
                 prec = qcReport['perRecordingStats']
                 if not error:
@@ -911,6 +935,8 @@ class _SimpleMarosijoTask(Task):
                     analysis.update(error=error)
 
                 analysis.update(wer_norm=wer_norm)
+                analysis.update(conf=confidence)
+                analysis.update(hyp=hyp)
 
                 # handle specific errors
                 if error == 'wav_header_only':
