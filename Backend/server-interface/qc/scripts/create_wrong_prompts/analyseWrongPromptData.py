@@ -44,6 +44,26 @@ def log(arg, category=None):
         _warnings += 1
     print(arg, file=sys.stderr)
 
+def calculateWER(data, lexicon, isDict=True):
+    """
+    Similar to _calculatePhoneAccuracy from MarosijoModule
+
+    data == (prompt, hyp)
+    """ 
+    accuracies = []
+    if isDict:
+        data = [val for key, val in data.items()]
+
+    for pair in data:
+        ref = pair[0].lower().replace('\ufeff','').split(' ')
+        hyp = pair[1].replace('\ufeff','').split(' ')
+
+        wer = _levenshteinDistance(hyp, ref)[0] / len(ref)
+
+        accuracies.append(0.0 if 1 - wer < 0 else 1 - wer)
+
+    return accuracies
+
 def calcPhoneEditDistance(data, lexicon, isDict=True):
     """
     Similar to _calculatePhoneAccuracy from MarosijoModule
@@ -129,7 +149,11 @@ def calculateHybridAccuracy(data, lexicon, isDict=True):
     phonemes calculated from that.
 
     accuracy c [0,1]
+
+    also calculates WER
     """
+
+    wer_accuracies = []
 
     accuracies = []
     if isDict:
@@ -179,6 +203,10 @@ def calculateHybridAccuracy(data, lexicon, isDict=True):
         #         hyp: the cat j u m p
         # we would calc the overlap of 'j u m p e d' with 'j u m p'
         ratios = [] # len(ratios) == len(minus_ones) ratios of each sequence phoneme overlap (contribution to word error rate)
+
+        #
+        wer_insertions = 0
+
         for seq in minus_ones:
             # convert seq to phoneme list, grab e.g. !h from symbolTable and remove ! to match with lexicon
             seq_phones = []
@@ -207,7 +235,7 @@ def calculateHybridAccuracy(data, lexicon, isDict=True):
                 # e.g. aligned: [0, 1, -1, -1, -1, 4]
                 # we want to look at words ref[2:4]
                 ref_phones_range = (ali_no_oov[seq[0]-1]+1, ali_no_oov[seq[1]])
-            
+
             hybridPenalty = 1.5
             if ref_phones_range[1] - ref_phones_range[0] > 0:
                 # use formula
@@ -237,9 +265,15 @@ def calculateHybridAccuracy(data, lexicon, isDict=True):
                 # 11 phonemes we give an error of -1/2 * floor(11/5) = -1
                 ratios.append((1 - hybridPenalty) * int((seq[1]-seq[0]) / avgPhonemeCount))
 
+                wer_insertions += 1
+
+        # WAcc = (H - I)/N
+        # https://en.wikipedia.org/wiki/Word_error_rate
+        wer_accuracies.append((len([x for x in aligned if x >= 0]) - wer_insertions) / len(ref))
+
         accuracies.append(max((len(rec_words) + sum(ratios)) / len(ref) , 0))
 
-    return accuracies
+    return (wer_accuracies, accuracies)
 
 def _alignHyp(hyp, ref) -> list:
     """
@@ -475,19 +509,48 @@ def run(data_path, lexicon_path, prompt_col, hyp_col, wav_col):
     insAccs = calcPhoneEditDistance(ins_orig, lexicon)
     print('ins avg:', sum(insAccs) / len(insAccs))
 
-    print('Hybrid acc:')
+    print('WER:')
 
     # output simple averages of phone error rates of analysis
     origAccs = calculateHybridAccuracy(original, lexicon, False)
-    print('orig avg:', sum(origAccs) / len(origAccs))
+    print('orig avg:', sum(origAccs[0]) / len(origAccs[0]))
 
     subAccs = calculateHybridAccuracy(subs_orig, lexicon)
-    print('sub avg:', sum(subAccs) / len(subAccs))
+    print('sub avg:', sum(subAccs[0]) / len(subAccs[0]))
 
     delAccs = calculateHybridAccuracy(dels_orig, lexicon)
-    print('del avg:', sum(delAccs) / len(delAccs))
+    print('del avg:', sum(delAccs[0]) / len(delAccs[0]))
 
     insAccs = calculateHybridAccuracy(ins_orig, lexicon)
+    print('ins avg:', sum(insAccs[0]) / len(insAccs[0]))
+
+    print('Hybrid acc:')
+
+    # output simple averages of phone error rates of analysis
+    print('orig avg:', sum(origAccs[1]) / len(origAccs[1]))
+
+    subAccs = calculateHybridAccuracy(subs_orig, lexicon)
+    print('sub avg:', sum(subAccs[1]) / len(subAccs[1]))
+
+    delAccs = calculateHybridAccuracy(dels_orig, lexicon)
+    print('del avg:', sum(delAccs[1]) / len(delAccs[1]))
+
+    insAccs = calculateHybridAccuracy(ins_orig, lexicon)
+    print('ins avg:', sum(insAccs[1]) / len(insAccs[1]))
+
+    print('Old WER:')
+
+    # output simple averages of phone error rates of analysis
+    origAccs = calculateWER(original, lexicon, False)
+    print('orig avg:', sum(origAccs) / len(origAccs))
+
+    subAccs = calculateWER(subs_orig, lexicon)
+    print('sub avg:', sum(subAccs) / len(subAccs))
+
+    delAccs = calculateWER(dels_orig, lexicon)
+    print('del avg:', sum(delAccs) / len(delAccs))
+
+    insAccs = calculateWER(ins_orig, lexicon)
     print('ins avg:', sum(insAccs) / len(insAccs))
 
 if __name__ == '__main__':
