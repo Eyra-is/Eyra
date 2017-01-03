@@ -67,10 +67,15 @@ def calcAvg(data, grades, permissive):
     wer_norm_num = []
     grade_num = []
     for recId, d in data.items():
-        if len(d) > 4:
-            log('More than 4 graders for same rec, is this right? data: { {} : [{}]}'.format(recId, d), 'warning')
-        if len(d) < 4:
-            log('Less than 4 graders for same rec, is this right? data: { {} : [{}]}'.format(recId, d), 'warning')
+        try:
+            if len(d) > 4:
+                log('More than 4 graders for same rec, is this right? data: { {} : [{}]}'.format(recId, d), 'warning')
+            if len(d) < 4:
+                log('Less than 4 graders for same rec, is this right? data: { {} : [{}]}'.format(recId, d), 'warning')
+        except ValueError as e:
+            print('recId:',recId)
+            print('d:', d)
+            raise
         valid = True
         cnt = 0
         for grade in d:
@@ -175,6 +180,7 @@ def run(data_path, rec_id_col, listener_col, grade_col, hybrid_col, phone_col, w
                 data[recId].append(listened_data)
             except KeyError as e:
                 data[recId] = [listened_data]
+    # print('data:',data)
 
     if new_tsv == 'normal_execution':
         print('Showing results for {} graded recordings.'.format(len(data)))

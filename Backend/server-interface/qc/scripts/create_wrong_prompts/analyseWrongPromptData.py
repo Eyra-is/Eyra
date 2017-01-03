@@ -30,7 +30,7 @@ import itertools
 import numpy as np
 
 _warnings = 0
-avgPhonemeCount = -1
+avgPhonemeCount = 'change me please'
 
 
 def log(arg, category=None):
@@ -165,6 +165,7 @@ def calculateHybridAccuracy(data, lexicon, isDict=True):
         data = [val for key, val in data.items()]
 
     oov = '<UNK>'
+    avgPhonemeCount = round(sum([len(key) for val, key in lexicon.items()]) / max(len(lexicon), 1))
 
     for pair in data:
         ref = pair[0].lower().replace('\ufeff','').split(' ')
@@ -261,7 +262,7 @@ def calculateHybridAccuracy(data, lexicon, isDict=True):
                                               ))
 
                 ratio = 1 - min(ed / N, hybridPenalty)
-                normalized_ratio = ratio*(ref_phones_range[1] - ref_phones_range[0])
+                normalized_ratio = ratio*(ref_phones_range[1] - ref_phones_range[0])  
                 ratios.append(normalized_ratio)
 
                 numPhones = int(seq[1]-seq[0])
@@ -537,17 +538,17 @@ def run(data_path, lexicon_path, prompt_col, hyp_col, wav_col):
 
     print('Hybrid acc:')
 
-    print('orig avg:', sum(origAccs[1]) / len(origAccs[1]))
-    print('sub avg:', sum(subAccs[1]) / len(subAccs[1]))
-    print('del avg:', sum(delAccs[1]) / len(delAccs[1]))
-    print('ins avg:', sum(insAccs[1]) / len(insAccs[1]))
+    print('orig avg: {} (cnt: {})'.format(sum(origAccs[1]) / len(origAccs[1]), len(origAccs[1])))
+    print('sub avg: {} (cnt: {})'.format(sum(subAccs[1]) / len(subAccs[1]), len(subAccs[1])))
+    print('del avg: {} (cnt: {})'.format(sum(delAccs[1]) / len(delAccs[1]), len(delAccs[1])))
+    print('ins avg: {} (cnt: {})'.format(sum(insAccs[1]) / len(insAccs[1]), len(insAccs[1])))
 
     print('Ratio correct phones avg:')
 
-    print('orig avg:', sum(origAccs[2]) / len(origAccs[2]))
-    print('sub avg:', sum(subAccs[2]) / len(subAccs[2]))
-    print('del avg:', sum(delAccs[2]) / len(delAccs[2]))
-    print('ins avg:', sum(insAccs[2]) / len(insAccs[2]))
+    print('orig avg: {} (cnt: {})'.format(sum(origAccs[2]) / len(origAccs[2]), len(origAccs[2])))
+    print('sub avg: {} (cnt: {})'.format(sum(subAccs[2]) / len(subAccs[2]), len(subAccs[2])))
+    print('del avg: {} (cnt: {})'.format(sum(delAccs[2]) / len(delAccs[2]), len(delAccs[2])))
+    print('ins avg: {} (cnt: {})'.format(sum(insAccs[2]) / len(insAccs[2]), len(insAccs[2])))
 
     print('Old WER:')
 

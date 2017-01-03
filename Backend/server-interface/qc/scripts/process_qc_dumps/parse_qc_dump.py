@@ -47,7 +47,7 @@ def log(arg, category=None):
 
 def run(dump_path, module):
     if module == 'Marosijo':
-        print('# sessionId\ttokenId\taccuracy\tphone_acc\twer_norm\tconf\tonlyInsOrSub\tcorrect\tsub\tins\tdel\tstartdel\tenddel\textraInsertions\tempty\tdistance\terror\trecordingId\tfilename\ttoken\thyp\tsessionId')
+        print('# sessionId\ttokenId\taccuracy\tphone_acc\twer_norm\tconf\tonlyInsOrSub\tcorrect\tsub\tins\tdel\tstartdel\tenddel\textraInsertions\tempty\tdistance\terror\trecordingId\tfilename\ttoken\tsessionId')
     elif module == 'Cleanup':
         print('# sessionId\ttokenId\taccuracy\terror\trecordingId\tfilename\ttoken\tsessionId')
 
@@ -120,7 +120,7 @@ def run(dump_path, module):
                                 int(stats['correct']), int(stats['sub']), int(stats['ins']), int(stats['del']),
                                 int(stats['startdel']), int(stats['enddel']), int(stats['extraInsertions']), 
                                 bool(stats['empty']), int(stats['distance']), error, int(recording_id),
-                                filename, token, stats['hyp'], int(session_id)]
+                                filename, token, int(session_id)]
                     elif module == 'Cleanup':
                         row = [ int(session_id), int(token_id), float(stats['accuracy']), error, 
                                 int(recording_id), filename, token, int(session_id)]
