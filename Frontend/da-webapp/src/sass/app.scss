@@ -57,6 +57,23 @@ body {
   @extend .default-view;
   text-align: center;
 }
+.agreement-view {
+  @extend .default-view;
+  margin: 0 auto;
+  width: 100%;
+
+  form button {
+    text-align: center;
+    width: 49%;
+    float: left;
+    margin: 0.1%;
+  }
+
+  .agreement {
+    overflow-y: scroll;
+    max-height: 500px;
+  }
+}
 /* modal popup with QC reports */
 .report-view {
   @extend .default-view;

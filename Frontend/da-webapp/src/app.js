@@ -115,6 +115,16 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
           }
         }
       }).
+      when('/recording-agreement', {
+        templateUrl: 'views/recording-agreement.html',
+        controller: 'RecordingAgreementController',
+        controllerAs: 'agrCtrl'/*,
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
+          }
+        }*/
+      }).
       when('/register-device', {
         templateUrl: 'views/register-device.html',
         controller: 'RegisterDeviceController',
