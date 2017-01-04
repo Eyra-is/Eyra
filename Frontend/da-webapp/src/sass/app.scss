@@ -23,12 +23,14 @@ File author/s:
 /* variables */
 $glyphSize: 4em;
 $mainColor: lightblue;
+$stdViewHeight: 400px;
+$stdViewWidth: 320px;
 
 /* reusables */
 /* default layout for the stuff you can interact with on the screen */
 .default-view {
   width: 80%;
-  max-width: 320px;
+  max-width: $stdViewWidth;
 }
 .glyph-default {
   font-size: $glyphSize;
@@ -66,12 +68,13 @@ body {
     text-align: center;
     width: 49%;
     float: left;
-    margin: 0.1%;
+    margin: 0.2%;
   }
 
   .agreement {
     overflow-y: scroll;
-    max-height: 500px;
+    height: 70vh;
+    max-height: 450px;
   }
 }
 /* modal popup with QC reports */
@@ -246,7 +249,8 @@ body {
   margin: 0 auto;
   padding: 2% 0.5%;
   flex-basis: 70%;
-  max-height: 500px;
+  max-height: $stdViewHeight;
+  max-width: $stdViewWidth;
 }
 
 /* navbar */

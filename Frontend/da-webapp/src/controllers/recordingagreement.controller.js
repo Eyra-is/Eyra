@@ -23,9 +23,9 @@ File author/s:
 angular.module('daApp')
 .controller('RecordingAgreementController', RecordingAgreementController);
 
-RecordingAgreementController.$inject = ['$scope', '$rootScope'];
+RecordingAgreementController.$inject = ['$location', '$scope', '$rootScope', 'logger'];
 
-function RecordingAgreementController($scope, $rootScope) {
+function RecordingAgreementController($location, $scope, $rootScope, logger) {
   var agrCtrl = this;
 
   agrCtrl.submit = submit;
@@ -37,7 +37,13 @@ function RecordingAgreementController($scope, $rootScope) {
   //////////
 
   function submit(choice) {
-    console.log(choice);
+    if (choice === 'accept') {
+      logger.log('Agreement accepted.');
+      $location.path('/start');
+    } else {
+      logger.log('Agreement declined, cannot record unless accepted.');
+      $scope.msg = 'You have to accept the agreement to continue.';
+    }
   }
 }
 }());

@@ -37,7 +37,19 @@ MainController.$inject = ['$location',
                           'tokenService', 
                           'utilityService'];
 
-function MainController($location, $q, $rootScope, $scope, $window, androidRecordingService, locationService, logger, myLocalForageService, recordingService, routeService, tokenService, utilityService) {
+function MainController($location, 
+                        $q, 
+                        $rootScope, 
+                        $scope, 
+                        $window, 
+                        androidRecordingService, 
+                        locationService, 
+                        logger, 
+                        myLocalForageService, 
+                        recordingService, 
+                        routeService, 
+                        tokenService, 
+                        utilityService) {
   var mainCtrl = this;
   var locService = locationService;
   var lfService = myLocalForageService;
@@ -158,7 +170,11 @@ function MainController($location, $q, $rootScope, $scope, $window, androidRecor
   // NAVIGATION //
 
   function start() {
-    $location.path('/start');
+    if (util.getConstant('RECAGREEMENT')) {
+      $location.path('/recording-agreement');
+    } else {
+      $location.path('/start');
+    }
   }
 }
 }());
