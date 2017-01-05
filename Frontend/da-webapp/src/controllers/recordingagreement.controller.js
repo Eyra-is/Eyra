@@ -23,12 +23,15 @@ File author/s:
 angular.module('daApp')
 .controller('RecordingAgreementController', RecordingAgreementController);
 
-RecordingAgreementController.$inject = ['$location', '$scope', '$rootScope', 'logger'];
+RecordingAgreementController.$inject = ['$location', '$scope', '$rootScope', 'dataService', 'logger'];
 
-function RecordingAgreementController($location, $scope, $rootScope, logger) {
+function RecordingAgreementController($location, $scope, $rootScope, dataService, logger) {
   var agrCtrl = this;
 
   agrCtrl.submit = submit;
+
+  agrCtrl.fullName = '';
+  agrCtrl.email = '';
 
   $scope.msg = '';
 
@@ -37,11 +40,23 @@ function RecordingAgreementController($location, $scope, $rootScope, logger) {
   //////////
 
   function submit(choice) {
+    if (!agrCtrl.fullName || !agrCtrl.email) {
+      $scope.msg = 'Please type your name and email.';
+      return;
+    }
+
     if (choice === 'accept') {
+      dataService.set('fullName', agrCtrl.fullName);
+      dataService.set('email', agrCtrl.email);
+
       logger.log('Agreement accepted.');
+      $rootScope.agreementSigned = true;
+
       $location.path('/start');
     } else {
       logger.log('Agreement declined, cannot record unless accepted.');
+      $rootScope.agreementSigned = false;
+
       $scope.msg = 'You have to accept the agreement to continue.';
     }
   }

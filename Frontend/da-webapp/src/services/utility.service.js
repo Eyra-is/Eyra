@@ -18,7 +18,7 @@ File author/s:
 */
 
 (function () {
-// service with utility functions for the app
+// service with utility functions for the app and for now, contains many configurable aspects, see also app.js.
 
 'use strict';
 

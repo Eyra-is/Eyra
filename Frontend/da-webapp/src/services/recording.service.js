@@ -18,7 +18,7 @@ File author/s:
 */
 
 (function () {
-// service to handle recording, basically a wrapper around recorderjs
+// service to handle recording, basically a wrapper around recorderjs library
 
 'use strict';
 

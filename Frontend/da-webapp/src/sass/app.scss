@@ -68,12 +68,12 @@ body {
     text-align: center;
     width: 49%;
     float: left;
-    margin: 0.2%;
+    margin: 0.5em 0.2% 1.5em 0.2%;
   }
 
   .agreement {
     overflow-y: scroll;
-    height: 70vh;
+    height: 47vh;
     max-height: 450px;
   }
 }
@@ -208,6 +208,7 @@ body {
 }
 .btn-main {
   font-size: 1.5em;
+  margin-bottom: 2.5em;
 }
 .evaluation-action-glyph {
   @extend .glyph-default;

@@ -37,6 +37,7 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
   $rootScope.$on("$routeChangeError", routeError);
 
   routeHandler.appInitialized = appInitialized;
+  routeHandler.agreementSigned = agreementSigned;
   routeHandler.loggedIn = loggedIn;
   routeHandler.evalReady = evalReady;
 
@@ -51,6 +52,14 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
       return $q.when(true);
     } else {
       return $q.reject('App is not initialized.');
+    }
+  }
+
+  function agreementSigned() {
+    if ($rootScope.agreementSigned) {
+      return $q.when(true);
+    } else {
+      return $q.reject('Agreement has not been signed.');
     }
   }
 
@@ -81,6 +90,9 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
     else if (!$rootScope.appInitialized) {
       // for some reason, couldn't find for example the rejection messages in the eventInfo or the data...
       logger.log('App not initialized, going back to main page.');
+      $location.path('/main');
+    } else if (!$rootScope.agreementSigned) {
+      logger.log('Agreement not signed, going back to main page.');
       $location.path('/main');
     } else {
       handleLogin();
