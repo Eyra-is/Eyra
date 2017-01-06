@@ -79,6 +79,14 @@ module.exports = function(grunt) {
                   ],
       temp: [depl+'app.js']
     },
+    concurrent: {
+      options: {
+        logConcurrentOutput: true
+      },
+      dev: {
+        tasks: ["watch:sass", "watch:postcss"]
+      }
+    },
     copy: {
       main: {
         files: [
@@ -122,20 +130,34 @@ module.exports = function(grunt) {
       all: ['Gruntfile.js', source+'**/*.js']
     },
     ngAnnotate: {
-        options: {
-            singleQuotes: true,
-        },
-        app: {
-            files: [{
-                expand: true,
-                src:  [
-                        depl+'app.js', 
-                        source+'services/**/*.js',
-                        source+'controllers/**/*.js', 
-                      ],
-                dest: depl+'min/old/'
-            }]
-        }
+      options: {
+        singleQuotes: true,
+      },
+      app: {
+        files: [{
+          expand: true,
+          src:  [
+                  depl+'app.js', 
+                  source+'services/**/*.js',
+                  source+'controllers/**/*.js', 
+                ],
+          dest: depl+'min/old/'
+        }]
+      }
+    },
+    postcss: {
+      options: {
+        map: true,
+        processors: [
+          require('autoprefixer')
+        ]
+      },
+      dev: {
+        src: source+'css/*.css'
+      },
+      prod: {
+        src: depl+'css/*.css'
+      }
     },
     replace: {
       script_name: {
@@ -277,13 +299,19 @@ module.exports = function(grunt) {
         options: { spawn: false }
       },
       sass: {
-        files: [source+'**/*.scss'],
+        files: [source+'sass/*.scss'],
         tasks: ['sass'],
+        options: { spawn: false }
+      },
+      postcss: {
+        files: [source+'css/*.css'],
+        tasks: ['postcss:dev'],
         options: { spawn: false }
       }
     }
   });
 
+  grunt.loadNpmTasks('grunt-concurrent');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -291,15 +319,17 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-appcache');
   grunt.loadNpmTasks('grunt-ng-annotate');
+  grunt.loadNpmTasks('grunt-postcss');
   grunt.loadNpmTasks('grunt-replace');
   grunt.loadNpmTasks('grunt-sass');
 
   grunt.registerTask('default', ['watch:scripts']);
-  grunt.registerTask('dev', ['watch:sass']);
+  grunt.registerTask('dev', ['concurrent:dev']);
   grunt.registerTask('deploy',  [
                                   'clean:old_files', // delete previous deploy scripts
                                   'sass', // compile scss to css file/s in source
                                   'copy:main', // copy everything not javascript from source to depl and rename with CACHEBREAKER
+                                  'postcss:prod', // add autoprefixes to compiled css in css/*.css
                                   'replace:script_name', // replace previous file.CACHEBREAKER.ext in index.CACHEBREAKER.html 
                                   'replace:views', // replace 'views/bla.CACHEBREAKER.html' to the new cachebreaker in the routes in app.js
                                   'replace:info_page', // add version number to info page
