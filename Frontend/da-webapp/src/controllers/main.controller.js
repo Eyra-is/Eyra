@@ -108,11 +108,6 @@ function MainController($location,
       }
     });
 
-    // make sure not to get rerouted if we haven't signed participant agreement when it is turned off
-    if (!util.getConstant('RECAGREEMENT')) {
-      $rootScope.agreementSigned = true;
-    }
-
     // async things
     locService.init(locServiceInitDoneCallback); // lets not require location
     recService.init(recServiceInitDoneCallback);

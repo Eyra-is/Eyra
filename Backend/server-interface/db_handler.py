@@ -825,6 +825,8 @@ class DbHandler:
                                 "grade": 2,
                                 "comments": "Bad pronunciation",
                                 "skipped": false
+                                [, "fullName": "Daphne Jane"
+                                 , "email": "daphne@jane.com"]
                             },
                             ..
                         ]
@@ -843,8 +845,8 @@ class DbHandler:
         error = '' 
         errorStatusCode = 500
         for evaluation in jsonDecoded:
-            evaluator, sessionId, recordingFilename, grade, comments, skipped = \
-                None, None, None, None, None, None
+            evaluator, sessionId, recordingFilename, grade, comments, skipped, fullName, email = \
+                None, None, None, None, None, None, None, None
             try:
                 evaluator = evaluation['evaluator']
                 sessionId = evaluation['sessionId']
@@ -852,6 +854,15 @@ class DbHandler:
                 grade = evaluation['grade']
                 comments = evaluation['comments']
                 skipped = evaluation['skipped']
+                # fullName email is not required always (if there is no agreement)
+                try:
+                    fullName = evaluation['fullName']
+                except KeyError as e:
+                    fullName = ''
+                try:
+                    email = evaluation['email']
+                except KeyError as e:
+                    email = ''
             except KeyError as e:
                 error = 'Some evaluation data not on correct format, wrong key.'
                 errorStatusCode = 400
@@ -880,9 +891,9 @@ class DbHandler:
                     log(error + ' Data: {}, eval_set: {}'.format(evaluation, eval_set), e)
                     continue
 
-                cur.execute('INSERT INTO evaluation (recordingId, eval_set, evaluator, grade, comments, skipped) \
-                             VALUES (%s, %s, %s, %s, %s, %s)', 
-                            (recId, eval_set, evaluator, grade, comments, skipped))
+                cur.execute('INSERT INTO evaluation (recordingId, eval_set, evaluator, grade, comments, skipped, fullName, email) \
+                             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', 
+                            (recId, eval_set, evaluator, grade, comments, skipped, fullName, email))
             except MySQLError as e:
                 error = 'Error inserting some evaluation into database.'
                 errorStatusCode = 500

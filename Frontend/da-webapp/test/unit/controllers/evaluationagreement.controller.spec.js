@@ -16,12 +16,12 @@ limitations under the License.
 File author/s:
     Matthias Petursson <oldschool01123@gmail.com>
 
-This file is very similar to evaluationagreement.controller.spec.js (not very DRY)
+This file is very similar to recordingagreement.controller.spec.js (not very DRY)
 */
 
 "use strict";
 
-describe('recording agreement controller', function(){
+describe('evaluation agreement controller', function(){
   beforeEach(module('daApp'));
 
   var $rootScope, $controller, $scope, $location, agrCtrl, dataService;
@@ -35,7 +35,7 @@ describe('recording agreement controller', function(){
 
     $scope = {};
     $scope.$watch = function(){};
-    agrCtrl = $controller('RecordingAgreementController', { $scope: $scope });
+    agrCtrl = $controller('EvaluationAgreementController', { $scope: $scope });
   }));
 
   it('should initialize', function(){
@@ -58,7 +58,7 @@ describe('recording agreement controller', function(){
     agrCtrl.email = 'only@email.com';
     agrCtrl.submit();
     var newMessage = $scope.msg;
-
+    
     expect(newMessage).not.toBe(oldMessage);
   });
 
@@ -73,7 +73,7 @@ describe('recording agreement controller', function(){
   });
 
   it('should redirect if agreement accepted, set fullName/email\
-      in dataService and set $rootScope.agreementSigned to true', function(){
+      in dataService and set $rootScope.evalAgreementSigned to true', function(){
     var fullName = 'Warner Bro';
     var email = 'warner@bros.com';
     agrCtrl.fullName = fullName;
@@ -81,9 +81,9 @@ describe('recording agreement controller', function(){
 
     agrCtrl.submit('accept');
 
-    expect($rootScope.agreementSigned).toBe(true);
-    expect($location.path).toHaveBeenCalledWith('/start');
-    expect(dataService.get('fullName')).toEqual(fullName);
-    expect(dataService.get('email')).toEqual(email);
+    expect($rootScope.evalAgreementSigned).toBe(true);
+    expect($location.path).toHaveBeenCalledWith('/evaluation');
+    expect(dataService.get('evalFullName')).toEqual(fullName);
+    expect(dataService.get('evalEmail')).toEqual(email);
   });
 });

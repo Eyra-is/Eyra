@@ -120,6 +120,8 @@ create table evaluation (
     grade int not null,
     comments varchar(255) not null default '',
     skipped boolean not null default FALSE,
+    fullName varchar(255) not null default '',
+    email varchar(255) not null default '',
     foreign key (recordingId) references recording(id)
 );
 alter table evaluation convert to character set utf8 collate utf8_general_ci;

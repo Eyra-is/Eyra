@@ -26,12 +26,14 @@ describe('evaluation service', function(){
   // TODO handle more than evalBufferSize TESTNEXTS
   var TESTNEXTS = 4; // test getNext X times.
   var evalBufferSize = 5; // should be same as in utilityService
+  var evalSubmitFreq = 5;
 
-  var $httpBackend, evalService;
-  beforeEach(inject(function(_$httpBackend_, _evaluationService_){
+  var $httpBackend, evalService, util;
+  beforeEach(inject(function(_$httpBackend_, _evaluationService_, _utilityService_){
     // The injector unwraps the underscores (_) from around the parameter names when matching
     $httpBackend = _$httpBackend_;
     evalService = _evaluationService_;
+    util = _utilityService_;
 
     $httpBackend.whenRoute('GET', '/backend/evaluation/set/:set/progress/:progress/count/:count')
       .respond(function(method, url, data, headers, params) {
@@ -82,7 +84,18 @@ describe('evaluation service', function(){
    $httpBackend.verifyNoOutstandingRequest();
   });
 
-  it('should initialize sets, and be able to grab nexts', function(){
+  // these 4 'it' functions not very dry basically 2 copies of each
+  it('should initialize sets, and be able to grab nexts without participant agreement', function(){
+    util.getConstant = jasmine.createSpy().and.callFake(function(param){
+      if (param === 'evalBufferSize') {
+        return evalBufferSize;
+      } else if (param === 'evalSubmitFreq') {
+        return evalSubmitFreq;
+      } else if (param === 'EVALAGREEMENT') {
+        return false;
+      }
+    });
+
     testSet(testSets[0]);
 
     // this is real messy
@@ -106,7 +119,51 @@ describe('evaluation service', function(){
     }
   });
 
-  it('should correctly undo and be able to click next afterwards', function(){
+  it('should initialize sets, and be able to grab nexts with participant agreement', function(){
+    util.getConstant = jasmine.createSpy().and.callFake(function(param){
+      if (param === 'evalBufferSize') {
+        return evalBufferSize;
+      } else if (param === 'evalSubmitFreq') {
+        return evalSubmitFreq;
+      } else if (param === 'EVALAGREEMENT') {
+        return true;
+      }
+    });
+
+    testSet(testSets[0]);
+
+    // this is real messy
+    // thanks, hansmaad, http://stackoverflow.com/a/37750595/5272567
+    try { $httpBackend.flush(99); }  // resolve all the possible requests my service might have to do
+    catch(e) {}
+
+    function testSet(set) {
+      var promise = evalService.initSet(set, 'user', function(){}, function(){}, 'Matt Damon', 'matt@damon.com');
+      $httpBackend.flush();
+      promise.then(function(){
+        for (var j = 0; j < TESTNEXTS; j++) {
+          var next = j === 0 ? evalService.getNext('initial') : evalService.getNext(4);
+
+          expect(next[0]).toBe('link'+j);
+          expect(next[1]).toBe('prompt'+j);
+        }
+      }, function(){
+        fail('Error in initSet.');
+      });
+    }
+  });
+
+  it('should correctly undo and be able to click next afterwards without participant agreement', function(){
+    util.getConstant = jasmine.createSpy().and.callFake(function(param){
+      if (param === 'evalBufferSize') {
+        return evalBufferSize;
+      } else if (param === 'evalSubmitFreq') {
+        return evalSubmitFreq;
+      } else if (param === 'EVALAGREEMENT') {
+        return false;
+      }
+    });
+
     var promise = evalService.initSet(testSets[0]);
     $httpBackend.flush();
     promise.then(function(){
@@ -122,4 +179,32 @@ describe('evaluation service', function(){
       fail('Error in initSet.');
     });
   });
+
+  it('should correctly undo and be able to click next afterwards with participant agreement', function(){
+    util.getConstant = jasmine.createSpy().and.callFake(function(param){
+      if (param === 'evalBufferSize') {
+        return evalBufferSize;
+      } else if (param === 'evalSubmitFreq') {
+        return evalSubmitFreq;
+      } else if (param === 'EVALAGREEMENT') {
+        return true;
+      }
+    });
+
+    var promise = evalService.initSet(testSets[0], 'user', function(){}, function(){}, 'Matt Damon', 'matt@damon.com');
+    $httpBackend.flush();
+    promise.then(function(){
+      evalService.getNext('initial');
+      // prompt is short for recnprompt
+      var oldPrompt = evalService.getNext(4);
+      var newPrompt = evalService.getNext(4);
+      var undoPrompt = evalService.undo();
+      expect(oldPrompt).toBe(undoPrompt);
+      var afterUndoPrompt = evalService.getNext(4);
+      expect(newPrompt).toBe(afterUndoPrompt);
+    }, function(){
+      fail('Error in initSet.');
+    });
+  });
+  // end non-dry 4 'it' functions
 });

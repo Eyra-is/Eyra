@@ -67,6 +67,18 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   var isSetComplete = false;
   var undoFlag = false; // true if an undo utterance is the current one (used to circumvent needing to listen for grading)
 
+  // this is only used if EVALAGREEMENT in utilityService is set to true, only if user is supposed
+  // to sign an agreement before evaluating
+  var fullName = '';
+  var email = '';
+  if (util.getConstant('EVALAGREEMENT')) {
+    fullName = dataService.get('evalFullName');
+    email = dataService.get('evalEmail');
+    if (!fullName || !email) {
+      $scope.msg = 'Something is wrong, did you accept the participant agreement?';
+    }
+  }
+
   // save reference to the audio element on the page, for play/pause
   // thanks, Shushanth Pallegar, http://stackoverflow.com/a/30899643/5272567
   // TODO: would probably be nicer to make a directive
@@ -175,7 +187,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
     /*
     Returns promise resolved when evalService has init'd set.
     */
-    return evalService.initSet(set, user, setInfoReadyCallback, setCompleteCallback);
+    return evalService.initSet(set, user, setInfoReadyCallback, setCompleteCallback, fullName, email);
   }
 
   function next(grade, comments) {

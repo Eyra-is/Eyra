@@ -68,10 +68,14 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
             "grade": 2,
             "comments": "Bad pronunciation",
             "skipped": false
+            [, "fullName": "Daphne Jane"
+             , "email": "daphne@jane.com"]
         },
         ..
       ]*/
   var evaluation = [];
+  var fullName = '';
+  var email = '';
 
   // keep a copy of the last utterance graded to allow for an undo.
   var lastUtterance = ['error_no_rec.wav', 'Not a real prompt.'];
@@ -93,7 +97,7 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
     );
   }
 
-  function initSet(set, user, setInfoReadyCallback, setCompleteCallback) {
+  function initSet(set, user, setInfoReadyCallback, setCompleteCallback, evalFullName, evalEmail) {
     /*
     Code using this service must call initSet with the set name before
     trying to use that set.
@@ -103,7 +107,16 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
         user                  a string representing the user doing the evaluation
         setInfoReadyCallback  call with info from server after receiving info about set
         setCompleteCallback   call after user has evaluated the entire set
+        fullName              full name of the user (used for participant agreement)
+        email                 user email (used for participant agreement)
     */
+    if (util.getConstant('EVALAGREEMENT') && (!evalFullName || !evalEmail)) {
+      return $q.reject('No fullName or email supplied.');
+    } else {
+      fullName = evalFullName;
+      email = evalEmail;
+    }
+
     evalHandler.setInfoReadyCallback = setInfoReadyCallback || evalHandler.setInfoReadyCallback;
     evalHandler.setCompleteCallback = setCompleteCallback || evalHandler.setCompleteCallback;
     if (currentUser !== user) {
@@ -274,6 +287,10 @@ function evaluationService($q, deliveryService, localDbMiscService, logger, util
     uttEval.grade = grade || -1;
     uttEval.comments = comments || 'No comments.';
     uttEval.skipped = grade ? false : true;
+    if (util.getConstant('EVALAGREEMENT')) {
+      uttEval.fullName = fullName;
+      uttEval.email = email;
+    }
 
     evaluation.push(uttEval);
   }

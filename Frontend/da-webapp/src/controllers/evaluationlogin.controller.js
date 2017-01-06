@@ -68,8 +68,12 @@ function EvaluationLoginController($location, $rootScope, $scope, dataService, d
     if (evalLoginCtrl.currentUser && evalLoginCtrl.currentSet) {
       dataService.set('currentUser', evalLoginCtrl.currentUser);
       dataService.set('currentSet', evalLoginCtrl.currentSet);
-      $rootScope.evalReady = true;
-      $location.path('/evaluation');
+      $rootScope.evalCredentials = true;
+      if (util.getConstant('EVALAGREEMENT') && !$rootScope.evalAgreementSigned) {
+        $location.path('/evaluation-agreement');
+      } else {
+        $location.path('/evaluation');
+      }
     } else {
       if (!evalLoginCtrl.currentUser) {
         $scope.msg = 'Please type a username.';

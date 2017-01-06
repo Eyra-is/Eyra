@@ -80,6 +80,11 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         controller: 'EvaluationLoginController',
         controllerAs: 'evalLoginCtrl'
       }).
+      when('/evaluation-agreement', {
+        templateUrl: 'views/evaluation-agreement.html',
+        controller: 'EvaluationAgreementController',
+        controllerAs: 'agrCtrl'
+      }).
       when('/info', {
         templateUrl: 'views/info.html',
         controller: 'InfoController',
@@ -121,12 +126,12 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
       when('/recording-agreement', {
         templateUrl: 'views/recording-agreement.html',
         controller: 'RecordingAgreementController',
-        controllerAs: 'agrCtrl'/*,
+        controllerAs: 'agrCtrl',
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
           }
-        }*/
+        }
       }).
       when('/register-device', {
         templateUrl: 'views/register-device.html',

@@ -27,11 +27,12 @@ File author/s:
 angular.module('daApp')
   .factory('routeService', routeService);
 
-routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger'];
+routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger', 'utilityService'];
 
-function routeService($location, $q, $rootScope, authenticationService, dataService, logger) {
+function routeService($location, $q, $rootScope, authenticationService, dataService, logger, utilityService) {
   var routeHandler = {};
   var authService = authenticationService;
+  var util = utilityService;
 
   // handle rejected promises in route resolves
   $rootScope.$on("$routeChangeError", routeError);
@@ -56,7 +57,8 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
   }
 
   function agreementSigned() {
-    if ($rootScope.agreementSigned) {
+    // always pass if agreement is turned off
+    if ($rootScope.agreementSigned || !util.getConstant('RECAGREEMENT')) {
       return $q.when(true);
     } else {
       return $q.reject('Agreement has not been signed.');
@@ -74,7 +76,7 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
   // fired when for example app isn't initialized and we try to access another page manually
   function routeError(eventInfo, data) {
     if (data.loadedTemplateUrl.indexOf('evaluation') > -1 && !$rootScope.evalReady) {
-      logger.log('No info about user submitted for evaluation, redirecting to login.');
+      logger.log('No info about user submitted for evaluation or agreement not signed, redirecting to login.');
       $location.path('/evaluation-login');
       return;
     }
@@ -109,11 +111,18 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
   function evalReady() {
     /*
     Returns truthy if evaluation is ready (meaning it is okay to navigate to evaluation.html).
-    E.g. user has typed in credentials.
+    E.g. user has typed in credentials and accepted agreement.
     */
-    if ($rootScope.evalReady) {
-      return $q.when(true);
+    if ($rootScope.evalCredentials) {
+      if ($rootScope.evalAgreementSigned || !util.getConstant('EVALAGREEMENT')) {
+        $rootScope.evalReady = true;
+        return $q.when(true);
+      } else {
+        $rootScope.evalReady = false;
+        return $q.reject('Error, agreement not signed.');
+      }
     } else {
+      $rootScope.evalReady = false;
       return $q.reject('Error, no info about user submitted.');
     }
   }
