@@ -15,8 +15,6 @@ limitations under the License.
 
 File author/s:
     Matthias Petursson <oldschool01123@gmail.com>
-
-This file is very similar to evaluationagreement.controller.spec.js (not very DRY)
 */
 
 "use strict";

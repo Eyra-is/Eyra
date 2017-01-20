@@ -48,8 +48,7 @@ function utilityService(logger) {
     'syncRecCountPerSend' : 5, // recs to send each transmission to server during a Sync operation,
     'evalBufferSize' : 5, // number of prompts and/or recs to fetch and keep in memory during evaluation
     'evalSubmitFreq' : 5, // per utterance graded, after X send to server
-    'RECAGREEMENT' : false, // include the recording participant agreement
-    'EVALAGREEMENT' : false // include the evaluation participant agreement
+    'RECAGREEMENT' : true // include the recording participant agreement
   };
   
 

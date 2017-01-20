@@ -27,12 +27,11 @@ File author/s:
 angular.module('daApp')
   .factory('routeService', routeService);
 
-routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger', 'utilityService'];
+routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger'];
 
-function routeService($location, $q, $rootScope, authenticationService, dataService, logger, utilityService) {
+function routeService($location, $q, $rootScope, authenticationService, dataService, logger) {
   var routeHandler = {};
   var authService = authenticationService;
-  var util = utilityService;
 
   // handle rejected promises in route resolves
   $rootScope.$on("$routeChangeError", routeError);
@@ -76,7 +75,7 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
   // fired when for example app isn't initialized and we try to access another page manually
   function routeError(eventInfo, data) {
     if (data.loadedTemplateUrl.indexOf('evaluation') > -1 && !$rootScope.evalReady) {
-      logger.log('No info about user submitted for evaluation or agreement not signed, redirecting to login.');
+      logger.log('No info about user submitted for evaluation, redirecting to login.');
       $location.path('/evaluation-login');
       return;
     }
@@ -111,18 +110,11 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
   function evalReady() {
     /*
     Returns truthy if evaluation is ready (meaning it is okay to navigate to evaluation.html).
-    E.g. user has typed in credentials and accepted agreement.
+    E.g. user has typed in credentials.
     */
-    if ($rootScope.evalCredentials) {
-      if ($rootScope.evalAgreementSigned || !util.getConstant('EVALAGREEMENT')) {
-        $rootScope.evalReady = true;
-        return $q.when(true);
-      } else {
-        $rootScope.evalReady = false;
-        return $q.reject('Error, agreement not signed.');
-      }
+    if ($rootScope.evalReady) {
+      return $q.when(true);
     } else {
-      $rootScope.evalReady = false;
       return $q.reject('Error, no info about user submitted.');
     }
   }

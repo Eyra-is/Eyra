@@ -198,8 +198,6 @@ Current implementation:
                 "grade": 2,
                 "comments": "Bad pronunciation",
                 "skipped": false
-                [, "fullName": "Daphne Jane"
-                 , "email": "daphne@jane.com"]
             },
             ..
         ]

@@ -80,11 +80,6 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         controller: 'EvaluationLoginController',
         controllerAs: 'evalLoginCtrl'
       }).
-      when('/evaluation-agreement', {
-        templateUrl: 'views/evaluation-agreement.html',
-        controller: 'EvaluationAgreementController',
-        controllerAs: 'agrCtrl'
-      }).
       when('/info', {
         templateUrl: 'views/info.html',
         controller: 'InfoController',
