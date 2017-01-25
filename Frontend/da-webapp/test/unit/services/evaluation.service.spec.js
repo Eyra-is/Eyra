@@ -26,12 +26,14 @@ describe('evaluation service', function(){
   // TODO handle more than evalBufferSize TESTNEXTS
   var TESTNEXTS = 4; // test getNext X times.
   var evalBufferSize = 5; // should be same as in utilityService
+  var evalSubmitFreq = 5;
 
-  var $httpBackend, evalService;
-  beforeEach(inject(function(_$httpBackend_, _evaluationService_){
+  var $httpBackend, evalService, util;
+  beforeEach(inject(function(_$httpBackend_, _evaluationService_, _utilityService_){
     // The injector unwraps the underscores (_) from around the parameter names when matching
     $httpBackend = _$httpBackend_;
     evalService = _evaluationService_;
+    util = _utilityService_;
 
     $httpBackend.whenRoute('GET', '/backend/evaluation/set/:set/progress/:progress/count/:count')
       .respond(function(method, url, data, headers, params) {

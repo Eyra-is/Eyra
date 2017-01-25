@@ -27,16 +27,18 @@ File author/s:
 angular.module('daApp')
   .factory('routeService', routeService);
 
-routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger'];
+routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger', 'utilityService'];
 
-function routeService($location, $q, $rootScope, authenticationService, dataService, logger) {
+function routeService($location, $q, $rootScope, authenticationService, dataService, logger, utilityService) {
   var routeHandler = {};
   var authService = authenticationService;
+  var util = utilityService;
 
   // handle rejected promises in route resolves
   $rootScope.$on("$routeChangeError", routeError);
 
   routeHandler.appInitialized = appInitialized;
+  routeHandler.agreementSigned = agreementSigned;
   routeHandler.loggedIn = loggedIn;
   routeHandler.evalReady = evalReady;
 
@@ -51,6 +53,15 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
       return $q.when(true);
     } else {
       return $q.reject('App is not initialized.');
+    }
+  }
+
+  function agreementSigned() {
+    // always pass if agreement is turned off
+    if ($rootScope.agreementSigned || !util.getConstant('RECAGREEMENT')) {
+      return $q.when(true);
+    } else {
+      return $q.reject('Agreement has not been signed.');
     }
   }
 
@@ -81,6 +92,9 @@ function routeService($location, $q, $rootScope, authenticationService, dataServ
     else if (!$rootScope.appInitialized) {
       // for some reason, couldn't find for example the rejection messages in the eventInfo or the data...
       logger.log('App not initialized, going back to main page.');
+      $location.path('/main');
+    } else if (!$rootScope.agreementSigned) {
+      logger.log('Agreement not signed, going back to main page.');
       $location.path('/main');
     } else {
       handleLogin();

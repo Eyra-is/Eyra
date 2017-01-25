@@ -67,6 +67,17 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
       speakerInfo[attr] = sinfoCtrl[attr] || '';
     }
     speakerInfo.name = speakerName;
+    if (util.getConstant('RECAGREEMENT')) {
+      var fullName = dataService.get('fullName');
+      var email = dataService.get('email');
+      if (!fullName || !email) {
+        $scope.msg = 'Something is wrong, did you accept the participant agreement?';
+      }
+      speakerInfo.fullName = fullName;
+      speakerInfo.email = email;
+      speakerInfo.agreementId = dataService.get('agreementId') || '1';
+    }
+
     dataService.set('speakerInfo', speakerInfo); // set in ram
 
     // set user in local db async

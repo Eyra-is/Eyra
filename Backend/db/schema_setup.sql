@@ -104,6 +104,13 @@ create table recording (
 );
 alter table recording convert to character set utf8 collate utf8_general_ci;
 
+create table recording_agreement (
+    id int not null auto_increment primary key,
+    agreement text not null,
+    modified timestamp default current_timestamp on update current_timestamp
+);
+alter table recording convert to character set utf8 collate utf8_general_ci;
+
 create table evaluation_sets (
     id int not null auto_increment primary key,
     eval_set varchar(255) not null,

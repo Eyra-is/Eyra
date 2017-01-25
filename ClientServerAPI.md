@@ -15,10 +15,13 @@ Current implementation:
                 "speakerInfo"    :  {
                                         "name": "jacksparrow",
                                         "gender": "female",
-                                        "dob": "1991-1995",
-                                        "height":"151-156"
-                                        [, "deviceImei":"435763486"
-                                         , "speakerId" : 55]
+                                        "dob": "1991-1995"
+                                        [, "height":"151-156"
+                                         , "deviceImei":"435763486"
+                                         , "speakerId" : 55
+                                         , "fullName": "Jack Sparrow"
+                                         , "email": "jack@sparrow.com"
+                                         , "agreementId": "2"]
                                     },
                 "instructorId"   : 1,
                 "deviceInfo"     :  {

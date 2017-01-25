@@ -23,12 +23,14 @@ File author/s:
 /* variables */
 $glyphSize: 4em;
 $mainColor: lightblue;
+$stdViewHeight: 400px;
+$stdViewWidth: 320px;
 
 /* reusables */
 /* default layout for the stuff you can interact with on the screen */
 .default-view {
   width: 80%;
-  max-width: 320px;
+  max-width: $stdViewWidth;
 }
 .glyph-default {
   font-size: $glyphSize;
@@ -56,6 +58,24 @@ body {
 .recording-view {
   @extend .default-view;
   text-align: center;
+}
+.agreement-view {
+  @extend .default-view;
+  margin: 0 auto;
+  width: 100%;
+
+  form button {
+    text-align: center;
+    width: 49%;
+    float: left;
+    margin: 0.5em 0.2% 1.5em 0.2%;
+  }
+
+  .agreement {
+    overflow-y: scroll;
+    height: 47vh;
+    max-height: 450px;
+  }
 }
 /* modal popup with QC reports */
 .report-view {
@@ -188,6 +208,7 @@ body {
 }
 .btn-main {
   font-size: 1.5em;
+  margin-bottom: 2.5em;
 }
 .evaluation-action-glyph {
   @extend .glyph-default;
@@ -229,7 +250,8 @@ body {
   margin: 0 auto;
   padding: 2% 0.5%;
   flex-basis: 70%;
-  max-height: 500px;
+  max-height: $stdViewHeight;
+  max-width: $stdViewWidth;
 }
 
 /* navbar */
