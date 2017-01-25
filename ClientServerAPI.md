@@ -20,7 +20,8 @@ Current implementation:
                                          , "deviceImei":"435763486"
                                          , "speakerId" : 55
                                          , "fullName": "Jack Sparrow"
-                                         , "email": "jack@sparrow.com"]
+                                         , "email": "jack@sparrow.com"
+                                         , "agreementId": "2"]
                                     },
                 "instructorId"   : 1,
                 "deviceInfo"     :  {
