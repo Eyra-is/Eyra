@@ -23,9 +23,9 @@ File author/s:
 angular.module('daApp')
 .controller('RecordingAgreementController', RecordingAgreementController);
 
-RecordingAgreementController.$inject = ['$location', '$scope', '$rootScope', 'dataService', 'logger'];
+RecordingAgreementController.$inject = ['$document', '$location', '$scope', '$rootScope', 'dataService', 'logger'];
 
-function RecordingAgreementController($location, $scope, $rootScope, dataService, logger) {
+function RecordingAgreementController($document, $location, $scope, $rootScope, dataService, logger) {
   var agrCtrl = this;
 
   agrCtrl.submit = submit;
@@ -34,6 +34,9 @@ function RecordingAgreementController($location, $scope, $rootScope, dataService
   agrCtrl.email = '';
 
   $scope.msg = '';
+
+  var agreementId = $document[0].getElementById('agreement-id').attributes['agreement-id'].value;
+  dataService.set('agreementId', agreementId);
 
   $rootScope.isLoaded = true;
   

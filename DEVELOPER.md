@@ -9,7 +9,7 @@ A recommended read as well is the article published on this software, which can 
 
 
 - [Development](#development)
-  - [Quick description of folder structure](#quick-description-of-folder-structure)
+  - [Short description of folder structure](#short-description-of-folder-structure)
   - [Detailed description of the components](#detailed-description-of-the-components)
   - [Some useful info](#some-useful-info)
   - [Maintaining code](#maintaining-code)
@@ -26,7 +26,7 @@ A recommended read as well is the article published on this software, which can 
 
 ## Development
 
-### Quick description of folder structure
+### Short description of folder structure
 
 * **AndroidApp**  
     The entire Android app, java code and all. IDE used is Android Studio.
@@ -96,12 +96,12 @@ This list is not exhaustive.
     * App had to be able to be completely offline (appcache was used, should be upgraded to Service Workers, see [issue on github](https://github.com/Eyra-is/Eyra/issues/60)).
     * RESTful communication with server.
     
-    Overall documentation is lacking [TODO].  
-    
     * [`da-webapp/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp)  
         A completely useless distinction to have this [`da-webapp`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp) folder :( until they add more components to the Frontend! Stands for "data acquisition webapp". Data acquisition was the project's original title, until Simon came up with Eyra.
         * [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src)  
             The source, code from here is compiled into the `app/` folder on a [`./Setup/setup.sh --frontend-app`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) or a `grunt deploy` run. Under normal conditions, the application is run from the `app/` folder. Should be pretty straightforward where stuff is here. See **Run webapp straight from `Frontend/da-webapp/src`** in the [**Some useful info**](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md#some-useful-info) section below on how to work straight from source instead of having to compile into `app/` first. Uses Mozilla's [localForage](https://github.com/mozilla/localForage) to store data in the browsers databases on the client side (for offline use, e.g. store cached recordings). The webapp relies heavily on this database working (user data, device data, prompts etc.).
+            * [`views/recording-agreement.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/views/recording-agreement.html)  
+                Contains the participant agreement (optional, turn it on in [`services/utility.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/utility.service.js)), which needs to match the one in table `recording_agreement` in database. Running [`./Setup/setup.sh --backend-agreement`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) takes care of looking at [`recording-agreement.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/views/recording-agreement.html) and updating the database with the agreement and the `html` file with the id. The `agreement-id` in the `html` is used in submitting speaker info to the server to signal which agreement the user signed and should match the `id` from the database.
         * `app/`  
             Data generated from [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src) on a [`./Setup/setup.sh --frontend-app`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) or a `grunt deploy` run. The need for a separate build vs source system is for the most part the application cache (appcache). See [appcache is a douche](http://alistapart.com/article/application-cache-is-a-douchebag). In order to work around all the caveats of the beloved (not) appcache, we need to for example change the filenames of views and scripts on each compile, generate a `app/app.appcache` manifest and more. This is all done in [`Gruntfile.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/Gruntfile.js), see more details below. This build process can of course in addition do other useful things such as minifying the javascript code (which it does), and watching changes in the `src/sass/app.scss` file (`grunt watch:sass`). The server that serves the website should serve it from this folder (`app/`).
         * [`Gruntfile.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/Gruntfile.js)  
@@ -235,7 +235,7 @@ along with other misc stuff.
 
 * If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in [`index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) and the code at the top of [`services/delivery.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/delivery.service.js)->`submitRecordings`.
 
-* You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/non_eyra_data1`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/non_eyra_data1)        
+* You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/dh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/dh)        
 
 ### Maintaining code
 

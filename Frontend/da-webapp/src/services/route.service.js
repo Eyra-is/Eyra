@@ -27,11 +27,12 @@ File author/s:
 angular.module('daApp')
   .factory('routeService', routeService);
 
-routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger'];
+routeService.$inject = ['$location', '$q', '$rootScope', 'authenticationService', 'dataService', 'logger', 'utilityService'];
 
-function routeService($location, $q, $rootScope, authenticationService, dataService, logger) {
+function routeService($location, $q, $rootScope, authenticationService, dataService, logger, utilityService) {
   var routeHandler = {};
   var authService = authenticationService;
+  var util = utilityService;
 
   // handle rejected promises in route resolves
   $rootScope.$on("$routeChangeError", routeError);

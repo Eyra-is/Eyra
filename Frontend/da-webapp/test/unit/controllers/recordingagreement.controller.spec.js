@@ -22,11 +22,15 @@ File author/s:
 describe('recording agreement controller', function(){
   beforeEach(module('daApp'));
 
-  var $rootScope, $controller, $scope, $location, agrCtrl, dataService;
-  beforeEach(inject(function(_$rootScope_, _$controller_, _$location_, _dataService_){
+  var $rootScope, $controller, $scope, $document, $location, agrCtrl, dataService;
+  beforeEach(inject(function(_$rootScope_, _$controller_, _$document_, _$location_, _dataService_){
     // The injector unwraps the underscores (_) from around the parameter names when matching
     $rootScope = _$rootScope_;
     $controller = _$controller_;
+    $document = _$document_;
+    $document[0].getElementById = jasmine.createSpy('$document[0].getElementById').and.returnValue(
+                                    {'attributes': {'agreement-id': {'value':'1'}}}
+                                  );
     $location = _$location_;
     $location.path = jasmine.createSpy('$location.path');
     dataService = _dataService_;

@@ -75,6 +75,7 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
       }
       speakerInfo.fullName = fullName;
       speakerInfo.email = email;
+      speakerInfo.agreementId = dataService.get('agreementId') || '1';
     }
 
     dataService.set('speakerInfo', speakerInfo); // set in ram
