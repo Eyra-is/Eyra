@@ -36,6 +36,7 @@ available_opts_int=("ap"
                     "backend-db"
                     "backend-204"
                     "backend-qc"
+                    "backend-agreement"
                     "frontend-app"
                    )
 available_opts_ext=("ext-kaldi"
@@ -44,20 +45,21 @@ available_opts_ext=("ext-kaldi"
                    )
 
 declare -A AV_OPTS_INT=(
-['ap']='          WiFi Access Point'
-['apache']='      Apache Web Server'
-['mysqldb']='     MySQL Database *WARNING - deletes previous database*'
-['backend-wsgi']='WSGI for Apache'
-['backend-db']='  Backend: Database Related'
-['backend-204']=' Backend: Spoofing Android Online Check'
-['backend-qc']='  Backend: Quality Control related'
-['frontend-app']='Frontend: Web App'
+['ap']='               WiFi Access Point'
+['apache']='           Apache Web Server'
+['mysqldb']='          MySQL Database *WARNING - deletes previous database*'
+['backend-wsgi']='     WSGI for Apache'
+['backend-db']='       Backend: Database Related'
+['backend-204']='      Backend: Spoofing Android Online Check'
+['backend-qc']='       Backend: Quality Control related'
+['backend-agreement']='Backend: Updating agreement in database based on html'
+['frontend-app']='     Frontend: Web App'
 )
 
 declare -A AV_OPTS_EXT=(
-['ext-kaldi']='   External: Kaldi and dependencies'
-['ext-phoneti']=' External: Phonetisaurus for G2P conversion'
-['ext-mitlm']='   External: MITLM'
+['ext-kaldi']='        External: Kaldi and dependencies'
+['ext-phoneti']='      External: Phonetisaurus for G2P conversion'
+['ext-mitlm']='        External: MITLM'
 )
 
 usage () {

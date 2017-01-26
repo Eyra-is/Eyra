@@ -18,7 +18,7 @@ File author/s:
 */
 
 (function () {
-// service with utility functions for the app
+// service with utility functions for the app and for now, contains many configurable aspects, see also app.js.
 
 'use strict';
 
@@ -47,7 +47,8 @@ function utilityService(logger) {
     'tokenCountGoal' : 500,
     'syncRecCountPerSend' : 5, // recs to send each transmission to server during a Sync operation,
     'evalBufferSize' : 5, // number of prompts and/or recs to fetch and keep in memory during evaluation
-    'evalSubmitFreq' : 5 // per utterance graded, after X send to server
+    'evalSubmitFreq' : 5, // per utterance graded, after X send to server
+    'RECAGREEMENT' : false // include the recording participant agreement
   };
   
 

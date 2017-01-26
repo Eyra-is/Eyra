@@ -20,7 +20,7 @@ File author/s:
 (function () {
 'use strict';
 
-// app 'options'
+// app 'options' (see more in utility service)
 var BACKENDTYPE = 'default';
 var BACKENDOPTS = {
                     'default':'/backend',
@@ -112,6 +112,19 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
+          },
+          agreementSigned: function(routeService){
+            return routeService.agreementSigned();
+          }
+        }
+      }).
+      when('/recording-agreement', {
+        templateUrl: 'views/recording-agreement.html',
+        controller: 'RecordingAgreementController',
+        controllerAs: 'agrCtrl',
+        resolve: {
+          appInitialized: function(routeService){
+            return routeService.appInitialized();
           }
         }
       }).
@@ -142,6 +155,9 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
+          },
+          agreementSigned: function(routeService){
+            return routeService.agreementSigned();
           }
         }
       }).
@@ -152,6 +168,9 @@ angular.module('daApp', ['ngRoute', 'LocalForageModule', 'satellizer', 'ui.boots
         resolve: {
           appInitialized: function(routeService){
             return routeService.appInitialized();
+          },
+          agreementSigned: function(routeService){
+            return routeService.agreementSigned();
           }
         }
       }).

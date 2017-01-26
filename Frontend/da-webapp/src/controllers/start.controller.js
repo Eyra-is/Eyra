@@ -36,6 +36,8 @@ function StartController($location, $rootScope, $scope, dataService, localDbMisc
   startCtrl.comments = '';
   startCtrl.doneBefore = false;
 
+  $scope.msg = '';
+
   $rootScope.isLoaded = true;
 
   //////////
