@@ -71,21 +71,13 @@ class AppTestCase(unittest.TestCase):
         self.assertNotEqual(response.status_code, 200) # error with get for 0 tokens
 
         # test getting various amounts of tokens
-        print('Attention: The following test of \'submit/gettokens/X\' could fail in the unlikely event some ids get chosen twice at random.')
         lengths = [1, 5, 1500]
         for l in lengths:
             response = self.app.get('/submit/gettokens/{}'.format(l))
             tokens = json.loads(response.data.decode('utf-8'))
             print('The \'submit/gettokens/{}\' resulted in: {}'.format(l, len(tokens)))
-            if l != lengths[-1]:
-                self.assertEqual(len(tokens), l)
-            else:
-                # the grab tokens isn't accurate. 
-                #  a) in case multiple ids are the same, the select in clause won't repeat them
-                #  b) some tokens could be invalid meaning they will simply be dropped
-                self.assertLessEqual(len(tokens), l)
-                self.assertGreater(len(tokens), l - 500) # lets gamble 500 of the same token is extremely unlikely.
-
+            self.assertEqual(len(tokens), l)
+            
     def test_qc_routes(self):
         print('\nIn test qc')
         response = self.app.get('/qc/report/session/0')
@@ -99,7 +91,8 @@ class AppTestCase(unittest.TestCase):
         # get from set
         response = self.app.get('/evaluation/set/Random/progress/0/count/5')
         sample = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(len(sample), 5)
+
+        self.assertEqual(len(sample), 5, 'This might mean you forgot to insert prompts (tokens) into your database.')
         self.assertEqual(type(sample[0][0]), type('aString'))
         self.assertEqual(type(sample[0][1]), type('aString'))
 

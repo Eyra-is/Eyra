@@ -661,9 +661,6 @@ class DbHandler:
         Does not return any tokens marked with valid:FALSE in db.
         or it's: [{"id":id1, "token":token1}, {"id":id2, "token":token2}, ...]
         
-        Attention: In case the same token is selected >1, the count of tokens returned
-                   reduces accordingly. E.g. getTokens(1500) will typically result in about 1490 tokens.
-        
         returns [] on failure
         """
         # start by getting the list of invalid tokens, and create it if we haven't already
@@ -675,14 +672,11 @@ class DbHandler:
             cur = self.mysql.connection.cursor()
 
             # select numTokens random rows from the database
-            cur.execute('SELECT COUNT(*) FROM token');
-            numRows = cur.fetchone()[0]
-
-            total_token_ids = range(1, numRows+1)
+            cur.execute('SELECT id FROM token');
+            total_token_ids = [x[0] for x in cur.fetchall()]
             valid_token_ids = [x for x in total_token_ids if x not in self.invalid_token_ids]
 
-            # needs testing here to make sure 1 is lowest id, and numRows is highest id
-            randIds = [random.choice(valid_token_ids) for i in range(int(numTokens))]
+            randIds = random.sample(valid_token_ids, numTokens)
             randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
             cur.execute('SELECT id, inputToken FROM token WHERE id IN %s',
                         (randIds,)) # have to pass in a tuple, with only one parameter
@@ -774,12 +768,11 @@ class DbHandler:
             cur = self.mysql.connection.cursor()
             # select count random recordings from a special set (Random)
             if eval_set == 'Random':
-                cur.execute('SELECT COUNT(*) FROM recording');
-                numRows = cur.fetchone()[0]
+                cur.execute('SELECT id FROM recording');
+                recIds = [x[0] for x in cur.fetchall()]
+                recIds = recIds[1:] # remove the placeholder recording introduced by populate_db.sql
 
-                total_recording_ids = range(1, numRows+1)
-
-                randIds = [random.choice(total_recording_ids) for i in range(int(count))]
+                randIds = random.sample(recIds, count)
                 randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
                 cur.execute('SELECT recording.sessionId, recording.filename, inputToken '+
                             'FROM recording, token '+
