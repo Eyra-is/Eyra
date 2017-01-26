@@ -746,9 +746,7 @@ class _SimpleMarosijoTask(Task):
         gmmLatgenFaster = sh.Command('{}/src/gmmbin/gmm-latgen-faster'
                                      .format(self.common.kaldiRoot))
         latticeBestPath = sh.Command('{}/src/latbin/lattice-best-path'
-                                      .format(self.common.kaldiRoot))  
-        latticeConfidence = sh.Command('{}/src/latbin/lattice-confidence'
-                                       .format(self.common.kaldiRoot))         
+                                      .format(self.common.kaldiRoot))
 
         recordings = json.loads(
             self.redis.get(
@@ -761,7 +759,7 @@ class _SimpleMarosijoTask(Task):
             mfccFeatsScpPath = os.path.join(tmpdir, 'feats.scp')
             mfccFeatsPath = os.path.join(tmpdir, 'feats.ark')
             tokensPath = os.path.join(tmpdir, 'tokens')
-            latticePath = os.path.join(tmpdir, 'lattice.ark')
+            editsPath = os.path.join(tmpdir, 'edits')  # ???
             with open(tokensPath, 'w') as tokensF, \
                  open(mfccFeatsScpPath, 'w') as mfccFeatsTmp, \
                  open(tokensGraphsScpPath, 'w') as tokensGraphsScp:
@@ -783,8 +781,13 @@ class _SimpleMarosijoTask(Task):
                     print('{} {}'.format(r['recId'], tokenInts),
                           file=tokensF)
 
-                    graphsScp.append('{} {}'.format(r['recId'],
-                                                    self.decodedScpRefs[str(r['tokenId'])]))
+                    try:
+                        graphsScp.append('{} {}'.format(r['recId'],
+                                                        self.decodedScpRefs[str(r['tokenId'])]))
+                    except KeyError as e:
+                        log('Error, probably could not find key in MarosijoModule/local/graphs.scp, id: {}, prompt: {}'
+                             .format(r['tokenId'], r['token']))
+                        raise
 
                 # make sure .scp file is sorted on keys
                 graphsScp = sorted(graphsScp, key=lambda x: x.split()[0])
@@ -811,38 +814,36 @@ class _SimpleMarosijoTask(Task):
                                     kaldi_root=self.common.kaldiRoot)
 
                 # need to save the lattice as well (for confidence and best path)
-                gmmLatgenFaster(
-                    '--acoustic-scale=0.1',
-                    '--beam=12',
-                    '--max-active=1000',
-                    '--lattice-beam=10.0',
-                    '--max-mem=50000000',
-                    self.common.acousticModelPath,
-                    'scp,p:{}'.format(tokensGraphsScpPath),  # fsts-rspecifier
-                    'ark,p:{} |'.format(featsCmd),           # features-rspecifier
-                    'ark:{}'.format(latticePath)             # lattice-wspecifier
-                )
+                
 
+                # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
+                # piping in contents of tokens_graphs_scp_path and writing to edits_path
                 # note: be careful, as of date sh seems to swallow exceptions in the inner pipe
                 #   https://github.com/amoffat/sh/issues/309
                 # ...
                 hypLines = latticeBestPath(
+                    gmmLatgenFaster(
+                        '--acoustic-scale=0.1',
+                        '--beam=12',
+                        '--max-active=1000',
+                        '--lattice-beam=10.0',
+                        '--max-mem=50000000',
+                        self.common.acousticModelPath,
+                        'scp,p:{}'.format(tokensGraphsScpPath),  # fsts-rspecifier
+                        'ark,p:{} |'.format(featsCmd),           # features-rspecifier
+                        'ark:-',                                 # lattice-wspecifier
+                        _err=errLog,
+                        _piped=True),
                     '--acoustic-scale=0.06',
                     '--word-symbol-table={}'.format(self.common.symbolTablePath),
-                    'ark,p:{}'.format(latticePath),
+                    'ark,p:-',
                     'ark,t:-',
-                    _iter=True
-                )
-                confidence = latticeConfidence(
-                    '--acoustic-scale=0.06',
-                    'ark,p:{}'.format(latticePath),
-                    'ark,t:-',
-                    _iter=True
+                    _iter=True,
+                    _err=errLog
                 )
             except sh.ErrorReturnCode_1 as e:
                 # No data (e.g. all wavs unreadable)
                 hypLines = []
-                confidence = []
                 log('e.stderr: ', e.stderr)
 
             def splitAlsoEmpty(s):
@@ -856,9 +857,6 @@ class _SimpleMarosijoTask(Task):
 
             hyps = {str(recId): tok_ for recId, tok_ in
                     (splitAlsoEmpty(line.strip()) for line in hypLines)}
-
-            conf = {str(recId): confidence for recId, confidence in
-                    (splitAlsoEmpty(line.strip()) for line in confidence)}
 
             refs = {str(recId): tok_ for recId, tok_ in
                     ((r['recId'], self.common.symToInt(r['token']))
@@ -894,10 +892,8 @@ class _SimpleMarosijoTask(Task):
             cumAccuracy = 0.0
             for r in recordings:
                 error = ''
-                exception = False
                 try:
                     wer = edits[str(r['recId'])] / len(r['token'].split())
-                    confidence = conf[str(r['recId'])]
                 except KeyError as e:
                     # Kaldi must have choked on this recording for some reason
                     if isWavHeaderOnly(r['recPath']):
@@ -914,16 +910,18 @@ class _SimpleMarosijoTask(Task):
                     hyp =  ' '.join([self.common.symbolTableToInt[x] 
                                         for x in hyps[str(r['recId'])].split(' ')]) # hypothesis (words not ints)
                 except KeyError as e:
-                    if not error:
-                        error = 'hyp_error'
-                        log('Error, hypothesis error processing recording: {} for session {}; {}'
-                            .format(r['recId'], session_id, repr(e)))
+                    if hyps[str(r['recId'])] == '':
+                        hyp = ''
+                    else:
+                        if not error:
+                            error = 'hyp_error'
+                            log('Error, hypothesis error processing recording: {} for session {}; {}'
+                                .format(r['recId'], session_id, repr(e)))
 
                 if not error:
                     wer_norm = 0.0 if 1 - wer < 0 else 1 - wer
                 else:
                     wer_norm = 0.0
-                    confidence = -1.0
                     hyp = ''
 
                 prec = qcReport['perRecordingStats']
@@ -935,7 +933,6 @@ class _SimpleMarosijoTask(Task):
                     analysis.update(error=error)
 
                 analysis.update(wer_norm=wer_norm)
-                analysis.update(conf=confidence)
                 analysis.update(hyp=hyp)
 
                 # handle specific errors
