@@ -194,7 +194,7 @@ class MarosijoAnalyzer(object):
         except KeyError as e:
             # word in ref not in lexicon, abort trying to convert it to phonemes
             log('Warning: couldn\'t find prompt words in lexicon or symbol table (grading 0.0), prompt: {}'.format(ref))
-            return 0.0
+            return (0.0, 0.0)
 
         aligned = self._alignHyp(hyp, ref)
         ali_no_oov = [x for x in aligned if x != -2] # remove oov for part of our analysis
@@ -284,8 +284,12 @@ class MarosijoAnalyzer(object):
 
                 wer_insertions += 1
 
-        return max((len(rec_words) + sum(ratios)) / len(ref) , 0), \
-                (len([x for x in aligned if x >= 0]) - wer_insertions) / len(ref)
+        hybrid = max((len(rec_words) + sum(ratios)) / len(ref) , 0)
+        # WAcc = (H - I)/N
+        # https://en.wikipedia.org/wiki/Word_error_rate
+        wer    = (len([x for x in aligned if x >= 0]) - wer_insertions) / len(ref)
+
+        return (hybrid, wer)
 
 
     def _calculatePhoneAccuracy(self):
