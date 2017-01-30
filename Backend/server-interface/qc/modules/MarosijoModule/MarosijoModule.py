@@ -154,9 +154,9 @@ class MarosijoAnalyzer(object):
         self._distance, self.d = self._levenshteinDistance(self.hypothesis, self.reference)
         self.seq, self.nC, self.nS, self.nI, self.nD = self.shortestPath(self.d)
 
-    def _calculateAccuracy(self) -> float:
+    def _calculateHybridAccuracy(self) -> (float, float):
         """
-        Accuracy is some sort of metric, attempts to locate correct words.
+        Hybrid accuracy is some sort of metric, attempts to locate correct words.
         E.g. ref: the dog jumped over the fence
              hyp: the /c/o/d/ ran over the tent
         would result in an accuracy of 3/6 + 1/3*1/6 = 0.555 for getting the, over, the and a 
@@ -171,6 +171,16 @@ class MarosijoAnalyzer(object):
         phonemes calculated from that.
 
         accuracy c [0,1]
+
+        also calculates regular WER (done here since the align hyp computation is needed and
+        has already been done here) on a word level grouping hyp phonemes into words
+
+        e.g. ref: the dog jumped over the fence
+             hyp: the /c/o/d/ ran over the tent
+        would result in a wer of 3/6 = 0.5 (3 substitutions)
+
+        return:
+            (hybrid, wer)
         """
 
         oovId = self.common.symbolTable['<UNK>']
@@ -184,7 +194,7 @@ class MarosijoAnalyzer(object):
         except KeyError as e:
             # word in ref not in lexicon, abort trying to convert it to phonemes
             log('Warning: couldn\'t find prompt words in lexicon or symbol table (grading 0.0), prompt: {}'.format(ref))
-            return 0.0
+            return (0.0, 0.0)
 
         aligned = self._alignHyp(hyp, ref)
         ali_no_oov = [x for x in aligned if x != -2] # remove oov for part of our analysis
@@ -217,6 +227,9 @@ class MarosijoAnalyzer(object):
         #         hyp: the cat j u m p
         # we would calc the overlap of 'j u m p e d' with 'j u m p'
         ratios = [] # len(ratios) == len(minus_ones) ratios of each sequence phoneme overlap (contribution to word error rate)
+
+        wer_insertions = 0
+
         for seq in minus_ones:
             # convert seq to phoneme list, grab e.g. !h from symbolTable and remove ! to match with lexicon
             seq_phones = [self.common.symbolTableToInt[x][1:] for x in hyp_no_oov[seq[0] : seq[1]]]
@@ -269,12 +282,19 @@ class MarosijoAnalyzer(object):
                 # 11 phonemes we give an error of -1/2 * floor(11/5) = -1
                 ratios.append((1 - hybridPenalty) * int((seq[1]-seq[0]) / self.common.avgPhonemeCount))
 
-        return max((len(rec_words) + sum(ratios)) / len(ref) , 0)
+                wer_insertions += 1
+
+        hybrid = max((len(rec_words) + sum(ratios)) / len(ref) , 0)
+        # WAcc = (H - I)/N
+        # https://en.wikipedia.org/wiki/Word_error_rate
+        wer    = (len([x for x in aligned if x >= 0]) - wer_insertions) / len(ref)
+
+        return (hybrid, wer)
 
 
     def _calculatePhoneAccuracy(self):
         """
-        Similar to _calculateAccuracy, except uses phonemes only.
+        Similar to _calculateHybridAccuracy, except uses phonemes only.
 
         Converts ref and hyp to phonemes and does a direct edit distance on the entire thing.
 
@@ -485,8 +505,9 @@ class MarosijoAnalyzer(object):
         return {'correct': self.nC, 'sub': self.nS, 'ins': self.nI,
                 'del': self.nD, 'distance': self._distance}
 
-    def details(self) -> '{accuracy: int\
+    def details(self) -> '{hybrid: int\
             phone_acc: int\
+            wer: int\
             onlyInsOrSub: bool\
             correct: int\
             sub: int\
@@ -499,7 +520,7 @@ class MarosijoAnalyzer(object):
             distance: int}':
         """Returns dict with details of analysis
 
-        Distance (and the rest of the stats excluding accuracy) is calculated on a 
+        Distance (and the rest of the stats excluding hybrid) is calculated on a 
         mixture of word/phoneme level, since phonemes are words from this aligner.
         """
 
@@ -510,7 +531,7 @@ class MarosijoAnalyzer(object):
         details.update(res)
         details.update(ops=seq)
 
-        details['accuracy'] = self._calculateAccuracy()
+        details['hybrid'], details['wer'] = self._calculateHybridAccuracy()
         details['phone_acc'] = self._calculatePhoneAccuracy()
 
         if not any([res['correct'], res['sub'], res['ins']]):
@@ -811,10 +832,7 @@ class _SimpleMarosijoTask(Task):
                             '"ark:| {kaldi_root}/src/featbin/add-deltas ark,p:- ark:-" '
                            ).format(compute_cmvn_cmd=computeCmvnCmd,
                                     mfcc_feats_path=mfccFeatsPath,
-                                    kaldi_root=self.common.kaldiRoot)
-
-                # need to save the lattice as well (for confidence and best path)
-                
+                                    kaldi_root=self.common.kaldiRoot)                
 
                 # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
                 # piping in contents of tokens_graphs_scp_path and writing to edits_path
@@ -867,8 +885,9 @@ class _SimpleMarosijoTask(Task):
             # 'empty' analysis in case Kaldi couldn't analyse recording for some reason
             # look at MarosijoAnalyzer.details() for format
             placeholderDetails = {
-                'accuracy': 0.0,
+                'hybrid': 0.0,
                 'phone_acc': 0.0,
+                'wer': 0.0,
                 'onlyInsOrSub': False,
                 'correct': 0,
                 'sub': 0,
@@ -893,7 +912,8 @@ class _SimpleMarosijoTask(Task):
             for r in recordings:
                 error = ''
                 try:
-                    wer = edits[str(r['recId'])] / len(r['token'].split())
+                    # this is the old wer where a single phoneme is treated as a single word
+                    old_wer = edits[str(r['recId'])] / len(r['token'].split())
                 except KeyError as e:
                     # Kaldi must have choked on this recording for some reason
                     if isWavHeaderOnly(r['recPath']):
@@ -919,9 +939,9 @@ class _SimpleMarosijoTask(Task):
                                 .format(r['recId'], session_id, repr(e)))
 
                 if not error:
-                    wer_norm = 0.0 if 1 - wer < 0 else 1 - wer
+                    old_wer_norm = 0.0 if 1 - old_wer < 0 else 1 - old_wer
                 else:
-                    wer_norm = 0.0
+                    old_wer_norm = 0.0
                     hyp = ''
 
                 prec = qcReport['perRecordingStats']
@@ -932,14 +952,15 @@ class _SimpleMarosijoTask(Task):
                     analysis = placeholderDetails
                     analysis.update(error=error)
 
-                analysis.update(wer_norm=wer_norm)
+                analysis.update(old_wer_norm=old_wer_norm)
                 analysis.update(hyp=hyp)
 
                 # handle specific errors
                 if error == 'wav_header_only':
                     analysis.update(empty=True)
 
-                accuracy = analysis['accuracy']
+                # use phone accuracy (seemed to give best results)
+                accuracy = analysis['phone_acc']
 
                 stats = {"accuracy": accuracy}
                 cumAccuracy += accuracy
