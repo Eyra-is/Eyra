@@ -485,7 +485,7 @@ class MarosijoAnalyzer(object):
         return {'correct': self.nC, 'sub': self.nS, 'ins': self.nI,
                 'del': self.nD, 'distance': self._distance}
 
-    def details(self) -> '{accuracy: int\
+    def details(self) -> '{hybrid: int\
             phone_acc: int\
             onlyInsOrSub: bool\
             correct: int\
@@ -499,7 +499,7 @@ class MarosijoAnalyzer(object):
             distance: int}':
         """Returns dict with details of analysis
 
-        Distance (and the rest of the stats excluding accuracy) is calculated on a 
+        Distance (and the rest of the stats excluding hybrid) is calculated on a 
         mixture of word/phoneme level, since phonemes are words from this aligner.
         """
 
@@ -510,7 +510,7 @@ class MarosijoAnalyzer(object):
         details.update(res)
         details.update(ops=seq)
 
-        details['accuracy'] = self._calculateAccuracy()
+        details['hybrid'] = self._calculateAccuracy()
         details['phone_acc'] = self._calculatePhoneAccuracy()
 
         if not any([res['correct'], res['sub'], res['ins']]):
@@ -811,10 +811,7 @@ class _SimpleMarosijoTask(Task):
                             '"ark:| {kaldi_root}/src/featbin/add-deltas ark,p:- ark:-" '
                            ).format(compute_cmvn_cmd=computeCmvnCmd,
                                     mfcc_feats_path=mfccFeatsPath,
-                                    kaldi_root=self.common.kaldiRoot)
-
-                # need to save the lattice as well (for confidence and best path)
-                
+                                    kaldi_root=self.common.kaldiRoot)                
 
                 # create a pipe using sh, output of gmm_latgen_faster piped into lattice_oracle
                 # piping in contents of tokens_graphs_scp_path and writing to edits_path
@@ -867,7 +864,7 @@ class _SimpleMarosijoTask(Task):
             # 'empty' analysis in case Kaldi couldn't analyse recording for some reason
             # look at MarosijoAnalyzer.details() for format
             placeholderDetails = {
-                'accuracy': 0.0,
+                'hybrid': 0.0,
                 'phone_acc': 0.0,
                 'onlyInsOrSub': False,
                 'correct': 0,
@@ -939,7 +936,8 @@ class _SimpleMarosijoTask(Task):
                 if error == 'wav_header_only':
                     analysis.update(empty=True)
 
-                accuracy = analysis['accuracy']
+                # use phone accuracy (seemed to give best results)
+                accuracy = analysis['phone_acc']
 
                 stats = {"accuracy": accuracy}
                 cumAccuracy += accuracy

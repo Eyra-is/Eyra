@@ -18,7 +18,8 @@ Setup a laptop which the phones (recording devices) can connect to in an offline
 
 * **Backend (on the laptop)**  
     You have to initially have an internet connection and run  
-    `./Setup/setup.sh --all`
+    `./Setup/setup.sh --all` and then  
+    `sudo service apache2 restart`
     
 * **Client-side (on the devices)**
     * Android app  
@@ -37,7 +38,8 @@ Setup a laptop which the phones (recording devices) can connect to in an offline
 Setup a server (we use apache).
 
 * **Backend**  
-    Run `./Setup/setup.sh --all --no-ap`.
+    Run `./Setup/setup.sh --all --no-ap` and then  
+    `sudo service apache2 restart`
 
     You might want to look at [`Setup/src/apache/tmpl/etc_apache2_sites-available_datatool.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/apache/tmpl/etc_apache2_sites-available_datatool.conf) (src) or `/etc/apache2/sites-enabled/datool.conf` (generated) and e.g. adjust the parameters for the `mpm_worker_module`.  
 
