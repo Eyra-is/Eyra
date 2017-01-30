@@ -51,6 +51,8 @@ Setup a server (we use apache).
 
 ## Usage
 
+Eyra is not perfect software. You can look at [issues](https://github.com/Eyra-is/Eyra/issues) on github (e.g. with label bugs) for example. If you do fix something please [contribute](https://github.com/Eyra-is/Eyra/tree/master/CONTRIBUTING.md)!
+
 ### Basic usage:
 
 In the GUI

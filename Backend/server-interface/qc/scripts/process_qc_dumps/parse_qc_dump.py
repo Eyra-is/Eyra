@@ -15,7 +15,7 @@
 # File author/s:
 #     Matthias Petursson <oldschool01123@gmail.com>
 
-# Quick and dirty script to parse marosijo module dumps and present their data.
+# Script to parse marosijo/cleanup module dumps and present their data.
 # Based on scripts from earlier commits, parse_qc_dump.sh and combine_qc_dump_with_recinfo.sh
 # written by Robert Kjaran <robert@kjaran.com>
 
@@ -47,7 +47,7 @@ def log(arg, category=None):
 
 def run(dump_path, module):
     if module == 'Marosijo':
-        print('# sessionId\ttokenId\taccuracy\tonlyInsOrSub\tcorrect\tsub\tins\tdel\tstartdel\tenddel\textraInsertions\tempty\tdistance\terror\trecordingId\tfilename\ttoken\tsessionId')
+        print('# sessionId\ttokenId\taccuracy\tphone_acc\twer_norm\tonlyInsOrSub\tcorrect\tsub\tins\tdel\tstartdel\tenddel\textraInsertions\tempty\tdistance\terror\trecordingId\tfilename\ttoken\thyp\tsessionId')
     elif module == 'Cleanup':
         print('# sessionId\ttokenId\taccuracy\terror\trecordingId\tfilename\ttoken\tsessionId')
 
@@ -115,11 +115,12 @@ def run(dump_path, module):
                         raise
                     # now we should have all we need to print the correct line for this recording
                     if module == 'Marosijo':
-                        row = [ int(session_id), int(token_id), float(stats['accuracy']), bool(stats['onlyInsOrSub']), 
+                        row = [ int(session_id), int(token_id), float(stats['accuracy']), float(stats['phone_acc']), 
+                                float(stats['wer_norm']), bool(stats['onlyInsOrSub']), 
                                 int(stats['correct']), int(stats['sub']), int(stats['ins']), int(stats['del']),
                                 int(stats['startdel']), int(stats['enddel']), int(stats['extraInsertions']), 
                                 bool(stats['empty']), int(stats['distance']), error, int(recording_id),
-                                filename, token, int(session_id)]
+                                filename, token, stats['hyp'], int(session_id)]
                     elif module == 'Cleanup':
                         row = [ int(session_id), int(token_id), float(stats['accuracy']), error, 
                                 int(recording_id), filename, token, int(session_id)]
