@@ -11,6 +11,7 @@ A recommended read as well is the article published on this software, which can 
 - [Development](#development)
   - [Short description of folder structure](#short-description-of-folder-structure)
   - [Detailed description of the components](#detailed-description-of-the-components)
+  - [Description of individual Frontend services](#description-of-individual-frontend-services)
   - [Some useful info](#some-useful-info)
   - [Maintaining code](#maintaining-code)
 - [Quality Control (QC)](#quality-control-qc)
@@ -185,6 +186,8 @@ along with other misc stuff.
   Service to handle GPS location, basically a wrapper around `navigator.geolocation`.
 * [`logger.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/logger.service.js)  
   Service to log errors/console output. Also saves it to localForage, with key `logs` as one big string.
+* [`notification.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/notification.service.js)  
+  Service to notify user (e.g. during recording) with for example a popup on a certain amount of prompts read.
 * [`myLocalForage.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/myLocalForage.service.js)  
   Simple wrapper for the angular-localForage library.  
   Does nothing except keep a single boolean whether there are any indexed db operations
