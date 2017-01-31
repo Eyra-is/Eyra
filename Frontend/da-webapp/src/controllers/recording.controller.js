@@ -108,8 +108,8 @@ function RecordingController($q,
   recCtrl.accuracy = 1.0;
   recCtrl.lowThreshold = util.getConstant('QCAccThreshold') || 0.2;
   recCtrl.highThreshold = util.getConstant('QCHighThreshold') || 0.7;
-  recCtrl.lowerUtt = 0;
-  recCtrl.upperUtt = 0;
+  recCtrl.lowerUtt = '?';
+  recCtrl.upperUtt = '?';
 
   $scope.recsDelivered = 0;
 
@@ -121,6 +121,7 @@ function RecordingController($q,
     recService.setupCallbacks(recordingCompleteCallback);
     var res = volService.init(recService.getAudioContext(), recService.getStreamSource());
     if (!res) logger.log('Volume meter failed to initialize.');
+    qcService.setupCallbacks(qcDataReady);
 
     // get recsDelivered, first check RAM, then ldb
     $scope.recsDelivered = dataService.get('recsDelivered') || 0;
@@ -195,10 +196,17 @@ function RecordingController($q,
   function displayReport() {
     $uibModal.open({
       // defined in app.js to simpliy gruntfile replace of rest of the views.
-      templateUrl: 'views/report.html',//CACHEBROKEN_REPORT, // e.g. 'views/report.2016-03-02-15-42.html'
+      templateUrl: CACHEBROKEN_REPORT, // e.g. 'views/report.2016-03-02-15-42.html'
       controller: 'ReportController',
       controllerAs: 'reportCtrl',
     }); 
+  }
+
+  // callback, called by qc service
+  function qcDataReady(data) {
+    recCtrl.accuracy = data.avgAcc;
+    recCtrl.lowerUtt = data.lowerUtt;
+    recCtrl.upperUtt = data.upperUtt;
   }
 
   function toggleActionBtn() {
@@ -216,8 +224,6 @@ function RecordingController($q,
   }
 
   function record() {
-    //recCtrl.accuracy -= 0.2;
-
     $scope.msg = 'Recording now...';
 
     recCtrl.skipBtnDisabled = false;
@@ -275,24 +281,13 @@ function RecordingController($q,
               logger.error(e);
             }
 
-            // temporarily disable QC
             // notify QC with last used session (should be same probably)
             //   and if non-existant, use the one we got now, and if non-existant don't move.
             var sessionIdToUse = oldSessionId || sessionId;
-            // if (sessionIdToUse) {
-              qcService.notifySend(sessionIdToUse, dataService.get('speakerInfo').tokensRead || 0).then(
-                function success(data){
-                  // so long as the user is not in a recording
-                  //   display QC report straight away
-                  // otherwise, queue it for next stop click.
-                  /*if (actionType === 'record') {
-                    displayReport();
-                  } else {
-                    shouldDisplayReport = true;
-                  }*/
-                },
-                angular.noop);
-            //}
+            if (sessionIdToUse) {
+              qcService.notifySend( sessionIdToUse, 
+                                    dataService.get('speakerInfo').tokensRead || 0);
+            }
 
             var announcement = notifService.notifySend(dataService.get('speakerInfo').tokensRead || 0);
             if (announcement) {

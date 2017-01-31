@@ -15,7 +15,6 @@ limitations under the License.
 
 File author/s:
     Matthias Petursson <oldschool01123@gmail.com>
-    Sveinn Ernstsson (messageClassByAccuracy and more)
 */
 
 (function () {
@@ -34,6 +33,8 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   var util = utilityService;
 
   qcHandler.notifySend = notifySend;
+  qcHandler.setupCallbacks = setupCallbacks;
+  qcHandler.dataReady = function(){}; // needs to be set by calling controller
 
   // counter for the total times recording.controller.js 
   // has notified us of a send during this session
@@ -44,10 +45,18 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
   // {"module1" : id, ...} 
   var moduleRequestIds = {};
 
+  // number of utterances currently included in report
+  var lowerUtt = '?';
+  var upperUtt = '?';
+  var avgAcc = 1.0; // average accuracy of the recordings included in [lowerUtt, upperUtt]
+
   return qcHandler;
 
   //////////
 
+  function setupCallbacks(dataReadyCallback) {
+    qcHandler.dataReady = dataReadyCallback;
+  }
 
   function notifySend(sessionId, tokenCount) {
     // tokenCount is the total count of token reads by current speaker
@@ -62,112 +71,30 @@ function qcService($q, dataService, deliveryService, logger, utilityService) {
       modSendCounter = 1;
     }
 
-    // temporarily disable QC display
     if (modSendCounter >= (util.getConstant('QCFrequency' || 5))
        && totalNotifies >= (util.getConstant('QCInitRecThreshold') || 10)) {
       modSendCounter = 0;
 
       if (sessionId) {
         delService.queryQC(sessionId)
-        //.then(handleQCReport, util.stdErrCallback);
-        .then(angular.noop, util.stdErrCallback);
+        .then(handleQCReport, util.stdErrCallback);
       }
-    } /*else {
-      return $q.reject(false);
-    }*/
-
-    // temporarily disable QC
-    // return handleQCReport();
-    return $q.reject(false);
-  }
-
-  function calcAvgAcc(report) {
-    /*
-      Calculates weighted (right now equally) accuracy of all the modules
-      from the QC report.
-
-      parameters:
-        report  the QC report as described in client server api.
-      return: 
-        a in [0.0 .. 1.0]
-    */
-    var acc = 0;
-    var cnt = 0;
-    for (var mod in report.modules) {
-      if (!report.modules.hasOwnProperty(mod)) continue;
-
-      var module = report.modules[mod];
-      acc += module.totalStats.accuracy;
-      cnt++;
     }
-    return acc/cnt;
   }
 
   function handleQCReport(response) {
     var report = response.data || {};
-
-    var result = updateModuleRequestIds(report); // do we have any new reports?
-
-    // calulate average accuracy of all QC modules
-    var avgAcc = calcAvgAcc(report);
-    report.avgAcc = avgAcc;
-
-    // displayReport is in HTML
-    var displayReport = prettify(report);
-    dataService.set('QCReport', displayReport);
-
-    // message to send back to recording.controller.js notifying that we wish
-    //   results to be displayed.
-    var displayResults = (avgAcc < util.getConstant('QCAccThreshold')
-                         && result); // make sure only to display if we have anything new (or token announcement)
-    if (displayResults) {
-      return $q.when(true);
-    } else {
-      return $q.reject(false);
-    }
-  }
-
-  function messageClassByAccuracy(accuracy){
-    if (accuracy <= 0.2) { return '_red'; }
-    if (accuracy > 0.2 && accuracy < 0.4) { return '_orange'; }
-    if (accuracy >= 0.4 && accuracy < 0.6) { return '_greenish'; } else {
-      return '_green';
-    }
-  }
-
-  // parses the JSON object report into some prettified report to display in HTML
-  function prettify(report) {
-    var out = '';
-
-    if (report.status === 'processing' && report.avgAcc !== NaN) {
-      out += '<p class="message '+messageClassByAccuracy(report.avgAcc)+
-              '">Total average accuracy: '+util.percentage(report.avgAcc, 1, 3)+'%</p>';
-
-      var modules = report.modules;
-      for (var mod in modules) {
-        if (!modules.hasOwnProperty(mod)) continue;
-
-        var module = modules[mod];
-        var accuracy = module.totalStats.accuracy;
-        out += '<h3>'+mod+'</h3>';
-        if (accuracy) {
-          var message = messageClassByAccuracy(accuracy);
-          
-          out += '<p class="'+message+'">Average accuracy: '+util.percentage(accuracy, 1, 3)+'%</p>';
-        }
-        if (module.perRecordingStats) {
-          out += '<h3>More stats</h3>';
-          out += '<ul>';
-          for (var i = 0; i < module.perRecordingStats.length; i++) {
-            var acc = module.perRecordingStats[i].stats.accuracy;
-            out += '    <li>Rec. '+i+', accuracy: '+util.percentage(acc, 1, 3)+'%</li>';
-          }
-          out += '</ul>';
-        }
-      }
-    }
     
-    return out;
+    //var result = updateModuleRequestIds(report); // do we have any new reports?
+
+    if (report.status === 'processing') {
+      // right now only uses MarosijoModule
+      avgAcc = report.modules['MarosijoModule'].totalStats.avgAcc;
+      lowerUtt = report.modules['MarosijoModule'].totalStats.lowerUtt;
+      upperUtt = report.modules['MarosijoModule'].totalStats.upperUtt;
+
+      qcHandler.dataReady({'avgAcc': avgAcc, 'lowerUtt': lowerUtt, 'upperUtt': upperUtt});
+    }
   }
 
   function updateModuleRequestIds(report) {

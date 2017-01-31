@@ -126,38 +126,48 @@ Current implementation:
 
 Current implementation:
 * json format of response:
-```
-Returned dict if the QC report is not available, but is being
-processed:
+  ```
+  Returned dict if the QC report is not available, but is being
+  processed:
 
-    {"sessionId": ...,
-     "status": "started",
-     "modules":{}}
+      {"sessionId": ...,
+       "status": "started",
+       "modules":{}}
 
-Returned dict definition if no QC module is active:
+  Returned dict definition if no QC module is active:
 
-    {"sessionId": ...,
-     "status": "inactive",
-     "modules":{}}
+      {"sessionId": ...,
+       "status": "inactive",
+       "modules":{}}
 
-Returned dict definition:
+  Returned dict definition:
 
-    {"sessionId": ...,
-     "status": "processing",
-     "modules"  {
-        "module1" :  {
-                        "totalStats": {"accuracy": [0.0;1.0]"}
-                        [, "perRecordingStats": [
-                                {"recordingId": ...,
-                                    "stats": {"accuracy": [0.0;1.0]}
-                                },
-                                ...]}
-                        ]
-                      }, 
-                      ...
-                }
-    }
-```
+      {"sessionId": ...,
+       "status": "processing",
+       "modules"  {
+          "module1" :  {
+                          "totalStats": {"accuracy": [0.0;1.0], "avgAcc": [0.0;1.0], 
+                                         "lowerUtt": 31, "upperUtt": 36},
+                          "perRecordingStats": [
+                              {"recordingId": ...,
+                                  "stats": {"accuracy": [0.0;1.0]}
+                              },
+                              ...]}
+                          ]
+                        }, 
+                        ...
+                  }
+      }
+  ```
+  Where
+  * `accuracy` is the cumulative average accuracy over all previous recordings
+  * `avgAcc` is the average accuracy of the recordings in perRecordingStats.
+  * `lowerUtt` is the number of recording processed for this session at the start of the latest batch
+  * `upperUtt` is lowerUtt + recs processed in batch
+
+  e.g. `accuracy` = 0.9, `avgAcc` = 0.8 (slightly worse this batch than overall),
+       `lowerUtt` = 50, `upperUtt` = 55 (done a total of 55 recordings, batch size 5)
+
 * url:
 ```
         /qc/report/session/X

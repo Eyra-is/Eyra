@@ -974,15 +974,27 @@ class _SimpleMarosijoTask(Task):
                 avgAccuracy = 0.0
             else:
                 qcReport['totalStats']['accuracy'] = avgAccuracy
+                qcReport['totalStats']['avgAcc'] = avgAccuracy
 
             # If a report exists, we update it.
             # TODO: Do this more efficiently. Need to change how we store reports.
             strReport = self.redis.get('report/{}/{}'.format(name, session_id))
             if strReport:
                 oldReport = json.loads(strReport.decode('utf-8'))
+
                 newAvgAccuracy = (oldReport['totalStats']['accuracy'] + qcReport['totalStats']['accuracy']) / 2
+                recsDoneThisBatch = len(qcReport['perRecordingStats'])
+                newLowerUtt = oldReport['totalStats']['lowerUtt'] + recsDoneThisBatch
+                newUpperUtt = oldReport['totalStats']['upperUtt'] + recsDoneThisBatch
+
                 qcReport = update(oldReport, qcReport)
+
                 qcReport['totalStats']['accuracy'] = newAvgAccuracy
+                qcReport['totalStats']['lowerUtt'] = newLowerUtt
+                qcReport['totalStats']['upperUtt'] = newUpperUtt
+            else:
+                qcReport['totalStats']['lowerUtt'] = 0
+                qcReport['totalStats']['upperUtt'] = len(qcReport['perRecordingStats'])
 
             self.redis.set('report/{}/{}'.format(name, session_id),
                            json.dumps(qcReport))
