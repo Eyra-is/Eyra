@@ -40,11 +40,12 @@ function utilityService(logger) {
     'invalidTitle' : 'no_data.wav', // sentinel value for invalid recordings
     'tokenThreshold' : 600, 
     'tokenGetCount' : 1500, 
-    'QCAccThreshold' : 0.2,
+    'QCAccThreshold' : 0.2, // threshold for displaying QC popup
     'QCFrequency' : 5, // per sessions sent
     'QCInitRecThreshold' : 5, // recording count before QC can report, adjustment period for speaker
+    'QCHighThreshold' : 0.7, // if accuracy falls below this, meter will display yellow instead of green
     'tokenAnnouncementFreq' : 500,
-    'tokenCountGoal' : 500,
+    'tokenCountGoal' : 500, // how many prompts should a user read?
     'syncRecCountPerSend' : 5, // recs to send each transmission to server during a Sync operation,
     'evalBufferSize' : 5, // number of prompts and/or recs to fetch and keep in memory during evaluation
     'evalSubmitFreq' : 5, // per utterance graded, after X send to server

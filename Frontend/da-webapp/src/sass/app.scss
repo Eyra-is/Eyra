@@ -93,6 +93,15 @@ body {
 .feedbackDisplay {
   font-size: 1.1em;
   text-align: center;
+  /* accuracy meter from QC */
+  meter {
+    width: $stdViewWidth / 2;
+    margin: 10% auto 0 auto;
+  }
+  label[for="accMeter"] {
+    width: 100%;
+    font-size: 0.6em;
+  }
 }
 .minorFeedbackDisplay {
   font-size: 0.9em;
