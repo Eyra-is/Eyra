@@ -82,7 +82,7 @@ This project wouldn't have been possible without the cooperation of
 
 * Google
 
-along with constant vigilance as project head by
+Project head:
 
 * Jón Guðnason
 

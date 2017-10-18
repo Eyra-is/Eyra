@@ -43,8 +43,8 @@ Current implementation:
         }
 ```
   * The 'json' key is the key in the form data itself.
-  * Each tokenId must match it's corresponding recording filename including extension.
-  * Server looks at sessions with the same info (minus end time of course), and if it is the same, it simply adds the recording to that session, and updates the end time of that session.
+  * Each tokenId must match its corresponding recording filename including extension.
+  * Server looks at sessions with the same info (except with an updated end time), and if it is the same, it simply adds the recording to that session, and updates the end time of that session.
   * The deviceInfo 'imei' is optional.
     * Same goes for the speakerInfo 'deviceImei' and the {speaker,device}Id's.
   * The recordings in the submission (request.files) should be stored with keys 'rec0','rec1',..,'recn'
@@ -78,7 +78,7 @@ Where X is number of tokens.
 
 ## 3. submitInstructor
 
-*Submit instructor data, receives in return some way to ID said instructor.*
+*Submit instructor data. Server returns instructor ID.*
 
 Current implementation:
 * json format of submission:
