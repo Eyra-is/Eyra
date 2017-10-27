@@ -30,6 +30,25 @@ A recommended read as well is the article published on this software, which can 
 
 ## Development
 
+### The Stack
+
+MySQL
+Python
+    * Flask
+JavaScript
+    * AngularJS
+Celery
+Kaldi
+    * Marosijo
+Bash
+Android
+
+### Which platforms has Eyra been compiled on?
+Debian 8 Jessie
+Ubuntu Server 14.04
+
+also works on Firefox and Chrome
+
 ### Short description of folder structure
 
 * **AndroidApp**  
