@@ -32,19 +32,20 @@ A recommended read as well is the article published on this software, which can 
 
 ### The Stack
 
-MySQL
-Python
-    * Flask
-JavaScript
-    * AngularJS
-Celery
-Kaldi
-    * Marosijo
-Bash
-Android
+    MySQL
+    Python
+*   Flask
+    JavaScript
+*   AngularJS
+    Celery
+    Kaldi
+        * Marosijo
+    Bash
+    Android
 
 ### Which platforms has Eyra been compiled on?
 Debian 8 Jessie
+
 Ubuntu Server 14.04
 
 also works on Firefox and Chrome
