@@ -103,6 +103,9 @@ Many thanks to the people at Google:
 Additional developers
 * Judy Fong
 
+Technical Writer
+* Judy Fong
+
 ## License
 
 This software is licenced under the Apache Version 2.0 licence as stated in the [LICENCE](https://github.com/Eyra-is/Eyra/tree/master/LICENSE) document. Some parts of the software are licenced under the MIT licence or other open licences. A non-exhaustive list can be found in the [NOTICE](https://github.com/Eyra-is/Eyra/tree/master/NOTICE) document.
