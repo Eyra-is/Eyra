@@ -20,6 +20,12 @@ Setup a laptop which the phones (recording devices) can connect to in an offline
     You have to initially have an internet connection and run  
     `./Setup/setup.sh --all` and then  
     `sudo service apache2 restart`
+
+    *Warning: Running [`./Setup/setup.sh --all`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) or [`./Setup/setup.sh --ap`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) disables your wifi while setting up the access point. If this is not what you want, a way to enable the wifi is the following:*  
+    * `sudo nano /etc/NetworkManager/NetworkManager.conf` -> change `managed=false` to `managed=true`
+    * `sudo service network-manager restart` 
+ 
+    *Wifi should now work again.*
     
 * **Client-side (on the devices)**
     * Android app  
