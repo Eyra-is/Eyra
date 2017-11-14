@@ -62,13 +62,13 @@ def run():
     parser = argparse.ArgumentParser(
         description='Creates sql from src ready to be put into a token')
     parser.add_argument('src', type=argparse.FileType('r'),
-                        help='Tokens/prompts, newline seperated')
+                        help='Tokens/prompts, newline separated')
     parser.add_argument('dest', type=argparse.FileType('w'), default=sys.stdout,
                         nargs='?',
                         help='Destination SQL file')
     parser.add_argument('--use-labels', action='store_true', default=False,
                         help=('Use language labels. `src` must then contain'
-                              ' two tab seperated columns, language label and'
+                              ' two tab separated columns, language label and'
                               ' the prompt'))
     args = parser.parse_args()
     if args.use_labels:
