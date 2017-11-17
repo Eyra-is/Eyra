@@ -9,6 +9,8 @@ A recommended read as well is the article published on this software, which can 
 
 
 - [Development](#development)
+  - [The Stack](#the-stack)
+  - [Which platforms has Eyra been compiled on?](#which-platforms-has-eyra-been-compiled-on)
   - [Short description of folder structure](#short-description-of-folder-structure)
   - [Detailed description of the components](#detailed-description-of-the-components)
   - [Description of individual Frontend services](#description-of-individual-frontend-services)
@@ -18,7 +20,7 @@ A recommended read as well is the article published on this software, which can 
   - [Firing up the QC](#firing-up-the-qc)
   - [Selecting modules to use](#selecting-modules-to-use)
   - [Creating your own modules](#creating-your-own-modules)
-  - [Running QC offline](#running-qc-offline)
+  - [Running QC offline (post-processing of recordings)](#running-qc-offline-post-processing-of-recordings)
   - [Existing modules](#existing-modules)
     - [Marosijo module](#marosijo-module)
     - [Cleanup module](#cleanup-module)
@@ -297,18 +299,20 @@ See [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/
 
 QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py). As well as being saved in the [Redis](http://redis.io/) datastore (Redis is also used as a message broker for Celery).
 
+Logging is done to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast).
+
 ### Firing up the QC
 
 * The QC needs Kaldi to be installed. This is done by running [`./Setup/setup.sh --ext-kaldi`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh). This could take some time (hrs).
-* The QC also needs a worker running constantly. This is for Celery. You need to install Celery and redis-server, this should be in [`Setup/src/backend-qc/*.deps`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/backend-qc). Running [`./Setup/setup.sh --backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) should install those for you. Then, the worker is run automatically in the background (see `Setup/src/backend-qc/post_install.sh`), logging to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast). You shouldn't need to manually kill the workers with this setup, uses celery multi (you can also restart the celery worker by running [`./Setup/setup.sh --backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh)).
-* In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/{Cleanup,Marosijo}GenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) or getting it elsewhere). These are used by Marosijo and Cleanup module. Generating them takes a long time, and depends on the number/length of the prompt list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
+
 * If you also need the monophone models/tri models/etc for these modules, you can look at [`Backend/scripts/data_prep/run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh).
 Here is an example of the commands needed to run to create the models/files for the Marosijo module:
     * Edit [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) to use your lexicon and phonemes.txt.
     * `./run.sh`
 
-  The files for Marosijo should be located at `local/marosijo.tgz` after you run.  
-  A similar process applies for the Cleanup module, look at commenting out Stage 3 and the last 2 lines in [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh).
+  The files for Marosijo should be located at `local/marosijo.tgz` after you run. Then you need to extract that and put it in a folder called [`qc/modules/MarosijoModule/local`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/modules/MarosijoModule/local).
+* In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/MarosijoGenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts/MarosijoGenGraphs.py) or getting it elsewhere). Each decoding graph corresponds to a single prompt, and in this process you supply the prompts to the genGraphs scripts. It is important that the ids of the prompts supplied match the ids of the prompts in the database. These are then used by the Marosijo module to analyse the recording compared to each prompt. Generating these graphs takes a long time, and depends on the number/length of the prompt list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
+* Then, to restart Celery run [`./Setup/setup.sh --backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh).
 
 ### Selecting modules to use
 
@@ -346,7 +350,7 @@ To add your own QC module (lets call it New), you need to satisfy a couple of cr
 * Notes:
   * All files in `modules/NewModule/local` will be ignored by git as per [.gitignore](https://github.com/Eyra-is/Eyra/tree/master/Backend/.gitignore)).
 
-### Running QC offline
+### Running QC offline (post-processing of recordings)
 
 The QC saves its reports on disk as well as in memory. This is saved to `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py).
 
@@ -394,6 +398,7 @@ so the `wi`s could be e.g. `The quick fox jumped` and a possible hypothesis woul
 
 A simple aligner. It is considerably faster than Marosijo, both realtime and in creating the decoding graphs . Uses a small list of top words from the list of prompts and places higher probability on those words being recognized.
 
+Setting this module up is similar to setting up Marosijo described in the [Firing up the QC](#firing-up-the-qc) section.
 
 ## Evaluation
 
