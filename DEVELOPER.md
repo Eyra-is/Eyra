@@ -274,7 +274,9 @@ along with other misc stuff.
 
 * If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in [`index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) and the code at the top of [`services/delivery.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/delivery.service.js)->`submitRecordings`.
 
-* You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/malromur`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/malromur)        
+* You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/malromur`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/malromur).   
+
+* In order to collect data from people born before 2015, you need to change [`Frontend/da-webapp/src/json/speaker-info-format.json`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/json/speaker-info-format.json). Then `grunt deploy` from within the Frontend/da-webapp folder. 
 
 
 ### Maintaining code
