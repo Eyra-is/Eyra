@@ -6,7 +6,7 @@ The team at Reykjavik University published an article on this software for the S
 
 ## Installation
 
-Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and to a lesser degree, **Ubuntu 14.04**.
+Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and to a lesser degree, **Ubuntu 14.04 and 16.04**.
 
 The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in [`AndroidApp`](https://github.com/Eyra-is/Eyra/blob/master/AndroidApp)). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
     

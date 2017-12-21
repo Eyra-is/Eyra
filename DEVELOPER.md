@@ -49,7 +49,7 @@ A recommended read as well is the article published on this software, which can 
 ### Which platforms has Eyra been compiled on?
 Debian 8 Jessie
 
-Ubuntu Server 14.04
+Ubuntu Server 14.04, 16.04
 
 also works on Firefox and Chrome
 
@@ -276,7 +276,9 @@ along with other misc stuff.
 
 * You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/malromur`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/malromur).   
 
-* In order to collect data from people born before 2015, you need to change [`Frontend/da-webapp/src/json/speaker-info-format.json`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/json/speaker-info-format.json). Then `grunt deploy` from within the Frontend/da-webapp folder. 
+* In order to collect data from people born before 2015, you need to change [`Frontend/da-webapp/src/json/speaker-info-format.json`](https://github.com/cadia-lvl/Eyra/tree/master/Frontend/da-webapp/src/json/speaker-info-format.json). Then `grunt deploy` from within the Frontend/da-webapp folder. 
+
+* The max prompt length before the scrollbar comes into play is approximately 84 characters.  
 
 
 ### Maintaining code
