@@ -48,7 +48,7 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
   moreCtrl.registerDevice = registerDevice;
   moreCtrl.setInstructor = setInstructor;
   moreCtrl.sync = sync;
-  moreCtrl.test = test;
+  moreCtrl.logs = logs;
 
   moreCtrl.logout = logout;
 
@@ -122,27 +122,10 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
     $scope.msg = result ? 'Sync complete.' : 'Sync failed.';
   }
 
-  function test() {
-    /*dbService.countAvailableSessions().then(function(value){
-      if (value > 0)
-        logger.log('Aw yeah, '+value);
-      else
-        logger.log('Nope');
-    });*/
-
+  function logs() {
     logger.getLogs().then(function(logs){
       console.log(logs);
-    });
-
-    /*$http.post(
-      BACKENDURL + '/submit/session'
-    ).then(function(response){
-      console.log(response);
-    },
-    util.stdErrCallback);*/
-
-    tokenService.countAvailableTokens().then(function(n){
-      console.log(n);
+      $scope.msg = logs;
     });
   }
 }
