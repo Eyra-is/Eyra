@@ -38,7 +38,7 @@ agreement="$(cat "$agreementPath" | \
   tr '\n' ' ' | \
   sed -n 's:.*<!--\s*start\s*agreement\s*-->\(.*\)<!--\s*end\s*agreement\s*-->.*:\1:p')"
 
-# Checking if that agreement is already in database
+report "Checking if agreement is already in mysql database"
 dbAgreementId="$(mysql -u root -p -D recordings_master -e "select id from recording_agreement where agreement='$agreement'" | tail -1)"
 
 # thank you Mark Byers! http://stackoverflow.com/a/3027524/5272567

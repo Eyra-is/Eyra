@@ -21,8 +21,8 @@ display_usage() {
     echo -e "Usage:\n$0 module token_file graphs_scp_file [--concurrency,-c CONCURRENCY=1]\
              \n\nCreates decoding graphs for Marosijo and Cleanup module. Using CONCURRENCY threads.\n\
              module is 'marosijo' for marosijo and 'cleanup' for cleanup
-             token_file is a path to a file with format 'tokId token' where tokId is the same id as in MySQL database for the token.\n\
-             graphs_scp_file is a path to where the resulting .scp/.ark files are stored.\n" 
+             token_file is a path to a file with format 'tokId token' where tokId is the same id as in MySQL database for the token. Notice there HAS to be a SPACE between tokId and token in token_file.\n\
+             graphs_scp_file has to be named graphs.scp file (for the default use in MarosijoModule).\n It will then be in the directory of the resulting .ark files. graphs_scp_file then will contain references to said generated .ark file/s.\n" 
 } 
 if [[ ( $1 == "--help") ||  $1 == "-h" ]] 
 then 

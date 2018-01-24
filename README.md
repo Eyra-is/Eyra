@@ -6,9 +6,9 @@ The team at Reykjavik University published an article on this software for the S
 
 ## Installation
 
-Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and to a lesser degree, **Ubuntu 14.04**.
+Currently, the Eyra backend has to be run on Linux. Systems we've used are mainly **Debian 8** and to a lesser degree, **Ubuntu 14.04 and 16.04**.
 
-The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in [`AndroidApp`](https://github.com/Eyra-is/Eyra/blob/master/AndroidApp). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
+The recording devices themselves (phones, laptops, anything with a compatible browser) can use Chrome or Firefox. However, when using phones, we recommend using our Android app (located in [`AndroidApp`](https://github.com/Eyra-is/Eyra/blob/master/AndroidApp)). It bypasses a nasty bug we discovered where audio recorded through a phone's browser is 48kHz, but the data in it appears to be limited to 16kHz.
     
 If you want Quality Control (QC) to work, you need to install Kaldi and more, look at how to set it up in [DEVELOPER.md](https://github.com/Eyra-is/Eyra/blob/master/DEVELOPER.md). 
 
@@ -20,6 +20,12 @@ Setup a laptop which the phones (recording devices) can connect to in an offline
     You have to initially have an internet connection and run  
     `./Setup/setup.sh --all` and then  
     `sudo service apache2 restart`
+
+    *Warning: Running [`./Setup/setup.sh --all`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) or [`./Setup/setup.sh --ap`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) disables your wifi while setting up the access point. If this is not what you want, a way to enable the wifi is the following:*  
+    * `sudo nano /etc/NetworkManager/NetworkManager.conf` -> change `managed=false` to `managed=true`
+    * `sudo service network-manager restart` 
+ 
+    *Wifi should now work again.*
     
 * **Client-side (on the devices)**
     * Android app  
@@ -70,7 +76,7 @@ See [`Docs/UserGuideInstructions.pdf`](https://github.com/Eyra-is/Eyra/tree/mast
 
 If you require your users to give consent for their recordings to be used, you can look at an example participant agreement used at RU at [`Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf`](https://github.com/Eyra-is/Eyra/tree/master/Docs/EXAMPLE_PARTICIPANTAGREEMENT.pdf). This is only an example, and you should have your lawyers look over your own agreement.
 
-More details about the software and it's usage can be found in [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md).
+More details about the software and its usage can be found in [DEVELOPER.md](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md).
 
 ## Contributing
 
@@ -82,7 +88,7 @@ This project wouldn't have been possible without the cooperation of
 
 * Google
 
-along with constant vigilance as project head by
+Project head:
 
 * Jón Guðnason
 
@@ -99,6 +105,12 @@ Many thanks to the people at Google:
 * Linne Ha  
 * Martin Jansche  
 * and more  
+
+Additional developers
+* Judy Fong
+
+Technical Writer
+* Judy Fong
 
 ## License
 

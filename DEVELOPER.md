@@ -9,6 +9,8 @@ A recommended read as well is the article published on this software, which can 
 
 
 - [Development](#development)
+  - [The Stack](#the-stack)
+  - [Which platforms has Eyra been compiled on?](#which-platforms-has-eyra-been-compiled-on)
   - [Short description of folder structure](#short-description-of-folder-structure)
   - [Detailed description of the components](#detailed-description-of-the-components)
   - [Description of individual Frontend services](#description-of-individual-frontend-services)
@@ -18,7 +20,7 @@ A recommended read as well is the article published on this software, which can 
   - [Firing up the QC](#firing-up-the-qc)
   - [Selecting modules to use](#selecting-modules-to-use)
   - [Creating your own modules](#creating-your-own-modules)
-  - [Running QC offline](#running-qc-offline)
+  - [Running QC offline (post-processing of recordings)](#running-qc-offline-post-processing-of-recordings)
   - [Existing modules](#existing-modules)
     - [Marosijo module](#marosijo-module)
     - [Cleanup module](#cleanup-module)
@@ -29,6 +31,27 @@ A recommended read as well is the article published on this software, which can 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Development
+
+### The Stack
+
+* MySQL  
+* Python  
+  * Flask  
+* JavaScript  
+  * AngularJS  
+  * [`NodeJS >= 4`](https://nodejs.org/en/download/package-manager/)
+* Celery  
+* Kaldi  
+  * Marosijo  
+* bash  
+* Android 
+
+### Which platforms has Eyra been compiled on?
+Debian 8 Jessie
+
+Ubuntu Server 14.04, 16.04
+
+also works on Firefox and Chrome
 
 ### Short description of folder structure
 
@@ -113,7 +136,7 @@ This list is not exhaustive.
     * [`da-webapp/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp)  
         A completely useless distinction to have this [`da-webapp`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp) folder :( until they add more components to the Frontend! Stands for "data acquisition webapp". Data acquisition was the project's original title, until Simon came up with Eyra.
         * [`src/`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src)  
-            The source, code from here is compiled into the `app/` folder on a [`./Setup/setup.sh --frontend-app`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) or a `grunt deploy` run. Under normal conditions, the application is run from the `app/` folder. Should be pretty straightforward where stuff is here. See **Run webapp straight from `Frontend/da-webapp/src`** in the [**Some useful info**](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md#some-useful-info) section below on how to work straight from source instead of having to compile into `app/` first. Uses Mozilla's [localForage](https://github.com/mozilla/localForage) to store data in the browsers databases on the client side (for offline use, e.g. store cached recordings). The webapp relies heavily on this database working (user data, device data, prompts etc.).
+            The source, code from here is compiled into the `app/` folder on a [`./Setup/setup.sh --frontend-app`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) or a `grunt deploy` run. However, with recent sass [`updates`](https://github.com/request/request/commit/479143d546d6dff378da0e5fac5801dd3bf01f15), which grunt depends on, now Eyra only works with NodeJS >=v4. [`NodeJS v0.10.x or v0.12.x will error out.`](https://github.com/sass/node-sass/issues/2100). So make sure you have the correct version of NodeJS. Under normal conditions, the application is run from the `app/` folder. Should be pretty straightforward where stuff is here. See **Run webapp straight from `Frontend/da-webapp/src`** in the [**Some useful info**](https://github.com/Eyra-is/Eyra/tree/master/DEVELOPER.md#some-useful-info) section below on how to work straight from source instead of having to compile into `app/` first. Uses Mozilla's [localForage](https://github.com/mozilla/localForage) to store data in the browsers databases on the client side (for offline use, e.g. store cached recordings). The webapp relies heavily on this database working (user data, device data, prompts etc.).
             * [`views/recording-agreement.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/views/recording-agreement.html)  
                 Contains the participant agreement (optional, turn it on in [`services/utility.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/utility.service.js)), which needs to match the one in table `recording_agreement` in database. Running [`./Setup/setup.sh --backend-agreement`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) takes care of looking at [`recording-agreement.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/views/recording-agreement.html) and updating the database with the agreement and the `html` file with the id. The `agreement-id` in the `html` is used in submitting speaker info to the server to signal which agreement the user signed and should match the `id` from the database.
         * `app/`  
@@ -251,7 +274,11 @@ along with other misc stuff.
 
 * If you run into trouble getting data from phones to server (this happened with some older phones, and when server couldn't handle load), you could try making a Firebase account and submitting all the data to there aswell, you can see how we did it, you need to uncomment the `async` and `firebase` script libraries in [`index.html`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/index.html) and the code at the top of [`services/delivery.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/delivery.service.js)->`submitRecordings`.
 
-* You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/malromur`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/malromur)        
+* You can see an example of converting data from another database/format to Eyra format in [`Backend/scripts/convert_to_eyra_database/malromur`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/convert_to_eyra_database/malromur).   
+
+* In order to collect data from people born before 2015, you need to change [`Frontend/da-webapp/src/json/speaker-info-format.json`](https://github.com/cadia-lvl/Eyra/tree/master/Frontend/da-webapp/src/json/speaker-info-format.json). Then `grunt deploy` from within the Frontend/da-webapp folder. 
+
+* The max prompt length before the scrollbar comes into play is approximately 84 characters.  
 
 
 ### Maintaining code
@@ -276,18 +303,20 @@ See [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/
 
 QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py). As well as being saved in the [Redis](http://redis.io/) datastore (Redis is also used as a message broker for Celery).
 
+Logging is done to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast).
+
 ### Firing up the QC
 
 * The QC needs Kaldi to be installed. This is done by running [`./Setup/setup.sh --ext-kaldi`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh). This could take some time (hrs).
-* The QC also needs a worker running constantly. This is for Celery. You need to install Celery and redis-server, this should be in [`Setup/src/backend-qc/*.deps`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/backend-qc). Running [`./Setup/setup.sh --backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) should install those for you. Then, the worker is run automatically in the background (see `Setup/src/backend-qc/post_install.sh`), logging to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast). You shouldn't need to manually kill the workers with this setup, uses celery multi (you can also restart the celery worker by running [`./Setup/setup.sh --backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh)).
-* In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/{Cleanup,Marosijo}GenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) or getting it elsewhere). These are used by Marosijo and Cleanup module. Generating them takes a long time, and depends on the number/length of the prompt list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
+
 * If you also need the monophone models/tri models/etc for these modules, you can look at [`Backend/scripts/data_prep/run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh).
 Here is an example of the commands needed to run to create the models/files for the Marosijo module:
     * Edit [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh) to use your lexicon and phonemes.txt.
     * `./run.sh`
 
-  The files for Marosijo should be located at `local/marosijo.tgz` after you run.  
-  A similar process applies for the Cleanup module, look at commenting out Stage 3 and the last 2 lines in [`run.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts/data_prep/run.sh).
+  The files for Marosijo should be located at `local/marosijo.tgz` after you run. Then you need to extract that and put it in a folder called [`qc/modules/MarosijoModule/local`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/modules/MarosijoModule/local).
+* In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/MarosijoGenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts/MarosijoGenGraphs.py) or getting it elsewhere). Each decoding graph corresponds to a single prompt, and in this process you supply the prompts to the genGraphs scripts. It is important that the ids of the prompts supplied match the ids of the prompts in the database. These are then used by the Marosijo module to analyse the recording compared to each prompt. Generating these graphs takes a long time, and depends on the number/length of the prompt list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
+* Then, to restart Celery run [`./Setup/setup.sh --backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh).
 
 ### Selecting modules to use
 
@@ -325,7 +354,7 @@ To add your own QC module (lets call it New), you need to satisfy a couple of cr
 * Notes:
   * All files in `modules/NewModule/local` will be ignored by git as per [.gitignore](https://github.com/Eyra-is/Eyra/tree/master/Backend/.gitignore)).
 
-### Running QC offline
+### Running QC offline (post-processing of recordings)
 
 The QC saves its reports on disk as well as in memory. This is saved to `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py).
 
@@ -373,6 +402,7 @@ so the `wi`s could be e.g. `The quick fox jumped` and a possible hypothesis woul
 
 A simple aligner. It is considerably faster than Marosijo, both realtime and in creating the decoding graphs . Uses a small list of top words from the list of prompts and places higher probability on those words being recognized.
 
+Setting this module up is similar to setting up Marosijo described in the [Firing up the QC](#firing-up-the-qc) section.
 
 ## Evaluation
 
