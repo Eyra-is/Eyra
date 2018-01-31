@@ -296,12 +296,12 @@ Most of this should be self explanatory, but if you change code, remember to:
 
 The quality control is designed to process the recordings and try to improve the quality of gathered data by giving feedback to the user on the quality, allowing him to improve on the recordings he makes.
 
-This QC uses [Celery](http://www.celeryproject.org/) and a task chaining system to handle load and remain scalable (that's the idea anyway). By processing only a batch of recordings at a time, and then putting the continuation back on the queue as a task.  
+This QC uses [Celery](http://www.celeryproject.org/) and a task chaining system to handle load and remain scalable (that's the idea anyway). By processing only a batch of recordings at a time, and then putting the continuation back on the queue as a task. Celery keeps the chain going, waiting for input from the speaker for a default of 15 minutes until it times out.  
 The QC is located at [`Backend/server-interface/qc`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc).  
 
-See [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py) for configurable parameters, such as how long a process sleeps on an idle task (no more recordings to be processed yet).
+See [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py) for configurable parameters, such as how long a process sleeps on an idle task (no more recordings to be processed yet), and how long the timeout is.
 
-QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py). As well as being saved in the [Redis](http://redis.io/) datastore (Redis is also used as a message broker for Celery).
+Once the Celery chain for a speaker session has timed out, the QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py). As well as being saved in the [Redis](http://redis.io/) datastore (Redis is also used as a message broker for Celery).
 
 Logging is done to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast).
 
