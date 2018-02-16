@@ -53,6 +53,7 @@ Debian 8 Jessie
 Ubuntu Server 14.04, 16.04
 
 Android 6.0 and 5.1.1
+
 also works on Firefox and Chrome
 
 ### Short description of folder structure
