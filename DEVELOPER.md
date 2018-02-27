@@ -49,11 +49,8 @@ A recommended read as well is the article published on this software, which can 
 
 ### Which platforms has Eyra been compiled on?
 Debian 8 Jessie
-
 Ubuntu Server 14.04, 16.04
-
 Android 6.0 and 5.1.1
-
 also works on Firefox and Chrome
 
 ### Short description of folder structure
@@ -154,6 +151,29 @@ This list is not exhaustive.
 
 * **Setup**  
     Written to simplify the setup of Eyra. Most of the setup can be done by running [`setup.sh`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh), either with the `--all` option or other specific ones (e.g. [`./setup.sh --all --no-ap --no-mysqldb`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) to run everything except the wifi access point and the database setup, or [`./setup.sh --mysqldb`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) to only run the database setup). [`./setup.sh --all`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) runs all components not put specifically as an external component (e.g. `ext-kaldi`).  
+    * If doing [`managed=false` to `managed=true`](https://github.com/cadia-lvl/Eyra/tree/master/DEVELOPER.md#some-useful-info) doesn't work then also do the following:
+      `sudo rm /etc/hostapd/hostapd.conf`
+      `sudo apt-get purge hostapd`
+
+      `sudo rm /etc/dnsmasq.conf`
+      `sudo apt-get purge dnsmasq`
+
+      Within `/etc/network/interfaces` file replace all the uncommented out lines with the default ethernet or wifi interfaces( names) and configurations, whether static or dynamic, your operating system uses.
+      If you are running Debian 8 Jessie:
+      ```
+      # The loopback network interface
+      auto lo
+      iface lo inet loopback
+
+      auto eth0
+      iface eth0 inet dhcp
+
+      auto wlan0
+      iface wlan0 inet dhcp
+      ```
+      Computers need a network card that can make an access point if you want to run `./setup.sh --ap`. Also, in [`Setup/src/ap/default.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/ap/default.conf) change the settings as appropriate to work with the names of your drivers and network interface names.
+
+      Then, restart your computer.
     
     **The basic design is this:**   
     The [`setup.sh`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) script contains a list of components, which correspond to folders in [`src`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src) (e.g. [`src/backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/backend-qc) which handles setting up the quality control). Each component can have 
