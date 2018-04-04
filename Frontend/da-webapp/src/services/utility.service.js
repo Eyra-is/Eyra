@@ -38,8 +38,8 @@ function utilityService(logger) {
 
   var CONSTANTS = { 
     'invalidTitle' : 'no_data.wav', // sentinel value for invalid recordings
-    'tokenThreshold' : 600, 
-    'tokenGetCount' : 1500, 
+    'tokenThreshold' : 5, 
+    'tokenGetCount' : 10, 
     'QCAccThreshold' : 0.2, // if accuracy falls below this, meter will display red
     'QCFrequency' : 5, // per sessions sent
     'QCInitRecThreshold' : 5, // recording count before QC can report, adjustment period for speaker
@@ -49,7 +49,7 @@ function utilityService(logger) {
     'syncRecCountPerSend' : 5, // recs to send each transmission to server during a Sync operation,
     'evalBufferSize' : 5, // number of prompts and/or recs to fetch and keep in memory during evaluation
     'evalSubmitFreq' : 5, // per utterance graded, after X send to server
-    'RECAGREEMENT' : false // include the recording participant agreement
+    'RECAGREEMENT' : true // include the recording participant agreement
   };
   
 

@@ -2,9 +2,9 @@
     {
         "attribute" : "gender",
         "type" : "select",
-        "options" : ["Male", "Female", "Other"],
+        "options" : ["Karl", "Kona"],
         "required" : true,
-        "label" : "Gender",
+        "label" : "Kyn",
         "description" : "Select your gender."
     },
     {
@@ -108,7 +108,7 @@
                         "1921"
                     ],
         "required" : true,
-        "label" : "Year of birth",
+        "label" : "Fæðingarár",
         "description" : "Select the year you were born in."
     },
     {
@@ -173,7 +173,7 @@
 
                     ],
         "required" : false,
-        "label" : "Height (optional)",
+        "label" : "Hæð (valfrjálst)",
         "description" : "Enter your height in centimeters."
     }
 ]
