@@ -22,6 +22,7 @@ File author/s:
 
 /* variables */
 $glyphSize: 4em;
+$recButtonSize: 5em;
 $mainColor: lightblue;
 $stdViewHeight: 400px;
 $stdViewWidth: 320px;
@@ -203,7 +204,7 @@ body {
   p {
     float: left;
     display: block;
-    width: $glyphSize;
+    width: $recButtonSize;
     text-align: center;
     padding: 0.3em 0 0 0.2em;
   }
