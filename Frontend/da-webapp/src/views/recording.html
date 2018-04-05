@@ -34,10 +34,10 @@ File author/s:
             <button class="btn btn-glyph-only btn-record-ctrl" type="button" ng-disabled="recCtrl.skipBtnDisabled" ng-click="recCtrl.skip()">
                 <span class="glyphicon glyphicon-ban-circle"></span>
             </button>
-            <p>Skip</p>
+            <p>{{skipText}}</p>
         </div>
         <div class="feedbackDisplay">
-            <p>Prompts read: {{tokensRead}}</p>
+            <p>{{promptsReadText}} {{tokensRead}}</p>
             <progress max="{{tokenCountGoal}}" value="{{tokensRead}}"></progress>
 
             <canvas id="volume-meter" width="200" height="50"></canvas>

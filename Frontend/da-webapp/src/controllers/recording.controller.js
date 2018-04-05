@@ -74,6 +74,8 @@ function RecordingController($q,
 
   recCtrl.action = action;
   recCtrl.skip = skip;
+  $scope.skipText = util.getConstant('SKIPTEXT');
+  $scope.promptsReadText = util.getConstant('PROMPTSREADTEXT')
 
   $scope.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
@@ -85,15 +87,13 @@ function RecordingController($q,
 
   var actionType = 'record'; // current state
 
-  var RECTEXT = 'Rec'; // text under the buttons
-  var STOPTEXT = 'Stop';
   var RECGLYPH = 'glyphicon-record'; // bootstrap glyph class
   var STOPGLYPH = 'glyphicon-stop';
-  $scope.actionText = RECTEXT;
+  $scope.actionText = util.getConstant('RECTEXT');
   $scope.actionGlyph = RECGLYPH;
   $scope.hide_playback = true;
 
-  var currentToken = {'id':0, 'token':'Hit \'Rec\' for prompt.'};
+  var currentToken = {'id':0, 'token': 'Smelltu á \'Taka upp\' að fá textabrot'};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
@@ -212,13 +212,13 @@ function RecordingController($q,
   function toggleActionBtn() {
     if (actionType === 'record') {
       actionType = 'stop';
-      $scope.actionText = STOPTEXT;
+      $scope.actionText = util.getConstant('STOPTEXT');
       $scope.actionGlyph = STOPGLYPH;
       $scope.hide_playback = true;
     } else if (actionType === 'stop') {
       actionType = 'record';
       $scope.hide_playback = false;
-      $scope.actionText = RECTEXT;
+      $scope.actionText = util.getConstant('RECTEXT');
       $scope.actionGlyph = RECGLYPH;
     }
   }

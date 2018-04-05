@@ -49,7 +49,12 @@ function utilityService(logger) {
     'syncRecCountPerSend' : 5, // recs to send each transmission to server during a Sync operation,
     'evalBufferSize' : 5, // number of prompts and/or recs to fetch and keep in memory during evaluation
     'evalSubmitFreq' : 5, // per utterance graded, after X send to server
-    'RECAGREEMENT' : true // include the recording participant agreement
+    'RECAGREEMENT' : true, // include the recording participant agreement
+    //language specific constants
+     'RECTEXT' : 'Takka upp', // text under rec button
+     'STOPTEXT' : 'Stopp',
+     'SKIPTEXT' : 'Sleppa',
+     'PROMPTSREADTEXT' : 'Lesnir textar:'
   };
   
 
