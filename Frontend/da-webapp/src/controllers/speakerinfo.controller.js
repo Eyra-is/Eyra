@@ -32,6 +32,7 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
   
   sinfoCtrl.submit = submit;
   $scope.msg = '';
+  $scope.infoHeadingText = util.getConstant('INFOHEADINGTEXT');
 
   var speakerName = dataService.get('speakerName'); // speakerName should be set from start.html
   if (!speakerName || speakerName === '') {

@@ -35,6 +35,9 @@ function StartController($location, $rootScope, $scope, dataService, localDbMisc
   startCtrl.speakerName = '';
   startCtrl.comments = '';
   startCtrl.doneBefore = false;
+  $scope.infoHeadingText = util.getConstant('INFOHEADINGTEXT');
+  $scope.usernameText = util.getConstant('USERNAMETEXT');
+  $scope.doneBeforeText = util.getConstant('DONEBEFORETEXT');
 
   $scope.msg = '';
 

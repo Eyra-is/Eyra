@@ -37,18 +37,18 @@ File author/s:
 
         <form>
             <div class="form-group">
-                <label for="fullName">Full name *</label>
+                <label for="fullName">{{fullNameText}} *</label>
                 <input class="form-control" id="fullName" type="text" ng-model="agrCtrl.fullName" placeholder="Josh Nine" required>
             </div>
             <div class="form-group">
-                <label for="email">Email *</label>
+                <label for="email">{{emailText}} *</label>
                 <input class="form-control" id="email" type="email" ng-model="agrCtrl.email" placeholder="email@example.com" required>
             </div>
             <button class="form-control btn btn-primary" ng-click="agrCtrl.submit('accept')" value="">
-                Accept
+                {{acceptText}}
             </button>
             <button class="form-control btn btn-primary" ng-click="agrCtrl.submit('decline')" value="">
-                Decline
+                {{declineText}}
             </button>
         <form>
 

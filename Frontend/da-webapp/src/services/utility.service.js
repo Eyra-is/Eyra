@@ -51,10 +51,25 @@ function utilityService(logger) {
     'evalSubmitFreq' : 5, // per utterance graded, after X send to server
     'RECAGREEMENT' : true, // include the recording participant agreement
     //language specific constants
-     'RECTEXT' : 'Takka upp', // text under rec button
+    //main
+    'STARTTEXT' : 'Byrja',
+    //recording agreement
+    'FULLNAMETEXT' : 'Full name',
+    'EMAILTEXT' : 'Netfang',
+    'ACCEPTTEXT' : 'Accept', //
+    'DECLINETEXT' : 'Decline',
+    //start
+    'INFOHEADINGTEXT' : 'Vinsamlegast veldu þá möguleika sem eiga við þig',
+    'USERNAMETEXT' : 'Notendanafn',
+    'DONEBEFORETEXT' : 'Ég hef notað Eyra áður?',
+    //recording
+     'RECTEXT' : 'Taka upp', // text under rec button
      'STOPTEXT' : 'Stopp',
      'SKIPTEXT' : 'Sleppa',
-     'PROMPTSREADTEXT' : 'Lesnir textar:'
+     'PROMPTSREADTEXT' : 'Lesnir textar:',
+     //error messages
+     'APPINITIALIZATIONFAILMSG' : 'App failed to initialize. Try refreshing the page and check your connection.',
+     'GETPROMPTSMSGTEXT' : 'Getting prompts  - Please wait'
   };
   
 

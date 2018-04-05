@@ -19,10 +19,10 @@ File author/s:
 
 <div class="content vertical-center">
     <div class="data-entry">
-        <h3 class="default-heading">Vinsamlegast veldu þá möguleika sem eiga við þig</h3>
+        <h3 class="default-heading">{{infoHeadingText}}</h3>
         <form ng-submit="startCtrl.submit()">
             <div class="form-group">
-                <label for="speakerName">Notendanafn</label>
+                <label for="speakerName">{{usernameText}}</label>
                 <input class="form-control" id="speakerName" type="text" ng-model="startCtrl.speakerName" placeholder="josh9">
             </div>
             <!--
@@ -33,7 +33,7 @@ File author/s:
             <div class="checkbox">
                 <label for="doneBefore">
                     <input id="doneBefore" type="checkbox" ng-model="startCtrl.doneBefore">
-                    Ég hef notað Eyra áður?
+                    {{doneBeforeText}}
                 </label>
             </div>
             <button class="form-control btn btn-primary" type="submit" value="">

@@ -23,10 +23,11 @@ File author/s:
 angular.module('daApp')
 .controller('RecordingAgreementController', RecordingAgreementController);
 
-RecordingAgreementController.$inject = ['$document', '$location', '$scope', '$rootScope', 'dataService', 'logger'];
+RecordingAgreementController.$inject = ['$document', '$location', '$scope', '$rootScope', 'dataService', 'logger', 'utilityService'];
 
-function RecordingAgreementController($document, $location, $scope, $rootScope, dataService, logger) {
+function RecordingAgreementController($document, $location, $scope, $rootScope, dataService, logger, utilityService) {
   var agrCtrl = this;
+  var util = utilityService;
 
   agrCtrl.submit = submit;
 
@@ -34,6 +35,10 @@ function RecordingAgreementController($document, $location, $scope, $rootScope, 
   agrCtrl.email = '';
 
   $scope.msg = '';
+  $scope.fullNameText = util.getConstant('FULLNAMETEXT');
+  $scope.emailText = util.getConstant('EMAILTEXT');
+  $scope.acceptText = util.getConstant('ACCEPTTEXT');
+  $scope.declineText = util.getConstant('DECLINETEXT');
 
   var agreementId = $document[0].getElementById('agreement-id').attributes['agreement-id'].value;
   dataService.set('agreementId', agreementId);
