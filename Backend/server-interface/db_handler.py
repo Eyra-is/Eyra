@@ -670,16 +670,8 @@ class DbHandler:
         tokens = []
         try:
             cur = self.mysql.connection.cursor()
-
-            # select numTokens random rows from the database
-            cur.execute('SELECT id FROM token');
-            total_token_ids = [x[0] for x in cur.fetchall()]
-            valid_token_ids = [x for x in total_token_ids if x not in self.invalid_token_ids]
-
-            randIds = random.sample(valid_token_ids, numTokens)
-            randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
-            cur.execute('SELECT id, inputToken FROM token WHERE id IN %s',
-                        (randIds,)) # have to pass in a tuple, with only one parameter
+            cur.execute('SELECT id, inputToken FROM token WHERE id NOT IN %s ORDER BY RAND() LIMIT %s',
+                        (self.invalid_tokens_ids, numTokens))
             tokens = cur.fetchall()
         except MySQLError as e:
             msg = 'Error getting tokens from database.'
