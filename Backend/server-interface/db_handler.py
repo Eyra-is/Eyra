@@ -663,23 +663,12 @@ class DbHandler:
         
         returns [] on failure
         """
-        # start by getting the list of invalid tokens, and create it if we haven't already
-        if self.invalid_token_ids is None:
-            self.invalid_token_ids = self.getInvalidTokenIds()
-
         tokens = []
         try:
             cur = self.mysql.connection.cursor()
-
-            # select numTokens random rows from the database
-            cur.execute('SELECT id FROM token');
-            total_token_ids = [x[0] for x in cur.fetchall()]
-            valid_token_ids = [x for x in total_token_ids if x not in self.invalid_token_ids]
-
-            randIds = random.sample(valid_token_ids, numTokens)
-            randIds = tuple(randIds) # change to tuple because SQL syntax is 'WHERE id IN (1,2,3,..)'
-            cur.execute('SELECT id, inputToken FROM token WHERE id IN %s',
-                        (randIds,)) # have to pass in a tuple, with only one parameter
+            # Get list of random tokens which are valid from the mysql database
+            cur.execute('SELECT id, inputToken, valid FROM token WHERE valid=1 ORDER BY RAND() LIMIT %s',
+                        (numTokens, ))
             tokens = cur.fetchall()
         except MySQLError as e:
             msg = 'Error getting tokens from database.'
@@ -690,8 +679,6 @@ class DbHandler:
         # parse our tuple object from the cursor.execute into our desired json object
         for pair in tokens:
             jsonTokens.append({"id":pair[0], "token":pair[1]})
-
-        random.shuffle(jsonTokens) # the select seemed to alphabetize the tokens
         return jsonTokens
 
     def getRecordingsInfo(self, sessionId, count=None) -> '[{"recId": ..., "token": str, "recPath": str - absolute path, "tokenId": ...}]':
