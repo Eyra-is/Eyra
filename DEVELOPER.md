@@ -38,6 +38,7 @@ A recommended read as well is the article published on this software, which can 
 * Python  
   * Flask  
 * JavaScript  
+  * Grunt
   * AngularJS  
   * [`NodeJS >= 4`](https://nodejs.org/en/download/package-manager/)
 * Celery  
@@ -50,6 +51,8 @@ A recommended read as well is the article published on this software, which can 
 Debian 8 Jessie
 
 Ubuntu Server 14.04, 16.04
+
+Android 6.0 and 5.1.1
 
 also works on Firefox and Chrome
 
@@ -151,6 +154,32 @@ This list is not exhaustive.
 
 * **Setup**  
     Written to simplify the setup of Eyra. Most of the setup can be done by running [`setup.sh`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh), either with the `--all` option or other specific ones (e.g. [`./setup.sh --all --no-ap --no-mysqldb`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) to run everything except the wifi access point and the database setup, or [`./setup.sh --mysqldb`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) to only run the database setup). [`./setup.sh --all`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) runs all components not put specifically as an external component (e.g. `ext-kaldi`).  
+    * If doing [`managed=false` to `managed=true`](https://github.com/cadia-lvl/Eyra/tree/master/DEVELOPER.md#some-useful-info) doesn't work then also do the following:
+      
+      `sudo rm /etc/hostapd/hostapd.conf`
+      
+      `sudo apt-get purge hostapd`
+
+      `sudo rm /etc/dnsmasq.conf`
+      
+      `sudo apt-get purge dnsmasq`
+
+      Within `/etc/network/interfaces` file replace all the uncommented out lines with the default ethernet or wifi interfaces( names) and configurations, whether static or dynamic, your operating system uses.
+      If you are running Debian 8 Jessie:
+      ```
+      # The loopback network interface
+      auto lo
+      iface lo inet loopback
+
+      auto eth0
+      iface eth0 inet dhcp
+
+      auto wlan0
+      iface wlan0 inet dhcp
+      ```
+      Computers need a network card that can make an access point if you want to run `./setup.sh --ap`. Also, in [`Setup/src/ap/default.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/ap/default.conf) change the settings as appropriate to work with the names of your drivers and network interface names.
+
+      Then, restart your computer.
     
     **The basic design is this:**   
     The [`setup.sh`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh) script contains a list of components, which correspond to folders in [`src`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src) (e.g. [`src/backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/backend-qc) which handles setting up the quality control). Each component can have 
@@ -296,12 +325,12 @@ Most of this should be self explanatory, but if you change code, remember to:
 
 The quality control is designed to process the recordings and try to improve the quality of gathered data by giving feedback to the user on the quality, allowing him to improve on the recordings he makes.
 
-This QC uses [Celery](http://www.celeryproject.org/) and a task chaining system to handle load and remain scalable (that's the idea anyway). By processing only a batch of recordings at a time, and then putting the continuation back on the queue as a task.  
+This QC uses [Celery](http://www.celeryproject.org/) and a task chaining system to handle load and remain scalable (that's the idea anyway). By processing only a batch of recordings at a time, and then putting the continuation back on the queue as a task. Celery keeps the chain going, waiting for input from the speaker for a default of 15 minutes until it times out.  
 The QC is located at [`Backend/server-interface/qc`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc).  
 
-See [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py) for configurable parameters, such as how long a process sleeps on an idle task (no more recordings to be processed yet).
+See [`qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py) for configurable parameters, such as how long a process sleeps on an idle task (no more recordings to be processed yet), and how long the timeout is.
 
-QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py). As well as being saved in the [Redis](http://redis.io/) datastore (Redis is also used as a message broker for Celery).
+Once the Celery chain for a speaker session has timed out, the QC reports are dumped on disk at `/data/eyra/qc_reports` or as specified in [`Backend/server-interface/qc/celery_config.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/celery_config.py). As well as being saved in the [Redis](http://redis.io/) datastore (Redis is also used as a message broker for Celery).
 
 Logging is done to `Local/Log/celery.log`. (be careful, still uses loglevel info (might want to change this for release), so the file could get big fast).
 
@@ -315,7 +344,7 @@ Here is an example of the commands needed to run to create the models/files for 
     * `./run.sh`
 
   The files for Marosijo should be located at `local/marosijo.tgz` after you run. Then you need to extract that and put it in a folder called [`qc/modules/MarosijoModule/local`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/modules/MarosijoModule/local).
-* In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/MarosijoGenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts/MarosijoGenGraphs.py) or getting it elsewhere). Each decoding graph corresponds to a single prompt, and in this process you supply the prompts to the genGraphs scripts. It is important that the ids of the prompts supplied match the ids of the prompts in the database. These are then used by the Marosijo module to analyse the recording compared to each prompt. Generating these graphs takes a long time, and depends on the number/length of the prompt list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts) for parallelization of these.  
+* In addition, you need to obtain .scp and .ark files containing the decoded graphs (either by running e.g. [`qc/scripts/MarosijoGenGraphs.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts/MarosijoGenGraphs.py) or getting it elsewhere). Each decoding graph corresponds to a single prompt, and in this process you supply the prompts to the genGraphs scripts. It is important that the ids of the prompts supplied match the ids of the prompts in the database. These are then used by the Marosijo module to analyse the recording compared to each prompt. Generating these graphs takes a long time, and depends on the number/length of the prompt list. Look at [`qc/scripts/genGraphs.sh`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts/genGraphs.sh) for parallelization of these.  
 * Then, to restart Celery run [`./Setup/setup.sh --backend-qc`](https://github.com/Eyra-is/Eyra/tree/master/Setup/setup.sh).
 
 ### Selecting modules to use
