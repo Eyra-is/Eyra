@@ -16,7 +16,7 @@
 #     Matthias Petursson <oldschool01123@gmail.com>
 #     Robert Kjaran <robert@kjaran.com> (getRecordingsInfo)
 
-from flask.ext.mysqldb import MySQL
+from flask_mysqldb import MySQL
 from MySQLdb import Error as MySQLError
 import json
 import os
