@@ -62,7 +62,7 @@ also works on Firefox and Chrome
     The entire Android app, java code and all. IDE used is Android Studio.
 
 * **Backend**  
-    The Flask python code, which handles connections to the MySQL database among other things. Also includes the schema for the database, the entire quality control (QC) and sql code needed for setup. Recordings are saved in `/data/eyra/recordings/` by default (this can be changed in [`app.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/app.py) by changing `app.config['MAIN_RECORDINGS_PATH']`, should be an absolute path). Number of useful scripts in [`scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts) and [`qc/scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts).
+    The Flask python code, which handles connections to the MySQL database among other things. Also includes the schema for the database, the entire quality control (QC) and sql code needed for setup. Recordings are saved in `/data/eyra/recordings/` by default (this can be changed in [`app.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/app.py) by changing `app.config['MAIN_RECORDINGS_PATH']`, should be an absolute path). It should also be changed in [`Setup/src/apache/default.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/apache/default.conf). Number of useful scripts in [`scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts) and [`qc/scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts).
 
 * **Docs**  
     Some additional documentation to this guide and the [README.md](https://github.com/Eyra-is/Eyra/tree/master/README.md).
