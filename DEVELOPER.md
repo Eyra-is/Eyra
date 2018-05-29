@@ -36,7 +36,7 @@ A recommended read as well is the article published on this software, which can 
 
 * MySQL  
 * Python  
-  * Flask  
+  * Flask >= 1.0.2 
 * JavaScript  
   * Grunt
   * AngularJS  
