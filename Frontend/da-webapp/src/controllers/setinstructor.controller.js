@@ -48,7 +48,18 @@ function SetInstructorController($location, $rootScope, $scope, dataService, del
 
   $rootScope.isLoaded = true;
 
+  $scope.newInstructor = util.getConstant('NEWINSTRUCTORTEXT');
+  $scope.fullName = util.getConstant('FULLNAMETEXT');
+  $scope.email = util.getConstant('EMAILTEXT');
+  $scope.phone = util.getConstant('PHONETEXT');
+  $scope.address = util.getConstant('ADRESSTEXT');
+  $scope.idLabel = util.getConstant('IDLABELTEXT');
+  $scope.existingInstructor = util.getConstant('EXISTINGINSTRUCTORTEXT');
 
+  $scope.placeholderName = util.getConstant('FULLNAMEPLACEHOLDERTEXT');
+  $scope.placeholderEmail = util.getConstant('EMAILPLACEHOLDERTEXT');
+  $scope.placeholderPhone = util.getConstant('PHONEPLACEHOLDER');
+  $scope.placeholderAddress = util.getConstant('ADRESSPLACEHOLDER');
   //////////
 
   function submit() {
@@ -73,18 +84,18 @@ function SetInstructorController($location, $rootScope, $scope, dataService, del
               dbService.setInstructorId(instructorId) // set it in local db
                 .then(angular.noop, util.stdErrCallback);
 
-              alert('Instructor submitted to database!');
+              alert(util.getConstant('INSTRUCTORSUBMITALERT'));
 
               $location.path('/main');
             } else {
-              $scope.msg = 'Something went wrong.';
+              $scope.msg = util.getConstant('SOMETINGWRONGERRORMSG');
             }
           } catch (e) {
             logger.error(e);
           }
         },
         function error(response){
-          $scope.msg = 'Error submitting instructor data.';
+          $scope.msg = util.getConstant('SUBMITINSTRUCTORERRORMSG');
           logger.error(response);
         }
       );

@@ -39,7 +39,7 @@
 
 [[ -e  ${1}/pip3.deps ]] && [[ ! -z  "$( cat ${1}/pip3.deps )" ]] && {
   report "Installing dependencies (pip3) " && \
-  sudo pip3 install $(cat ${1}/pip3.deps) && \
+  sudo -H pip3 install $(cat ${1}/pip3.deps) && \
   suc || err
 }
 

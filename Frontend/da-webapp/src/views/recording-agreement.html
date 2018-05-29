@@ -38,11 +38,11 @@ File author/s:
         <form>
             <div class="form-group">
                 <label for="fullName">{{fullNameText}} *</label>
-                <input class="form-control" id="fullName" type="text" ng-model="agrCtrl.fullName" placeholder="Josh Nine" required>
+                <input class="form-control" id="fullName" type="text" ng-model="agrCtrl.fullName" placeholder="{{fullnamePlaceholder}}" required>
             </div>
             <div class="form-group">
                 <label for="email">{{emailText}} *</label>
-                <input class="form-control" id="email" type="email" ng-model="agrCtrl.email" placeholder="email@example.com" required>
+                <input class="form-control" id="email" type="email" ng-model="agrCtrl.email" placeholder="{{emailPlaceholder}}" required>
             </div>
             <button class="form-control btn btn-primary" ng-click="agrCtrl.submit('accept')" value="">
                 {{acceptText}}

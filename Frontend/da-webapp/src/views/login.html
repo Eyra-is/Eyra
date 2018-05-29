@@ -19,14 +19,14 @@ File author/s:
 
 <div class="content vertical-center">
     <div class="data-entry">
-        <h3 class="default-heading">Login</h3>
+        <h3 class="default-heading">{{loginText}}</h3>
         <form ng-submit="loginCtrl.submit()">
             <div class="form-group">
-                <label for="email">Email</label>
-                <input class="form-control" id="email" type="email" ng-model="email" placeholder="josh9@dataacquisition.da">
+                <label for="email">{{emailText}}</label>
+                <input class="form-control" id="email" type="email" ng-model="email" placeholder="{{emailPlaceholder}}">
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">{{passwordText}}</label>
                 <input class="form-control" id="password" type="password" ng-model="password" placeholder="****************">
             </div>
             <button class="form-control btn btn-primary" type="submit" value="">

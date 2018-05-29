@@ -37,6 +37,23 @@ function utilityService(logger) {
   utilityHandler.stdErrCallback = stdErrCallback;
 
   var CONSTANTS = { 
+    //To change to English you must modify these files:
+
+    //-must change "label" in "speaker-info-format.json" to the correct translation
+
+    //-must change evalueation-comments.json:
+      //1. change EVALUATIONCOMMENTSURL in evaluation.controller.js 
+      //2. in evaluation.controller.spec.js change "$httpBackend.whenRoute('GET', 'json/evaluation-comments-isl.json')" to "$httpBackend.whenRoute('GET', 'json/evaluation-comments.json')"
+      //3. in Gruntfil.js change:
+        //"match: /json\/evaluation-comments-isl\.json/g, 
+         //replacement: 'json/evaluation-comments-isl.'+cache_breaker+'.json'"
+         //to
+         // "match: /json\/evaluation-comments\.json/g,
+         // replacement: 'json/evaluation-comments.'+cache_breaker+'.json'"
+
+    //-must change index page: nav bar and loading msg
+
+
     'invalidTitle' : 'no_data.wav', // sentinel value for invalid recordings
     'tokenThreshold' : 5, 
     'tokenGetCount' : 10, 
@@ -51,25 +68,123 @@ function utilityService(logger) {
     'evalSubmitFreq' : 5, // per utterance graded, after X send to server
     'RECAGREEMENT' : true, // include the recording participant agreement
     //language specific constants
+    //evaluation login
+    'ENTERINFO' : 'Fylltu inn þínar upplýsingar', //'Enter your info',
+    'SETTEXT' : 'Sett', //'Set',
+    'NAMEPLACEHOLDERTEXT' : 'Anna4',  //'Jane4',
+    //evaluation 
+    'PLAYTEXT' : 'Spila', //'Play',
+    'PAUSETEXT' : 'Stoppa', //'Pause',
+    'NOTOKENTEXT' : 'Textabútar enn ósóttir.',  //'No prompt yet.',
+    'GRADECOMPLETETEXT' : 'Einkunnagjöf fyrir set lokið. Kærar þakkir.',  //'Grading set complete. Thank you.',
+    'GRADETEXT' : 'Einkunn',  //'Grade'
+    'COMMENTTEXT' : 'Athugasemd',  //'Comment'
+    'UNDOTEXT' : 'Afturkalla',  //'Undo',
+    'AUTOPLAYTEXT' : 'Sjálfvirk spilun',  //'Autoplay',
+    'UTTGRADEDTEXT' : 'Frasar yfirfarnir',  //'Utterances graded',
+    'USERTEXT' : 'Notandi',  //'User',
+    'SETTEXTMIN' : 'sett',  //'set',
+    //info
+    'VERSIONTEXT' : 'Útgáfa',  //'Version',
+    //login
+    'LOGINTEXT' : 'Innskráning',  //'Login',
+    'PASSWORDTEXT' : 'Lykilorð',  //'Password',
     //main
-    'STARTTEXT' : 'Byrja',
+    'STARTTEXT' : 'Byrja',  //'Begin',
+    //more
+    'ADDSPEAKERTEXT' : 'Bæta við ræðumanni',  //'Add speaker',
+    'SETINSTRUCTORTEXT' : 'Bæta við leiðbeinanda',  //'Set instructor',
+    'REGISTERDEVICETEXT' : 'Skrá tæki',  //'Register device',
+    'LOGOUTTEXT' : 'Útskráning',  //'Logout',
+    'GETTOKENTEXT' : 'Sækja textabúta (dev)',  //'Get tokens (dev)',
+    'CLEARDBTEXT' : 'Hreinsa staðbundin gögn (dev)',  //'Clear local db (dev)',
+    'CLEARTOKENSDBTEXT' : 'Hreinsa alla textabúta (dev)',  //'Clear all tokens (dev)',
+    'PRINTLOGSTEXT' : 'Skrifa út atburðaskrár (dev)',  //'Print logs (dev)',
+    'CONFIRMMSG' : 'Are you sure?\nThis will delete the entire local db, including tokens and recordings.',
+    'CLEARINGDBMSG' : 'Hreinsa allt staðbundna gagnasafnið...',  //'Clearing entire local db...',
+    'DBCLEAREDALERT' : 'Gagnasafn hreinsað!',  //'Database cleared!',
+    'DBCLEAREDMSG' : 'Gagnasafn hreinsað.',  //'Database cleared.',
+    'CLEARINGTOKENSMSG' : 'Hreinsa textabúta...',  //'Clearing tokens...',
+    'TOKENSCLEARSALERT' : 'Allir textabútar farnir!',  //'All tokens gone!',
+    'TOKENSCLEARSMSG' : 'Textabútum eytt.',  //'Tokens deleted.',
+    'GETTINGTOKENSMSG' : 'Sæki textabúta...',  //'Getting tokens...',
+    'TOKENSACQUIREDALERT' : 'Textabútar sóttir!',  //'Tokens acquired!',
+    'TOKENSACQUIREDMSG' : 'Textabútar sóttir.',  //'Tokens acquired.',
+    'SYNCINGMSG' : 'Samstilli gögn - vinsamlegst bíðið',  //'Syncing - please wait',
+    'SYNCCOMPLETEMSG' : 'Samstillingu lokið.',  //'Sync complete.',
+    'SYNCFAILEDMSG' : 'Textabútar sóttir.',  //'Tokens acquired.',
     //recording agreement
-    'FULLNAMETEXT' : 'Full name',
-    'EMAILTEXT' : 'Netfang',
-    'ACCEPTTEXT' : 'Accept', //
-    'DECLINETEXT' : 'Decline',
+    'FULLNAMETEXT' : 'Fullt nafn',  //'Full name',
+    'EMAILTEXT' : 'Netfang',  //'Email',
+    'ACCEPTTEXT' : 'Samþykkja',   //'Accept', 
+    'DECLINETEXT' : 'Hafna',  //'Decline',
+    //speaker info
+    'INFOHEADINGTEXT' : 'Vinsamlegast veldu þá möguleika sem eiga við þig',  //'Enter your info',
     //start
-    'INFOHEADINGTEXT' : 'Vinsamlegast veldu þá möguleika sem eiga við þig',
-    'USERNAMETEXT' : 'Notendanafn',
-    'DONEBEFORETEXT' : 'Ég hef notað Eyra áður?',
+    'STARTHEADINGTEXT' : 'Vinsamlegast fylltu inn þá möguleika sem eiga við þig',  //'Enter your info',
+    'USERNAMETEXT' : 'Notendanafn',  //'Username',
+    'DONEBEFORETEXT' : 'Ég hef notað Eyra áður',  //'Done this before?', 
     //recording
-     'RECTEXT' : 'Taka upp', // text under rec button
-     'STOPTEXT' : 'Stopp',
-     'SKIPTEXT' : 'Sleppa',
-     'PROMPTSREADTEXT' : 'Lesnir textar:',
-     //error messages
-     'APPINITIALIZATIONFAILMSG' : 'App failed to initialize. Try refreshing the page and check your connection.',
-     'GETPROMPTSMSGTEXT' : 'Getting prompts  - Please wait'
+     'RECTEXT' : 'Taka upp', //'Rec', //text under rec button
+     'STOPTEXT' : 'Stopp',  //'Stop',
+     'SKIPTEXT' : 'Sleppa',  //'Skip',
+     'PROMPTSREADTEXT' : 'Lesnir textar:',  //'Prompts read:',
+     'UTTQUALITYTEXT' : 'Gæði lesinna frasa',  //'Quality of utts',
+     'UTTUPLOADEDTEXT' : 'Frösum hlaðið upp',  //'Utterances uploaded',
+     'INITTOKENTEXT' : 'Smelltu á \'Taka upp\' til að fá textabrot',  //'Hit \'Rec\' for prompt',
+     'RECORDINGNOWTEXT' : 'Tek upp...',  //'Recording now...',
+     'WAITINGFORTOKENTEXT' : 'Bíð eftir nýjum textabút...',  //'Waiting for new token...',
+     'TOKENSKIPPEDTEXT' : 'Textabút sleppt',  //'Token skipped',
+     'STOPPEDTEXT' : 'Stöðvað',  //'Stopped',
+     'NOMORETOKENSTEXT' : 'Engir fleiri textabútar. Endurræstu forritið með nettengingu fyrir fleiri.',  //'No more tokens. Restart app with internet connection for more.',
+     //register device
+     'IMEIDEVICETEXT' : 'IMEI/Device ID',  //'IMEI/Device ID',
+     'DEVICEINFOALERT' : 'Upplýsingar tækis skráðar!',  //'Device info submitted!',
+     'DEVICESUBMITERRORMSG' : 'Villa við að skrá tæki.',  //'Error submitting device.',
+     //report
+     'REPORTTEXT' : 'Tilkynna',  //'Report',
+     'CLICKTOCONTINUETEXT' : 'smelltu fyrir neðan til að halda áfram',  //'click below to continue',
+     //set instructor
+     'NEWINSTRUCTORTEXT' : 'Nýr leiðbeinandi',  //'New instructor',
+     'PHONETEXT' : 'Sími',  //'Phone',
+     'ADRESSTEXT' : 'Heimilisfang',  //'Address',
+     'IDLABELTEXT' : 'ID',  //'ID',
+     'EXISTINGINSTRUCTORTEXT' : 'Leiðbeinandi þegar skráður',  //'Existing instructor',
+     'FULLNAMEPLACEHOLDERTEXT' : 'Jón Jónsson',  //'Jane Doe',
+     'EMAILPLACEHOLDERTEXT' : 'postur@netfang.is',  //'email@example.com',
+     'PHONEPLACEHOLDER' : '7777777',  //'7777777',
+     'ADRESSPLACEHOLDER' : 'Aðalgata 11',  //'21 Example Lane',
+     'INSTRUCTORSUBMITALERT' : 'Leiðbeinandi skráður í gagnagrunn!',  //'Instructor submitted to database!',
+    //sync
+    'SYNCTEXT' : 'Samstilla',  //'Sync',
+    'BACKTORECTEXT' : 'Til baka í upptöku',  //'Back to recording',
+    'UTTRECTEXT' : 'Frasar hljóðritaðir',  //'Utterances recorded',
+    'UTTUPLTEXT' : 'Frasar hlaðnir upp',  //'Utterances uploaded',
+    'UTTRECNOTUPLTEXT' : 'Frasar hljóðritaðir & ekki hlaðnir upp',  //'Utterances recorded &amp; not uploaded',
+    'PROMPTSDOWNLTEXT' : 'Sóttir textabútar',  //'Prompts downloaded:',
+     //error messages\
+    'SPEAKEREXISTSERRORMSG' : 'Ræðumaður þegar í gagnagrunni. Veldu annað nafn, nema þú hafir gert þetta áður á þessu tæki, hakaðu þá í boxið.',  //'Speaker already in database. Choose a different name, unless you have done this before on this device, then tick the box.',
+    'ACCEPTPARTICIPATIONMSG' : 'Eitthvað fór úrskeiðis, samþykktir þú skilmála?',  // 'Something is wrong, did you accept the participant agreement?',
+    'RENDERPAGEERRORMSG' : 'Villa við að birta síðu.',  //'Error rendering page.',
+    'SUBMITINSTRUCTORERRORMSG' : 'Villa við að skrá gögn leiðbeinanda.',  //'Error submitting instructor data.',
+    'SPEAKERINFOERRORMSG' : 'Gat ekki uppfært speakerInfo í ldb',  //'Could not update speakerInfo into ldb',
+    'TOKENSREADERRORMSG' : 'Gat ekki lesið tokensRead teljara frá ldb',  //'Could not read tokensRead counter from ldb',
+    'COMMENTMISSINGMSG' : 'Vinsamlegast gerðu grein fyrir einkunnagjöfinni.',  //'Please comment on your grade.',
+    'LISTENMSG' : 'Vinsamlegast hlýddu á upptökuna.', //'Please listen to the recording.',
+    'FETCHERRORMSG' : 'Gat ekki fundið laus sett. Ertu með nettengingu?', //'Couldn\'t grab available sets. Are you online?',
+    'USERNAMEERRORMSG' : 'Vinsamlegast fylltu inn notendanafn.',  //'Please type a username.',
+    'SETERRORMSG' : 'Vinsamlegast veldu sett.',  //'Please select a set.',
+    'USERSETERRORMSG' : 'Fylltu inn notendanafn og veldu sett',  //'Type a username and select a set',
+    'APPINITIALIZATIONFAILMSG' : 'Forrit tókst ekki að ræsa. Reyndu að endurhlaða síðunni og athuga nettengingu',  //'App failed to initialize. Try refreshing the page and check your connection.',
+    'GETPROMPTSMSGTEXT' : 'Sæki textabúta  - Vinsamlegast bíðið',  //'Getting prompts  - Please wait',
+    'WAITINGTEXT' : 'Vinsamlegast bíðið',  //'Please wait',
+    'FAILEDTOGETTOKENS' : 'Tókst ekki að sækja textabúta',  //'Failed to get tokens',
+    'PLAYBACKERRORMSG' : 'Eitthvað fór úrskeiðis við spilun hljóðs.',  //'Something went wrong with the audio playback.',
+    'SOMETINGWRONGERRORMSG' : 'Eitthvað fór úrskeiðis.',  //'Something went wrong.',
+    'FETCHCOMMENTERRORMSG' : 'Eitthvað fór úrskeiðis við að sækja athugasemdir frá netþjóni',  //'Something went wrong grabbing comments from server.',
+    'LOGINERRORMSG' : 'Villa við innskráningu',  //'Failed to login',
+    'NAMEANDEMAILMISSINGMSG' : 'Vinsamlegast skráðu nafn og netfang.',  //'Please type your name and email.',
+    'MUSTACCEPTMSG' : 'Þú verður að samþykkja skilmála til að halda áfram.',  //'You have to accept the agreement to continue.',
   };
   
 

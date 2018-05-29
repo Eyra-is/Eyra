@@ -22,6 +22,6 @@ File author/s:
 
 source schema_setup.sql
 source populate_db.sql
--- source malromur_toks.sql
--- source invalidate_tokens.sql
+source malromur_toks.sql
+source invalidate_tokens.sql
 source permissions.sql

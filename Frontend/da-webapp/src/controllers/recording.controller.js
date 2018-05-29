@@ -75,7 +75,9 @@ function RecordingController($q,
   recCtrl.action = action;
   recCtrl.skip = skip;
   $scope.skipText = util.getConstant('SKIPTEXT');
-  $scope.promptsReadText = util.getConstant('PROMPTSREADTEXT')
+  $scope.promptsReadText = util.getConstant('PROMPTSREADTEXT');
+  $scope.uttQuality = util.getConstant('UTTQUALITYTEXT');
+  $scope.uttUploaded = util.getConstant('UTTUPLOADEDTEXT');
 
   $scope.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;
@@ -93,7 +95,7 @@ function RecordingController($q,
   $scope.actionGlyph = RECGLYPH;
   $scope.hide_playback = true;
 
-  var currentToken = {'id':0, 'token': 'Smelltu á \'Taka upp\' að fá textabrot'};
+  var currentToken = {'id':0, 'token': util.getConstant('INITTOKENTEXT')};
   recCtrl.displayToken = currentToken['token'];
 
   sessionService.setStartTime(new Date().toISOString());
@@ -175,7 +177,7 @@ function RecordingController($q,
           miscDbService.setSpeaker(speaker, speakerInfo).then(
             angular.noop,
             function error(value){
-              $scope.msg = 'Could not update speakerInfo into ldb';
+              $scope.msg =  util.getConstant('SPEAKERINFOERRORMSG');
               logger.error(value);
             }
           );
@@ -186,7 +188,7 @@ function RecordingController($q,
         }
       },
       function error(value){
-        $scope.msg = 'Could not read tokensRead counter from ldb';
+        $scope.msg =  util.getConstant('TOKENSREADERRORMSG');
         logger.error(value);
       }
 
@@ -224,7 +226,7 @@ function RecordingController($q,
   }
 
   function record() {
-    $scope.msg = 'Recording now...';
+    $scope.msg = util.getConstant('RECORDINGNOWTEXT');
 
     recCtrl.skipBtnDisabled = false;
     if (actionType === 'record') {
@@ -234,7 +236,7 @@ function RecordingController($q,
 
     recService.record();
 
-    currentToken = {'id':0, 'token':'Waiting for new token...'};    
+    currentToken = {'id':0, 'token': util.getConstant('WAITINGFORTOKENTEXT')};    
 
     // show token on record/newToken button hit
     tokenService.nextToken().then(function(token){
@@ -275,7 +277,7 @@ function RecordingController($q,
               if (sessionId) {
                 dataService.set('sessionId', sessionId); // set it in ram
               } else {
-                $scope.msg = 'Something went wrong.';
+                $scope.msg = util.getConstant('SOMETINGWRONGERRORMSG');
               }
             } catch (e) {
               logger.error(e);
@@ -340,7 +342,7 @@ function RecordingController($q,
   }
 
   function skip() {
-    $scope.msg = 'Token skipped.';
+    $scope.msg = util.getConstant('TOKENSKIPPEDTEXT');
 
     if (currentToken.id !== 0) {
       stop(false);
@@ -349,7 +351,7 @@ function RecordingController($q,
   }
 
   function stop(valid) {
-    $scope.msg = 'Stopped.';
+    $scope.msg = util.getConstant('STOPPEDTEXT');
 
     recCtrl.actionBtnDisabled = true;
     recCtrl.skipBtnDisabled = true;

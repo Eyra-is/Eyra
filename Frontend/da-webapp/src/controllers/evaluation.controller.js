@@ -50,16 +50,27 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   evalCtrl.skipBtnDisabled = false;
   evalCtrl.undoBtnDisabled = true;
 
+  $scope.grade = util.getConstant('GRADETEXT');
+  $scope.comment = util.getConstant('COMMENTTEXT');
+  $scope.skip = util.getConstant('SKIPTEXT');
+  $scope.undo = util.getConstant('UNDOTEXT');
+  $scope.autoplay = util.getConstant('AUTOPLAYTEXT');
+  $scope.uttGraded = util.getConstant('UTTGRADEDTEXT');
+  $scope.user = util.getConstant('USERTEXT');
+  $scope.set = util.getConstant('SETTEXTMIN');
+
   var actionType = 'play'; // current state
 
-  var PLAYTEXT = 'Play'; // text under the buttons
-  var PAUSETEXT = 'Pause';
+  var PLAYTEXT = util.getConstant('PLAYTEXT'); // text under the buttons
+  var PAUSETEXT = util.getConstant('PAUSETEXT');
   var PLAYGLYPH = 'glyphicon-play'; // bootstrap glyph class
   var PAUSEGLYPH = 'glyphicon-pause';
   evalCtrl.actionText = PLAYTEXT;
   evalCtrl.actionGlyph = PLAYGLYPH;
 
-  var EVALUATIONCOMMENTSURL = 'json/evaluation-comments.json';
+
+  //var EVALUATIONCOMMENTSURL = 'json/evaluation-comments-isl.json'; //uncomment for English
+  var EVALUATIONCOMMENTSURL = 'json/evaluation-comments-isl.json'; //comment out for English
   evalCtrl.commentOpts = [];
 
   evalCtrl.currentUser = dataService.get('currentUser');
@@ -74,7 +85,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   if (audioPlayback) {
     audioPlayback.addEventListener('ended', audioEnded);
   } else {
-    $scope.msg = 'Something went wrong with the audio playback.';
+    $scope.msg = util.getConstant('PLAYBACKERRORMSG');
   }
 
   activate();
@@ -82,7 +93,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   ////////// 
   
   function activate() {
-    evalCtrl.displayToken = 'No prompt yet.';
+    evalCtrl.displayToken = util.getConstant('NOTOKENTEXT');
     evalCtrl.uttsGraded = 0;
     evalCtrl.setCount = '?';
     evalCtrl.comments = '';
@@ -102,12 +113,12 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
               logger.log('Ready for evaluation.');
             },
             function error(error) {
-              $scope.msg = 'Something went wrong.';
+              $scope.msg = util.getConstant('SOMETINGWRONGERRORMSG');
               logger.error(error);
             });
         }, 
         function error(response){
-          $scope.msg = 'Something went wrong.';
+          $scope.msg = util.getConstant('SOMETINGWRONGERRORMSG');
           logger.error(response);
         }
       )
@@ -119,13 +130,13 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
               evalCtrl.commentOpts = response.data;
             },
             function error(response) {
-              $scope.msg = 'Something went wrong grabbing comments from server.';
+              $scope.msg = util.getConstant('FETCHCOMMENTERRORMSG');
               logger.error(response);
             }
           );
         },
         function error(response){
-          $scope.msg = 'Something went wrong.';
+          $scope.msg = util.getConstant('SOMETINGWRONGERRORMSG');
           logger.error(response);
         }
       )
@@ -223,7 +234,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
         }, 
         function error(error) {
           logger.error(error);
-          $scope.msg = 'Something went wrong.';
+          $scope.msg = util.getConstant('SOMETINGWRONGERRORMSG');
           playbackReady.reject(false);
         }
       );
@@ -256,7 +267,7 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   }
 
   function setCompleteCallback() {
-    $scope.msg = 'Grading set complete. Thank you.';
+    $scope.msg = util.getConstant('GRADECOMPLETETEXT');
     isSetComplete = true;
     disableAllControls();
   }
@@ -315,13 +326,13 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
 
       // if grade is low (2 or lower) make comment mandatory
       if (evalCtrl.comments === '' && evalCtrl.grade <= 2) {
-        $scope.msg = 'Please comment on your grade.';
+        $scope.msg = util.getConstant('COMMENTMISSINGMSG');
         evalCtrl.grade = undefined;
         return;
       }
       // make evaluator at least have started listening
       if (audioPlayback.currentTime === 0 && !undoFlag) {
-        $scope.msg = 'Please listen to the recording.';
+        $scope.msg = util.getConstant('LISTENMSG');
         evalCtrl.grade = undefined;
         return;
       }

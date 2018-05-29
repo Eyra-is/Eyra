@@ -39,6 +39,8 @@ function RecordingAgreementController($document, $location, $scope, $rootScope, 
   $scope.emailText = util.getConstant('EMAILTEXT');
   $scope.acceptText = util.getConstant('ACCEPTTEXT');
   $scope.declineText = util.getConstant('DECLINETEXT');
+  $scope.emailPlaceholder = util.getConstant('EMAILPLACEHOLDERTEXT');
+  $scope.fullnamePlaceholder = util.getConstant('FULLNAMEPLACEHOLDERTEXT');
 
   var agreementId = $document[0].getElementById('agreement-id').attributes['agreement-id'].value;
   dataService.set('agreementId', agreementId);
@@ -49,7 +51,7 @@ function RecordingAgreementController($document, $location, $scope, $rootScope, 
 
   function submit(choice) {
     if (!agrCtrl.fullName || !agrCtrl.email) {
-      $scope.msg = 'Please type your name and email.';
+      $scope.msg = util.getConstant('NAMEANDEMAILMISSINGMSG');;
       return;
     }
 
@@ -65,7 +67,7 @@ function RecordingAgreementController($document, $location, $scope, $rootScope, 
       logger.log('Agreement declined, cannot record unless accepted.');
       $rootScope.agreementSigned = false;
 
-      $scope.msg = 'You have to accept the agreement to continue.';
+      $scope.msg = util.getConstant('MUSTACCEPTMSG');;
     }
   }
 }

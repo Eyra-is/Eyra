@@ -36,7 +36,7 @@ A recommended read as well is the article published on this software, which can 
 
 * MySQL  
 * Python  
-  * Flask  
+  * Flask >= 1.0.2
 * JavaScript  
   * Grunt
   * AngularJS  
@@ -260,7 +260,7 @@ along with other misc stuff.
 * [`token.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/token.service.js)  
   Service to query and process tokens from server.
 * [`utility.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/utility.service.js)  
-  Service with utility functions for the app, commonly abbreviated `util`.
+  Service with utility functions for the app, commonly abbreviated `util`. It containes language specific constants, used to make it easy to translate the app/site to other languages. Most strings have been moved here and it is a good place to start when translating to another language.
   Also contains many configurable aspects, token count grabbed from server, frequency of QC querying etc., see also [`app.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/app.js).
 * [`volumeMeter.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/volumeMeter.service.js)  
   Service for the volume meter, uses [volume-meter.js](https://github.com/Eyra-is/Eyra/blob/master/Frontend/da-webapp/src/volume_meter/volume-meter.js). Code in part from https://github.com/cwilso/volume-meter
