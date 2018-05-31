@@ -69,8 +69,8 @@ function EvaluationController($document, $http, $q, $rootScope, $scope, $timeout
   evalCtrl.actionGlyph = PLAYGLYPH;
 
 
-  //var EVALUATIONCOMMENTSURL = 'json/evaluation-comments.json'; //uncomment for English
-  var EVALUATIONCOMMENTSURL = 'json/evaluation-comments-isl.json'; //comment out for English
+  var EVALUATIONCOMMENTSURL = 'json/evaluation-comments.json'; //uncomment for English
+  //var EVALUATIONCOMMENTSURL = 'json/evaluation-comments-isl.json'; //comment out for English
   evalCtrl.commentOpts = [];
 
   evalCtrl.currentUser = dataService.get('currentUser');

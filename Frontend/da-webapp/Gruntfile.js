@@ -210,10 +210,10 @@ module.exports = function(grunt) {
               replacement: 'json/speaker-info-format.'+cache_breaker+'.json'
             },
             {
-              //match: /json\/evaluation-comments\.json/g, //uncomment for English
-              //replacement: 'json/evaluation-comments.'+cache_breaker+'.json' //uncomment for English
-              match: /json\/evaluation-comments-isl\.json/g,
-              replacement: 'json/evaluation-comments-isl.'+cache_breaker+'.json'
+              match: /json\/evaluation-comments\.json/g, //uncomment for English
+              replacement: 'json/evaluation-comments.'+cache_breaker+'.json' //uncomment for English
+              //match: /json\/evaluation-comments-isl\.json/g,
+              //replacement: 'json/evaluation-comments-isl.'+cache_breaker+'.json'
             }
           ]
         },
