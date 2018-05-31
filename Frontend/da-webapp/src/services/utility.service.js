@@ -42,9 +42,8 @@ function utilityService(logger) {
     //-must change "label" in "speaker-info-format.json" to the correct translation
 
     //-must change evalueation-comments.json:
-      //1. change EVALUATIONCOMMENTSURL in evaluation.controller.js 
-      //2. in evaluation.controller.spec.js change "$httpBackend.whenRoute('GET', 'json/evaluation-comments-isl.json')" to "$httpBackend.whenRoute('GET', 'json/evaluation-comments.json')"
-      //3. in Gruntfil.js change:
+      //1. change EVALUATIONCOMMENTSURL in evaluation.controller.js from 'json/evaluation-comments.json' to 'json/evaluation-comments-isl.json'
+      //2. in Gruntfil.js change:
         //"match: /json\/evaluation-comments-isl\.json/g, 
          //replacement: 'json/evaluation-comments-isl.'+cache_breaker+'.json'"
          //to
@@ -77,8 +76,8 @@ function utilityService(logger) {
     'PAUSETEXT' : 'Stoppa', //'Pause',
     'NOTOKENTEXT' : 'Textabrot enn ósótt.',  //'No prompt yet.',
     'GRADECOMPLETETEXT' : 'Einkunnagjöf fyrir sett lokið. Kærar þakkir.',  //'Grading set complete. Thank you.',
-    'GRADETEXT' : 'Einkunn',  //'Grade'
-    'COMMENTTEXT' : 'Athugasemd',  //'Comment'
+    'GRADETEXT' : 'Einkunn',  //'Grade',
+    'COMMENTTEXT' : 'Athugasemd',  //'Comment',
     'UNDOTEXT' : 'Afturkalla',  //'Undo',
     'AUTOPLAYTEXT' : 'Sjálfvirk spilun',  //'Autoplay',
     'UTTGRADEDTEXT' : 'Frasar yfirfarnir',  //'Utterances graded',
@@ -128,7 +127,7 @@ function utilityService(logger) {
      'RECTEXT' : 'Taka upp', //'Rec', //text under rec button
      'STOPTEXT' : 'Stopp',  //'Stop',
      'SKIPTEXT' : 'Sleppa',  //'Skip',
-     'PROMPTSREADTEXT' : 'Lesnir textar:',  //'Prompts read:',
+     'PROMPTSREADTEXT' : 'Lesnir textar:',  //'Prompts read',
      'UTTQUALITYTEXT' : 'Gæði lesinna frasa',  //'Quality of utts',
      'UTTUPLOADEDTEXT' : 'Frösum hlaðið upp',  //'Utterances uploaded',
      'INITTOKENTEXT' : 'Smelltu á \'Taka upp\' til að fá textabrot',  //'Hit \'Rec\' for prompt',

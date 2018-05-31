@@ -58,8 +58,7 @@ describe('evaluation controller', function(){
         // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
         return [200, '{"progress":2}'];
       });
-    //$httpBackend.whenRoute('GET', 'json/evaluation-comments.json') //uncomment for English
-    $httpBackend.whenRoute('GET', 'json/evaluation-comments-isl.json') //comment out for English
+    $httpBackend.whenRoute('GET', 'json/evaluation-comments.json') //uncomment for English
     .respond(function(method, url, data, headers, params) {
       // for url of '/user/1234/article/567' params is {user: '1234', article: '567'}
       return [200, '["comment1", "comment2"]'];
