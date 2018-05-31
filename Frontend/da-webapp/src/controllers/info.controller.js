@@ -23,13 +23,13 @@ File author/s:
 angular.module('daApp')
 .controller('InfoController', InfoController);
 
-InfoController.$inject = ['$scope', '$rootScope'];
+InfoController.$inject = ['$scope', '$rootScope', 'utilityService'];
 
-function InfoController($scope, $rootScope) {
+function InfoController($scope, $rootScope, utilityService) {
   var infoCtrl = this;
-
+  var util = utilityService;
   $scope.msg = '';
-
+  $scope.version = util.getConstant('VERSIONTEXT');  
   $rootScope.isLoaded = true;
   
   //////////

@@ -32,7 +32,9 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
   
   sinfoCtrl.submit = submit;
   $scope.msg = '';
+  $scope.infoHeadingText = util.getConstant('INFOHEADINGTEXT');
 
+  
   var speakerName = dataService.get('speakerName'); // speakerName should be set from start.html
   if (!speakerName || speakerName === '') {
     logger.error('No speaker name. Setting default.');
@@ -48,7 +50,7 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
       $rootScope.isLoaded = true;
     },
     function error(response) {
-      $scope.msg = 'Error rendering page.';
+      $scope.msg = util.getConstant(RENDERPAGEERRORMSG);
 
       logger.error(response);
     }
@@ -71,7 +73,7 @@ function SpeakerInfoController($http, $location, $rootScope, $scope, dataService
       var fullName = dataService.get('fullName');
       var email = dataService.get('email');
       if (!fullName || !email) {
-        $scope.msg = 'Something is wrong, did you accept the participant agreement?';
+        $scope.msg = util.getConstant(ACCEPTPARTICIPATIONMSG);
       }
       speakerInfo.fullName = fullName;
       speakerInfo.email = email;

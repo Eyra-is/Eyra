@@ -23,18 +23,24 @@ File author/s:
 angular.module('daApp')
 .controller('LoginController', LoginController);
 
-LoginController.$inject = ['$http', '$location', '$rootScope', '$scope', 'authenticationService', 'logger'];
+LoginController.$inject = ['$http', '$location', '$rootScope', '$scope', 'authenticationService', 'logger', 'utilityService'];
 
-function LoginController($http, $location, $rootScope, $scope, authenticationService, logger) {
+function LoginController($http, $location, $rootScope, $scope, authenticationService, logger, utilityService) {
   var loginCtrl = this;
   var authService = authenticationService;
-  
+  var util = utilityService;
+
   loginCtrl.submit = submit;
 
   $scope.email = '';
   $scope.password = '';
   $rootScope.isLoaded = true;
 
+  
+  $scope.loginText = util.getConstant('LOGINTEXT');
+  $scope.emailText = util.getConstant('EMAILTEXT');
+  $scope.passwordText = util.getConstant('PASSWORDTEXT');
+  $scope.emailPlaceholder = util.getConstant('EMAILPLACEHOLDERTEXT');
   
   //////////
 
@@ -56,7 +62,7 @@ function LoginController($http, $location, $rootScope, $scope, authenticationSer
             $location.path('/more');
         },
         function error(res) {
-            $scope.msg = 'Failed to login.';
+            $scope.msg =  util.getConstant('LOGINERRORMSG');
             logger.error(res); // DEBUG ONLY 
         }
     );

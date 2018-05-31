@@ -50,6 +50,14 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
   $scope.recsSaved = 0;
   $scope.tokensDownloaded = 0;
 
+  $scope.sync = util.getConstant('SYNCTEXT');
+  $scope.backToRec = util.getConstant('BACKTORECTEXT');
+  $scope.uttRec = util.getConstant('UTTRECTEXT');
+  $scope.uttUpl = util.getConstant('UTTUPLTEXT');
+  $scope.uttRecNotUpl = util.getConstant('UTTRECNOTUPLTEXT');
+  $scope.promptsDownl = util.getConstant('PROMPTSDOWNLTEXT');
+
+
   activate();
   
   //////////

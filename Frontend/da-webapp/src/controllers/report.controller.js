@@ -23,12 +23,15 @@ File author/s:
 angular.module('daApp')
 .controller('ReportController', ReportController);
 
-ReportController.$inject = ['$location', '$rootScope', '$sce', '$scope', 'dataService'];
+ReportController.$inject = ['$location', '$rootScope', '$sce', '$scope', 'dataService', 'utilityService'];
 
-function ReportController($location, $rootScope, $sce, $scope, dataService) {
+function ReportController($location, $rootScope, $sce, $scope, dataService, utilityService) {
   var reportCtrl = this;
+  var util = utilityService;
 
   $scope.msg = '';
+  $scope.report = util.getConstant('REPORTTEXT');
+  $scope.clickToContinue = util.getConstant('CLICKTOCONTINUETEXT');
   // https://docs.angularjs.org/api/ngSanitize/service/$sanitize
   $scope.DisplayReport = function() {
     return $sce.trustAsHtml(dataService.get('DisplayReport') || '<p>Nothing to report.</p>');

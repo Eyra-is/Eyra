@@ -35,6 +35,10 @@ function StartController($location, $rootScope, $scope, dataService, localDbMisc
   startCtrl.speakerName = '';
   startCtrl.comments = '';
   startCtrl.doneBefore = false;
+  $scope.infoHeadingText = util.getConstant('STARTHEADINGTEXT');
+  $scope.usernameText = util.getConstant('USERNAMETEXT');
+  $scope.doneBeforeText = util.getConstant('DONEBEFORETEXT');
+  $scope.namePlaceholder = util.getConstant('NAMEPLACEHOLDERTEXT');
 
   $scope.msg = '';
 
@@ -45,7 +49,7 @@ function StartController($location, $rootScope, $scope, dataService, localDbMisc
   function submit() {
     // validate inputs here if needed
     if (startCtrl.speakerName === '') {
-      $scope.msg = 'You have to type a username.';
+      $scope.msg = util.getConstant('USERNAMEERRORMSG');
       return;
     }
     if (startCtrl.comments === '') {
@@ -67,7 +71,7 @@ function StartController($location, $rootScope, $scope, dataService, localDbMisc
             // speaker has done this before, and is in db, go record!
             $location.path('/recording');
           } else {
-            $scope.msg = 'Speaker already in database. Choose a different name, unless you have done this before on this device, then tick the box.';
+            $scope.msg = util.getConstant('SPEAKEREXISTSERRORMSG');
           }
         } else {
           // speaker doesn't exist
@@ -75,7 +79,7 @@ function StartController($location, $rootScope, $scope, dataService, localDbMisc
         }
       },
       function error(value){
-        $scope.msg = 'Something went wrong.';
+        $scope.msg = util.getConstant('SOMETINGWRONGERRORMSG');
         logger.error(value);
       }
     );

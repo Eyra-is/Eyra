@@ -19,33 +19,33 @@ File author/s:
 
 <div class="content vertical-center">
     <div class="data-entry">
-        <h3 class="default-heading">New instructor</h3>
+        <h3 class="default-heading">{{newInstructor}}</h3>
         <form ng-submit="setiCtrl.submit()">
             <div class="form-group">
-                <label for="name">Full name *</label>
-                <input class="form-control" id="name" type="text" ng-model="setiCtrl.name" placeholder="Jane Doe" required>
+                <label for="name">{{fullName}} *</label>
+                <input class="form-control" id="name" type="text" ng-model="setiCtrl.name" placeholder="{{placeholderName}}" required>
             </div>
             <div class="form-group">
-                <label for="email">Email *</label>
-                <input class="form-control" id="email" type="email" ng-model="setiCtrl.email" placeholder="email@example.com" required>
+                <label for="email">{{email}} *</label>
+                <input class="form-control" id="email" type="email" ng-model="setiCtrl.email" placeholder="{{placeholderEmail}}" required>
             </div>
             <div class="form-group">
-                <label for="phone">Phone</label>
-                <input class="form-control" id="phone" type="tel" ng-model="setiCtrl.phone" placeholder="7777777" 
+                <label for="phone">{{phone}}</label>
+                <input class="form-control" id="phone" type="tel" ng-model="setiCtrl.phone" placeholder="{{placeholderPhone}}" 
                 pattern="[\d-\(\)\+ ]+">
             </div>
             <div class="form-group">
-                <label for="address">Address</label>
-                <input class="form-control" id="address" type="text" ng-model="setiCtrl.address" placeholder="21 Example Lane">
+                <label for="address">{{address}}</label>
+                <input class="form-control" id="address" type="text" ng-model="setiCtrl.address" placeholder="{{placeholderAddress}}">
             </div>
             <button class="form-control btn btn-primary" type="submit" value="">
                 <span class="glyphicon glyphicon-ok"></span>
             </button>
         </form>
-        <h3 class="default-heading">Existing instructor</h3>
+        <h3 class="default-heading">{{existingInstructor}}</h3>
         <form ng-submit="setiCtrl.submit()">
             <div class="form-group">
-                <label for="instructorId">ID</label>
+                <label for="instructorId">{{idLabel}}</label>
                 <input class="form-control" id="instructorId" type="number" ng-model="setiCtrl.instructorId" placeholder="1" required>
             </div>
             <button class="form-control btn btn-primary" type="submit" value="">

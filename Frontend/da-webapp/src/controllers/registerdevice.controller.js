@@ -43,6 +43,7 @@ function RegisterDeviceController($location, $rootScope, $scope, dataService, de
   regdCtrl.imei = ''; // device hardcoded ID, btw many phones can display this by dialing *#06#
   $rootScope.isLoaded = true;
 
+  $scope.deviceIdLabel = util.getConstant('IMEIDEVICETEXT');
   
   //////////
 
@@ -57,12 +58,12 @@ function RegisterDeviceController($location, $rootScope, $scope, dataService, de
       delService.submitDevice(device).then(
         function success(response) {
 
-          alert('Device info submitted!');
+          alert(util.getConstant('DEVICEINFOALERT'));
 
           $location.path('/main');
         },
         function error(response) {
-          $scope.msg = 'Error submitting device.';
+          $scope.msg = util.getConstant('DEVICESUBMITERRORMSG');
           logger.error(response);
         }
       );
