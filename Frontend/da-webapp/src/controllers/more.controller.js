@@ -54,9 +54,9 @@ function MoreController($location, $rootScope, $scope, dataService, authenticati
 
   $rootScope.isLoaded = true;
   
-  $scope.addSp = util.getConstant('ADDSPEAKERTEXT');
-  $scope.setIns = util.getConstant('SETINSTRUCTORTEXT');
-  $scope.registerDev = util.getConstant('REGISTERDEVICETEXT');
+  $scope.addSpeaker = util.getConstant('ADDSPEAKERTEXT');
+  $scope.setInstructor = util.getConstant('SETINSTRUCTORTEXT');
+  $scope.registerDevice = util.getConstant('REGISTERDEVICETEXT');
   $scope.sync = util.getConstant('SYNCTEXT');
   $scope.logout = util.getConstant('LOGOUTTEXT');
   $scope.getTokens = util.getConstant('GETTOKENTEXT');

@@ -76,8 +76,8 @@ function RecordingController($q,
   recCtrl.skip = skip;
   $scope.skipText = util.getConstant('SKIPTEXT');
   $scope.promptsReadText = util.getConstant('PROMPTSREADTEXT');
-  $scope.uttQuality = util.getConstant('UTTQUALITYTEXT');
-  $scope.uttUploaded = util.getConstant('UTTUPLOADEDTEXT');
+  $scope.utteranceQuality = util.getConstant('UTTQUALITYTEXT');
+  $scope.utteranceUploaded = util.getConstant('UTTUPLOADEDTEXT');
 
   $scope.msg = ''; // single debug/information msg
   recCtrl.curRec = recService.currentRecording;

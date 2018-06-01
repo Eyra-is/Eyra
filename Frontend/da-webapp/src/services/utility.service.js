@@ -157,7 +157,7 @@ function utilityService(logger) {
     'BACKTORECTEXT' : 'Back to recording',
     'UTTRECTEXT' : 'Utterances recorded',
     'UTTUPLTEXT' : 'Utterances uploaded',
-    'UTTRECNOTUPLTEXT' : 'Utterances recorded &amp; not uploaded',
+    'UTTRECNOTUPLTEXT' : 'Utterances recorded & not uploaded',
     'PROMPTSDOWNLTEXT' : 'Prompts downloaded',
      //error messages\
     'SPEAKEREXISTSERRORMSG' : 'Speaker already in database. Choose a different name, unless you have done this before on this device, then tick the box.',

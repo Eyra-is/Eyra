@@ -52,9 +52,9 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
 
   $scope.sync = util.getConstant('SYNCTEXT');
   $scope.backToRec = util.getConstant('BACKTORECTEXT');
-  $scope.uttRec = util.getConstant('UTTRECTEXT');
-  $scope.uttUpl = util.getConstant('UTTUPLTEXT');
-  $scope.uttRecNotUpl = util.getConstant('UTTRECNOTUPLTEXT');
+  $scope.utteranceRec = util.getConstant('UTTRECTEXT');
+  $scope.utteranceUpl = util.getConstant('UTTUPLTEXT');
+  $scope.utteranceRecNotUpl = util.getConstant('UTTRECNOTUPLTEXT');
   $scope.promptsDownl = util.getConstant('PROMPTSDOWNLTEXT');
 
 

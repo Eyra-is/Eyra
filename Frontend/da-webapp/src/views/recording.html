@@ -43,7 +43,7 @@ File author/s:
             <canvas id="volume-meter" width="200" height="50"></canvas>
 
             <meter id="accMeter" min="0.0" max="1.0" value="{{recCtrl.accuracy}}" low="{{recCtrl.lowThreshold}}" high="{{recCtrl.highThreshold}}" optimum="1.0" title="accuracy"></meter>
-            <label for="accMeter">{{uttQuality}}: {{recCtrl.lowerUtt}} - {{recCtrl.upperUtt}}</label>
+            <label for="accMeter">{{utterancetQuality}}: {{recCtrl.lowerUtt}} - {{recCtrl.upperUtt}}</label>
         </div>
         <p class="message">{{msg}}</p>
     </div>
@@ -52,7 +52,7 @@ File author/s:
 <div class="content">
     <footer class="footer">
       <div class="container minorFeedbackDisplay text-center">
-        <p>{{uttUploaded}}: {{recsDelivered}}</p>
+        <p>{{utteranceUploaded}}: {{recsDelivered}}</p>
       </div>
     </footer>
 </div>
