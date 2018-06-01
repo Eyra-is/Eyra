@@ -38,7 +38,7 @@ function EvaluationLoginController($location, $rootScope, $scope, dataService, d
 
   evalLoginCtrl.submit = submit;
 
-  $scope.msg = ''// single information msg
+  $scope.msg = '';// single information msg
   $scope.username = util.getConstant('USERNAMETEXT');
   $scope.set =  util.getConstant('SETTEXT');
   $scope.enterInfo =  util.getConstant('ENTERINFO');
