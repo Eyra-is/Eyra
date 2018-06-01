@@ -319,6 +319,26 @@ Most of this should be self explanatory, but if you change code, remember to:
 * Change relevant documentation (for example here in DEVELOPER.md and any other descriptors)
 * Rerun `doctoc --notitle DEVELOPER.md` if you modify this file's headings (manual for now). You can install doctoc by running `sudo npm install -g doctoc`.
 
+### Internationalization 
+
+To make it easier for developers to translate the app most of the displayed strings have been gathered to /Frontend/da-webapp/src/services/utility.service.js. This is a fine place to start when translating, simply change language specific constants to your desired language. Regrettably due to some difficulties there are a few other things that must be done for a complete translation:
+  * Change "label" in  'Eyra/Frontend/da-webapp/src/json/speaker-info-format.json' to the correct translation, keep in mind the documentation in  Eyra/Frontend/da-webapp/src/json/speaker-info-format.info
+  * Some strings are kept in a json file at 'Frontend/da-webapp/src/json/'. Instead of editing the json file it may be better to create a new json file with the new translation. It could be created at 'Frontend/da-webapp/src/json/newLanguage.json'. Then you can change the reference to Eyra/Frontend/da-webapp/src/json/evaluation-comments.json:
+    * In Frontend/da-webapp/src/controllers/evaluation.controller.js change <br> 
+    var EVALUATIONCOMMENTSURL = 'json/evaluation-comments.json'; <br> 
+    to <br> 
+    var EVALUATIONCOMMENTSURL ='json/evaluation-comments-newLanguage.json';
+    * In Gruntfil.js change:
+        * match: /json\/evaluation-comments\.json/g, <br>
+          replacement: 'json/evaluation-comments.'+cache_breaker+'.json' <br>
+          to <br>
+          "match: /json\/evaluation-comments-newLanguage\.json/g, <br>
+          replacement: 'json/evaluation-comments-newLanguage.'+cache_breaker+'.json'
+
+  * Translate Frontend/da-webapp/src/index.html, nav bar and loading msg, manually to the desired language.
+
+This should be sufficient for a basic translation. 
+
 ## Quality Control (QC)
 
 **NOTE currently, the frontend queries the QC as normal, but doesn't display anything it receives back.**
