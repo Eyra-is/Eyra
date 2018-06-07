@@ -127,9 +127,7 @@ function MainController($location,
       $scope.msg = util.getConstant('APPINITIALIZATIONFAILMSG');
       logger.error(data);
     });
-    $scope.info = 'stebbs'; //util.getConstant('INFO');
     $scope.startText = util.getConstant('STARTTEXT');
-    console.log($scope.info);
   }
 
   function getTokensIfNeeded() {
