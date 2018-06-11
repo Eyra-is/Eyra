@@ -165,7 +165,7 @@ function recordingService($http, logger, utilityService) {
     //input.connect(audio_context.destination);
     //logger.log('Input connected to audio context destination.');
     
-    recorder = new Recorder(input, { 'numChannels':1 });
+    recorder = new Recorder(input, { 'numChannels':1, 'bufferLen':2048 });
     logger.log('Recorder initialised.');
 
     recHandler.initCompleteCallback(true);
