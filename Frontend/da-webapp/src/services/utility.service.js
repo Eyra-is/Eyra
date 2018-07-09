@@ -88,7 +88,7 @@ function utilityService(logger) {
     'PASSWORDTEXT' : 'Password',
     //main
     'STARTTEXT' : 'Begin',
-    //more
+    //more and sync
     'ADDSPEAKERTEXT' : 'Add speaker',
     'SETINSTRUCTORTEXT' : 'Set instructor',
     'REGISTERDEVICETEXT' : 'Register device',
@@ -109,7 +109,7 @@ function utilityService(logger) {
     'TOKENSACQUIREDMSG' : 'Tokens acquired.',
     'SYNCINGMSG' : 'Syncing - please wait',
     'SYNCCOMPLETEMSG' : 'Sync complete.',
-    'SYNCFAILEDMSG' : 'Tokens acquired.',
+    'SYNCFAILEDMSG' : 'Sync failed.',
     //recording agreement
     'FULLNAMETEXT' : 'Full name',
     'EMAILTEXT' : 'Email',
