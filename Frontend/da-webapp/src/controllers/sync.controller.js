@@ -50,6 +50,16 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
   $scope.recsSaved = 0;
   $scope.tokensDownloaded = 0;
 
+  $scope.sync = util.getConstant('SYNCTEXT');
+  $scope.backToRec = util.getConstant('BACKTORECTEXT');
+  $scope.utteranceRec = util.getConstant('UTTRECTEXT');
+  $scope.utteranceUpl = util.getConstant('UTTUPLTEXT');
+  $scope.utteranceRecNotUpl = util.getConstant('UTTRECNOTUPLTEXT');
+  $scope.promptsDownl = util.getConstant('PROMPTSDOWNLTEXT');
+  $scope.syncing = util.getConstant('SYNCINGMSG');
+  $scope.syncComplete = util.getConstant('SYNCCOMPLETEMSG');
+  $scope.syncFailed = util.getConstant('SYNCFAILEDMSG');
+
   activate();
   
   //////////
@@ -118,14 +128,14 @@ function SyncController($rootScope, $scope, dataService, deliveryService, localD
   function sync() {
     $scope.hide_sync = true;
 
-    $scope.msg = 'Syncing - please wait';
+    $scope.msg = $scope.syncing;
 
     delService.sendLocalSessions(syncDoneCallback, syncProgressCallback);
   }
 
   // result is true if sync completed successfully
   function syncDoneCallback(result) {
-    $scope.msg = result ? 'Sync complete.' : 'Sync failed.';
+    $scope.msg = result ? $scope.syncComplete : $scope.syncFailed;
     $scope.hide_sync = false;
     $scope.recsDelivered = dataService.get('recsDelivered') || $scope.recsDelivered || 0;
     updateRecsSaved();

@@ -21,34 +21,34 @@ File author/s:
     <div class="default-view">
         <ul class="more-list">
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.addSpeaker()">
-                Add speaker
+                {{addSpeaker}}
             </button></li>
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.setInstructor()">
-                Set instructor
+                {{setInstructor}}
             </button></li>
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.registerDevice()">
-                Register device
+                {{registerDevice}}
             </button></li>
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.sync()">
-                Sync
+                {{sync}}
             </button></li>
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.logout()">
-                Logout
+                {{logout}}
             </button></li>
         </ul>
 
         <ul class="more-list">
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.getTokens()">
-                Get tokens (dev)
+                {{getTokens}}
             </button></li>
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.clearLocalDb()">
-                Clear local db (dev)
+                {{clearDb}}
             </button></li>
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.clearTokens()">
-                Clear all tokens (dev)
+                {{clearTokens}}
             </button></li>
             <li><button class="btn btn-primary btn-list" type="button" ng-click="moreCtrl.logs()">
-                Print logs (dev)
+                {{printLogs}}
             </button></li>
         </ul>
         <p class="message">{{msg}}</p>

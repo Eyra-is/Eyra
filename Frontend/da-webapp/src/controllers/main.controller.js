@@ -56,6 +56,9 @@ function MainController($location,
   var recService = recordingService;
   var tokService = tokenService;
   var util = utilityService;
+  $scope.info = util.getConstant('INFO');
+
+  $scope.startText = util.getConstant('STARTTEXT');
 
   // because of a 8k filtering issue, detect if we are in an the Android webview app fix
   //   in which case use a different recorder from the web audio API
@@ -121,25 +124,26 @@ function MainController($location,
     },
     // this means our app didn't initialize.. we should probably do something if that happens
     function error(data){
-      $scope.msg = 'App failed to initialize. Try refreshing the page and check your connection.';
+      $scope.msg = util.getConstant('APPINITIALIZATIONFAILMSG');
       logger.error(data);
     });
+    $scope.startText = util.getConstant('STARTTEXT');
   }
 
   function getTokensIfNeeded() {
     tokenService.countAvailableTokens().then(function(numTokens){
       if (numTokens < util.getConstant('tokenThreshold')) {
-        $rootScope.loading_msg = 'Getting prompts  - Please wait';
+        $rootScope.loading_msg = util.getConstant('GETPROMPTSMSGTEXT');
         logger.log('Getting tokens..');
         tokenService.getTokens(util.getConstant('tokenGetCount')).then(function(tokens){
           tokensPromise.resolve(true);
           logger.log('Got tokens.');
-          $rootScope.loading_msg = 'Please wait';
+          $rootScope.loading_msg = util.getConstant('WAITINGTEXT');
         },
         function error(data){
           tokensPromise.reject(data);
           logger.log('Failed getting tokens.');
-          $rootScope.loading_msg = 'Failed to get tokens';
+          $rootScope.loading_msg = util.getConstant('FAILEDTOGETTOKENS');
           logger.error(data);
         });
       } else {

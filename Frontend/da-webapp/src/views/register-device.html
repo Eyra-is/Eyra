@@ -21,7 +21,7 @@ File author/s:
     <div class="data-entry">
         <form ng-submit="regdCtrl.submit()">
             <div class="form-group">
-                <label for="imei">IMEI/Device ID</label>
+                <label for="imei">{{deviceIdLabel}}</label>
                 <input class="form-control" id="imei" type="text" ng-model="regdCtrl.imei" placeholder="000000000000000" 
                 pattern="[\dA-Za-z/-_ ]+" required>
             </div>

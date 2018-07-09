@@ -108,6 +108,7 @@ Many thanks to the people at Google:
 
 Additional developers
 * Judy Fong
+* Stefán Gunnlaugur Jónsson
 
 Technical Writer
 * Judy Fong

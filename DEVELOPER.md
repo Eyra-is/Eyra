@@ -36,7 +36,7 @@ A recommended read as well is the article published on this software, which can 
 
 * MySQL  
 * Python  
-  * Flask  
+  * Flask >= 1.0.2 
 * JavaScript  
   * Grunt
   * AngularJS  
@@ -62,7 +62,7 @@ also works on Firefox and Chrome
     The entire Android app, java code and all. IDE used is Android Studio.
 
 * **Backend**  
-    The Flask python code, which handles connections to the MySQL database among other things. Also includes the schema for the database, the entire quality control (QC) and sql code needed for setup. Recordings are saved in `/data/eyra/recordings/` by default (this can be changed in [`app.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/app.py) by changing `app.config['MAIN_RECORDINGS_PATH']`, should be an absolute path). Number of useful scripts in [`scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts) and [`qc/scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts).
+    The Flask python code, which handles connections to the MySQL database among other things. Also includes the schema for the database, the entire quality control (QC) and sql code needed for setup. Recordings are saved in `/data/eyra/recordings/` by default (this can be changed in [`app.py`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/app.py) by changing `app.config['MAIN_RECORDINGS_PATH']`, should be an absolute path). It should also be changed in [`Setup/src/apache/default.conf`](https://github.com/Eyra-is/Eyra/tree/master/Setup/src/apache/default.conf). Number of useful scripts in [`scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/scripts) and [`qc/scripts/`](https://github.com/Eyra-is/Eyra/tree/master/Backend/server-interface/qc/scripts).
 
 * **Docs**  
     Some additional documentation to this guide and the [README.md](https://github.com/Eyra-is/Eyra/tree/master/README.md).
@@ -260,7 +260,7 @@ along with other misc stuff.
 * [`token.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/token.service.js)  
   Service to query and process tokens from server.
 * [`utility.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/utility.service.js)  
-  Service with utility functions for the app, commonly abbreviated `util`.
+  Service with utility functions for the app, commonly abbreviated `util`. It containes language specific constants, used to make it easy to translate the app/site to other languages. Most strings have been moved here and it is a good place to start when translating to another language.
   Also contains many configurable aspects, token count grabbed from server, frequency of QC querying etc., see also [`app.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/app.js).
 * [`volumeMeter.service.js`](https://github.com/Eyra-is/Eyra/tree/master/Frontend/da-webapp/src/services/volumeMeter.service.js)  
   Service for the volume meter, uses [volume-meter.js](https://github.com/Eyra-is/Eyra/blob/master/Frontend/da-webapp/src/volume_meter/volume-meter.js). Code in part from https://github.com/cwilso/volume-meter
@@ -318,6 +318,26 @@ Most of this should be self explanatory, but if you change code, remember to:
 * Change relevant comments.
 * Change relevant documentation (for example here in DEVELOPER.md and any other descriptors)
 * Rerun `doctoc --notitle DEVELOPER.md` if you modify this file's headings (manual for now). You can install doctoc by running `sudo npm install -g doctoc`.
+
+### Internationalization 
+
+To make it easier for developers to translate the app most of the displayed strings have been gathered to /Frontend/da-webapp/src/services/utility.service.js. This is a fine place to start when translating, simply change language specific constants to your desired language. Regrettably due to some difficulties there are a few other things that must be done for a complete translation:
+  * Change "label" in  'Eyra/Frontend/da-webapp/src/json/speaker-info-format.json' to the correct translation, keep in mind the documentation in  Eyra/Frontend/da-webapp/src/json/speaker-info-format.info
+  * Some strings are kept in a json file at 'Frontend/da-webapp/src/json/'. Instead of editing the json file it may be better to create a new json file with the new translation. It could be created at 'Frontend/da-webapp/src/json/newLanguage.json'. Then you can change the reference to Eyra/Frontend/da-webapp/src/json/evaluation-comments.json:
+    * In Frontend/da-webapp/src/controllers/evaluation.controller.js change <br> 
+    var EVALUATIONCOMMENTSURL = 'json/evaluation-comments.json'; <br> 
+    to <br> 
+    var EVALUATIONCOMMENTSURL ='json/evaluation-comments-newLanguage.json';
+    * In Gruntfil.js change:
+        * match: /json\/evaluation-comments\.json/g, <br>
+          replacement: 'json/evaluation-comments.'+cache_breaker+'.json' <br>
+          to <br>
+          "match: /json\/evaluation-comments-newLanguage\.json/g, <br>
+          replacement: 'json/evaluation-comments-newLanguage.'+cache_breaker+'.json'
+
+  * Translate Frontend/da-webapp/src/index.html, nav bar and loading msg, manually to the desired language.
+
+This should be sufficient for a basic translation. 
 
 ## Quality Control (QC)
 

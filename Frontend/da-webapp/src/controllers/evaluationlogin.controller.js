@@ -38,8 +38,11 @@ function EvaluationLoginController($location, $rootScope, $scope, dataService, d
 
   evalLoginCtrl.submit = submit;
 
-  $scope.msg = ''; // single information msg
-
+  $scope.msg = '';// single information msg
+  $scope.username = util.getConstant('USERNAMETEXT');
+  $scope.set =  util.getConstant('SETTEXT');
+  $scope.enterInfo =  util.getConstant('ENTERINFO');
+  $scope.namePlaceholder =  util.getConstant('NAMEPLACEHOLDERTEXT');
   evalLoginCtrl.currentUser = '';
   evalLoginCtrl.currentSet = '';
 
@@ -49,7 +52,7 @@ function EvaluationLoginController($location, $rootScope, $scope, dataService, d
       evalLoginCtrl.possibleSets = response.data;
     },
     function error(error){
-      $scope.msg = 'Couldn\'t grab available sets. Are you online?';
+      $scope.msg = util.getConstant('FETCHERRORMSG');
       logger.error(error);
     }
   )
@@ -72,12 +75,12 @@ function EvaluationLoginController($location, $rootScope, $scope, dataService, d
       $location.path('/evaluation');
     } else {
       if (!evalLoginCtrl.currentUser) {
-        $scope.msg = 'Please type a username.';
+        $scope.msg = util.getConstant('USERNAMEERRORMSG');
       } else if (!evalLoginCtrl.currentSet) {
-        $scope.msg = 'Please select a set.';
+        $scope.msg = util.getConstant('SETERRORMSG');
       }
       if (!evalLoginCtrl.currentUser && !evalLoginCtrl.currentSet) {
-        $scope.msg = 'Type a username and select a set';
+        $scope.msg = util.getConstant('USERSETERRORMSG');
       }
     }
   }
