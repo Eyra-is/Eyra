@@ -1,8 +1,10 @@
 # Eyra
 
-Eyra provides tools for data gathering designed to be used to make speech corpora for under-resourced languages.  
+Eyra provides tools for data gathering designed to be used to make speech corpora for under-resourced languages.
 
-The team at Reykjavik University published an article on this software for the SLTU 2016 conference, which can be found online and in this repository at [`Docs/Petursson_et_al_2016.pdf`](https://github.com/Eyra-is/Eyra/blob/master/Docs/Petursson_et_al_2016.pdf).
+This project is now being maintained at the [cadia-lvl/Eyra](https://github.com/cadia-lvl/Eyra) fork.
+
+The team at [Reykjavik University](https://lvl.ru.is/) published an article on this software for the SLTU 2016 conference, which can be found online and in this repository at [`Docs/Petursson_et_al_2016.pdf`](https://github.com/Eyra-is/Eyra/blob/master/Docs/Petursson_et_al_2016.pdf).
 
 ## Installation
 
